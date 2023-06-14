@@ -1,0 +1,200 @@
+package com.pixel.chatapp.home;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.viewpager2.widget.ViewPager2;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.pixel.chatapp.signup_login.LoginActivity;
+import com.pixel.chatapp.general.ProfileActivity;
+import com.pixel.chatapp.R;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TabLayout tabLayoutGeneral;
+    private ViewPager2 viewPager2General;
+    private ImageView menuOpen, home, menuClose, imageViewLogo;
+    FirebaseAuth auth = FirebaseAuth.getInstance();
+    ConstraintLayout scrollMenu, v;
+    private TextView logout, textLightAndDay;
+    Switch darkMoodSwitch;
+    CardView cardViewSettings;
+    SharedPreferences sharedPreferences;
+    private Boolean nightMood;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        tabLayoutGeneral = findViewById(R.id.tabLayerMain);
+        viewPager2General = findViewById(R.id.viewPageMain);
+        menuOpen = findViewById(R.id.imageViewMenu);
+        home = findViewById(R.id.imageViewHome);
+        menuClose = findViewById(R.id.imageViewMenuClose);
+        scrollMenu = findViewById(R.id.constraintMenu);
+        logout = findViewById(R.id.textViewLogOut);
+        imageViewLogo = findViewById(R.id.circleUserImage);
+        v = findViewById(R.id.v);
+        darkMoodSwitch = findViewById(R.id.switch1);
+        textLightAndDay = findViewById(R.id.textView13);
+
+        cardViewSettings = findViewById(R.id.cardViewSettings);
+
+
+        ViewPagerMainAdapter adapterV = new ViewPagerMainAdapter(getSupportFragmentManager(), getLifecycle());
+
+        viewPager2General.setAdapter(adapterV);
+
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayoutGeneral, viewPager2General, true, true,
+                new TabLayoutMediator.TabConfigurationStrategy() {
+                    @Override
+                    public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                        switch (position){
+                            case 0:
+                                tab.setText("Chats");
+                                break;
+                            case 1:
+                                tab.setText("Tournaments");
+                                break;
+                            case 2:
+                                tab.setText("Hosts");
+                                break;
+                        }
+                    }
+                });
+        tabLayoutMediator.attach();
+
+        // Dark mood setting
+        sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
+        nightMood = sharedPreferences.getBoolean("MoodStatus", false);
+
+        if(nightMood){
+            darkMoodSwitch.setChecked(true);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            textLightAndDay.setText("Light");
+        } else textLightAndDay.setText("Dark");;
+
+        darkMoodSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(nightMood){
+                    //activate the night moon
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
+                } else{
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
+                }
+            }
+        });
+
+        // open the menu option
+        menuOpen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                scrollMenu.setVisibility(View.VISIBLE);
+                viewPager2General.setVisibility(View.INVISIBLE);
+//                v.setBackgroundColor(getResources().);
+            }
+        });
+
+        // open menu option via logo too
+        imageViewLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scrollMenu.setVisibility(View.VISIBLE);
+                viewPager2General.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        // close the open option when background is clicked
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (scrollMenu.getVisibility() == View.VISIBLE){
+                    scrollMenu.setVisibility(View.GONE);
+                    viewPager2General.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // close the open option
+        menuClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                viewPager2General.setVisibility(View.VISIBLE);
+                scrollMenu.setVisibility(View.GONE);
+            }
+        });
+
+        //logout
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("GetMeh");
+                builder.setMessage("Are you sure you want to logout?");
+                builder.setCancelable(false);
+                builder.setNegativeButton("Logout", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        auth.signOut();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
+                    }
+                });
+                builder.setPositiveButton("Back", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                builder.create().show();
+            }
+        });
+
+        // settings
+        cardViewSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+            }
+        });
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
