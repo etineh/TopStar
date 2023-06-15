@@ -21,6 +21,7 @@
             android:exported="false" />
         <activity
             android:name=".chats.MessageActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
         <activity
             android:name=".general.ProfileActivity"

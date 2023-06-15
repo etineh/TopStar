@@ -1,5 +1,6 @@
 package com.pixel.chatapp.chats;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +33,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     Boolean status;
     private int send;
     private int receive;
-
-    FirebaseAuth auth;
     FirebaseUser user;
-    FirebaseDatabase database;
-    DatabaseReference reference;
+    DatabaseReference refCheckMsgDelivery;
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId) {
         this.modelList = modelList;
@@ -47,10 +45,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         send = 1;
         receive = 2;
 
-        auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("Users");
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        refCheckMsgDelivery = FirebaseDatabase.getInstance().getReference("Checks");
     }
 
     @NonNull
@@ -73,67 +69,37 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.cardViewSend.setTag(pos);        //     to get cardView position
 
         long convert = (long) modelList.get(position).timeSent;
-        Date d = new Date(convert);
+        Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
         DateFormat formatter = new SimpleDateFormat("h:mm a");
         String time = formatter.format(d);
 
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
-        holder.textViewShowMsg.setText(modelList.get(position).getMessage());     // show all the previous messages in positions
+        // show all the previous messages in positions
+        holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
-        // check seen delivery massage
-//        reference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                if (snapshot.child(uId).child(user.getUid()).child("seen").getValue().equals("in")){
-//                    // all previous seen msg should remain seen except the last one
-//                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);  // all seen
-//
-//                    String checkReal =   snapshot.child(user.getUid()).child(uId).child("realr").getValue().toString();
-//                    long msgCount = (long) snapshot.child(user.getUid()).child(uId).child("msgCount").getValue() + 1;
-//
-//                    // let's decide what happen to the unread last messages
-//                    if(pos > (modelList.size() - msgCount) && checkReal.equals("in")) {
-//                        holder.seenMsg.setImageResource(R.drawable.baseline_grade_24); // seen
-//                    }
-//                    else if(pos > (modelList.size() - msgCount) && checkReal.equals("out")) {
-//                        holder.seenMsg.setImageResource(R.drawable.sent_pin);   // not seen yet
-//                    }
-//                }
-//                // checking if the other user disable his view or if he has view my message
-//                if(snapshot.child(uId).child(user.getUid()).child("show").getValue().equals("in")){
-//                    reference.child("Users").child(user.getUid()).child(uId)  // set seen msg
-//                            .child("realr").setValue("in");
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
+        //  Delivery and seen settings
+        refCheckMsgDelivery.child(uId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                long msgCount = (long) snapshot.child(user.getUid()).child("unreadMsg").getValue() + 1;
 
-        // saving last message to both users
-//        reference.child(user.getUid()).child(uId).child("lastMsg").
-//                setValue(modelList.get(modelList.size()-1).getMessage()).toString();
-//
-//        reference.child(uId).child(user.getUid()).child("lastMsg").
-//                setValue(modelList.get(modelList.size()-1).getMessage()).toString();
-//
-//        // saving their username to know who sent the last message
-//        reference.child(user.getUid()).child(uId).child("check").  // change later from "check" to "lastMsgSender"
-//                setValue(modelList.get(modelList.size()-1).getFrom()).toString();
-//
-//        reference.child(uId).child(user.getUid()).child("check").
-//                setValue(modelList.get(modelList.size()-1).getFrom()).toString();
-//
-//        // saving the last time sent message
-//        reference.child(user.getUid()).child(uId).child("check2"). // change later from check2 to timeCheck
-//                setValue(modelList.get(modelList.size()-1).getTimeSent()).toString();
-//
-//        reference.child(uId).child(user.getUid()).child("check2").
-//                setValue(modelList.get(modelList.size()-1).getTimeSent()).toString();
+                if(pos <= (modelList.size() - msgCount) ){
+                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
+                }
+
+                if(pos > (modelList.size() - msgCount)) {
+                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     @Override

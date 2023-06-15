@@ -169,6 +169,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 String otherName = snapshot.child(myUsersId).child("userName")
                         .getValue().toString();
 
+                holder.textViewUser.setText(otherName);     //set the display name
+
                 String imageUrl = snapshot.child(myUsersId).child("image").getValue().toString();    // fetch out image
                 if (imageUrl.equals("null")) holder.imageView.setImageResource(R.drawable.person_round);
                 else Picasso.get().load(imageUrl).into(holder.imageView);

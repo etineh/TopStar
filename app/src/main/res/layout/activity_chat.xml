@@ -6,13 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".chats.MessageActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contraintTop"
         style="@style/cardTop"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,23 +19,241 @@
 
         <ImageView
             android:id="@+id/imageViewBackArrow"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_margin="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:padding="7dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/baseline_arrow_back_24" />
 
         <TextView
-            android:id="@+id/textViewChat"
+            android:id="@+id/textViewName"
             style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="GetMeh"
+            android:textSize="18dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView10"
+            app:layout_constraintStart_toEndOf="@+id/circleImageView3"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView10"
+            android:layout_width="30dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/baseline_more_vert_24" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageView3"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/logo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageViewBackArrow"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/textViewBio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="-2dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Hey there! Let's chat and play game."
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageView10"
+            app:layout_constraintStart_toEndOf="@+id/circleImageView3"
+            app:layout_constraintTop_toBottomOf="@+id/textViewName" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout7"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="2dp"
+        android:fitsSystemWindows="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contraintTop">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/orange"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/imageView8"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="30dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewMsgSearch"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/money_round" />
+
+        <ImageView
+            android:id="@+id/imageViewGameMe"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="30dp"
+            android:scaleType="fitXY"
+            android:scaleY="1.5"
+            app:layout_constraintEnd_toStartOf="@+id/imageView8"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_videogame_asset_24" />
+
+        <ImageView
+            android:id="@+id/imageViewVoiceCall"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="30dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewGameMe"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/stat_sys_phone_call" />
+
+        <TextView
+            android:id="@+id/textViewAudio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="7dp"
-            android:text="GetMeh"
-            android:textSize="20sp" />
-    </LinearLayout>
+            android:layout_marginBottom="1dp"
+            android:text="Audio C"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewVoiceCall"
+            app:layout_constraintStart_toStartOf="@+id/imageViewVoiceCall" />
+
+        <ImageView
+            android:id="@+id/imageViewOthers"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/stat_sys_phone_call"
+            tools:layout_editor_absoluteX="71dp" />
+
+        <TextView
+            android:id="@+id/textOtherText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:text="Others"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewOthers"
+            app:layout_constraintStart_toStartOf="@+id/imageViewOthers" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp"
+            android:layout_marginBottom="1dp"
+            android:text="Game"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewGameMe"
+            app:layout_constraintStart_toStartOf="@+id/imageViewGameMe"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewGameMe" />
+
+        <ImageView
+            android:id="@+id/imageViewVideoCall"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="30dp"
+            android:scaleType="fitXY"
+            android:scaleY="1.4"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewVoiceCall"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_video_call_24" />
+
+        <TextView
+            android:id="@+id/textViewVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:text="Video C"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewVideoCall"
+            app:layout_constraintStart_toStartOf="@+id/imageViewVideoCall" />
+
+        <ImageView
+            android:id="@+id/imageViewMsgSearch"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_search_24" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:text="Search"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewMsgSearch"
+            app:layout_constraintStart_toStartOf="@+id/imageViewMsgSearch" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:text="Gift"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView8"
+            app:layout_constraintStart_toStartOf="@+id/imageView8" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewChat"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="3dp"
+        android:fitsSystemWindows="true"
+        app:layout_constraintBottom_toTopOf="@+id/fab"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout7"
+        tools:listitem="@layout/card_received" />
 
     <LinearLayout
         android:id="@+id/linearLayoutMsgBox"
@@ -64,20 +281,6 @@
             android:inputType="textMultiLine" />
 
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewChat"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutMsgBox"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
-        tools:listitem="@layout/card_received" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

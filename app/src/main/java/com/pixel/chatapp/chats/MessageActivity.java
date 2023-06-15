@@ -8,22 +8,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,8 +29,6 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +37,7 @@ import java.util.Map;
 public class MessageActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewChat;
-    private ImageView imageViewBack;
+    private ImageView imageViewBack, imageViewDeliverMsg;
     private TextView textViewOtherUser;
     private EditText editTextMessage;
     private FloatingActionButton fab;
@@ -72,9 +63,10 @@ public class MessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         imageViewBack = findViewById(R.id.imageViewBackArrow);
-        textViewOtherUser = findViewById(R.id.textViewChat);
+        textViewOtherUser = findViewById(R.id.textViewName);
         editTextMessage = findViewById(R.id.editTextMessage);
         fab = findViewById(R.id.fab);
+        imageViewDeliverMsg = findViewById(R.id.imageViewSeen);
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
@@ -236,6 +228,7 @@ public class MessageActivity extends AppCompatActivity {
         messageMap.put("timeSent", ServerValue.TIMESTAMP);
         //  now save the message to the database
         String key = dbReference.child("Messages").child(userName).child(otherName).push().getKey();  // create an id for each message
+        // set the deliver icon if successful
         dbReference.child("Messages").child(userName).child(otherName).child(key).setValue(messageMap);
         dbReference.child("Messages").child(otherName).child(userName).child(key).setValue(messageMap);
 
@@ -257,30 +250,6 @@ public class MessageActivity extends AppCompatActivity {
         referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
                 .child(user.getUid()).child(uID).child("unreadMsg");
         referenceMsgCount2.setValue(0);
-
-
-        // ---------- use .addListenerForSingleValueEvent when you want it to change only when clicked.
-//        dbReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                // check if the other user is not in your page to view your msg
-//                if(snapshot.child(uID).child(user.getUid()).child("show").getValue().equals("out")){
-//                    dbReference.child("Users").child(user.getUid()).child(uID)
-//                            .child("realr").setValue("out");
-//
-//                    // unread msg count
-//                    long lastCount = (long) snapshot.child(user.getUid()).child(uID).child("msgCount").getValue();
-//                    count = 1;
-//                    dbReference.child("Users").child(user.getUid()).child(uID)
-//                            .child("msgCount").setValue(lastCount + count);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
 
     }
 
@@ -342,12 +311,11 @@ public class MessageActivity extends AppCompatActivity {
         super.onPause();
     }
 //
-    @Override
-    protected void onResume() {
-
-        runnerChaeck = false;
-        super.onResume();
-    }
+//    @Override
+//    protected void onResume() {
+//        runnerChaeck = false;
+//        super.onResume();
+//    }
 
 }
 

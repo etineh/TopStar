@@ -54,6 +54,11 @@
         <item name="android:tint">@color/black</item>
     </style>
 
+<!--    background Tink orange and white-->
+    <style name="BackgroundTintOrange">
+        <item name="android:tint">@color/orange</item>
+    </style>
+
     <style name="Background">
         <item name="android:background">@color/black</item>
     </style>
