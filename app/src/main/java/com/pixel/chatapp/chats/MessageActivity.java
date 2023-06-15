@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -244,12 +245,39 @@ public class MessageActivity extends AppCompatActivity {
 
         // save the number of msg sent by me
         referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(uID).child(user.getUid()).child("unreadMsg");
-        referenceMsgCount.setValue(count+=1);
+                .child(uID).child(user.getUid());
+        referenceMsgCount.child("unreadMsg").setValue(count+=1);
 
         referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
                 .child(user.getUid()).child(uID).child("unreadMsg");
         referenceMsgCount2.setValue(0);
+
+//        check if the user is in my chat box and reset the count
+        DatabaseReference statusCheck = FirebaseDatabase.getInstance().getReference("Checks");
+        statusCheck.child(uID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(!snapshot.child(user.getUid()).child("status").exists()){
+                    statusCheck.child(uID).child(user.getUid())
+                            .child("status").setValue(false);
+                }
+                else {
+                    boolean statusState = (boolean) snapshot.child(user.getUid())
+                            .child("status").getValue();
+
+                    if(statusState == true) {
+                        referenceMsgCount.child("unreadMsg").setValue(0);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 
@@ -294,8 +322,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        refBackResetCount.child(user.getUid()).child(uID).child("unreadMsg").setValue(0);
-//        refBackResetCount.child(user.getUid()).child(uID).child("typing").setValue(0);
+        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(false);
         runnerChaeck = true;
 
         finish();
@@ -304,18 +331,18 @@ public class MessageActivity extends AppCompatActivity {
 //
     @Override
     protected void onPause() {
-        refBackResetCount.child(user.getUid()).child(uID).child("unreadMsg").setValue(0);
-//        refBackResetCount.child(user.getUid()).child(uID).child("typing").setValue(0);
+        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(false);
         runnerChaeck = true;
 //        finish();
         super.onPause();
     }
 //
 //    @Override
-//    protected void onResume() {
-//        runnerChaeck = false;
-//        super.onResume();
-//    }
+    protected void onResume() {
+        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(true);
+        runnerChaeck = false;
+        super.onResume();
+    }
 
 }
 

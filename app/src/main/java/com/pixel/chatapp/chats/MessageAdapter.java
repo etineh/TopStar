@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -85,12 +86,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 long msgCount = (long) snapshot.child(user.getUid()).child("unreadMsg").getValue() + 1;
 
-                if(pos <= (modelList.size() - msgCount) ){
-                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
+                if(pos > (modelList.size() - msgCount)) {
+                    // and network check (later)
+                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
                 }
 
-                if(pos > (modelList.size() - msgCount)) {
-                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
+                if(pos <= (modelList.size() - msgCount) ){
+                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
                 }
             }
 

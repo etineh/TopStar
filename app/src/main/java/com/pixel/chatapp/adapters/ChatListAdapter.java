@@ -27,7 +27,9 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,6 +40,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     String userName;
     DatabaseReference referenceUsers, fReference, referenceCheck;
     FirebaseUser user;
+//    Map<String, Object> mapTypingAndStatus;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -49,6 +52,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceUsers = FirebaseDatabase.getInstance().getReference("Users");
         fReference = FirebaseDatabase.getInstance().getReference("UsersList");
 
+//        mapTypingAndStatus = new HashMap<>();
     }
 
     @NonNull
@@ -66,6 +70,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         int pos = position;
 
         String myUsersId = otherUsersId.get(pos);
+
+        // set user "typing" to be false when I come online
+        referenceCheck.child(myUsersId).child(user.getUid()).child("typing").setValue(0);
+
+        // set my status to be false incase I receive msg, it will be tick as seen
+        referenceCheck.child(user.getUid()).child(myUsersId).child("status").setValue(false);
 
         // get lastMessage and Time sent
         fReference.child(user.getUid()).addValueEventListener(new ValueEventListener() {
@@ -159,7 +169,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             });
 
 
-
 //  get all other-user name and photo -----------------------
         referenceUsers.addValueEventListener(new ValueEventListener() {
             @Override
@@ -169,10 +178,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 String otherName = snapshot.child(myUsersId).child("userName")
                         .getValue().toString();
 
-                holder.textViewUser.setText(otherName);     //set the display name
+                holder.textViewUser.setText(otherName);     //set users display name
 
-                String imageUrl = snapshot.child(myUsersId).child("image").getValue().toString();    // fetch out image
-                if (imageUrl.equals("null")) holder.imageView.setImageResource(R.drawable.person_round);
+                // set users image
+                String imageUrl = snapshot.child(myUsersId).child("image").getValue().toString();
+                if (imageUrl.equals("null")) {
+                    holder.imageView.setImageResource(R.drawable.person_round);
+                }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
 
@@ -181,11 +193,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     @Override
                     public void onClick(View view) {
 
-                        // set my unreadMessage to 0
-                        referenceCheck.child(user.getUid()).child(myUsersId)
-                                .child("unreadMsg").setValue(0);
-                        holder.textViewMsgCount.setVisibility(View.GONE);
-
                         // send userName, otherName and each user UiD to display on the chat box
                         Intent intent = new Intent(mContext, MessageActivity.class);
                         intent.putExtra("otherName", otherName);
@@ -193,6 +200,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         intent.putExtra("Uid", myUsersId);
 
                         mContext.startActivity(intent);
+
+                        // set my unreadMessage to 0
+                        referenceCheck.child(user.getUid()).child(myUsersId)
+                                .child("unreadMsg").setValue(0);
+                        holder.textViewMsgCount.setVisibility(View.GONE);
+
+                        // set my status to be true incase I receive msg, it will be tick as seen
+                        referenceCheck.child(user.getUid()).child(myUsersId)
+                                .child("status").setValue(true);
                     }
                 });
             }
