@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
+            android:id="@+id/constraintMsgContainer"
             style="@style/card"
             android:layout_width="match_parent"
             android:layout_height="55dp"
@@ -138,7 +138,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/imageViewAccount"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/gift" />
+                app:srcCompat="@drawable/baseline_create_new_folder_24" />
 
             <ImageView
                 android:id="@+id/imageView7"
@@ -162,7 +162,7 @@
             android:layout_height="45dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+            app:layout_constraintTop_toBottomOf="@+id/constraintMsgContainer"
             app:tabMode="fixed"
             app:tabTextAppearance="@style/CustomTab">
 

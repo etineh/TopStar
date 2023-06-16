@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,9 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -189,7 +188,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
                 // what happen when the cardView is click
-                holder.cardView.setOnClickListener(new View.OnClickListener() {
+                holder.constraintLast.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
@@ -201,14 +200,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         mContext.startActivity(intent);
 
-                        // set my unreadMessage to 0
+                        // set my unreadMessage to 0 and hide my count layer
                         referenceCheck.child(user.getUid()).child(myUsersId)
                                 .child("unreadMsg").setValue(0);
                         holder.textViewMsgCount.setVisibility(View.GONE);
 
-                        // set my status to be true incase I receive msg, it will be tick as seen
+                        // set my status to be true in case I receive msg, it will be tick as seen
                         referenceCheck.child(user.getUid()).child(myUsersId)
                                 .child("status").setValue(true);
+
+                        if(holder.constraintTop.getVisibility() == View.VISIBLE){
+                            holder.constraintTop.setVisibility(View.GONE);
+                        }
                     }
                 });
             }
@@ -216,6 +219,25 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        //  open option menu
+        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(holder.constraintTop.getVisibility() == View.GONE){
+                    holder.constraintTop.setVisibility(View.VISIBLE);
+                } else {
+                    holder.constraintTop.setVisibility(View.GONE);
+                }
+            }
+        });
+        //  close option menu
+        holder.imageViewCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.constraintTop.setVisibility(View.GONE);
             }
         });
 
@@ -229,7 +251,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     public class ChatViewHolder extends RecyclerView.ViewHolder{
 
         private CircleImageView imageView;
-        private ImageView imageViewDeliver;
+        private ImageView imageViewDeliver, imageViewMenu;
+        private ImageView imageViewPin, imageViewMute, imageViewMove, imageViewDel, imageViewCancel;
+        ConstraintLayout constraintTop, constraintLast;
         private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
         private CardView cardView;
 
@@ -244,6 +268,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             textViewTime = itemView.findViewById(R.id.textViewTime);
             textViewTyping = itemView.findViewById(R.id.textViewTyping);
             cardView = itemView.findViewById(R.id.cardView);
+            imageViewPin = itemView.findViewById(R.id.imageViewPin);
+            imageViewDel = itemView.findViewById(R.id.imageViewDel);
+            imageViewMute = itemView.findViewById(R.id.imageViewMute);
+            imageViewMove = itemView.findViewById(R.id.imageViewMove);
+            imageViewCancel = itemView.findViewById(R.id.imageViewCancel2);
+            imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
+            constraintTop = itemView.findViewById(R.id.constraintTop);
+            constraintLast = itemView.findViewById(R.id.constrainLast);
+
         }
     }
 

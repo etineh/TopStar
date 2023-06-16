@@ -3,11 +3,13 @@ package com.pixel.chatapp.chats;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -38,17 +40,15 @@ import java.util.Map;
 public class MessageActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewChat;
-    private ImageView imageViewBack, imageViewDeliverMsg;
-    private TextView textViewOtherUser;
+    private ImageView imageViewBack;
+    private ImageView imageViewOpenMenu, imageViewCloseMenu;
+    private ConstraintLayout constraintProfileMenu;
+    private TextView textViewOtherUser, textViewLastSeen, textViewTyping;
     private EditText editTextMessage;
     private FloatingActionButton fab;
-
     String userName, otherName, uID;
-    FirebaseDatabase fbDatabase;
-    DatabaseReference dbReference;
-    DatabaseReference refBackResetCount, refTyping;
+    DatabaseReference dbReference, refChecks, refTyping;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
-    FirebaseAuth auth;
     FirebaseUser user;
     MessageAdapter adapter;
     List<MessageModel> modelList;
@@ -67,7 +67,12 @@ public class MessageActivity extends AppCompatActivity {
         textViewOtherUser = findViewById(R.id.textViewName);
         editTextMessage = findViewById(R.id.editTextMessage);
         fab = findViewById(R.id.fab);
-        imageViewDeliverMsg = findViewById(R.id.imageViewSeen);
+        imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
+        imageViewCloseMenu = findViewById(R.id.imageViewCancel);
+        constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
+        textViewLastSeen = findViewById(R.id.textViewStatus);
+        textViewTyping = findViewById(R.id.textViewTyping2);
+
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
@@ -75,12 +80,10 @@ public class MessageActivity extends AppCompatActivity {
 
         sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
-        fbDatabase = FirebaseDatabase.getInstance();
-        dbReference = fbDatabase.getReference();
-        auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
+        dbReference = FirebaseDatabase.getInstance().getReference();
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
-        refBackResetCount = fbDatabase.getReference("Checks");
+        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         // get users details sents from userlist via intent
         userName = getIntent().getStringExtra("userName");
@@ -88,6 +91,18 @@ public class MessageActivity extends AppCompatActivity {
         uID = getIntent().getStringExtra("Uid");
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
+
+        // send message
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String message = editTextMessage.getText().toString();
+                if (!message.equals("")){
+                    sendMessage(message);
+                    editTextMessage.setText("");
+                }
+            }
+        });
 
         // arrow back
         imageViewBack.setOnClickListener(new View.OnClickListener() {   // return back when the arrow is clicked
@@ -98,8 +113,30 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        // open user menu
+        imageViewOpenMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.VISIBLE);
+            }
+        });
 
-        // show my user that I am typing
+        // close user menu
+        imageViewCloseMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.GONE);
+            }
+        });
+        constraintProfileMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.GONE);
+            }
+        });
+
+
+        // alert database when user is typing
         handler = new Handler();
         runnable = new Runnable() {
             @Override
@@ -122,73 +159,6 @@ public class MessageActivity extends AppCompatActivity {
             }
         };
         handler.post(runnable);
-
-
-        // add user id to db when user start typing
-        editTextMessage.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-                // Adding User to chat fragment: Latest Chats with contacts
-                final DatabaseReference chatRef = FirebaseDatabase.getInstance()
-                        .getReference("ChatList")
-                        .child(user.getUid()).child(uID);
-
-                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (!dataSnapshot.exists()){
-                            chatRef.child("id").setValue(uID);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-                final DatabaseReference chatRef2 = FirebaseDatabase.getInstance()
-                        .getReference("ChatList")
-                        .child(uID).child(user.getUid());
-
-                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (!dataSnapshot.exists()){
-                            chatRef2.child("id").setValue(user.getUid());
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        });
-
-        // send message
-        fab.setOnClickListener(new View.OnClickListener() {     // send message when the button is clicked
-            @Override
-            public void onClick(View view) {
-                String message = editTextMessage.getText().toString();
-                if (!message.equals("")){
-                    sendMessage(message);
-                    editTextMessage.setText("");
-                }
-            }
-        });
 
 
 //        Check if the unreadMessage count is 0
@@ -217,6 +187,10 @@ public class MessageActivity extends AppCompatActivity {
         });
 
         getMessage();
+
+        addUserWhenTyping();
+
+        getMyUserTyping();
 
     }
 
@@ -319,10 +293,95 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+        // show when user is typing
+    public void getMyUserTyping()
+    {
+        refChecks.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (!snapshot.child(uID).child("typing").exists()){
+                    refChecks.child(user.getUid()).child(uID)
+                            .child("typing").setValue(0);
+                }
+                else {
+
+                    long typing = (long) snapshot.child(uID).child("typing").getValue();
+
+                    if(typing == 1){
+                        textViewTyping.setText("typing...");
+                    } else{
+                        textViewTyping.setText("");
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+        // add user id to db when user start typing
+    public void addUserWhenTyping(){
+        editTextMessage.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                // Adding User to chat fragment: Latest Chats with contacts
+                final DatabaseReference chatRef = FirebaseDatabase.getInstance()
+                        .getReference("ChatList")
+                        .child(user.getUid()).child(uID);
+
+                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()){
+                            chatRef.child("id").setValue(uID);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+                final DatabaseReference chatRef2 = FirebaseDatabase.getInstance()
+                        .getReference("ChatList")
+                        .child(uID).child(user.getUid());
+
+                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()){
+                            chatRef2.child("id").setValue(user.getUid());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+    }
+
     @Override
     public void onBackPressed() {
 
-        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(false);
+        refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
         runnerChaeck = true;
 
         finish();
@@ -331,7 +390,7 @@ public class MessageActivity extends AppCompatActivity {
 //
     @Override
     protected void onPause() {
-        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(false);
+        refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
         runnerChaeck = true;
 //        finish();
         super.onPause();
@@ -339,7 +398,7 @@ public class MessageActivity extends AppCompatActivity {
 //
 //    @Override
     protected void onResume() {
-        refBackResetCount.child(user.getUid()).child(uID).child("status").setValue(true);
+        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
         runnerChaeck = false;
         super.onResume();
     }

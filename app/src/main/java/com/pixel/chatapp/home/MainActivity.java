@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
                 });
         tabLayoutMediator.attach();
 
+
+
         // Dark mood setting
         sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
         nightMood = sharedPreferences.getBoolean("MoodStatus", false);

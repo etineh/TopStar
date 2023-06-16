@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +56,7 @@ public class ChatsListFragment extends Fragment {
 
         fab = view.findViewById(R.id.floatingActionButton);
         recyclerView = view.findViewById(R.id.recyclerViewChatList);
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -71,7 +73,6 @@ public class ChatsListFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
 
 
         // get my userName

@@ -61,6 +61,16 @@
         <item name="android:background">@color/white</item>
     </style>
 
+    <!--    chat theme background-->
+    <style name="ChatBackground">
+        <item name="android:background">@drawable/dark_theme</item>
+    </style>
+
+    <!--    chat box msg background.  dark orange   #281600-->
+    <style name="ChatMsgContainer">
+        <item name="android:background">#301a00</item>
+    </style>
+
     <!--    Custom TabLayout-->
     <style name="CustomTab" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>

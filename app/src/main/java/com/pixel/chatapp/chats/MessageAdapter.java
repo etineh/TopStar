@@ -1,5 +1,6 @@
 package com.pixel.chatapp.chats;
 
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,19 +37,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private int send;
     private int receive;
     FirebaseUser user;
-    DatabaseReference refCheckMsgDelivery;
+    DatabaseReference refCheck;
+    int num;
+
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
+        num = 0;
 
         status = false;
         send = 1;
         receive = 2;
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        refCheckMsgDelivery = FirebaseDatabase.getInstance().getReference("Checks");
+        refCheck = FirebaseDatabase.getInstance().getReference("Checks");
     }
 
     @NonNull
@@ -67,7 +72,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
         int pos = holder.getAdapterPosition();     //   to get the position of each msg
-        holder.cardViewSend.setTag(pos);        //     to get cardView position
+//        holder.constraintMsgContainer.setTag(pos);        //     to get cardView position
 
         long convert = (long) modelList.get(position).timeSent;
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
@@ -80,7 +85,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
         //  Delivery and seen settings
-        refCheckMsgDelivery.child(uId).addValueEventListener(new ValueEventListener() {
+        refCheck.child(uId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -102,6 +107,30 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        //  show chat options
+        holder.cardViewChatBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(holder.constraintChatTop.getVisibility() == View.GONE){
+                    holder.constraintChatTop.setVisibility(View.VISIBLE);
+                } else{
+                    holder.constraintChatTop.setVisibility(View.GONE);
+                }
+                Log.i("position", "position " + view.getTag());
+            }
+        });
+
+        // close chat option
+        holder.constraintMsgContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
+                    holder.constraintChatTop.setVisibility(View.GONE);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -109,11 +138,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return modelList.size();
     }
 
-    public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    // use this option when you want to use CardView onClick
+//    public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class MessageViewHolder extends RecyclerView.ViewHolder{
+
         TextView textViewShowMsg;
         ImageView seenMsg;
+        ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
+        ImageView imageViewReact, imageViewCopy, imageViewDel;
+        ConstraintLayout constraintChatTop, constraintMsgContainer;
+
         TextView timeMsg;
-        CardView cardViewSend;
+        CardView cardViewChatBox;
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -121,22 +157,46 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 timeMsg = itemView.findViewById(R.id.textViewChatTime);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen);
                 textViewShowMsg = itemView.findViewById(R.id.textViewSend);
-                cardViewSend = itemView.findViewById(R.id.cardViewSend);
-                cardViewSend.setOnClickListener(this);  // to get cardView position when clicked
+                cardViewChatBox = itemView.findViewById(R.id.cardViewSend);
+
+                imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg);
+                imageViewEdit = itemView.findViewById(R.id.imageViewEdit);
+                imageViewPin = itemView.findViewById(R.id.imageViewPinMsg);
+                imageViewForward = itemView.findViewById(R.id.imageViewForward);
+                imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
+                imageViewDel = itemView.findViewById(R.id.imageViewDel2);
+                constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
+                constraintMsgContainer = itemView.findViewById(R.id.constraint);
+
+//                constraintMsgContainer.setOnClickListener(this);  // to get cardView position when clicked
+
             } else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
-                cardViewSend = itemView.findViewById(R.id.cardViewReceived);
+                cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen2);
                 textViewShowMsg = itemView.findViewById(R.id.textViewReceived);
-                cardViewSend.setOnClickListener(this); // to get cardView position when clicked
+
+                imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg2);
+                imageViewPin = itemView.findViewById(R.id.imageViewReceivePinMsg);
+                imageViewForward = itemView.findViewById(R.id.imageViewForward2);
+                imageViewReact = itemView.findViewById(R.id.imageViewReact2);
+                imageViewCopy = itemView.findViewById(R.id.imageViewReceiveCopyText);
+                imageViewDel = itemView.findViewById(R.id.imageViewReceiveDel);
+                constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
+                constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
+
+//                constraintMsgContainer.setOnClickListener(this); // to get cardView position when clicked
             }
         }
 
-        @Override
-        public void onClick(View view) {
-            int cardPosition = (int) view.getTag();
-            timeMsg.setText("check " + cardPosition);
-        }
+//        @Override
+//        public void onClick(View view) {
+//            int cardPosition = (int) view.getTag();
+//
+////            if(pos)
+//
+////            timeMsg.setText("check " + cardPosition);
+//        }
     }
 
     //------------ this method is used because we have 2 view card (card_msg and card_receiver) to use

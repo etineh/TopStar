@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Chat App</string>
+    <string name="pin">Pin</string>
+    <string name="delete">Del.</string>
+    <string name="move">Move</string>
+    <string name="mute">Mute</string>
+    <string name="Copy">Copy</string>
+<!--    <string name="lastSeen">Last seen: &amp; Yesterday</string>-->
+    <string name="lastSeen">Online</string>
+    <string name="typing">Typing...</string>
+
 </resources>

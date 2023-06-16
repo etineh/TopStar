@@ -10,4 +10,6 @@
     <color name="orange">#ED7014</color>
     <color name="black2">#191818</color>
     <color name="trans">#55000000</color>
+    <color name="dark_orange1">#281600</color>
+    <color name="dark_orange2">#301a00</color>
 </resources>

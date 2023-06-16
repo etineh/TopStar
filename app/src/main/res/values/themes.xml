@@ -54,13 +54,23 @@
         <item name="android:tint">@color/black</item>
     </style>
 
-<!--    background Tink orange and white-->
+<!--    background Tint orange and white-->
     <style name="BackgroundTintOrange">
         <item name="android:tint">@color/orange</item>
     </style>
 
     <style name="Background">
         <item name="android:background">@color/black</item>
+    </style>
+
+<!--    chat theme background-->
+    <style name="ChatBackground">
+        <item name="android:background">@drawable/light</item>
+    </style>
+
+    <!--    chat box msg background-->
+    <style name="ChatMsgContainer">
+        <item name="android:background">@color/orange</item>
     </style>
 
 <!--    Custom TabLayout-->
