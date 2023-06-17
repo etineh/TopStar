@@ -36,8 +36,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     String userName;
     DatabaseReference fbReference;
     FirebaseUser user;
-//    SharedPreferences sharedPreferences;
-//    long count;
 
     public UsersAdapter(List<String> otherUsersList, Context mContext, String userName) {
         this.otherUsersList = otherUsersList;
@@ -46,8 +44,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         fbReference = FirebaseDatabase.getInstance().getReference("Users");
-//        sharedPreferences = this.mContext.getSharedPreferences("LastUserMessage", Context.MODE_PRIVATE); // here you can store different data into the Score, like line 42
-
     }
 
     @NonNull
@@ -90,19 +86,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
                         intent.putExtra("otherName", otherName);
                         intent.putExtra("userName", userName);
                         intent.putExtra("Uid", otherUsersList.get(pos));
-
-                        // coming back
-                        // set all delivery/seen notification to "in"
-//                        fbReference.child("Users").child(user.getUid()).child(otherUsersList.get(pos))  // set seen msg
-//                                .child("seen").setValue("in");
-//                        fbReference.child("Users").child(user.getUid()).child(otherUsersList.get(pos))  // set seen msg
-//                                .child("show").setValue("in");
-//
-//                        // checking if the other user disable his view or if he has view my message
-//                        if(snapshot.child(otherUsersList.get(pos)).child(user.getUid()).child("show").getValue().equals("in")){
-//                            fbReference.child("Users").child(user.getUid()).child(otherUsersList.get(pos))  // set seen msg
-//                                    .child("realr").setValue("in");
-//                        }
 
                         mContext.startActivity(intent);
                     }

@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,7 +50,7 @@ public class MessageActivity extends AppCompatActivity {
     private EditText editTextMessage;
     private FloatingActionButton fab;
     String userName, otherName, uID;
-    DatabaseReference dbReference, refChecks, refTyping;
+    DatabaseReference dbReference, refChecks;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
     MessageAdapter adapter;
@@ -55,8 +58,8 @@ public class MessageActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     private Handler handler;
     private Runnable runnable;
-    private long count = 0;
-    private Boolean runnerChaeck = false;
+    private long count = 0, offCount = 0;
+    private Boolean runnerChaeck = false, networkMood;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +99,7 @@ public class MessageActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String message = editTextMessage.getText().toString();
                 if (!message.equals("")){
                     sendMessage(message);
@@ -143,17 +147,20 @@ public class MessageActivity extends AppCompatActivity {
             public void run() {
 
                 String message2 = editTextMessage.getText().toString();
-                refTyping = FirebaseDatabase.getInstance().getReference("Checks")
-                        .child(uID).child(user.getUid()).child("typing");
+
                 if(!message2.equals("")){
-                    refTyping.setValue(1);
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(1);
                 } else {
-                    refTyping.setValue(0);
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
+                }
+
+                if(checkConnection()){
+                    refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
                 }
 
                 if(!runnerChaeck) handler.postDelayed(runnable, 1000);
                 else {
-                    refTyping.setValue(0);
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
                     handler.removeCallbacks(runnable);
                 }
             }
@@ -161,21 +168,26 @@ public class MessageActivity extends AppCompatActivity {
         handler.post(runnable);
 
 
-//        Check if the unreadMessage count is 0
+//        Check if the unreadMessage count and offline count is 0
         DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(uID).child(user.getUid()).child("unreadMsg");
+                .child(uID).child(user.getUid());
         referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(!snapshot.exists()){
+                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists()){
 
-                    referenceMsgCountCheck.setValue(0);
+                    referenceMsgCountCheck.child("unreadMsg").setValue(0);
+                    referenceMsgCountCheck.child("offCount").setValue(0);
 
                 } else {
                     // if last msg count is not 0, then get the count
-                    if(!snapshot.getValue().equals(0)){
-                        count = (long) snapshot.getValue();
+                    if(!snapshot.child("unreadMsg").getValue().equals(0)){
+                        count = (long) snapshot.child("unreadMsg").getValue();
+                    }
+                    // if last msg count is not 0, then get the count
+                    if(!snapshot.child("offCount").getValue().equals(0)){
+                        offCount = (long) snapshot.child("offCount").getValue();
                     }
                 }
             }
@@ -186,6 +198,7 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+
         getMessage();
 
         addUserWhenTyping();
@@ -195,6 +208,17 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //---------------------- methods -----------------
+
+    public boolean checkConnection()
+    {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo == null) return false;
+
+        return networkInfo.isConnected();
+
+    }
+
     public void sendMessage(String message){
 
         Map<String, Object> messageMap = new HashMap<>();
@@ -226,6 +250,14 @@ public class MessageActivity extends AppCompatActivity {
                 .child(user.getUid()).child(uID).child("unreadMsg");
         referenceMsgCount2.setValue(0);
 
+
+        // check if there is network connection before sending message
+        if(!checkConnection()){
+            refChecks.child(uID).child(user.getUid()).child("offCount").setValue(offCount+=1);
+        } else{
+            refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
+        }
+
 //        check if the user is in my chat box and reset the count
         DatabaseReference statusCheck = FirebaseDatabase.getInstance().getReference("Checks");
         statusCheck.child(uID).addValueEventListener(new ValueEventListener() {
@@ -244,7 +276,6 @@ public class MessageActivity extends AppCompatActivity {
                         referenceMsgCount.child("unreadMsg").setValue(0);
                     }
                 }
-
             }
 
             @Override
@@ -287,8 +318,7 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-
-        adapter = new MessageAdapter(modelList, userName, uID);
+        adapter = new MessageAdapter(modelList, userName, uID, offCount, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
 
     }

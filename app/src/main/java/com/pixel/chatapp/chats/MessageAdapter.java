@@ -1,5 +1,6 @@
 package com.pixel.chatapp.chats;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,18 +35,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     String uId;
     String userName;
     Boolean status;
+//    boolean networkMood;
+    long offCount;
     private int send;
     private int receive;
     FirebaseUser user;
     DatabaseReference refCheck;
-    int num;
+    Context context;
 
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId) {
+    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, long offCount, Context context) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
-        num = 0;
+        this.offCount = offCount;
+        this.context = context;
 
         status = false;
         send = 1;
@@ -84,19 +88,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // show all the previous messages in positions
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
+
+        // get the last seen or presence of user
+//        refCheck.child(uId).child(myUsersId)
+
         //  Delivery and seen settings
         refCheck.child(uId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 long msgCount = (long) snapshot.child(user.getUid()).child("unreadMsg").getValue() + 1;
+                long offCount = (long) snapshot.child(user.getUid()).child("offCount").getValue();
 
-                if(pos > (modelList.size() - msgCount)) {
-                    // and network check (later)
+                // tick load when no network and approve when network and unread msg tick
+                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount)) {
                     holder.seenMsg.setImageResource(R.drawable.message_tick_one);
                 }
+                else {
+                    holder.seenMsg.setImageResource(R.drawable.message_load);
+                }
 
-                if(pos <= (modelList.size() - msgCount) ){
+                // tick all previous read msg
+                if(pos <= (modelList.size() - (msgCount))){
                     holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
                 }
             }

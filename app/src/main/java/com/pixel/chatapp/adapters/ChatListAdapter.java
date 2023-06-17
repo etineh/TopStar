@@ -3,6 +3,8 @@ package com.pixel.chatapp.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
@@ -28,7 +31,9 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -39,7 +44,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     String userName;
     DatabaseReference referenceUsers, fReference, referenceCheck;
     FirebaseUser user;
-//    Map<String, Object> mapTypingAndStatus;
+    Map<String, Object> offlinePresenceAndStatus, offlineTypingAndMsg;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -51,7 +56,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceUsers = FirebaseDatabase.getInstance().getReference("Users");
         fReference = FirebaseDatabase.getInstance().getReference("UsersList");
 
-//        mapTypingAndStatus = new HashMap<>();
+        offlinePresenceAndStatus = new HashMap<>();
+        offlineTypingAndMsg = new HashMap<>();
     }
 
     @NonNull
@@ -70,11 +76,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         String myUsersId = otherUsersId.get(pos);
 
-        // set user "typing" to be false when I come online
-        referenceCheck.child(myUsersId).child(user.getUid()).child("typing").setValue(0);
+        // set user "typing" to be false when I disconnect
+        referenceCheck.child(myUsersId).child(user.getUid())
+                .child("typing").onDisconnect().setValue(0);
 
-        // set my status to be false incase I receive msg, it will be tick as seen
-        referenceCheck.child(user.getUid()).child(myUsersId).child("status").setValue(false);
+        // set my online presence
+        referenceCheck.child(user.getUid()).child(myUsersId).child("presence").setValue("online");
+
+        // reset offline message count to 0 when network comes
+        referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
+
+        // set offline details automatic
+        offlinePresenceAndStatus.put("presence", "Last seen: "+ServerValue.TIMESTAMP);
+        offlinePresenceAndStatus.put("status", false);
+        referenceCheck.child(user.getUid()).child(myUsersId).onDisconnect().updateChildren(offlinePresenceAndStatus);
+
 
         // get lastMessage and Time sent
         fReference.child(user.getUid()).addValueEventListener(new ValueEventListener() {
@@ -83,8 +99,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                 String lastMsg = snapshot.child(myUsersId).child("message").getValue().toString();
 //                String userName = snapshot.child(myUsersId).child("from").getValue().toString();
-                long lastTime = (long) snapshot.child(myUsersId).child("timeSent").getValue();
+                long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
 
+                int more = Integer.parseInt("123"); // to convert string to int
                 // to get the current timestamp
 //                Timestamp stamp = new Timestamp(System.currentTimeMillis());
 //                Date date = new Date(stamp.getTime());
@@ -106,7 +123,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         });
 
 
-        // show number of unread message count
+        // get number of unread message count
         referenceCheck.keepSynced(true);
         referenceCheck.child(user.getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -135,7 +152,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     }
                 });
 
-        // show when user is typing
+        // get user typing state
 // Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
         referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -209,6 +226,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         referenceCheck.child(user.getUid()).child(myUsersId)
                                 .child("status").setValue(true);
 
+                        // close option menu if open
                         if(holder.constraintTop.getVisibility() == View.VISIBLE){
                             holder.constraintTop.setVisibility(View.GONE);
                         }
