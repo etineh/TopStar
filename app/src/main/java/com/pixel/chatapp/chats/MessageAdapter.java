@@ -35,7 +35,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     String uId;
     String userName;
     Boolean status;
-//    boolean networkMood;
     long offCount;
     private int send;
     private int receive;
@@ -85,14 +84,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
-        // show all the previous messages in positions
+        // show all messages in positions
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
 
-        // get the last seen or presence of user
-//        refCheck.child(uId).child(myUsersId)
-
-        //  Delivery and seen settings
+        // unsent and sent msg... delivery and seen settings
         refCheck.child(uId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -104,9 +100,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount)) {
                     holder.seenMsg.setImageResource(R.drawable.message_tick_one);
                 }
-                else {
+                else
                     holder.seenMsg.setImageResource(R.drawable.message_load);
-                }
 
                 // tick all previous read msg
                 if(pos <= (modelList.size() - (msgCount))){

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.squareup.picasso.Picasso;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,16 +82,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceCheck.child(myUsersId).child(user.getUid())
                 .child("typing").onDisconnect().setValue(0);
 
-        // set my online presence
-        referenceCheck.child(user.getUid()).child(myUsersId).child("presence").setValue("online");
-
         // reset offline message count to 0 when network comes
         referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
 
+        // set my online presence
+        referenceCheck.child(user.getUid()).child(myUsersId).child("presence").setValue(1);
+
         // set offline details automatic
-        offlinePresenceAndStatus.put("presence", "Last seen: "+ServerValue.TIMESTAMP);
+        offlinePresenceAndStatus.put("presence", ServerValue.TIMESTAMP);
         offlinePresenceAndStatus.put("status", false);
-        referenceCheck.child(user.getUid()).child(myUsersId).onDisconnect().updateChildren(offlinePresenceAndStatus);
+        referenceCheck.child(user.getUid()).child(myUsersId).onDisconnect()
+                .updateChildren(offlinePresenceAndStatus);
 
 
         // get lastMessage and Time sent
@@ -101,13 +104,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                String userName = snapshot.child(myUsersId).child("from").getValue().toString();
                 long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
 
-                int more = Integer.parseInt("123"); // to convert string to int
-                // to get the current timestamp
-//                Timestamp stamp = new Timestamp(System.currentTimeMillis());
-//                Date date = new Date(stamp.getTime());
+
 
                 // convert the timestamp to current time
                 Date d = new Date(lastTime);
+//                Log.i("Date", "full date "+ date);
                 DateFormat formatter = new SimpleDateFormat("h:mm a");
                 String time = formatter.format(d);
 

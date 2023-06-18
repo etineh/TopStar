@@ -35,7 +35,11 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +59,12 @@ public class MessageActivity extends AppCompatActivity {
     FirebaseUser user;
     MessageAdapter adapter;
     List<MessageModel> modelList;
-    SharedPreferences sharedPreferences;
+//    SharedPreferences sharedPreferences;
     private Handler handler;
     private Runnable runnable;
     private long count = 0, offCount = 0;
     private Boolean runnerChaeck = false, networkMood;
+    private Map<String, Integer> dateNum, dateMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +86,7 @@ public class MessageActivity extends AppCompatActivity {
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         modelList = new ArrayList<>();
 
-        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
+//        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
         dbReference = FirebaseDatabase.getInstance().getReference();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -205,6 +210,8 @@ public class MessageActivity extends AppCompatActivity {
 
         getMyUserTyping();
 
+        lastSeenAndOnline();
+
     }
 
     //---------------------- methods -----------------
@@ -320,6 +327,125 @@ public class MessageActivity extends AppCompatActivity {
         });
         adapter = new MessageAdapter(modelList, userName, uID, offCount, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
+
+    }
+
+        // get the last seen or presence of user
+    public void lastSeenAndOnline()
+    {
+        refChecks.child(uID).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long onlineValue = (long) snapshot.child("presence").getValue();
+
+                if(!snapshot.child("presence").exists()){
+                    textViewLastSeen.setText("Welcome!");
+                }
+                else
+                {
+                    if (onlineValue == 1){
+                        textViewLastSeen.setText("Online");
+                    }
+                    else {
+                        //  Sat Jun 17 23:07:21 GMT+01:00 2023
+//  1687042708508
+                        // current date and time
+                        Timestamp stamp = new Timestamp(System.currentTimeMillis());
+                        Date date = new Date(stamp.getTime());
+                        String dateString = String.valueOf(date);
+
+                        // last user date and time
+                        Date d = new Date(onlineValue);
+                        DateFormat formatter = new SimpleDateFormat("h:mm a");
+                        String time = formatter.format(d);
+                        String dateString2 = String.valueOf(d);
+
+                        dateMonth = new HashMap<>();     // months
+                        dateMonth.put("Jan", 1);
+                        dateMonth.put("Feb", 2);
+                        dateMonth.put("Mar", 3);
+                        dateMonth.put("Apr", 4);
+                        dateMonth.put("May", 5);
+                        dateMonth.put("Jun", 6);
+                        dateMonth.put("Jul", 7);
+                        dateMonth.put("Aug", 8);
+                        dateMonth.put("Sep", 9);
+                        dateMonth.put("Oct", 10);
+                        dateMonth.put("Nov", 11);
+                        dateMonth.put("Dec", 12);
+
+                        dateNum = new HashMap<>();      // days
+                        dateNum.put("Mon", 1);
+                        dateNum.put("Tue", 2);
+                        dateNum.put("Wed", 3);
+                        dateNum.put("Thu", 4);
+                        dateNum.put("Fri", 5);
+                        dateNum.put("Sat", 6);
+                        dateNum.put("Sun", 7);
+
+                        int curMonth = dateMonth.get(dateString.substring(4,7));    // Months
+                        int lastMonth = dateMonth.get(dateString2.substring(4,7));
+
+                        int curDay = dateNum.get(dateString.substring(0,3));    // Mon - Sun
+                        int lastDay = dateNum.get(dateString2.substring(0,3));
+
+                        int dateCur = Integer.parseInt(dateString.substring(8, 10));    // day 1 - 30
+                        int dateLast = Integer.parseInt(dateString2.substring(8, 10));
+
+                        if (curMonth - lastMonth == 0)
+                        {
+                            if (dateCur - dateLast < 7)
+                            {
+                                if(curDay - lastDay == 0)
+                                {
+                                    textViewLastSeen.setText("Last seen: "+ time.toLowerCase());
+                                    Log.i("Check", "Answer ");
+                                } else if (curDay - lastDay == 1) {
+                                    textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase());
+                                } else if (curDay - lastDay == 2) {
+                                    textViewLastSeen.setText("Last seen: 2days ago, \n"+time.toLowerCase());
+                                } else if (curDay - lastDay == 3) {
+                                    textViewLastSeen.setText("Last seen: 3days ago, \n"+time.toLowerCase());
+                                } else if (curDay - lastDay == 4) {
+                                    textViewLastSeen.setText("Last seen: 4days ago, \n"+time.toLowerCase());
+                                } else if (curDay - lastDay == 5) {
+                                    textViewLastSeen.setText("Last seen: 5days ago, \n"+time.toLowerCase());
+                                } else if (curDay - lastDay == 6) {
+                                    textViewLastSeen.setText("Last seen: 6days ago, \n"+time.toLowerCase());
+                                }
+                            } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
+                                textViewLastSeen.setText("Last seen: Last week, \n"+lastDay);
+                            } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
+                                textViewLastSeen.setText("Last seen: 2 wks ago, \n"+lastDay);
+                            } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
+                                textViewLastSeen.setText("Last seen: 3 wks ago, \n"+lastDay);
+                            } else {
+                                textViewLastSeen.setText("Last seen: a month \nago");
+                            }
+                        } else if(curMonth - lastMonth == 1){
+                            textViewLastSeen.setText("Last seen: one month \nago");
+                        } else if(curMonth - lastMonth == 2){
+                            textViewLastSeen.setText("Last seen: two months \nago");
+                        }else if(curMonth - lastMonth == 3){
+                            textViewLastSeen.setText("Last seen: three months \nago");
+                        }else if(curMonth - lastMonth == 4){
+                            textViewLastSeen.setText("Last seen: Four months \nago");
+                        }else if(curMonth - lastMonth == 5){
+                            textViewLastSeen.setText("Last seen: Five months \nago");
+                        } else {
+                            textViewLastSeen.setText("Last seen: Long time");
+                        }
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 
