@@ -337,19 +337,18 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                long onlineValue = (long) snapshot.child("presence").getValue();
 
                 if(!snapshot.child("presence").exists()){
-                    textViewLastSeen.setText("Welcome!");
+                    textViewLastSeen.setText("GetMeh");
                 }
                 else
                 {
+                    long onlineValue = (long) snapshot.child("presence").getValue();
                     if (onlineValue == 1){
                         textViewLastSeen.setText("Online");
                     }
                     else {
-                        //  Sat Jun 17 23:07:21 GMT+01:00 2023
-//  1687042708508
+                        //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
                         // current date and time
                         Timestamp stamp = new Timestamp(System.currentTimeMillis());
                         Date date = new Date(stamp.getTime());

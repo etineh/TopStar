@@ -167,7 +167,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="7dp"
                 android:layout_marginBottom="10dp"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -196,8 +196,7 @@
                 android:id="@+id/textViewTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="7dp"
                 android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu" />
@@ -206,14 +205,14 @@
                 android:id="@+id/textViewMsgCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="12dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/msg_count"
                 android:paddingStart="3sp"
                 android:paddingEnd="3dp"
                 android:textColor="@color/white"
                 android:textSize="12sp"
-                android:visibility="gone"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/textViewTime" />
 
@@ -221,7 +220,7 @@
                 android:id="@+id/imageViewUserMenu"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -242,7 +241,7 @@
                 android:id="@+id/imageViewDelivery"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:layout_marginEnd="3dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="10dp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -254,9 +253,9 @@
                 style="@style/BackgroundTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="3dp"
                 android:layout_marginEnd="-5dp"
-                android:visibility="gone"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_push_pin_24" />
@@ -265,12 +264,21 @@
                 android:id="@+id/imageViewUnmute"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
-                android:visibility="gone"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/mute" />
+
+            <TextView
+                android:id="@+id/textViewDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-2dp"
+                android:textSize="10sp"
+                app:layout_constraintBottom_toTopOf="@+id/textViewTime"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

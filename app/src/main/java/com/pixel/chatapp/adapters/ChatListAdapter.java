@@ -46,7 +46,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     String userName;
     DatabaseReference referenceUsers, fReference, referenceCheck;
     FirebaseUser user;
-    Map<String, Object> offlinePresenceAndStatus, offlineTypingAndMsg;
+    Map<String, Object> offlinePresenceAndStatus;
+    Map<String, Integer> dateMonth, dateNum;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -59,7 +60,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         fReference = FirebaseDatabase.getInstance().getReference("UsersList");
 
         offlinePresenceAndStatus = new HashMap<>();
-        offlineTypingAndMsg = new HashMap<>();
+        dateMonth = new HashMap<>();
+        dateNum = new HashMap<>();
     }
 
     @NonNull
@@ -104,17 +106,98 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                String userName = snapshot.child(myUsersId).child("from").getValue().toString();
                 long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
 
+                holder.textViewMsg.setText(lastMsg);    // set last message
+//                holder.textViewUser.setText(userName);
 
+                // current date and time
+                Timestamp stamp = new Timestamp(System.currentTimeMillis());
+                Date date = new Date(stamp.getTime());
+                String currentDateString = String.valueOf(date);
 
-                // convert the timestamp to current time
-                Date d = new Date(lastTime);
-//                Log.i("Date", "full date "+ date);
+                // last user date and time
+                Date d = new Date(lastTime);    // convert the timestamp to current time
                 DateFormat formatter = new SimpleDateFormat("h:mm a");
                 String time = formatter.format(d);
+                String previousDateString = String.valueOf(d);
 
-                holder.textViewMsg.setText(lastMsg);
-                holder.textViewTime.setText(time.toLowerCase());
-//                holder.textViewUser.setText(userName);
+                dateMonth = new HashMap<>();     // months
+                dateMonth.put("Jan", 1);
+                dateMonth.put("Feb", 2);
+                dateMonth.put("Mar", 3);
+                dateMonth.put("Apr", 4);
+                dateMonth.put("May", 5);
+                dateMonth.put("Jun", 6);
+                dateMonth.put("Jul", 7);
+                dateMonth.put("Aug", 8);
+                dateMonth.put("Sep", 9);
+                dateMonth.put("Oct", 10);
+                dateMonth.put("Nov", 11);
+                dateMonth.put("Dec", 12);
+
+                dateNum = new HashMap<>();      // days
+                dateNum.put("Mon", 1);
+                dateNum.put("Tue", 2);
+                dateNum.put("Wed", 3);
+                dateNum.put("Thu", 4);
+                dateNum.put("Fri", 5);
+                dateNum.put("Sat", 6);
+                dateNum.put("Sun", 7);
+
+                int lastYear = Integer.parseInt(previousDateString.substring(30, 34));  // last year
+
+                int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
+                int lastMonth = dateMonth.get(previousDateString.substring(4,7));
+
+                int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
+                int lastDay = dateNum.get(previousDateString.substring(0,3));
+
+                int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
+                int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
+
+                if (curMonth - lastMonth == 0)
+                {
+                    if (dateCur - dateLast < 7)
+                    {
+                        if(curDay - lastDay == 0)
+                        {
+                            holder.textViewDay.setText("Today");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 1) {
+                            holder.textViewDay.setText("Yesterday");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 2) {
+                            holder.textViewDay.setText("2days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 3) {
+                            holder.textViewDay.setText("3days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 4) {
+                            holder.textViewDay.setText("4days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 5) {
+                            holder.textViewDay.setText("5days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 6) {
+                            holder.textViewDay.setText("6days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        }
+                    } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
+                        holder.textViewDay.setText("1wk ago");
+                        holder.textViewTime.setText(lastDay);
+                    } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
+                        holder.textViewDay.setText("2wks ago");
+                        holder.textViewTime.setText(lastDay);
+                    } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
+                        holder.textViewDay.setText("3wk ago");
+                        holder.textViewTime.setText(lastDay);
+                    } else {
+                        holder.textViewDay.setText("month ago");
+                        holder.textViewTime.setText(lastDay);
+                    }
+                } else{
+                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
+                    holder.textViewTime.setText(lastYear);
+                }
             }
 
             @Override
@@ -142,7 +225,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                                 holder.textViewMsgCount.setText(""+unreadMsg);
                                 holder.textViewMsgCount.setVisibility(View.VISIBLE);
                             } else{
-                                holder.textViewMsgCount.setVisibility(View.GONE);
+                                holder.textViewMsgCount.setVisibility(View.INVISIBLE);
                             }
                         }
                     }
@@ -221,7 +304,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // set my unreadMessage to 0 and hide my count layer
                         referenceCheck.child(user.getUid()).child(myUsersId)
                                 .child("unreadMsg").setValue(0);
-                        holder.textViewMsgCount.setVisibility(View.GONE);
+                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
                         // set my status to be true in case I receive msg, it will be tick as seen
                         referenceCheck.child(user.getUid()).child(myUsersId)
@@ -274,6 +357,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private ImageView imageViewPin, imageViewMute, imageViewMove, imageViewDel, imageViewCancel;
         ConstraintLayout constraintTop, constraintLast;
         private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
+        private TextView textViewDay;
         private CardView cardView;
 
         public ChatViewHolder(@NonNull View itemView) {
@@ -285,6 +369,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             textViewMsgCount = itemView.findViewById(R.id.textViewMsgCount);
             imageViewDeliver = itemView.findViewById(R.id.imageViewDelivery);
             textViewTime = itemView.findViewById(R.id.textViewTime);
+            textViewDay = itemView.findViewById(R.id.textViewDay);
             textViewTyping = itemView.findViewById(R.id.textViewTyping);
             cardView = itemView.findViewById(R.id.cardView);
             imageViewPin = itemView.findViewById(R.id.imageViewPin);
