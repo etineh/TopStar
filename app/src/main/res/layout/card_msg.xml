@@ -7,23 +7,54 @@
     android:layout_margin="3dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintNewMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textViewNewMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/msg_count"
+            android:paddingLeft="15dp"
+            android:paddingTop="3dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="3dp"
+            android:text="5 new message"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/constraintNewMsg">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintChatTop"
             style="@style/card"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/cardViewSend"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="@+id/constraint">
 
             <ImageView
                 android:id="@+id/imageViewForward"
@@ -161,9 +192,10 @@
                     android:layout_height="12dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="2dp"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="@+id/textViewSend"
                     app:layout_constraintEnd_toStartOf="@+id/textViewChatTime"
-                    app:srcCompat="@drawable/message_load" />
+                    app:srcCompat="@drawable/baseline_add_reaction_24" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

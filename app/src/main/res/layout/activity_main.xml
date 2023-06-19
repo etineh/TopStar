@@ -70,7 +70,7 @@
             <ImageView
                 android:id="@+id/imageViewMenu"
                 style="@style/BackgroundTint"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:scaleType="fitXY"
@@ -109,6 +109,7 @@
 
             <ImageView
                 android:id="@+id/imageViewSearch"
+                style="@style/BackgroundTintOrange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
@@ -120,6 +121,7 @@
 
             <ImageView
                 android:id="@+id/imageViewAccount"
+                style="@style/BackgroundTintOrange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
@@ -131,6 +133,7 @@
 
             <ImageView
                 android:id="@+id/imageViewGift"
+                style="@style/BackgroundTintOrange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
@@ -203,7 +206,7 @@
 
                 <ImageView
                     android:id="@+id/imageViewHome"
-                    style="@style/BackgroundTint"
+                    style="@style/BackgroundTintDarkOrange"
                     android:layout_width="40dp"
                     android:layout_height="33dp"
                     android:layout_marginStart="20dp"

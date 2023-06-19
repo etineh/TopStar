@@ -44,10 +44,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     List<String> otherUsersId;
     Context mContext;
     String userName;
-    DatabaseReference referenceUsers, fReference, referenceCheck;
+    DatabaseReference referenceUsers, refUsersLast, referenceCheck;
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
+    long numScroll;
+    int castNum;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -57,7 +59,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         user = FirebaseAuth.getInstance().getCurrentUser();
         referenceCheck = FirebaseDatabase.getInstance().getReference("Checks");
         referenceUsers = FirebaseDatabase.getInstance().getReference("Users");
-        fReference = FirebaseDatabase.getInstance().getReference("UsersList");
+        refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
 
         offlinePresenceAndStatus = new HashMap<>();
         dateMonth = new HashMap<>();
@@ -84,11 +86,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceCheck.child(myUsersId).child(user.getUid())
                 .child("typing").onDisconnect().setValue(0);
 
-        // reset offline message count to 0 when network comes
-        referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
-
         // set my online presence
-        referenceCheck.child(user.getUid()).child(myUsersId).child("presence").setValue(1);
+//        referenceCheck.child(user.getUid()).child(myUsersId).child("presence").setValue(1);
+        referenceUsers.child(user.getUid()).child("presence").setValue(1);
+
+        // set my online presence off
+        referenceUsers.child(user.getUid()).child("presence").onDisconnect().setValue(ServerValue.TIMESTAMP);
 
         // set offline details automatic
         offlinePresenceAndStatus.put("presence", ServerValue.TIMESTAMP);
@@ -97,17 +100,24 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 .updateChildren(offlinePresenceAndStatus);
 
 
-        // get lastMessage and Time sent
-        fReference.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        // get lastMessage, and Date/Time sent, and set delivery msg to visibility
+        refUsersLast.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 String lastMsg = snapshot.child(myUsersId).child("message").getValue().toString();
-//                String userName = snapshot.child(myUsersId).child("from").getValue().toString();
                 long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
+                String lastSender = snapshot.child(myUsersId).child("from").getValue().toString();
 
-                holder.textViewMsg.setText(lastMsg);    // set last message
-//                holder.textViewUser.setText(userName);
+                // set message delivery visibility
+                if(lastSender.equals(userName)){
+                    holder.imageViewDeliver.setVisibility(View.VISIBLE);
+                } else {
+                    holder.imageViewDeliver.setVisibility(View.INVISIBLE);
+                }
+
+                // set last message
+                holder.textViewMsg.setText(lastMsg);
 
                 // current date and time
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -205,9 +215,45 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             }
         });
+//
+//
+//        //         reset offline message count to 0 when network comes
+        ConnectivityManager connMgr = (ConnectivityManager) mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
+        if (networkInfo != null && networkInfo.isConnected()) {
+            referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
+        }
+//
+////        set message tick deliver;   // bug - move all child inside since it starts with myUserId
+        referenceCheck.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-        // get number of unread message count
+                long msgCount = (long) snapshot.child(myUsersId)
+                        .child(user.getUid()).child("unreadMsg").getValue();
+                long offCount = (long) snapshot.child(myUsersId)
+                        .child(user.getUid()).child("offCount").getValue();
+
+                if (msgCount == 0) {
+                    holder.imageViewDeliver.setImageResource(R.drawable.read_orange);
+                } else{
+                    if(offCount > 0){
+                        holder.imageViewDeliver.setImageResource(R.drawable.message_load);
+                    }
+                    else holder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+//
+//
+//        // get number of unread message count
         referenceCheck.keepSynced(true);
         referenceCheck.child(user.getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -222,12 +268,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         {
                             long unreadMsg = (long) snapshot.child(myUsersId).child("unreadMsg").getValue();
                             if(unreadMsg > 0) {
-                                holder.textViewMsgCount.setText(""+unreadMsg);
                                 holder.textViewMsgCount.setVisibility(View.VISIBLE);
+                                holder.textViewMsgCount.setText(""+unreadMsg);
                             } else{
                                 holder.textViewMsgCount.setVisibility(View.INVISIBLE);
                             }
                         }
+
                     }
 
                     @Override
@@ -236,8 +283,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     }
                 });
 
-        // get user typing state
-// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
+//
+//        // get user typing state
+//// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
         referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -268,8 +316,24 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
             });
 
+        //   get the number of new message I have to give my recycle position scrolling
+        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.child(myUsersId).child("newMsgCount").exists()){
+                    numScroll = 0;
+                }
+                else numScroll = (long) snapshot.child(myUsersId).child("newMsgCount").getValue();
+            }
 
-//  get all other-user name and photo -----------------------
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+//  get all other-user name and photo  and onClick to chat room-----------------------
         referenceUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -287,6 +351,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
+                // get the New Msg Count for the recycler scroll position
+                if(!snapshot.child(user.getUid()).child("newMsgCount").exists()){
+                    numScroll = 0;
+                }
+                else {
+                    numScroll = (long) snapshot.child(user.getUid()).child("newMsgCount").getValue();
+                }
+                    castNum = (int) numScroll;
 
                 // what happen when the cardView is click
                 holder.constraintLast.setOnClickListener(new View.OnClickListener() {
@@ -298,22 +370,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         intent.putExtra("otherName", otherName);
                         intent.putExtra("userName", userName);
                         intent.putExtra("Uid", myUsersId);
+                        intent.putExtra("recyclerScroll", castNum);
 
                         mContext.startActivity(intent);
 
                         // set my unreadMessage to 0 and hide my count layer
-                        referenceCheck.child(user.getUid()).child(myUsersId)
-                                .child("unreadMsg").setValue(0);
+//
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
-                        // set my status to be true in case I receive msg, it will be tick as seen
-                        referenceCheck.child(user.getUid()).child(myUsersId)
-                                .child("status").setValue(true);
-
                         // close option menu if open
-                        if(holder.constraintTop.getVisibility() == View.VISIBLE){
+//                        if(holder.constraintTop.getVisibility() == View.VISIBLE){
+//                        }
                             holder.constraintTop.setVisibility(View.GONE);
-                        }
                     }
                 });
             }

@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,15 +51,16 @@ public class MessageActivity extends AppCompatActivity {
     private EditText editTextMessage;
     private FloatingActionButton fab;
     String userName, otherName, uID;
-    DatabaseReference dbReference, refChecks;
+    DatabaseReference dbReference, refChecks, refUsers;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
     MessageAdapter adapter;
     List<MessageModel> modelList;
+    int scrollPosition;
 //    SharedPreferences sharedPreferences;
     private Handler handler;
     private Runnable runnable;
-    private long count = 0, offCount = 0;
+    private long count = 0, offCount = 0, newMsgCount = 0;
     private Boolean runnerChaeck = false, networkMood;
     private Map<String, Integer> dateNum, dateMonth;
 
@@ -88,17 +86,23 @@ public class MessageActivity extends AppCompatActivity {
 
 //        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
-        dbReference = FirebaseDatabase.getInstance().getReference();
+        dbReference = FirebaseDatabase.getInstance().getReference("Messages");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
+        refUsers = FirebaseDatabase.getInstance().getReference("Users");
 
         // get users details sents from userlist via intent
         userName = getIntent().getStringExtra("userName");
         otherName = getIntent().getStringExtra("otherName");
         uID = getIntent().getStringExtra("Uid");
+        scrollPosition = getIntent().getIntExtra("recyclerScroll", 0);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
+
+
+        getMessage();
+
 
         // send message
         fab.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +163,7 @@ public class MessageActivity extends AppCompatActivity {
                     refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
                 }
 
+                // clear off msg load tick when network restores.
                 if(checkConnection()){
                     refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
                 }
@@ -173,15 +178,15 @@ public class MessageActivity extends AppCompatActivity {
         handler.post(runnable);
 
 
-//        Check if the unreadMessage count and offline count is 0
+//     get all previous counts
         DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
                 .child(uID).child(user.getUid());
         referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists()){
-
+                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists())
+                {
                     referenceMsgCountCheck.child("unreadMsg").setValue(0);
                     referenceMsgCountCheck.child("offCount").setValue(0);
 
@@ -203,14 +208,34 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        // get the previous count of newMsgCount
+        DatabaseReference referNewMsgCount = FirebaseDatabase.getInstance().getReference("Users")
+                .child(uID);
+        referNewMsgCount.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.child("newMsgCount").exists()){
+                    referNewMsgCount.child("newMsgCount").setValue(0);
+                } else {
+                    newMsgCount = (long) snapshot.child("newMsgCount").getValue();
+                }
+            }
 
-        getMessage();
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
 
         addUserWhenTyping();
 
         getMyUserTyping();
 
-        lastSeenAndOnline();
+        getLastSeenAndOnline();
+
+        resetStatusAndMsgCount();
 
     }
 
@@ -223,7 +248,15 @@ public class MessageActivity extends AppCompatActivity {
         if(networkInfo == null) return false;
 
         return networkInfo.isConnected();
+    }
 
+    public void resetStatusAndMsgCount(){
+        // set my status to be true in case I receive msg, it will be tick as seen
+        Map <String, Object> statusAndMSgCount = new HashMap<>();
+        statusAndMSgCount.put("status", true);
+        statusAndMSgCount.put("unreadMsg", 0);
+
+        refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
 
     public void sendMessage(String message){
@@ -233,10 +266,10 @@ public class MessageActivity extends AppCompatActivity {
         messageMap.put("from", userName);
         messageMap.put("timeSent", ServerValue.TIMESTAMP);
         //  now save the message to the database
-        String key = dbReference.child("Messages").child(userName).child(otherName).push().getKey();  // create an id for each message
+        String key = dbReference.child(userName).child(otherName).push().getKey();  // create an id for each message
         // set the deliver icon if successful
-        dbReference.child("Messages").child(userName).child(otherName).child(key).setValue(messageMap);
-        dbReference.child("Messages").child(otherName).child(userName).child(key).setValue(messageMap);
+        dbReference.child(userName).child(otherName).child(key).setValue(messageMap);
+        dbReference.child(otherName).child(userName).child(key).setValue(messageMap);
 
         // --- set the last send message details
         DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
@@ -248,16 +281,6 @@ public class MessageActivity extends AppCompatActivity {
         fReference2.setValue(messageMap);
 
 
-        // save the number of msg sent by me
-        referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(uID).child(user.getUid());
-        referenceMsgCount.child("unreadMsg").setValue(count+=1);
-
-        referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(user.getUid()).child(uID).child("unreadMsg");
-        referenceMsgCount2.setValue(0);
-
-
         // check if there is network connection before sending message
         if(!checkConnection()){
             refChecks.child(uID).child(user.getUid()).child("offCount").setValue(offCount+=1);
@@ -265,9 +288,9 @@ public class MessageActivity extends AppCompatActivity {
             refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
         }
 
-//        check if the user is in my chat box and reset the count
+//        check if the user is in my chat box and reset the count -- newMsgCount & unreadMsg
         DatabaseReference statusCheck = FirebaseDatabase.getInstance().getReference("Checks");
-        statusCheck.child(uID).addValueEventListener(new ValueEventListener() {
+        statusCheck.child(uID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -281,6 +304,8 @@ public class MessageActivity extends AppCompatActivity {
 
                     if(statusState == true) {
                         referenceMsgCount.child("unreadMsg").setValue(0);
+                    } else if (statusState == false) {
+                        refUsers.child(uID).child("newMsgCount").setValue(newMsgCount+1);
                     }
                 }
             }
@@ -291,18 +316,30 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        // save the number of msg sent by me to receiver
+        referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
+                .child(uID).child(user.getUid());
+        referenceMsgCount.child("unreadMsg").setValue(count+=1);
+
+        referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
+                .child(user.getUid()).child(uID).child("unreadMsg");
+        referenceMsgCount2.setValue(0);
+
     }
 
     public void getMessage()
     {
-        dbReference.child("Messages").child(userName).child(otherName).addChildEventListener(new ChildEventListener() {
+        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
+        refMsg.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 //  create an object from the modelClass to get the value from the database
                 MessageModel messageModel = snapshot.getValue(MessageModel.class);
                 modelList.add(messageModel);
                 adapter.notifyDataSetChanged();
-                recyclerViewChat.scrollToPosition(modelList.size() - 1); // -------- to display the last message
+
+                // scroll to the new message position number
+                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1); // -------- to display the last message
             }
 
             @Override
@@ -325,15 +362,15 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-        adapter = new MessageAdapter(modelList, userName, uID, offCount, MessageActivity.this);
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
 
     }
 
         // get the last seen or presence of user
-    public void lastSeenAndOnline()
+    public void getLastSeenAndOnline()
     {
-        refChecks.child(uID).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        refUsers.child(uID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -399,7 +436,6 @@ public class MessageActivity extends AppCompatActivity {
                                 if(curDay - lastDay == 0)
                                 {
                                     textViewLastSeen.setText("Last seen: "+ time.toLowerCase());
-                                    Log.i("Check", "Answer ");
                                 } else if (curDay - lastDay == 1) {
                                     textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase());
                                 } else if (curDay - lastDay == 2) {
@@ -477,7 +513,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-        // add user id to db when user start typing
+        // add user id to db when user start typing and reset newMsgCount to 0
     public void addUserWhenTyping(){
         editTextMessage.addTextChangedListener(new TextWatcher() {
             @Override
@@ -529,6 +565,36 @@ public class MessageActivity extends AppCompatActivity {
 
                     }
                 });
+
+                // reset the new msg count
+                DatabaseReference statusCheck2 = FirebaseDatabase.getInstance().getReference("Checks");
+                statusCheck2.child(uID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if(!snapshot.child(user.getUid()).child("status").exists()){
+                            statusCheck2.child(uID).child(user.getUid())
+                                    .child("status").setValue(false);
+                        }
+                        else {
+                            boolean statusState = (boolean) snapshot.child(user.getUid())
+                                    .child("status").getValue();
+
+                            // receiver should be 0
+                            if(statusState == true) {
+                                refUsers.child(uID).child("newMsgCount").setValue(0);
+                            }
+
+                            // Mine should be 0
+                            refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
         });
     }
@@ -537,15 +603,17 @@ public class MessageActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
+        refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
         runnerChaeck = true;
 
-        finish();
+//        finish();
         super.onBackPressed();
     }
 //
     @Override
     protected void onPause() {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
+        refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
         runnerChaeck = true;
 //        finish();
         super.onPause();

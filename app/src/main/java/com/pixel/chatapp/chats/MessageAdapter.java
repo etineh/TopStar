@@ -35,19 +35,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     String uId;
     String userName;
     Boolean status;
-    long offCount;
     private int send;
     private int receive;
     FirebaseUser user;
-    DatabaseReference refCheck;
+    DatabaseReference refCheck, refUsers;
     Context context;
 
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, long offCount, Context context) {
+    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context context) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
-        this.offCount = offCount;
         this.context = context;
 
         status = false;
@@ -56,6 +54,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         refCheck = FirebaseDatabase.getInstance().getReference("Checks");
+        refUsers = FirebaseDatabase.getInstance().getReference("Users");
+
     }
 
     @NonNull
@@ -87,25 +87,61 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // show all messages in positions
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
-
         // unsent and sent msg... delivery and seen settings
-        refCheck.child(uId).addValueEventListener(new ValueEventListener() {
+//  //     refCheck.keepSynced(true);
+//        refCheck.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                long msgCount = (long) snapshot.child(uId).child(user.getUid()).child("unreadMsg").getValue() + 1;
+//                long offCount = (long) snapshot.child(uId).child(user.getUid()).child("offCount").getValue();
+//
+//                // tick load when no network and approve when network and unread msg tick
+//                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount)) {
+//                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
+//                }
+//                else
+//                    holder.seenMsg.setImageResource(R.drawable.message_load);
+//
+//
+//                // tick all previous read msg
+////                if(pos <= (modelList.size() - (msgCount))){
+////                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
+////                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+
+
+        //   get the number of new message I have
+        refUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                long msgCount = (long) snapshot.child(user.getUid()).child("unreadMsg").getValue() + 1;
-                long offCount = (long) snapshot.child(user.getUid()).child("offCount").getValue();
-
-                // tick load when no network and approve when network and unread msg tick
-                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount)) {
-                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
+                if(!snapshot.child(user.getUid()).child("newMsgCount").exists()){
+                    refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
                 }
                 else
-                    holder.seenMsg.setImageResource(R.drawable.message_load);
+                {
+                    long newMsgNumber = (long) snapshot.child(user.getUid()).child("newMsgCount").getValue();
 
-                // tick all previous read msg
-                if(pos <= (modelList.size() - (msgCount))){
-                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
+                    if(newMsgNumber == 0) {
+                        holder.constraintNewMsg.setVisibility(View.GONE);
+                    }
+                    else {
+                        if(pos > (modelList.size() - (newMsgNumber+1)) && pos < (modelList.size() - (newMsgNumber-1))){
+                            holder.constraintNewMsg.setVisibility(View.VISIBLE);
+                            holder.textViewNewMsg.setText(newMsgNumber +" new messages");
+                        }
+                        else{
+                            holder.constraintNewMsg.setVisibility(View.GONE);
+                        }
+                    }
                 }
             }
 
@@ -114,6 +150,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             }
         });
+
 
         //  show chat options
         holder.cardViewChatBox.setOnClickListener(new View.OnClickListener() {
@@ -125,7 +162,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 } else{
                     holder.constraintChatTop.setVisibility(View.GONE);
                 }
-                Log.i("position", "position " + view.getTag());
             }
         });
 
@@ -150,11 +186,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //    public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textViewShowMsg;
+        TextView textViewShowMsg, textViewNewMsg;
         ImageView seenMsg;
         ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         ImageView imageViewReact, imageViewCopy, imageViewDel;
-        ConstraintLayout constraintChatTop, constraintMsgContainer;
+        ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
 
         TextView timeMsg;
         CardView cardViewChatBox;
@@ -173,8 +209,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewForward = itemView.findViewById(R.id.imageViewForward);
                 imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewDel2);
+                textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
+                constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg);
                 constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraint);
+
 
 //                constraintMsgContainer.setOnClickListener(this);  // to get cardView position when clicked
 
@@ -190,6 +229,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewReact = itemView.findViewById(R.id.imageViewReact2);
                 imageViewCopy = itemView.findViewById(R.id.imageViewReceiveCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewReceiveDel);
+                textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg2);
+                constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg2);
                 constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
 

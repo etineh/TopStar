@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager2General;
     private ImageView menuOpen, home, menuClose, imageViewLogo;
     FirebaseAuth auth = FirebaseAuth.getInstance();
+    DatabaseReference refUser = FirebaseDatabase.getInstance().getReference("Users");
     ConstraintLayout scrollMenu, v;
     private TextView logout, textLightAndDay;
     Switch darkMoodSwitch;
@@ -203,6 +206,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.create().show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
+        super.onBackPressed();
+    }
+
+//    @Override
+//    protected void onPause() {
+//        refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
+//        super.onPause();
+//    }
+
+    @Override
+    protected void onResume() {
+        refUser.child(auth.getUid()).child("presence").setValue(1);
+        super.onResume();
     }
 }
 

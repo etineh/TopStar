@@ -45,7 +45,7 @@ public class ChatsListFragment extends Fragment {
 
     RecyclerView recyclerView;
     FirebaseUser user;
-    DatabaseReference fReference;
+    DatabaseReference fReference, refChecks;
 
     String userName;
     ChatListAdapter adapter;
@@ -69,6 +69,7 @@ public class ChatsListFragment extends Fragment {
         chatListID = new ArrayList<>();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
+//        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         // Go to contact
         fab.setOnClickListener(new View.OnClickListener() {
@@ -170,10 +171,10 @@ public class ChatsListFragment extends Fragment {
 //        super.onCreate(savedInstanceState);
 //    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//    }
 }
 
 
