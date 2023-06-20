@@ -30,7 +30,7 @@
                 android:id="@+id/imageViewBackArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:padding="7dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -50,7 +50,7 @@
                 android:text="GetMeh"
                 android:textSize="18dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
-                app:layout_constraintStart_toEndOf="@+id/circleImageView3"
+                app:layout_constraintStart_toEndOf="@+id/circleImageLogo"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -65,9 +65,10 @@
                 app:srcCompat="@drawable/baseline_more_vert_24" />
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleImageView3"
+                android:id="@+id/circleImageLogo"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="10dp"
                 android:src="@drawable/logo"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageViewBackArrow"
@@ -88,7 +89,7 @@
                 android:textSize="12.5sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
-                app:layout_constraintStart_toEndOf="@+id/circleImageView3"
+                app:layout_constraintStart_toEndOf="@+id/circleImageLogo"
                 app:layout_constraintTop_toBottomOf="@+id/textViewName" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -235,8 +236,21 @@
                 app:layout_constraintEnd_toEndOf="@+id/imageViewGift2"
                 app:layout_constraintStart_toStartOf="@+id/imageViewGift2" />
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/circleImageOnline"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="3dp"
+                android:src="@drawable/baseline_online_prediction_24"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/textViewStatus"
+                app:layout_constraintEnd_toStartOf="@+id/textViewStatus"
+                app:layout_constraintTop_toBottomOf="@+id/imageViewOthers" />
+
             <TextView
                 android:id="@+id/textViewStatus"
+                style="@style/textColorFullBlack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"

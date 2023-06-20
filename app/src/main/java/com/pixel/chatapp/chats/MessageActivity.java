@@ -32,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
+import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -42,16 +43,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MessageActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewChat;
     private ImageView imageViewBack;
+    private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu;
     private ConstraintLayout constraintProfileMenu;
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping;
     private EditText editTextMessage;
     private FloatingActionButton fab;
-    String userName, otherName, uID;
+    String userName, otherName, uID, imageUrl;
     DatabaseReference dbReference, refChecks, refUsers;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
@@ -62,7 +66,7 @@ public class MessageActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable runnable;
     private long count = 0, offCount = 0, newMsgCount = 0;
-    private Boolean runnerChaeck = false, networkMood;
+    private Boolean runnerChaeck = false;
     private Map<String, Integer> dateNum, dateMonth;
 
     @Override
@@ -79,6 +83,8 @@ public class MessageActivity extends AppCompatActivity {
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
         textViewLastSeen = findViewById(R.id.textViewStatus);
         textViewTyping = findViewById(R.id.textViewTyping2);
+        circleImageOnline = findViewById(R.id.circleImageOnline);
+        circleImageLogo = findViewById(R.id.circleImageLogo);
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
@@ -97,9 +103,16 @@ public class MessageActivity extends AppCompatActivity {
         userName = getIntent().getStringExtra("userName");
         otherName = getIntent().getStringExtra("otherName");
         uID = getIntent().getStringExtra("Uid");
+        imageUrl = getIntent().getStringExtra("ImageUrl");
         scrollPosition = getIntent().getIntExtra("recyclerScroll", 0);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
+
+        // set user image
+        if (imageUrl.equals("null")) {
+            circleImageLogo.setImageResource(R.drawable.person_round);
+        }
+        else Picasso.get().load(imageUrl).into(circleImageLogo);
 
 
         // send message
@@ -115,6 +128,45 @@ public class MessageActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+        // get messages
+        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
+        refMsg.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                //  create an object from the modelClass to get the value from the database
+                MessageModel messageModel = snapshot.getValue(MessageModel.class);
+                modelList.add(messageModel);
+                adapter.notifyDataSetChanged();
+
+                // scroll to the new message position number
+                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1); // -------- to display the last message
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
+        recyclerViewChat.setAdapter(adapter);
+
 
         // arrow back
         imageViewBack.setOnClickListener(new View.OnClickListener() {   // return back when the arrow is clicked
@@ -147,8 +199,6 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-
-        getMessage();
 
         tellUserAmTyping();
 
@@ -254,47 +304,8 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void getMessage()
-    {
-        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
-        refMsg.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                //  create an object from the modelClass to get the value from the database
-                MessageModel messageModel = snapshot.getValue(MessageModel.class);
-                modelList.add(messageModel);
-                adapter.notifyDataSetChanged();
 
-                // scroll to the new message position number
-                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1); // -------- to display the last message
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
-        recyclerViewChat.setAdapter(adapter);
-
-    }
-
-        // get the last seen or presence of user
+        // get the last seen and online presence of user
     public void getLastSeenAndOnline()
     {
         refUsers.child(uID).addValueEventListener(new ValueEventListener() {
@@ -310,8 +321,10 @@ public class MessageActivity extends AppCompatActivity {
                     long onlineValue = (long) snapshot.child("presence").getValue();
                     if (onlineValue == 1){
                         textViewLastSeen.setText("Online");
+                        circleImageOnline.setVisibility(View.VISIBLE);
                     }
                     else {
+                        circleImageOnline.setVisibility(View.GONE);
                         //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
                         // current date and time
                         Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -362,7 +375,7 @@ public class MessageActivity extends AppCompatActivity {
                             {
                                 if(curDay - lastDay == 0)
                                 {
-                                    textViewLastSeen.setText("Last seen: "+ time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: Today, \n" + time.toLowerCase());
                                 } else if (curDay - lastDay == 1) {
                                     textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase());
                                 } else if (curDay - lastDay == 2) {
@@ -412,6 +425,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // Alert the DB when I start typing, to notify the receiver
+    // clear off msg load tick when network restores.
     private void tellUserAmTyping(){
         handler = new Handler();
         runnable = new Runnable() {
@@ -639,6 +653,7 @@ public class MessageActivity extends AppCompatActivity {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
         refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
 
+        // Turn off online presence
         new CountDownTimer(10000, 1000){
             @Override
             public void onTick(long l) {

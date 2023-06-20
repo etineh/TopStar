@@ -382,9 +382,10 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:id="@+id/imageView9"
-                    android:layout_width="187dp"
-                    android:layout_height="175dp"
+                    android:id="@+id/imageViewUserPhoto"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:scaleType="fitXY"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/logo" />
@@ -405,7 +406,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView9">
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewUserPhoto">
 
                     <TextView
                         android:id="@+id/textViewDisplayName2"
@@ -417,7 +418,6 @@
                         android:ellipsize="end"
                         android:fontFamily="monospace"
                         android:maxLines="2"
-                        android:text="Godstime Etinemiderhi"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -432,7 +432,6 @@
                         android:layout_marginBottom="5dp"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:text="username"
                         android:textSize="15sp"
                         app:layout_constraintBottom_toTopOf="@+id/textView15"
                         app:layout_constraintStart_toStartOf="parent"
@@ -992,9 +991,9 @@
                     android:text="Tap"
                     android:textColor="@color/white"
                     android:textSize="18dp"
-                    app:layout_constraintEnd_toEndOf="@+id/imageView9"
-                    app:layout_constraintStart_toStartOf="@+id/imageView9"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView9" />
+                    app:layout_constraintEnd_toEndOf="@+id/imageViewUserPhoto"
+                    app:layout_constraintStart_toStartOf="@+id/imageViewUserPhoto"
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewUserPhoto" />
 
                 <TextView
                     android:id="@+id/textView13"

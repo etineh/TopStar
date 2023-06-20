@@ -370,6 +370,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         intent.putExtra("otherName", otherName);
                         intent.putExtra("userName", userName);
                         intent.putExtra("Uid", myUsersId);
+                        intent.putExtra("ImageUrl", imageUrl);
                         intent.putExtra("recyclerScroll", castNum);
 
                         mContext.startActivity(intent);

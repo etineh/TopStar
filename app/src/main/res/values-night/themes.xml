@@ -80,7 +80,7 @@
     <style name="CustomTab" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:background">@color/dark_orange1</item>
+        <item name="android:background">@color/black</item>
         <item name="android:textSize">17sp</item>
 
         <item name="tabSelectedTextColor">@color/orange</item>

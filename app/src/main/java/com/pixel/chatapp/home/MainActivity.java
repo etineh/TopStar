@@ -30,22 +30,26 @@ import android.widget.Toast;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayoutGeneral;
     private ViewPager2 viewPager2General;
-    private ImageView menuOpen, home, menuClose, imageViewLogo;
+    private ImageView menuOpen, home, menuClose, imageViewLogo, imageViewUserPhoto;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     DatabaseReference refUser = FirebaseDatabase.getInstance().getReference("Users");
     ConstraintLayout scrollMenu, v;
-    private TextView logout, textLightAndDay;
+    private TextView logout, textLightAndDay, textViewDisplayName, textViewUserName;
     Switch darkMoodSwitch;
     CardView cardViewSettings;
     SharedPreferences sharedPreferences;
@@ -64,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
         scrollMenu = findViewById(R.id.constraintMenu);
         logout = findViewById(R.id.textViewLogOut);
         imageViewLogo = findViewById(R.id.circleUserImage);
+        imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
+        textViewDisplayName = findViewById(R.id.textViewDisplayName2);
+        textViewUserName = findViewById(R.id.textViewUserName2);
         v = findViewById(R.id.v);
         darkMoodSwitch = findViewById(R.id.switch1);
         textLightAndDay = findViewById(R.id.textView13);
@@ -184,9 +191,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        setUserDetails();
+
     }
 
     //  --------------- methods --------------------
+
+
+        // set user image on settings
+    private void setUserDetails(){
+        refUser.child(auth.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                String imageUrl = snapshot.child("image").getValue().toString();
+                String userName = snapshot.child("userName").getValue().toString();
+
+                if (imageUrl.equals("null")) {
+                    imageViewUserPhoto.setImageResource(R.drawable.person_round);
+                }
+                else Picasso.get().load(imageUrl).into(imageViewUserPhoto);
+
+                textViewDisplayName.setText(userName);      // change later to Display name
+                textViewUserName.setText("@"+userName);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 
     public void logoutOption()
     {
@@ -235,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        new CountDownTimer(10500, 1000){
+        new CountDownTimer(10300, 1000){
             @Override
             public void onTick(long l) {
 
