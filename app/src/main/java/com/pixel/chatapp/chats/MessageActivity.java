@@ -11,6 +11,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -101,9 +102,6 @@ public class MessageActivity extends AppCompatActivity {
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
 
-        getMessage();
-
-
         // send message
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +110,7 @@ public class MessageActivity extends AppCompatActivity {
                 String message = editTextMessage.getText().toString();
                 if (!message.equals("")){
                     sendMessage(message);
+                    scrollPosition = 0;
                     editTextMessage.setText("");
                 }
             }
@@ -149,85 +148,9 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        // alert database when user is typing
-        handler = new Handler();
-        runnable = new Runnable() {
-            @Override
-            public void run() {
+        getMessage();
 
-                String message2 = editTextMessage.getText().toString();
-
-                if(!message2.equals("")){
-                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(1);
-                } else {
-                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
-                }
-
-                // clear off msg load tick when network restores.
-                if(checkConnection()){
-                    refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
-                }
-
-                if(!runnerChaeck) handler.postDelayed(runnable, 1000);
-                else {
-                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
-                    handler.removeCallbacks(runnable);
-                }
-            }
-        };
-        handler.post(runnable);
-
-
-//     get all previous counts
-        DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(uID).child(user.getUid());
-        referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists())
-                {
-                    referenceMsgCountCheck.child("unreadMsg").setValue(0);
-                    referenceMsgCountCheck.child("offCount").setValue(0);
-
-                } else {
-                    // if last msg count is not 0, then get the count
-                    if(!snapshot.child("unreadMsg").getValue().equals(0)){
-                        count = (long) snapshot.child("unreadMsg").getValue();
-                    }
-                    // if last msg count is not 0, then get the count
-                    if(!snapshot.child("offCount").getValue().equals(0)){
-                        offCount = (long) snapshot.child("offCount").getValue();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        // get the previous count of newMsgCount
-        DatabaseReference referNewMsgCount = FirebaseDatabase.getInstance().getReference("Users")
-                .child(uID);
-        referNewMsgCount.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.child("newMsgCount").exists()){
-                    referNewMsgCount.child("newMsgCount").setValue(0);
-                } else {
-                    newMsgCount = (long) snapshot.child("newMsgCount").getValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
+        tellUserAmTyping();
 
         addUserWhenTyping();
 
@@ -236,6 +159,10 @@ public class MessageActivity extends AppCompatActivity {
         getLastSeenAndOnline();
 
         resetStatusAndMsgCount();
+
+        getPreviousCounts();
+
+        setIsOnline();
 
     }
 
@@ -484,6 +411,36 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    // Alert the DB when I start typing, to notify the receiver
+    private void tellUserAmTyping(){
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                String message2 = editTextMessage.getText().toString();
+
+                if(!message2.equals("")){
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(1);
+                } else {
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
+                }
+
+                // clear off msg load tick when network restores.
+                if(checkConnection()){
+                    refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
+                }
+
+                if(!runnerChaeck) handler.postDelayed(runnable, 1000);
+                else {
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
+                    handler.removeCallbacks(runnable);
+                }
+            }
+        };
+        handler.post(runnable);
+    }
+
         // show when user is typing
     public void getMyUserTyping()
     {
@@ -599,6 +556,73 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
+    //  Get all previous counts of unreadMsg and offCount and newMsgCount
+    private void getPreviousCounts(){
+
+        DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
+                .child(uID).child(user.getUid());
+        referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists())
+                {
+                    referenceMsgCountCheck.child("unreadMsg").setValue(0);
+                    referenceMsgCountCheck.child("offCount").setValue(0);
+
+                } else {
+                    // if last msg count is not 0, then get the count
+                    if(!snapshot.child("unreadMsg").getValue().equals(0)){
+                        count = (long) snapshot.child("unreadMsg").getValue();
+                    }
+                    // if last msg count is not 0, then get the count
+                    if(!snapshot.child("offCount").getValue().equals(0)){
+                        offCount = (long) snapshot.child("offCount").getValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        // get the previous count of newMsgCount
+        DatabaseReference referNewMsgCount = FirebaseDatabase.getInstance().getReference("Users")
+                .child(uID);
+        referNewMsgCount.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.child("newMsgCount").exists()){
+                    referNewMsgCount.child("newMsgCount").setValue(0);
+                } else {
+                    newMsgCount = (long) snapshot.child("newMsgCount").getValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    // Turn on my online presence on
+    public void setIsOnline(){
+        refUsers.child(user.getUid()).child("presence").setValue(1);
+        new CountDownTimer(10500, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+            @Override
+            public void onFinish() {
+                refUsers.child(user.getUid()).child("presence").setValue(1);
+            }
+        }.start();
+    }
+
     @Override
     public void onBackPressed() {
 
@@ -614,6 +638,18 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
         refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
+
+        new CountDownTimer(10000, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+            @Override
+            public void onFinish() {
+                refUsers.child(user.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
+            }
+        }.start();
+
         runnerChaeck = true;
 //        finish();
         super.onPause();
@@ -622,6 +658,7 @@ public class MessageActivity extends AppCompatActivity {
 //    @Override
     protected void onResume() {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
+        setIsOnline();
         runnerChaeck = false;
         super.onResume();
     }

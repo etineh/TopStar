@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -93,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
                 });
         tabLayoutMediator.attach();
 
-
+        // set my online presence to be true
+        refUser.child(auth.getUid()).child("presence").setValue(1);
 
         // Dark mood setting
         sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
@@ -181,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
     }
 
     //  --------------- methods --------------------
@@ -208,21 +211,40 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    @Override
-    public void onBackPressed() {
-        refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
-        super.onBackPressed();
-    }
-
 //    @Override
-//    protected void onPause() {
+//    public void onBackPressed() {
 //        refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
-//        super.onPause();
+//        super.onBackPressed();
 //    }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        new CountDownTimer(10000, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+            @Override
+            public void onFinish() {
+                refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
+            }
+        }.start();
+
+    }
+
+    @Override
     protected void onResume() {
-        refUser.child(auth.getUid()).child("presence").setValue(1);
+        new CountDownTimer(10500, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+            @Override
+            public void onFinish() {
+                refUser.child(auth.getUid()).child("presence").setValue(1);
+            }
+        }.start();
         super.onResume();
     }
 }
