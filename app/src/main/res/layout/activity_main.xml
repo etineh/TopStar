@@ -188,8 +188,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout3"
             android:layout_width="match_parent"
-            android:layout_height="61dp"
-            android:background="@color/orange"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -197,12 +196,23 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintDownBar"
-                style="@style/card"
+                style="@style/BackgroundW_B"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLine"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/orange"
+                    app:layout_constraintBottom_toTopOf="@+id/imageViewHome"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ImageView
                     android:id="@+id/imageViewHome"
@@ -331,9 +341,9 @@
                 <ImageView
                     android:id="@+id/imageView12"
                     style="@style/BackgroundTint"
-                    android:layout_width="40dp"
-                    android:layout_height="33dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_width="38dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="12dp"
                     android:tint="@color/orange"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewMore"
                     app:layout_constraintStart_toEndOf="@+id/imageViewGames"

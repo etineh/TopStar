@@ -322,13 +322,12 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="10dp"
+                android:layout_marginBottom="3dp"
                 android:background="@drawable/msg_count"
                 android:padding="5dp"
                 android:src="@drawable/baseline_send_24"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <androidx.cardview.widget.CardView
                 style="@style/cardTop"
@@ -351,7 +350,8 @@
                     android:ems="10"
                     android:gravity="start|top"
                     android:hint="Message"
-                    android:inputType="textMultiLine" />
+                    android:inputType="textMultiLine"
+                    android:maxLines="6" />
             </androidx.cardview.widget.CardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
 

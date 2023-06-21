@@ -48,8 +48,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
-    long numScroll;
-    int castNum;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -316,22 +314,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
             });
 
-        //   get the number of new message I have to give my recycle position scrolling
-        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.child(myUsersId).child("newMsgCount").exists()){
-                    numScroll = 0;
-                }
-                else numScroll = (long) snapshot.child(myUsersId).child("newMsgCount").getValue();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
         referenceUsers.addValueEventListener(new ValueEventListener() {
@@ -351,38 +333,45 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
-                // get the New Msg Count for the recycler scroll position
-                if(!snapshot.child(user.getUid()).child("newMsgCount").exists()){
-                    numScroll = 0;
-                }
-                else {
-                    numScroll = (long) snapshot.child(user.getUid()).child("newMsgCount").getValue();
-                }
-                    castNum = (int) numScroll;
 
-                // what happen when the cardView is click
-                holder.constraintLast.setOnClickListener(new View.OnClickListener() {
+                //   get the number of new message I have to give my recycle position scrolling
+                referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onClick(View view) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot1) {
+                        if(!snapshot1.child(myUsersId).child("newMsgCount").exists()){
+                            referenceCheck.child(user.getUid()).child(myUsersId).child("newMsgCount").setValue(0);
+                        } else {
+                            long numScroll = (long) snapshot1.child(myUsersId).child("newMsgCount").getValue();
+                            int castNum = (int) numScroll;
 
-                        // send userName, otherName and each user UiD to display on the chat box
-                        Intent intent = new Intent(mContext, MessageActivity.class);
-                        intent.putExtra("otherName", otherName);
-                        intent.putExtra("userName", userName);
-                        intent.putExtra("Uid", myUsersId);
-                        intent.putExtra("ImageUrl", imageUrl);
-                        intent.putExtra("recyclerScroll", castNum);
+                            // what happen when the cardView is click
+                            holder.constraintLast.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
 
-                        mContext.startActivity(intent);
+                                    // send userName, otherName and each user UiD to display on the chat box
+                                    Intent intent = new Intent(mContext, MessageActivity.class);
+                                    intent.putExtra("otherName", otherName);
+                                    intent.putExtra("userName", userName);
+                                    intent.putExtra("Uid", myUsersId);
+                                    intent.putExtra("ImageUrl", imageUrl);
+                                    intent.putExtra("recyclerScroll", castNum);
 
-                        // set my unreadMessage to 0 and hide my count layer
-//
-                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+                                    mContext.startActivity(intent);
 
-                        // close option menu if open
-//                        if(holder.constraintTop.getVisibility() == View.VISIBLE){
-//                        }
-                            holder.constraintTop.setVisibility(View.GONE);
+                                    // set my unreadMessage to 0 and hide my count layer
+                                    holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+
+                                    // close option menu if open
+                                    holder.constraintTop.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
                     }
                 });
             }

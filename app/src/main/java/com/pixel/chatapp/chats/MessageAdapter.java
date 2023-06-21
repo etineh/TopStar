@@ -116,16 +116,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        });
 
         //   get the number of new message I have
-        refUsers.addValueEventListener(new ValueEventListener() {
+        refCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(!snapshot.child(user.getUid()).child("newMsgCount").exists()){
-                    refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
+                if(!snapshot.child(uId).child("newMsgCount").exists()){
+                    refCheck.child(user.getUid()).child(uId).child("newMsgCount").setValue(0);
                 }
                 else
                 {
-                    long newMsgNumber = (long) snapshot.child(user.getUid()).child("newMsgCount").getValue();
+                    long newMsgNumber = (long) snapshot.child(uId).child("newMsgCount").getValue();
+//                            Log.i("Check", "the num "+snapshot.child(uId));
 
                     if(newMsgNumber == 0) {
                         holder.constraintNewMsg.setVisibility(View.GONE);

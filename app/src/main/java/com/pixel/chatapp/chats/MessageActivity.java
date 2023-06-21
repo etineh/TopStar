@@ -64,6 +64,7 @@ public class MessageActivity extends AppCompatActivity {
     MessageAdapter adapter;
     List<MessageModel> modelList;
     int scrollPosition;
+    Map<String, Object> mapUpdate;
 //    SharedPreferences sharedPreferences;
     private Handler handler;
     private Runnable runnable;
@@ -242,6 +243,7 @@ public class MessageActivity extends AppCompatActivity {
         Map <String, Object> statusAndMSgCount = new HashMap<>();
         statusAndMSgCount.put("status", true);
         statusAndMSgCount.put("unreadMsg", 0);
+//        statusAndMSgCount.put("newMsgCount", 0);
 
         refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
@@ -292,7 +294,8 @@ public class MessageActivity extends AppCompatActivity {
                     if(statusState == true) {
                         referenceMsgCount.child("unreadMsg").setValue(0);
                     } else if (statusState == false) {
-                        refUsers.child(uID).child("newMsgCount").setValue(newMsgCount+1);
+                        // increase the new msg count
+                        statusCheck.child(uID).child(user.getUid()).child("newMsgCount").setValue(newMsgCount+1);
                     }
                 }
             }
@@ -616,11 +619,11 @@ public class MessageActivity extends AppCompatActivity {
 
                             // receiver should be 0
                             if(statusState == true) {
-                                refUsers.child(uID).child("newMsgCount").setValue(0);
+                                statusCheck2.child(uID).child(user.getUid()).child("newMsgCount").setValue(0);
                             }
 
                             // Mine should be 0
-                            refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
+                            statusCheck2.child(user.getUid()).child(uID).child("newMsgCount").setValue(0);
                         }
                     }
 
@@ -642,19 +645,24 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists())
+                if(!snapshot.child("unreadMsg").exists() || !snapshot.child("offCount").exists()
+                    || !snapshot.child("newMsgCount").exists())
                 {
                     referenceMsgCountCheck.child("unreadMsg").setValue(0);
                     referenceMsgCountCheck.child("offCount").setValue(0);
-
+                    referenceMsgCountCheck.child("newMsgCount").setValue(0);
                 } else {
                     // if last msg count is not 0, then get the count
                     if(!snapshot.child("unreadMsg").getValue().equals(0)){
                         count = (long) snapshot.child("unreadMsg").getValue();
                     }
-                    // if last msg count is not 0, then get the count
+                    // if last offline count is not 0, then get the count
                     if(!snapshot.child("offCount").getValue().equals(0)){
                         offCount = (long) snapshot.child("offCount").getValue();
+                    }
+                    // if last new msg count is not 0, then get the count
+                    if(!snapshot.child("offCount").getValue().equals(0)){
+                        newMsgCount = (long) snapshot.child("newMsgCount").getValue();
                     }
                 }
             }
@@ -665,24 +673,6 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        // get the previous count of newMsgCount
-        DatabaseReference referNewMsgCount = FirebaseDatabase.getInstance().getReference("Users")
-                .child(uID);
-        referNewMsgCount.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.child("newMsgCount").exists()){
-                    referNewMsgCount.child("newMsgCount").setValue(0);
-                } else {
-                    newMsgCount = (long) snapshot.child("newMsgCount").getValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     // Turn on my online presence on
@@ -703,8 +693,10 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
-        refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
+        mapUpdate = new HashMap<>();
+        mapUpdate.put("status", false);
+        mapUpdate.put("newMsgCount", 0);
+        refChecks.child(user.getUid()).child(uID).updateChildren(mapUpdate);
         runnerChaeck = true;
 
 //        finish();
@@ -714,7 +706,6 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(false);
-        refUsers.child(user.getUid()).child("newMsgCount").setValue(0);
 
         // Turn off online presence
         new CountDownTimer(10000, 1000){
