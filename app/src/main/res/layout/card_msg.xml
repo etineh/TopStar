@@ -191,10 +191,8 @@
                     android:layout_height="12dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="2dp"
-                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="@+id/textViewSend"
-                    app:layout_constraintEnd_toStartOf="@+id/textViewChatTime"
-                    app:srcCompat="@drawable/baseline_add_reaction_24" />
+                    app:layout_constraintEnd_toStartOf="@+id/textViewChatTime" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

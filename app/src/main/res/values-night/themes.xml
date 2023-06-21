@@ -3,7 +3,7 @@
     <style name="Theme.ChatApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimaryVariant">#1E1D1D</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -36,6 +36,14 @@
         <item name="android:background">#191818</item>
     </style>
 
+    <style name="cardTopOrange">
+        <item name="android:background">#1E1D1D</item>
+    </style>
+
+    <style name="cardTop2">
+        <item name="android:background">@color/black</item>
+    </style>
+
     <style name="textColorCustomise">
         <item name="android:textColor">@color/orange</item>
     </style>
@@ -64,6 +72,10 @@
 
     <style name="Background">
         <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="BackgroundW_B">
+        <item name="android:background">@color/black</item>
     </style>
 
     <!--    chat theme background-->

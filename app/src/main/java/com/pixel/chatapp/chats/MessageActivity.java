@@ -3,6 +3,7 @@ package com.pixel.chatapp.chats;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,13 +49,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MessageActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewChat;
-    private ImageView imageViewBack;
+    private ImageView imageViewBack, imageViewTick;
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu;
     private ConstraintLayout constraintProfileMenu;
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping;
     private EditText editTextMessage;
-    private FloatingActionButton fab;
+    private CircleImageView fab;
+    private CardView cardViewMsg;
     String userName, otherName, uID, imageUrl;
     DatabaseReference dbReference, refChecks, refUsers;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
@@ -80,6 +82,8 @@ public class MessageActivity extends AppCompatActivity {
         fab = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
+        imageViewTick = findViewById(R.id.imageViewTick);
+        cardViewMsg = findViewById(R.id.cardViewMsg);
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
         textViewLastSeen = findViewById(R.id.textViewStatus);
         textViewTyping = findViewById(R.id.textViewTyping2);
@@ -88,6 +92,7 @@ public class MessageActivity extends AppCompatActivity {
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
+        recyclerViewChat.setHasFixedSize(true);
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         modelList = new ArrayList<>();
 
@@ -108,7 +113,7 @@ public class MessageActivity extends AppCompatActivity {
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
-        // set user image
+//         set user image
         if (imageUrl.equals("null")) {
             circleImageLogo.setImageResource(R.drawable.person_round);
         }
@@ -130,7 +135,63 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
+        // arrow back
+        imageViewBack.setOnClickListener(new View.OnClickListener() {   // return back when the arrow is clicked
+            @Override
+            public void onClick(View view) {
+//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                onBackPressed();
+            }
+        });
+
+        // open user menu
+        imageViewOpenMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // close user menu
+        imageViewCloseMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.GONE);
+            }
+        });
+        constraintProfileMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintProfileMenu.setVisibility(View.GONE);
+            }
+        });
+
+        getMessage();
+
+        tellUserAmTyping();
+
+        addUserWhenTyping();
+
+        getMyUserTyping();
+
+        getLastSeenAndOnline();
+
+        resetStatusAndMsgCount();
+
+        getPreviousCounts();
+
+        setIsOnline();
+
+        getMsgDeliveryStatus();
+
+        setMsgTickVisibility();
+
+    }
+
+    //---------------------- methods -----------------
+
         // get messages
+    private void getMessage(){
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
         refMsg.addChildEventListener(new ChildEventListener() {
             @Override
@@ -166,58 +227,7 @@ public class MessageActivity extends AppCompatActivity {
         });
         adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
-
-
-        // arrow back
-        imageViewBack.setOnClickListener(new View.OnClickListener() {   // return back when the arrow is clicked
-            @Override
-            public void onClick(View view) {
-//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                onBackPressed();
-            }
-        });
-
-        // open user menu
-        imageViewOpenMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // close user menu
-        imageViewCloseMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.GONE);
-            }
-        });
-        constraintProfileMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.GONE);
-            }
-        });
-
-
-        tellUserAmTyping();
-
-        addUserWhenTyping();
-
-        getMyUserTyping();
-
-        getLastSeenAndOnline();
-
-        resetStatusAndMsgCount();
-
-        getPreviousCounts();
-
-        setIsOnline();
-
     }
-
-    //---------------------- methods -----------------
-
     public boolean checkConnection()
     {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -304,6 +314,59 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    private void setMsgTickVisibility(){
+        DatabaseReference refUsersList = FirebaseDatabase.getInstance().getReference("UsersList")
+                .child(user.getUid()).child(uID);
+        refUsersList.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(!snapshot.child("from").exists()){
+                    cardViewMsg.setVisibility(View.INVISIBLE);
+                }
+                else {
+                    String lastSender = snapshot.child("from").getValue().toString();
+                    if(lastSender.equals(userName)){
+                        cardViewMsg.setVisibility(View.VISIBLE);
+                    } else {
+                        cardViewMsg.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    // get the message delivery status
+    public void getMsgDeliveryStatus(){
+        refChecks.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long msgCount = (long) snapshot.child(uID)
+                        .child(user.getUid()).child("unreadMsg").getValue();
+                long offCount = (long) snapshot.child(uID)
+                        .child(user.getUid()).child("offCount").getValue();
+
+                if (msgCount == 0) {
+                    imageViewTick.setImageResource(R.drawable.read_orange);
+                } else{
+                    if(offCount > 0){
+                        imageViewTick.setImageResource(R.drawable.message_load);
+                    }
+                    else imageViewTick.setImageResource(R.drawable.message_tick_one);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 
         // get the last seen and online presence of user
     public void getLastSeenAndOnline()
@@ -672,7 +735,7 @@ public class MessageActivity extends AppCompatActivity {
 //
 //    @Override
     protected void onResume() {
-        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
+//        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
         setIsOnline();
         runnerChaeck = false;
         super.onResume();

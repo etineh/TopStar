@@ -74,8 +74,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
+        holder.setIsRecyclable(false);      // stop position from repeating itself
+
         int pos = holder.getAdapterPosition();     //   to get the position of each msg
-//        holder.constraintMsgContainer.setTag(pos);        //     to get cardView position
+        holder.cardViewChatBox.setTag(pos);        //     to get cardView position
 
         long convert = (long) modelList.get(position).timeSent;
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
@@ -88,7 +90,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
 
         // unsent and sent msg... delivery and seen settings
-//  //     refCheck.keepSynced(true);
 //        refCheck.addValueEventListener(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -97,17 +98,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                long offCount = (long) snapshot.child(uId).child(user.getUid()).child("offCount").getValue();
 //
 //                // tick load when no network and approve when network and unread msg tick
-//                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount)) {
+//                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount) && msgCount >1) {
 //                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
 //                }
-//                else
+//                else if (pos >= (modelList.size() - offCount))
 //                    holder.seenMsg.setImageResource(R.drawable.message_load);
-//
-//
-//                // tick all previous read msg
-////                if(pos <= (modelList.size() - (msgCount))){
-////                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
-////                }
+//                else if (pos >= modelList.size()-msgCount - 10 && msgCount == 1) {
+//                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
+//                }
 //
 //            }
 //
@@ -116,7 +114,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //
 //            }
 //        });
-
 
         //   get the number of new message I have
         refUsers.addValueEventListener(new ValueEventListener() {
@@ -215,7 +212,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintMsgContainer = itemView.findViewById(R.id.constraint);
 
 
-//                constraintMsgContainer.setOnClickListener(this);  // to get cardView position when clicked
+//                cardViewChatBox.setOnClickListener(this);  // to get cardView position when clicked
 
             } else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
@@ -234,16 +231,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
 
-//                constraintMsgContainer.setOnClickListener(this); // to get cardView position when clicked
+//                cardViewChatBox.setOnClickListener(this); // to get cardView position when clicked
             }
         }
 
 //        @Override
 //        public void onClick(View view) {
 //            int cardPosition = (int) view.getTag();
-//
-////            if(pos)
-//
 ////            timeMsg.setText("check " + cardPosition);
 //        }
     }
