@@ -5,10 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -21,7 +25,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,14 +58,15 @@ public class MessageActivity extends AppCompatActivity {
     private RecyclerView recyclerViewChat;
     private ImageView imageViewBack, imageViewTick;
     private CircleImageView circleImageOnline, circleImageLogo;
-    private ImageView imageViewOpenMenu, imageViewCloseMenu;
-    private ConstraintLayout constraintProfileMenu;
-    private TextView textViewOtherUser, textViewLastSeen, textViewTyping;
+    private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
+    private ConstraintLayout constraintProfileMenu, constraintDelBody;
+    private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply;
+    private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
-    private CircleImageView fab;
-    private CardView cardViewMsg;
+    private CircleImageView circleSendMesaage;
+    private CardView cardViewMsg, cardViewReply;
     String userName, otherName, uID, imageUrl;
-    DatabaseReference dbReference, refChecks, refUsers;
+    DatabaseReference refMessages, refChecks, refUsers;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
     MessageAdapter adapter;
@@ -71,6 +79,16 @@ public class MessageActivity extends AppCompatActivity {
     private long count = 0, offCount = 0, newMsgCount = 0;
     private Boolean runnerChaeck = false;
     private Map<String, Integer> dateNum, dateMonth;
+    String idKey, listener = "no", replyMsg;
+    public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            idKey = intent.getStringExtra("id");
+            listener = intent.getStringExtra("listener");
+            replyMsg = intent.getStringExtra("replyMsg");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +98,7 @@ public class MessageActivity extends AppCompatActivity {
         imageViewBack = findViewById(R.id.imageViewBackArrow);
         textViewOtherUser = findViewById(R.id.textViewName);
         editTextMessage = findViewById(R.id.editTextMessage);
-        fab = findViewById(R.id.fab);
+        circleSendMesaage = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
         imageViewTick = findViewById(R.id.imageViewTick);
@@ -90,6 +108,14 @@ public class MessageActivity extends AppCompatActivity {
         textViewTyping = findViewById(R.id.textViewTyping2);
         circleImageOnline = findViewById(R.id.circleImageOnline);
         circleImageLogo = findViewById(R.id.circleImageLogo);
+        constraintDelBody = findViewById(R.id.constDelBody);
+        textViewDelMine = findViewById(R.id.textViewDelMine);
+        textViewDelOther = findViewById(R.id.textViewDelOther);
+        textViewDelAll = findViewById(R.id.textViewDelEveryone);
+        imageViewCancelDel = findViewById(R.id.imageViewCancelDel);
+        cardViewReply = findViewById(R.id.cardViewReply);
+        textViewReply = findViewById(R.id.textViewReplyText);
+        imageViewCancelReply = findViewById(R.id.imageViewCancleReply);
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
@@ -99,13 +125,13 @@ public class MessageActivity extends AppCompatActivity {
 
 //        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
-        dbReference = FirebaseDatabase.getInstance().getReference("Messages");
+        refMessages = FirebaseDatabase.getInstance().getReference("Messages");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
 
-        // get users details sents from userlist via intent
+        // get users details via intent
         userName = getIntent().getStringExtra("userName");
         otherName = getIntent().getStringExtra("otherName");
         uID = getIntent().getStringExtra("Uid");
@@ -114,23 +140,29 @@ public class MessageActivity extends AppCompatActivity {
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
-//         set user image
+//         get user image
         if (imageUrl.equals("null")) {
             circleImageLogo.setImageResource(R.drawable.person_round);
         }
         else Picasso.get().load(imageUrl).into(circleImageLogo);
 
+        // get the idkey message from the adaptor via the broadcast intent
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("editMsg"));
 
         // send message
-        fab.setOnClickListener(new View.OnClickListener() {
+        circleSendMesaage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 String message = editTextMessage.getText().toString();
                 if (!message.equals("")){
+
                     sendMessage(message);
-                    scrollPosition = 0;
                     editTextMessage.setText("");
+                    listener = "no";
+                    scrollPosition = 0;
+                    cardViewReply.setVisibility(View.GONE);
                 }
             }
         });
@@ -167,6 +199,72 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        // Close delete message option
+        constraintDelBody.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                constraintDelBody.setVisibility(View.GONE);
+            }
+        });
+
+        // Delete for only me
+        textViewDelMine.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        constraintDelBody.setVisibility(View.GONE);
+                        Toast.makeText(MessageActivity.this, "Message deleted for me.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                idKey = null;
+                listener = "no";
+            }
+        });
+
+        // Delete for others only
+        textViewDelOther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        constraintDelBody.setVisibility(View.GONE);
+                        Toast.makeText(MessageActivity.this, "Message deleted for "+otherName+".", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                idKey = null;
+                listener = "no";
+            }
+        });
+
+        // Delete for everyone
+        textViewDelAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue();
+                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        constraintDelBody.setVisibility(View.GONE);
+                        Toast.makeText(MessageActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                idKey = null;
+                listener = "no";
+            }
+        });
+
+        // close reply box
+        imageViewCancelReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cardViewReply.setVisibility(8);
+            }
+        });
+
+
         getMessage();
 
         tellUserAmTyping();
@@ -183,9 +281,9 @@ public class MessageActivity extends AppCompatActivity {
 
         setIsOnline();
 
-        getMsgDeliveryStatus();
+//        getMsgDeliveryStatus();
 
-        setMsgTickVisibility();
+//        setMsgTickVisibility();
 
     }
 
@@ -194,31 +292,23 @@ public class MessageActivity extends AppCompatActivity {
         // get messages
     private void getMessage(){
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
-        refMsg.addChildEventListener(new ChildEventListener() {
+        refMsg.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                //  create an object from the modelClass to get the value from the database
-                MessageModel messageModel = snapshot.getValue(MessageModel.class);
-                modelList.add(messageModel);
-                adapter.notifyDataSetChanged();
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                modelList.clear();
+
+                for (DataSnapshot snapshot1 : snapshot.getChildren()){
+
+                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                    modelList.add(messageModel);
+                    adapter.notifyDataSetChanged();
+//                Log.i("Check", "Msg "+snapshot1);
+
+                }
 
                 // scroll to the new message position number
-                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1); // -------- to display the last message
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1);
             }
 
             @Override
@@ -226,8 +316,10 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
+                cardViewReply);
         recyclerViewChat.setAdapter(adapter);
+
     }
     public boolean checkConnection()
     {
@@ -243,32 +335,64 @@ public class MessageActivity extends AppCompatActivity {
         Map <String, Object> statusAndMSgCount = new HashMap<>();
         statusAndMSgCount.put("status", true);
         statusAndMSgCount.put("unreadMsg", 0);
-//        statusAndMSgCount.put("newMsgCount", 0);
 
         refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
 
     public void sendMessage(String message){
 
+//        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
+        String key;
+        int visibility = 8;
         Map<String, Object> messageMap = new HashMap<>();
-        messageMap.put("message", message);
         messageMap.put("from", userName);
-        messageMap.put("timeSent", ServerValue.TIMESTAMP);
+        messageMap.put("message", message);
+        messageMap.put( "timeSent", ServerValue.TIMESTAMP);
+
+        if(listener == "no"){
+            key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
+//            visibility = 8;
+        } else if (listener == "reply") {
+            key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
+            messageMap.put("replyMsg", textViewReply.getText());
+            visibility = 1;
+        } else {
+            key = idKey;
+            messageMap.put("edit", "edited");
+        }
+        messageMap.put("idKey", key);
+        messageMap.put("visibility", visibility);
+
         //  now save the message to the database
-        String key = dbReference.child(userName).child(otherName).push().getKey();  // create an id for each message
-        // set the deliver icon if successful
-        dbReference.child(userName).child(otherName).child(key).setValue(messageMap);
-        dbReference.child(otherName).child(userName).child(key).setValue(messageMap);
+        refMessages.child(userName).child(otherName).child(key).setValue(messageMap);
+        refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
 
-        // --- set the last send message details
-        DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
-                .child(user.getUid()).child(uID);
-        fReference.setValue(messageMap);
+        if (listener == "no")
+        {
+// --- set the last send message details
+            DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
+                    .child(user.getUid()).child(uID);
+            fReference.setValue(messageMap);
 
-        DatabaseReference fReference2 = FirebaseDatabase.getInstance().getReference("UsersList")
+            DatabaseReference fReference2 = FirebaseDatabase.getInstance().getReference("UsersList")
+                    .child(uID).child(user.getUid());
+            fReference2.setValue(messageMap);
+
+            checkAndSaveCounts_SendMsg();
+        }
+
+    }
+
+    private void checkAndSaveCounts_SendMsg(){
+
+        // save the number of msg sent by me to receiver
+        referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
                 .child(uID).child(user.getUid());
-        fReference2.setValue(messageMap);
+        referenceMsgCount.child("unreadMsg").setValue(count+=1);
 
+        referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
+                .child(user.getUid()).child(uID).child("unreadMsg");
+        referenceMsgCount2.setValue(0);
 
         // check if there is network connection before sending message
         if(!checkConnection()){
@@ -277,7 +401,7 @@ public class MessageActivity extends AppCompatActivity {
             refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
         }
 
-//        check if the user is in my chat box and reset the count -- newMsgCount & unreadMsg
+        //      check if the user is in my chat box and reset the count -- newMsgCount & unreadMsg
         DatabaseReference statusCheck = FirebaseDatabase.getInstance().getReference("Checks");
         statusCheck.child(uID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -305,16 +429,6 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-
-        // save the number of msg sent by me to receiver
-        referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(uID).child(user.getUid());
-        referenceMsgCount.child("unreadMsg").setValue(count+=1);
-
-        referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
-                .child(user.getUid()).child(uID).child("unreadMsg");
-        referenceMsgCount2.setValue(0);
-
     }
 
     private void setMsgTickVisibility(){
@@ -354,14 +468,24 @@ public class MessageActivity extends AppCompatActivity {
                 long offCount = (long) snapshot.child(uID)
                         .child(user.getUid()).child("offCount").getValue();
 
-                if (msgCount == 0) {
-                    imageViewTick.setImageResource(R.drawable.read_orange);
-                } else{
-                    if(offCount > 0){
-                        imageViewTick.setImageResource(R.drawable.message_load);
+                //  countTimer to add little delay to make the app sendMessage() fast
+                new CountDownTimer(2000, 1000){
+                    @Override
+                    public void onTick(long l) {
+
                     }
-                    else imageViewTick.setImageResource(R.drawable.message_tick_one);
-                }
+                    @Override
+                    public void onFinish() {
+                        if (msgCount == 0) {
+                            imageViewTick.setImageResource(R.drawable.read_orange);
+                        } else{
+                            if(offCount > 0){
+                                imageViewTick.setImageResource(R.drawable.message_load);
+                            }
+                            else imageViewTick.setImageResource(R.drawable.message_tick_one);
+                        }
+                    }
+                }.start();
             }
 
             @Override
@@ -699,7 +823,7 @@ public class MessageActivity extends AppCompatActivity {
         refChecks.child(user.getUid()).child(uID).updateChildren(mapUpdate);
         runnerChaeck = true;
 
-//        finish();
+        finish();
         super.onBackPressed();
     }
 //
@@ -727,7 +851,7 @@ public class MessageActivity extends AppCompatActivity {
 //    @Override
     protected void onResume() {
 //        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
-        setIsOnline();
+//        setIsOnline();
         runnerChaeck = false;
         super.onResume();
     }

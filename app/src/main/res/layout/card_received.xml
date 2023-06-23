@@ -45,12 +45,37 @@
         app:layout_constraintTop_toBottomOf="@+id/constraintNewMsg2">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constriantReplyBox2"
+            style="@style/replyBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@id/cardViewReceived"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/textViewReply2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="3"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintReceiveTop"
             style="@style/card"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/cardViewReceived"
+            app:layout_constraintBottom_toTopOf="@+id/constriantReplyBox2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -124,6 +149,14 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/reply" />
 
+            <ImageView
+                android:id="@+id/imageEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:srcCompat="@drawable/baseline_mode_edit_24"
+                tools:layout_editor_absoluteX="86dp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.cardview.widget.CardView
@@ -149,7 +182,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="2dp"
                     android:layout_marginBottom="1dp"
-                    android:text="00:00am"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="@+id/textViewReceived"
                     app:layout_constraintEnd_toEndOf="@+id/textViewReceived" />
@@ -159,7 +191,7 @@
                     style="@style/textColorFullBlack"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
+                    android:layout_marginStart="12dp"
                     android:gravity="start"
                     android:paddingLeft="15dp"
                     android:paddingTop="6dp"
@@ -168,7 +200,8 @@
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/imageViewOptions2"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0" />
 
                 <ImageView
                     android:id="@+id/imageViewOptions2"
@@ -194,7 +227,20 @@
                     app:layout_constraintBottom_toBottomOf="@+id/textViewReceived"
                     app:layout_constraintEnd_toStartOf="@+id/textViewChatTime2"
                     app:srcCompat="@drawable/sent_pin" />
+
+                <TextView
+                    android:id="@+id/textViewEditedReceiver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:textSize="11sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/textViewChatTime2"
+                    app:layout_constraintHorizontal_bias="0.25"
+                    app:layout_constraintStart_toStartOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

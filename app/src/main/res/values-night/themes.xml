@@ -44,6 +44,11 @@
         <item name="android:background">@color/black</item>
     </style>
 
+    <!--    reply background-->
+    <style name="replyBackground">
+        <item name="android:background">@color/black2</item>
+    </style>
+
     <style name="textColorCustomise">
         <item name="android:textColor">@color/orange</item>
     </style>
@@ -58,6 +63,10 @@
 
     <style name="BackgroundTint">
         <item name="android:tint">@color/white</item>
+    </style>
+
+    <style name="BackgroundTintW_B">
+        <item name="android:backgroundTint">@color/black2</item>
     </style>
 
     <!--    background Tink orange and white-->

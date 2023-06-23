@@ -1,11 +1,14 @@
 package com.pixel.chatapp.chats;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +33,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     List<MessageModel> modelList;
@@ -39,14 +45,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private int receive;
     FirebaseUser user;
     DatabaseReference refCheck, refUsers;
-    Context context;
+    Context mContext;
+    EditText editTextMsg;
+    ConstraintLayout deleteBody;
+    private CardView cardViewReply;
+    private TextView textViewReply;
 
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context context) {
+    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
+                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
-        this.context = context;
+        this.mContext = mContext;
+        this.editTextMsg = editMsg;
+        this.deleteBody = deleteBody;
+        this.textViewReply = textViewReply;
+        this.cardViewReply = cardViewReply;
 
         status = false;
         send = 1;
@@ -79,7 +94,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         int pos = holder.getAdapterPosition();     //   to get the position of each msg
         holder.cardViewChatBox.setTag(pos);        //     to get cardView position
 
-        long convert = (long) modelList.get(position).timeSent;
+        long convert = (long) modelList.get(position).getTimeSent();
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
         DateFormat formatter = new SimpleDateFormat("h:mm a");
         String time = formatter.format(d);
@@ -88,6 +103,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // show all messages in positions
         holder.textViewShowMsg.setText(modelList.get(position).getMessage());
+
+        holder.editNotify.setText(modelList.get(pos).getEdit());    // notify user when msg is edited
+
+        holder.constraintReplyCon.setVisibility(modelList.get(pos).getVisibility());
+
+        holder.textViewReplyMsg.setText(modelList.get(pos).getReplyMsg());
 
         // unsent and sent msg... delivery and seen settings
 //        refCheck.addValueEventListener(new ValueEventListener() {
@@ -173,6 +194,66 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // reply option
+        holder.imageViewReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cardViewReply.setVisibility(1);
+                textViewReply.setText(modelList.get(pos).getMessage());
+
+                // pop up keyboard
+                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
+                holder.constraintChatTop.setVisibility(View.GONE);
+
+                // Send the idKey to messageActivity with LocalBroadcast
+                Intent intent = new Intent("editMsg");
+                intent.putExtra("id", modelList.get(pos).getIdKey());
+                intent.putExtra("listener", "reply");
+//                intent.putExtra("replyMsg", modelList.get(pos).getReplyMsg());
+
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            }
+        });
+
+        // edit option
+        holder.imageViewEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                editTextMsg.setText(""+ modelList.get(pos).getMessage());
+                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
+                // Send the idKey to messageActivity with LocalBroadcast
+                Intent intent = new Intent("editMsg");
+                intent.putExtra("id", modelList.get(pos).getIdKey());
+                intent.putExtra("listener", "yes");
+
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+                // to close the keyboard
+//                inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+                holder.constraintChatTop.setVisibility(View.GONE);
+
+            }
+        });
+
+        // delete option
+        holder.imageViewDel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteBody.setVisibility(View.VISIBLE);
+                // Send the idKey to messageActivity with LocalBroadcast
+                Intent intent = new Intent("editMsg");
+                intent.putExtra("id", modelList.get(pos).getIdKey());
+
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+                holder.constraintChatTop.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
@@ -184,11 +265,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //    public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textViewShowMsg, textViewNewMsg;
+        TextView textViewShowMsg, textViewNewMsg, editNotify;
         ImageView seenMsg;
         ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         ImageView imageViewReact, imageViewCopy, imageViewDel;
         ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
+        ConstraintLayout constraintReplyCon;
+        TextView textViewReplyMsg;
+        CircleImageView circleSendMsg;
+        EditText editTextMessage;
 
         TextView timeMsg;
         CardView cardViewChatBox;
@@ -207,11 +292,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewForward = itemView.findViewById(R.id.imageViewForward);
                 imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewDel2);
+                editNotify = itemView.findViewById(R.id.textViewEditSender);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg);
                 constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraint);
-
+                circleSendMsg = itemView.findViewById(R.id.fab);
+                editTextMessage = itemView.findViewById(R.id.editTextMessage);
+                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
+                textViewReplyMsg = itemView.findViewById(R.id.textViewReply);
 
 //                cardViewChatBox.setOnClickListener(this);  // to get cardView position when clicked
 
@@ -222,15 +311,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 textViewShowMsg = itemView.findViewById(R.id.textViewReceived);
 
                 imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg2);
+                imageViewEdit = itemView.findViewById(R.id.imageEdit);
                 imageViewPin = itemView.findViewById(R.id.imageViewReceivePinMsg);
                 imageViewForward = itemView.findViewById(R.id.imageViewForward2);
                 imageViewReact = itemView.findViewById(R.id.imageViewReact2);
                 imageViewCopy = itemView.findViewById(R.id.imageViewReceiveCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewReceiveDel);
+                editNotify = itemView.findViewById(R.id.textViewEditedReceiver);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg2);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg2);
                 constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
+                editTextMessage = itemView.findViewById(R.id.editTextMessage);
+
+                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox2);
+                textViewReplyMsg = itemView.findViewById(R.id.textViewReply2);
 
 //                cardViewChatBox.setOnClickListener(this); // to get cardView position when clicked
             }

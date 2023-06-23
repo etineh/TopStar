@@ -1,20 +1,30 @@
 package com.pixel.chatapp.chats;
 
+import android.view.View;
+
 import java.sql.Timestamp;
 
 public class MessageModel {
 
-    String message;
-    String from;
-    long timeSent;
+    private String message;
+    private String from;
+    private String idKey;
+    private String edit;
+    private String replyMsg;
+    private long timeSent;
+    private int visibility;
 
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, long timeSent) {
+    public MessageModel(String message, String from, long timeSent, String idKey, String edit, int visibility, String replyMsg) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
+        this.idKey = idKey;
+        this.edit = edit;
+        this.visibility = visibility;
+        this.replyMsg = replyMsg;
     }
 
     public String getMessage() {
@@ -39,5 +49,37 @@ public class MessageModel {
 
     public void setTimeSent(long timeSent) {
         this.timeSent = timeSent;
+    }
+
+    public String getIdKey() {
+        return idKey;
+    }
+
+    public void setIdKey(String idKey) {
+        this.idKey = idKey;
+    }
+
+    public String getEdit() {
+        return edit;
+    }
+
+    public void setEdit(String edit) {
+        this.edit = edit;
+    }
+
+    public String getReplyMsg() {
+        return replyMsg;
+    }
+
+    public void setReplyMsg(String replyMsg) {
+        this.replyMsg = replyMsg;
+    }
+
+    public int getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(int visibility) {
+        this.visibility = visibility;
     }
 }

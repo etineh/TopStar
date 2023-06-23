@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/cardViewSend"
+            app:layout_constraintBottom_toTopOf="@id/constriantReplyBox"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/constraint">
 
@@ -131,7 +131,6 @@
             android:id="@+id/cardViewSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             app:cardCornerRadius="10dp"
             app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -142,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:paddingLeft="5dp"
+                android:paddingLeft="3dp"
                 android:paddingRight="2dp">
 
                 <TextView
@@ -150,7 +149,7 @@
                     style="@style/textColorFullBlack"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="15dp"
+                    android:layout_marginEnd="10dp"
                     android:gravity="start"
                     android:paddingLeft="10dp"
                     android:paddingTop="6dp"
@@ -167,7 +166,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="1dp"
-                    android:text="00:00am"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="@+id/textViewSend"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewOptions" />
@@ -194,9 +192,44 @@
                     app:layout_constraintBottom_toBottomOf="@+id/textViewSend"
                     app:layout_constraintEnd_toStartOf="@+id/textViewChatTime" />
 
+                <TextView
+                    android:id="@+id/textViewEditSender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="1dp"
+                    android:textSize="11sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/textViewChatTime" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constriantReplyBox"
+            style="@style/replyBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/cardViewSend"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/textViewReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="3"
+                android:paddingLeft="10dp"
+                android:paddingRight="25dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

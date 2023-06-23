@@ -46,6 +46,11 @@
         <item name="android:background">@color/white</item>
     </style>
 
+<!--    reply background-->
+    <style name="replyBackground">
+        <item name="android:background">#fedfb9</item>
+    </style>
+
     <style name="textColorCustomise">
         <item name="android:textColor">@color/black2</item>
     </style>
@@ -77,6 +82,10 @@
         <item name="android:tint">@color/dark_orange2</item>
     </style>
 
+    <style name="BackgroundTintW_B">
+        <item name="android:backgroundTint">#FBF9F9</item>
+    </style>
+
     <style name="Background">
         <item name="android:background">@color/black</item>
     </style>
@@ -92,7 +101,8 @@
 
     <!--    chat box msg background-->
     <style name="ChatMsgContainer">
-        <item name="android:background">@color/orange</item>
+        <item name="android:background">#ffc278</item>
+<!--        <item name="android:background">#fedfb9</item>-->
     </style>
 
 <!--    Custom TabLayout-->

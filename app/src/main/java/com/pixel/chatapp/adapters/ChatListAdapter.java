@@ -27,6 +27,8 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;

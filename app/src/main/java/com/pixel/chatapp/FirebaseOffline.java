@@ -12,3 +12,4 @@ public class FirebaseOffline extends Application {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 }
+
