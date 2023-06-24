@@ -153,8 +153,9 @@
                     android:gravity="start"
                     android:paddingLeft="10dp"
                     android:paddingTop="6dp"
-                    android:paddingRight="10dp"
+                    android:paddingRight="5dp"
                     android:paddingBottom="14dp"
+                    android:text="Here threre"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewOptions"
@@ -184,12 +185,11 @@
 
                 <ImageView
                     android:id="@+id/imageViewSeen"
-                    style="@style/BackColorFullBlack"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_marginEnd="5dp"
-                    android:layout_marginBottom="2dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textViewSend"
+                    app:tint="@color/orange"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/textViewChatTime" />
 
                 <TextView
@@ -208,9 +208,10 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constriantReplyBox"
-            style="@style/replyBackground"
+            style="@style/replyBackgroundSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="-5dp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/cardViewSend"
             app:layout_constraintEnd_toEndOf="parent">
@@ -220,12 +221,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="8dp"
                 android:ellipsize="end"
                 android:gravity="start"
                 android:maxLines="3"
                 android:paddingLeft="10dp"
                 android:paddingRight="25dp"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.5" />

@@ -56,7 +56,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MessageActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewChat;
-    private ImageView imageViewBack, imageViewTick;
+    private ImageView imageViewBack;
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
@@ -66,7 +66,7 @@ public class MessageActivity extends AppCompatActivity {
     private CircleImageView circleSendMesaage;
     private CardView cardViewMsg, cardViewReply;
     String userName, otherName, uID, imageUrl;
-    DatabaseReference refMessages, refChecks, refUsers;
+    DatabaseReference refMessages, refChecks, refUsers, refMsgCheck, refMsgSeen;
     DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
     MessageAdapter adapter;
@@ -77,9 +77,11 @@ public class MessageActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable runnable;
     private long count = 0, offCount = 0, newMsgCount = 0;
-    private Boolean runnerChaeck = false;
+    private Boolean runnerCheck = false;
     private Map<String, Integer> dateNum, dateMonth;
-    String idKey, listener = "no", replyMsg;
+    String idKey, listener = "no", replyMsg, networkListener = "yes", insideChat = "no";
+
+    // receive broadcast
     public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -101,7 +103,6 @@ public class MessageActivity extends AppCompatActivity {
         circleSendMesaage = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
-        imageViewTick = findViewById(R.id.imageViewTick);
         cardViewMsg = findViewById(R.id.cardViewMsg);
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
         textViewLastSeen = findViewById(R.id.textViewStatus);
@@ -130,6 +131,8 @@ public class MessageActivity extends AppCompatActivity {
 
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
+        refMsgCheck = FirebaseDatabase.getInstance().getReference("MsgCheck");
+        refMsgSeen = FirebaseDatabase.getInstance().getReference("MsgSeen");
 
         // get users details via intent
         userName = getIntent().getStringExtra("userName");
@@ -137,6 +140,7 @@ public class MessageActivity extends AppCompatActivity {
         uID = getIntent().getStringExtra("Uid");
         imageUrl = getIntent().getStringExtra("ImageUrl");
         scrollPosition = getIntent().getIntExtra("recyclerScroll", 0);
+        insideChat = getIntent().getStringExtra("insideChat");
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
@@ -227,14 +231,11 @@ public class MessageActivity extends AppCompatActivity {
         textViewDelOther.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        constraintDelBody.setVisibility(View.GONE);
-                        Toast.makeText(MessageActivity.this, "Message deleted for "+otherName+".", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                idKey = null;
+                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
+                constraintDelBody.setVisibility(View.GONE);
+                Toast.makeText(MessageActivity.this, "Message deleted for "+otherName+".", Toast.LENGTH_SHORT).show();
+
+                deleteMsgSeenKey();
                 listener = "no";
             }
         });
@@ -244,28 +245,34 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue();
-                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        constraintDelBody.setVisibility(View.GONE);
-                        Toast.makeText(MessageActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                idKey = null;
+                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
+                constraintDelBody.setVisibility(View.GONE);
+                Toast.makeText(MessageActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
+                refChecks.child(uID).child(user.getUid()).child("newMsgCount").setValue(0);
+
+                deleteMsgSeenKey();                 // delete the push the un-deliver msg key from db
+
                 listener = "no";
             }
         });
 
-        // close reply box
+
+        // close and cancel reply and edit box
         imageViewCancelReply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cardViewReply.setVisibility(8);
+                int intGone = (int) 8;
+                cardViewReply.setVisibility(intGone);
+                listener = "no";
+                idKey = null;
+                editTextMessage.setText("");
             }
         });
 
 
         getMessage();
+
+        setMsgSeen();
 
         tellUserAmTyping();
 
@@ -280,10 +287,6 @@ public class MessageActivity extends AppCompatActivity {
         getPreviousCounts();
 
         setIsOnline();
-
-//        getMsgDeliveryStatus();
-
-//        setMsgTickVisibility();
 
     }
 
@@ -303,8 +306,6 @@ public class MessageActivity extends AppCompatActivity {
                     MessageModel messageModel = snapshot1.getValue(MessageModel.class);
                     modelList.add(messageModel);
                     adapter.notifyDataSetChanged();
-//                Log.i("Check", "Msg "+snapshot1);
-
                 }
 
                 // scroll to the new message position number
@@ -317,11 +318,11 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply);
+                cardViewReply, textViewDelOther);
         recyclerViewChat.setAdapter(adapter);
 
     }
-    public boolean checkConnection()
+    public boolean checkNetworkConnection()
     {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -340,34 +341,42 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     public void sendMessage(String message){
+        // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
-//        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
-        String key;
+        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
         int visibility = 8;
+        int msgStatus = 700024;
+
+        if(networkListener == "no"){
+            msgStatus = 700033;
+            refMsgCheck.child(user.getUid()).push().child("loadKey").setValue(key);     // push the un-deliver msg key to db
+        }
+
         Map<String, Object> messageMap = new HashMap<>();
         messageMap.put("from", userName);
-        messageMap.put("message", message);
-        messageMap.put( "timeSent", ServerValue.TIMESTAMP);
 
-        if(listener == "no"){
-            key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
-//            visibility = 8;
-        } else if (listener == "reply") {
-            key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
+        if (listener == "reply") {
             messageMap.put("replyMsg", textViewReply.getText());
             visibility = 1;
-        } else {
+        } else if (listener == "yes") {
             key = idKey;
             messageMap.put("edit", "edited");
         }
+
         messageMap.put("idKey", key);
+        messageMap.put("message", message);
+        messageMap.put("msgStatus", msgStatus);
+        messageMap.put( "timeSent", ServerValue.TIMESTAMP);
         messageMap.put("visibility", visibility);
 
         //  now save the message to the database
         refMessages.child(userName).child(otherName).child(key).setValue(messageMap);
         refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
 
-        if (listener == "no")
+        // send delivery id to MsgSeen
+        refMsgSeen.child(uID).child(user.getUid()).push().child("seenKey").setValue(key);
+
+        if (listener == "no" || listener == "reply")
         {
 // --- set the last send message details
             DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
@@ -383,6 +392,31 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    // delete key from MsgCheckDelivery db if user delete msg b4 it delivers.
+    private void deleteMsgSeenKey(){
+        refMsgSeen.child(uID).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for (DataSnapshot snapshot1 : snapshot.getChildren()){
+                    String seenKey = snapshot1.getKey();
+                    String msgSeen = snapshot1.child("seenKey").getValue().toString();
+
+                    if(msgSeen.equals(idKey)) {
+                        refMsgSeen.child(uID).child(user.getUid()).child(seenKey).removeValue();
+                    }
+
+                }
+                idKey = null;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void checkAndSaveCounts_SendMsg(){
 
         // save the number of msg sent by me to receiver
@@ -395,7 +429,7 @@ public class MessageActivity extends AppCompatActivity {
         referenceMsgCount2.setValue(0);
 
         // check if there is network connection before sending message
-        if(!checkConnection()){
+        if(!checkNetworkConnection()){
             refChecks.child(uID).child(user.getUid()).child("offCount").setValue(offCount+=1);
         } else{
             refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
@@ -431,61 +465,32 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void setMsgTickVisibility(){
-        DatabaseReference refUsersList = FirebaseDatabase.getInstance().getReference("UsersList")
-                .child(user.getUid()).child(uID);
-        refUsersList.addValueEventListener(new ValueEventListener() {
+    // Reload seen msg status delivery when user is online
+    private void setMsgSeen(){
+        refMsgSeen.child(user.getUid()).child(uID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1: snapshot.getChildren()){
 
-                if(!snapshot.child("from").exists()){
-                    cardViewMsg.setVisibility(View.INVISIBLE);
-                }
-                else {
-                    String lastSender = snapshot.child("from").getValue().toString();
-                    if(lastSender.equals(userName)){
-                        cardViewMsg.setVisibility(View.VISIBLE);
-                    } else {
-                        cardViewMsg.setVisibility(View.INVISIBLE);
-                    }
-                }
-            }
+                    if(insideChat == "yes"){    // activate only when I am inside
+                        String keys = snapshot1.child("seenKey").getValue().toString();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                        refMessages.child(otherName).child(userName).child(keys)
+                                .child("msgStatus").setValue(700016);
 
-            }
-        });
-    }
-    // get the message delivery status
-    public void getMsgDeliveryStatus(){
-        refChecks.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        new CountDownTimer(5000, 1000){
+                            @Override
+                            public void onTick(long l) {
 
-                long msgCount = (long) snapshot.child(uID)
-                        .child(user.getUid()).child("unreadMsg").getValue();
-                long offCount = (long) snapshot.child(uID)
-                        .child(user.getUid()).child("offCount").getValue();
-
-                //  countTimer to add little delay to make the app sendMessage() fast
-                new CountDownTimer(2000, 1000){
-                    @Override
-                    public void onTick(long l) {
-
-                    }
-                    @Override
-                    public void onFinish() {
-                        if (msgCount == 0) {
-                            imageViewTick.setImageResource(R.drawable.read_orange);
-                        } else{
-                            if(offCount > 0){
-                                imageViewTick.setImageResource(R.drawable.message_load);
                             }
-                            else imageViewTick.setImageResource(R.drawable.message_tick_one);
-                        }
+
+                            @Override
+                            public void onFinish() {
+                                refMsgSeen.child(user.getUid()).child(uID).child(snapshot1.getKey()).removeValue();
+                            }
+                        }.start();
                     }
-                }.start();
+                }
             }
 
             @Override
@@ -495,7 +500,46 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-        // get the last seen and online presence of user
+    // Reload msg status delivery to true when network is true
+    private void refreshMsgDeliveryIcon(){
+        refMsgCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for (DataSnapshot snapshot1: snapshot.getChildren()){
+                    // refresh as soon as network connection is true
+                    if(checkNetworkConnection()){
+                        // get the keys of loading msg and update the Message delivery msgStatus
+                        String keys = snapshot1.child("loadKey").getValue().toString();
+                        refMessages.child(userName).child(otherName).child(keys)
+                                .child("msgStatus").setValue(700024);
+
+                        // delete in 5secs, not to deley the app
+                        new CountDownTimer(5000, 1000){
+                            @Override
+                            public void onTick(long l) {
+
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                refMsgCheck.child(user.getUid()).child(snapshot1.getKey()).removeValue();
+                            }
+                        }.start();
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    // get the last seen and online presence of user
     public void getLastSeenAndOnline()
     {
         refUsers.child(uID).addValueEventListener(new ValueEventListener() {
@@ -631,11 +675,15 @@ public class MessageActivity extends AppCompatActivity {
                 }
 
                 // clear off msg load tick when network restores.
-                if(checkConnection()){
+                if(checkNetworkConnection()){
                     refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
+                    refreshMsgDeliveryIcon();
+                    networkListener = "yes";
+                } else {
+                    networkListener = "no";
                 }
 
-                if(!runnerChaeck) handler.postDelayed(runnable, 1000);
+                if(!runnerCheck) handler.postDelayed(runnable, 1000);
                 else {
                     refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
                     handler.removeCallbacks(runnable);
@@ -821,7 +869,8 @@ public class MessageActivity extends AppCompatActivity {
         mapUpdate.put("status", false);
         mapUpdate.put("newMsgCount", 0);
         refChecks.child(user.getUid()).child(uID).updateChildren(mapUpdate);
-        runnerChaeck = true;
+        runnerCheck = true;
+        insideChat = "no";
 
         finish();
         super.onBackPressed();
@@ -843,16 +892,17 @@ public class MessageActivity extends AppCompatActivity {
             }
         }.start();
 
-        runnerChaeck = true;
-//        finish();
+        runnerCheck = true;
+        insideChat = "no";
         super.onPause();
     }
 //
 //    @Override
     protected void onResume() {
-//        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
+        refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
 //        setIsOnline();
-        runnerChaeck = false;
+        runnerCheck = false;
+        insideChat = "yes";
         super.onResume();
     }
 

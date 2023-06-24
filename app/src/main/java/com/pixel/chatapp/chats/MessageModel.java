@@ -13,11 +13,12 @@ public class MessageModel {
     private String replyMsg;
     private long timeSent;
     private int visibility;
+    private  int msgStatus;
 
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, long timeSent, String idKey, String edit, int visibility, String replyMsg) {
+    public MessageModel(String message, String from, long timeSent, String idKey, String edit, int visibility, String replyMsg, int msgStatus) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -25,6 +26,7 @@ public class MessageModel {
         this.edit = edit;
         this.visibility = visibility;
         this.replyMsg = replyMsg;
+        this.msgStatus = msgStatus;
     }
 
     public String getMessage() {
@@ -81,5 +83,13 @@ public class MessageModel {
 
     public void setVisibility(int visibility) {
         this.visibility = visibility;
+    }
+
+    public int getMsgStatus() {
+        return msgStatus;
+    }
+
+    public void setMsgStatus(int msgStatus) {
+        this.msgStatus = msgStatus;
     }
 }

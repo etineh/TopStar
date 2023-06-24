@@ -46,9 +46,14 @@
         <item name="android:background">@color/white</item>
     </style>
 
-<!--    reply background-->
-    <style name="replyBackground">
-        <item name="android:background">#fedfb9</item>
+<!--    reply background receiver-->
+    <style name="replyBackgroundRec">
+        <item name="android:background">@color/light_orange</item>
+    </style>
+
+    <!--    reply background sender-->
+    <style name="replyBackgroundSend">
+        <item name="android:background">#FBF9F9</item>
     </style>
 
     <style name="textColorCustomise">
@@ -101,7 +106,7 @@
 
     <!--    chat box msg background-->
     <style name="ChatMsgContainer">
-        <item name="android:background">#ffc278</item>
+        <item name="android:background">@color/light_orange</item>
 <!--        <item name="android:background">#fedfb9</item>-->
     </style>
 

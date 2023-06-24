@@ -117,7 +117,6 @@ public class ChatsListFragment extends Fragment {
                 recyclerView.setAdapter(adapter);
 
 //                chatList();
-
             }
 
             @Override
@@ -156,7 +155,6 @@ public class ChatsListFragment extends Fragment {
                         }
                     }
                 }
-
             }
 
             @Override

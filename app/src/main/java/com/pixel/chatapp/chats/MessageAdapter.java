@@ -3,6 +3,7 @@ package com.pixel.chatapp.chats;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,11 +50,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     EditText editTextMsg;
     ConstraintLayout deleteBody;
     private CardView cardViewReply;
-    private TextView textViewReply;
+    private TextView textViewReply, textViewDelOther;
 
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
-                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply) {
+                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
@@ -62,6 +63,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.deleteBody = deleteBody;
         this.textViewReply = textViewReply;
         this.cardViewReply = cardViewReply;
+        this.textViewDelOther = textViewDelOther;
 
         status = false;
         send = 1;
@@ -106,69 +108,31 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.editNotify.setText(modelList.get(pos).getEdit());    // notify user when msg is edited
 
-        holder.constraintReplyCon.setVisibility(modelList.get(pos).getVisibility());
+        int intValue = (int) modelList.get(pos).getVisibility();
 
-        holder.textViewReplyMsg.setText(modelList.get(pos).getReplyMsg());
+        holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
 
-        // unsent and sent msg... delivery and seen settings
-//        refCheck.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                long msgCount = (long) snapshot.child(uId).child(user.getUid()).child("unreadMsg").getValue() + 1;
-//                long offCount = (long) snapshot.child(uId).child(user.getUid()).child("offCount").getValue();
-//
-//                // tick load when no network and approve when network and unread msg tick
-//                if(pos > (modelList.size() - (msgCount)) && pos < (modelList.size() - offCount) && msgCount >1) {
-//                    holder.seenMsg.setImageResource(R.drawable.message_tick_one);
-//                }
-//                else if (pos >= (modelList.size() - offCount))
-//                    holder.seenMsg.setImageResource(R.drawable.message_load);
-//                else if (pos >= modelList.size()-msgCount - 10 && msgCount == 1) {
-//                    holder.seenMsg.setImageResource(R.drawable.baseline_grade_24);
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
+        holder.textViewReplyMsg.setText(modelList.get(pos).getReplyMsg());     //   set the reply text on top msg
+
+        // set unsent and sent msg... delivery and seen settings-- msg status tick
+        int intMsg = modelList.get(pos).getMsgStatus();
+        int numMsg = (int) R.drawable.message_tick_one;
+
+        if(intMsg == 700033){
+            numMsg = (int) R.drawable.message_load;
+        } else if (intMsg == 700016) {
+            numMsg = (int) R.drawable.baseline_grade_24;
+        }
+
+        holder.seenMsg.setImageResource(numMsg);     // set msg status tick
+
+        // 700024 --- tick one msg
+        // 700016 -- send msg
+        // 700033 -- load
+
 
         //   get the number of new message I have
-        refCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(!snapshot.child(uId).child("newMsgCount").exists()){
-                    refCheck.child(user.getUid()).child(uId).child("newMsgCount").setValue(0);
-                }
-                else
-                {
-                    long newMsgNumber = (long) snapshot.child(uId).child("newMsgCount").getValue();
-//                            Log.i("Check", "the num "+snapshot.child(uId));
-
-                    if(newMsgNumber == 0) {
-                        holder.constraintNewMsg.setVisibility(View.GONE);
-                    }
-                    else {
-                        if(pos > (modelList.size() - (newMsgNumber+1)) && pos < (modelList.size() - (newMsgNumber-1))){
-                            holder.constraintNewMsg.setVisibility(View.VISIBLE);
-                            holder.textViewNewMsg.setText(newMsgNumber +" new messages");
-                        }
-                        else{
-                            holder.constraintNewMsg.setVisibility(View.GONE);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        newMsgNumber(holder, pos);
 
 
         //  show chat options
@@ -198,22 +162,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.imageViewReply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cardViewReply.setVisibility(1);
-                textViewReply.setText(modelList.get(pos).getMessage());
 
-                // pop up keyboard
-                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if(modelList.get(pos).getMsgStatus() == 700033){
+                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                } else {
 
-                holder.constraintChatTop.setVisibility(View.GONE);
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                }
 
-                // Send the idKey to messageActivity with LocalBroadcast
-                Intent intent = new Intent("editMsg");
-                intent.putExtra("id", modelList.get(pos).getIdKey());
-                intent.putExtra("listener", "reply");
-//                intent.putExtra("replyMsg", modelList.get(pos).getReplyMsg());
-
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             }
         });
 
@@ -222,20 +178,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             @Override
             public void onClick(View view) {
 
-                editTextMsg.setText(""+ modelList.get(pos).getMessage());
-                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if(modelList.get(pos).getMsgStatus() == 700033){
+                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                } else {
+                    editTextMsg.setText(""+ modelList.get(pos).getMessage());
+                    holder.constraintChatTop.setVisibility(View.GONE);
 
-                // Send the idKey to messageActivity with LocalBroadcast
-                Intent intent = new Intent("editMsg");
-                intent.putExtra("id", modelList.get(pos).getIdKey());
-                intent.putExtra("listener", "yes");
-
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-
-                // to close the keyboard
-//                inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-                holder.constraintChatTop.setVisibility(View.GONE);
+                    editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                }
 
             }
         });
@@ -244,14 +194,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.imageViewDel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                deleteBody.setVisibility(View.VISIBLE);
-                // Send the idKey to messageActivity with LocalBroadcast
-                Intent intent = new Intent("editMsg");
-                intent.putExtra("id", modelList.get(pos).getIdKey());
 
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                if(modelList.get(pos).getMsgStatus() == 700033){
+                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                } else {
+                    if(!modelList.get(pos).getFrom().equals(userName)){
+                        textViewDelOther.setVisibility(View.GONE);
+                    } else {
+                        textViewDelOther.setVisibility(View.VISIBLE);
+                    }
 
-                holder.constraintChatTop.setVisibility(View.GONE);
+                    deleteBody.setVisibility(View.VISIBLE);
+                    // Send the idKey to messageActivity with LocalBroadcast
+                    Intent intent = new Intent("editMsg");
+                    intent.putExtra("id", modelList.get(pos).getIdKey());
+
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+                    holder.constraintChatTop.setVisibility(View.GONE);
+                }
+
+
             }
         });
     }
@@ -261,8 +224,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return modelList.size();
     }
 
-    // use this option when you want to use CardView onClick
-//    public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
         TextView textViewShowMsg, textViewNewMsg, editNotify;
@@ -302,8 +263,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply);
 
-//                cardViewChatBox.setOnClickListener(this);  // to get cardView position when clicked
-
             } else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
                 cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
@@ -326,17 +285,67 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox2);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply2);
-
-//                cardViewChatBox.setOnClickListener(this); // to get cardView position when clicked
             }
         }
-
-//        @Override
-//        public void onClick(View view) {
-//            int cardPosition = (int) view.getTag();
-////            timeMsg.setText("check " + cardPosition);
-//        }
     }
+
+
+    // ---------------------- methods ---------------------------
+    private void newMsgNumber(MessageViewHolder holder, int pos){
+        refCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(!snapshot.child(uId).child("newMsgCount").exists()){
+                    refCheck.child(user.getUid()).child(uId).child("newMsgCount").setValue(0);
+                }
+                else
+                {
+                    long newMsgNumber = (long) snapshot.child(uId).child("newMsgCount").getValue();
+//                            Log.i("Check", "the num "+snapshot.child(uId));
+
+                    if(newMsgNumber == 0) {
+                        holder.constraintNewMsg.setVisibility(View.GONE);
+                    }
+                    else {
+                        if(pos > (modelList.size() - (newMsgNumber+1)) && pos < (modelList.size() - (newMsgNumber-1))){
+                            holder.constraintNewMsg.setVisibility(View.VISIBLE);
+                            holder.textViewNewMsg.setText(newMsgNumber +" new messages");
+                        }
+                        else{
+                            holder.constraintNewMsg.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos){
+
+        editText.requestFocus();
+        // pop up keyboard
+        InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+
+        int intValue = (int) 1;
+        cardViewReply.setVisibility(intValue);
+        textViewReply.setText(modelList.get(pos).getMessage());
+        holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+        // Send the idKey to messageActivity with LocalBroadcast
+        Intent intent = new Intent("editMsg");
+        intent.putExtra("id", id);
+        intent.putExtra("listener", listener);
+
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    }
+
 
     //------------ this method is used because we have 2 view card (card_msg and card_receiver) to use
     @Override
