@@ -569,7 +569,7 @@ public class MessageActivity extends AppCompatActivity {
                         Date d = new Date(onlineValue);
                         DateFormat formatter = new SimpleDateFormat("h:mm a");
                         String time = formatter.format(d);
-                        String dateString2 = String.valueOf(d);
+                        String previousDateString = String.valueOf(d);
 
                         dateMonth = new HashMap<>();     // months
                         dateMonth.put("Jan", 1);
@@ -594,14 +594,18 @@ public class MessageActivity extends AppCompatActivity {
                         dateNum.put("Sat", 6);
                         dateNum.put("Sun", 7);
 
+                        String lastYear = previousDateString.substring(30, 34);  // last year
+
                         int curMonth = dateMonth.get(dateString.substring(4,7));    // Months
-                        int lastMonth = dateMonth.get(dateString2.substring(4,7));
+                        int lastMonth = dateMonth.get(previousDateString.substring(4,7));
 
                         int curDay = dateNum.get(dateString.substring(0,3));    // Mon - Sun
-                        int lastDay = dateNum.get(dateString2.substring(0,3));
+                        int lastDay = dateNum.get(previousDateString.substring(0,3));
+
+                        String lastDayString = previousDateString.substring(0,3);   // get the day
 
                         int dateCur = Integer.parseInt(dateString.substring(8, 10));    // day 1 - 30
-                        int dateLast = Integer.parseInt(dateString2.substring(8, 10));
+                        int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
 
                         if (curMonth - lastMonth == 0)
                         {
@@ -609,41 +613,41 @@ public class MessageActivity extends AppCompatActivity {
                             {
                                 if(curDay - lastDay == 0)
                                 {
-                                    textViewLastSeen.setText("Last seen: Today, \n" + time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: Today, \n" + time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 1) {
-                                    textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 2) {
-                                    textViewLastSeen.setText("Last seen: 2days ago, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: 2days ago, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 3) {
-                                    textViewLastSeen.setText("Last seen: 3days ago, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: 3days ago, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 4) {
-                                    textViewLastSeen.setText("Last seen: 4days ago, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: 4days ago, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 5) {
-                                    textViewLastSeen.setText("Last seen: 5days ago, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: 5days ago, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 6) {
-                                    textViewLastSeen.setText("Last seen: 6days ago, \n"+time.toLowerCase());
+                                    textViewLastSeen.setText("Last seen: 6days ago, \n"+time.toLowerCase()+".");
                                 }
                             } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
-                                textViewLastSeen.setText("Last seen: Last week, \n"+lastDay);
+                                textViewLastSeen.setText("Last seen: \nLast week "+lastDayString+".");
                             } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
-                                textViewLastSeen.setText("Last seen: 2 wks ago, \n"+lastDay);
+                                textViewLastSeen.setText("Last seen: \nLast 2 weeks "+lastDayString+".");
                             } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
-                                textViewLastSeen.setText("Last seen: 3 wks ago, \n"+lastDay);
+                                textViewLastSeen.setText("Last seen: \nLast 3 weeks "+lastDayString+".");
                             } else {
                                 textViewLastSeen.setText("Last seen: a month \nago");
                             }
                         } else if(curMonth - lastMonth == 1){
-                            textViewLastSeen.setText("Last seen: one month \nago");
+                            textViewLastSeen.setText("Last seen: \none month ago..");
                         } else if(curMonth - lastMonth == 2){
-                            textViewLastSeen.setText("Last seen: two months \nago");
+                            textViewLastSeen.setText("Last seen: \ntwo months ago.");
                         }else if(curMonth - lastMonth == 3){
-                            textViewLastSeen.setText("Last seen: three months \nago");
+                            textViewLastSeen.setText("Last seen: \nthree months ago.");
                         }else if(curMonth - lastMonth == 4){
-                            textViewLastSeen.setText("Last seen: Four months \nago");
+                            textViewLastSeen.setText("Last seen: \nFour months ago.");
                         }else if(curMonth - lastMonth == 5){
-                            textViewLastSeen.setText("Last seen: Five months \nago");
+                            textViewLastSeen.setText("Last seen: \nFive months ago.");
                         } else {
-                            textViewLastSeen.setText("Last seen: Long time");
+                            textViewLastSeen.setText("Last seen: "+dateLast +"/"+ lastMonth+"/"+ lastYear);
                         }
 
                     }
