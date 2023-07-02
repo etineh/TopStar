@@ -153,13 +153,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 dateNum.put("Sat", 6);
                 dateNum.put("Sun", 7);
 
-                int lastYear = Integer.parseInt(previousDateString.substring(30, 34));  // last year
+                String lastYear = previousDateString.substring(30, 34);  // last year
 
                 int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
                 int lastMonth = dateMonth.get(previousDateString.substring(4,7));
 
                 int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
                 int lastDay = dateNum.get(previousDateString.substring(0,3));
+
+                String lastDayString = previousDateString.substring(0,3);   // get the day string
+//                int dateLastString = Integer.parseInt(previousDateString.substring(8, 10));
 
                 int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
                 int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
@@ -192,21 +195,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                             holder.textViewTime.setText(time.toLowerCase());
                         }
                     } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
-                        holder.textViewDay.setText("1wk ago");
-                        holder.textViewTime.setText(lastDay);
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("1wk ago");
                     } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
-                        holder.textViewDay.setText("2wks ago");
-                        holder.textViewTime.setText(lastDay);
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("2wk ago");
                     } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
-                        holder.textViewDay.setText("3wk ago");
-                        holder.textViewTime.setText(lastDay);
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("3wk ago");
                     } else {
-                        holder.textViewDay.setText("month ago");
-                        holder.textViewTime.setText(lastDay);
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("month ago");
                     }
                 } else{
-                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
-                    holder.textViewTime.setText(lastYear);
+//                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
+                    holder.textViewTime.setText(dateLast +"/"+ lastMonth+"/"+ lastYear);
                 }
             }
 
