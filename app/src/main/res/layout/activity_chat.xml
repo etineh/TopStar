@@ -8,6 +8,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintContainer"
+        style="@style/ChatBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -89,7 +90,7 @@
                 android:layout_marginBottom="1dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Hello! Let's chat and play game together."
+                android:text="@string/hint2"
                 android:textSize="12.5sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
@@ -100,6 +101,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintNextTop"
+            style="@style/BackgroundW_B"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="2dp"
@@ -126,7 +128,6 @@
                 android:layout_height="25dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
-                android:tint="@color/orange"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewVideoCall"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/money_round" />
@@ -155,14 +156,14 @@
                 android:tint="@color/orange"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@android:drawable/stat_sys_phone_call" />
+                app:srcCompat="@drawable/baseline_add_ic_call_24" />
 
             <TextView
-                android:id="@+id/textViewAudio"
+                android:id="@+id/textViewCalls"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="1dp"
-                android:text="Audio C"
+                android:text="Calls"
                 android:textSize="11sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/imageViewVoiceCall"
@@ -212,18 +213,16 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
                 android:scaleType="fitXY"
-                android:scaleY="1.4"
-                android:tint="@color/orange"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewVoiceCall"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_video_call_24" />
+                app:srcCompat="@drawable/join_tour_24" />
 
             <TextView
                 android:id="@+id/textViewVideo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="1dp"
-                android:text="Video C"
+                android:text="Tour"
                 android:textSize="11sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/imageViewVideoCall"
@@ -294,12 +293,15 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewChat"
-            style="@style/ChatBackground"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
             android:fitsSystemWindows="true"
+            android:paddingLeft="5dp"
+            android:paddingTop="7dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="7dp"
             app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -310,9 +312,9 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintSendMsgBox"
-            style="@style/BackgroundW_B"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -457,7 +459,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ScrollView
-            android:layout_width="200dp"
+            android:layout_width="230dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -465,21 +467,21 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintListBox"
                 style="@style/card"
-                android:layout_width="200dp"
+                android:layout_width="210dp"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/textViewBlock"
+                    android:id="@+id/textViewClearMsg"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="20dp"
-                    android:text="Block"
+                    android:text="@string/clear_chats"
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewClearChats" />
+                    app:layout_constraintTop_toBottomOf="@+id/textViewClearSearchM" />
 
                 <TextView
                     android:id="@+id/textView23"
@@ -487,7 +489,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="40dp"
                     android:layout_marginEnd="100dp"
                     android:text="View Profile"
                     android:textSize="16sp"
@@ -519,61 +521,74 @@
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewFiles" />
+                    app:layout_constraintTop_toBottomOf="@+id/textViewJoinTour" />
 
                 <TextView
-                    android:id="@+id/textViewClearChats"
+                    android:id="@+id/textViewClearSearchM"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="20dp"
-                    android:text="Clear chats"
+                    android:text="@string/search"
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewSearch" />
+                    app:layout_constraintTop_toBottomOf="@+id/textViewFile" />
 
                 <TextView
-                    android:id="@+id/textViewSearch"
+                    android:id="@+id/textViewFile"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="20dp"
-                    android:text="Search"
+                    android:text="@string/file"
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textViewmute" />
 
                 <TextView
-                    android:id="@+id/textViewFiles"
+                    android:id="@+id/textViewJoinTour"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="20dp"
-                    android:text="Files"
+                    android:text="@string/join_tour"
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textViewGameHistory" />
 
                 <TextView
-                    android:id="@+id/textViewReport"
+                    android:id="@+id/textViewBlock_Report"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:text="Report"
+                    android:layout_marginBottom="25dp"
+                    android:text="@string/blockAndReport"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewBlock" />
+                    app:layout_constraintTop_toBottomOf="@+id/textViewDisappearMsg" />
+
+                <TextView
+                    android:id="@+id/textViewDisappearMsg"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/disappear_msg"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewClearMsg" />
 
                 <ImageView
                     android:id="@+id/imageViewCancel"
