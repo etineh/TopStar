@@ -5,8 +5,16 @@
     <string name="move">Move</string>
     <string name="mute">Mute</string>
     <string name="Copy">Copy</string>
-<!--    <string name="lastSeen">Last seen: &amp; Yesterday</string>-->
+    <string name="blockAndReport">Block &amp; report</string>
     <string name="lastSeen">Online</string>
     <string name="typing">Typing...</string>
+    <string name="clear_chats">Clear Chats</string>
+    <string name="disappear_msg">Set disappear message</string>
+    <string name="search">Search</string>
+    <string name="join_tour">Join tour</string>
+    <string name="file">File</string>
+    <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
+    <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
+
 
 </resources>
