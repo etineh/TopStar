@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chat App</string>
+    <string name="app_name">WinnerChat</string>
     <string name="pin">Pin</string>
     <string name="delete">Del.</string>
     <string name="move">Move</string>

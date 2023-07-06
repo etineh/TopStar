@@ -42,6 +42,10 @@
         <item name="android:background">@color/orange</item>
     </style>
 
+    <style name="appName">
+        <item name="android:textColor">@color/orange</item>
+    </style>
+
     <style name="cardTop2">
         <item name="android:background">@color/white</item>
     </style>

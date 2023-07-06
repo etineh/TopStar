@@ -2,8 +2,6 @@ package com.pixel.chatapp.chats;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -126,9 +124,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick
 
-        // 700024 --- tick one msg
-        // 700016 -- send msg
-        // 700033 -- load
+        // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
 
 
         //   get the number of new message I have
@@ -136,17 +132,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         //  show chat options
-        holder.cardViewChatBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(holder.constraintChatTop.getVisibility() == View.GONE){
-                    holder.constraintChatTop.setVisibility(View.VISIBLE);
-                } else{
-                    holder.constraintChatTop.setVisibility(View.GONE);
-                }
-            }
-        });
+//        holder.cardViewChatBox.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                if(holder.constraintChatTop.getVisibility() == View.GONE){
+//                    holder.constraintChatTop.setVisibility(View.VISIBLE);
+//                } else{
+//                    holder.constraintChatTop.setVisibility(View.GONE);
+//                }
+//            }
+//        });
 
         // close chat option
         holder.constraintMsgContainer.setOnClickListener(new View.OnClickListener() {
@@ -158,6 +154,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // swipe method for reply
+        OnGestureRegisterListener onGestureRegisterListener = new OnGestureRegisterListener(mContext) {
+            public void onSwipeRight(View view) {
+                if(modelList.get(pos).getMsgStatus() == 700033){
+                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+
+                }
+            }
+            public void onSwipeLeft(View view) {
+                if(modelList.get(pos).getMsgStatus() == 700033){
+                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                }
+            }
+            public void onClick(View view) {
+                // show chat options
+                if(holder.constraintChatTop.getVisibility() == View.GONE){
+                    holder.constraintChatTop.setVisibility(View.VISIBLE);
+                } else{
+                    holder.constraintChatTop.setVisibility(View.GONE);
+                }
+            }
+            public boolean onLongClick(View view) {
+                // Do something
+                return true;
+            }
+        };
+
+        holder.cardViewChatBox.setOnTouchListener(onGestureRegisterListener);   // swipe position
+
+
         // reply option
         holder.imageViewReply.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,11 +197,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 if(modelList.get(pos).getMsgStatus() == 700033){
                     Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                } else {
-
+                }
+                else {
                     editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
                 }
-
             }
         });
 
@@ -335,7 +366,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         int intValue = (int) 1;
         cardViewReply.setVisibility(intValue);
-        textViewReply.setText(modelList.get(pos).getMessage());
+        textViewReply.setText(modelList.get(pos).getMessage()); // set the reply text
         holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
         // Send the idKey to messageActivity with LocalBroadcast

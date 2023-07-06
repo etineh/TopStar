@@ -44,6 +44,11 @@
         <item name="android:background">@color/black</item>
     </style>
 
+
+    <style name="appName">
+        <item name="android:textColor">#E6CBB7</item>
+    </style>
+
     <!--    reply background receiver-->
     <style name="replyBackgroundRec">
         <item name="android:background">@color/dark_orange2</item>

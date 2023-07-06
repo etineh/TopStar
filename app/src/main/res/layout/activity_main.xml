@@ -21,7 +21,7 @@
             android:id="@+id/constraintMsgContainer"
             style="@style/card"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="50dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -94,14 +94,13 @@
 
             <TextView
                 android:id="@+id/textViewUsername"
-                style="@style/textColorFullBlack"
+                style="@style/appName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:fontFamily="monospace"
-                android:text="GetMeh"
-                android:textColor="@color/orange"
-                android:textSize="22sp"
+                android:text="@string/app_name"
+                android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/circleUserImage"
                 app:layout_constraintTop_toTopOf="parent"
@@ -443,12 +442,12 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:textSize="15sp"
-                        app:layout_constraintBottom_toTopOf="@+id/textView15"
+                        app:layout_constraintBottom_toTopOf="@+id/textViewHint"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textViewPhoneNum" />
 
                     <TextView
-                        android:id="@+id/textView15"
+                        android:id="@+id/textViewHint"
                         style="@style/textColorFullBlack"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -457,7 +456,7 @@
                         android:maxLines="3"
                         android:paddingLeft="15dp"
                         android:paddingRight="15dp"
-                        android:text="Bio: I am Godstime Etin. A software Developer. I love coding alot."
+                        android:text="@string/hint"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textViewUserName2" />
@@ -468,7 +467,7 @@
                         android:layout_height="2dp"
                         android:layout_marginBottom="3dp"
                         android:background="@color/orange"
-                        app:layout_constraintBottom_toTopOf="@+id/textView15"
+                        app:layout_constraintBottom_toTopOf="@+id/textViewHint"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent">
 
