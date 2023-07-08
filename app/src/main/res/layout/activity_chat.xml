@@ -383,7 +383,7 @@
                                 android:ellipsize="end"
                                 android:fontFamily="monospace"
                                 android:maxLines="3"
-                                android:textSize="12sp"
+                                android:textSize="14sp"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintEnd_toStartOf="@+id/constraintLayout11"
                                 app:layout_constraintStart_toEndOf="@+id/constraintLay"

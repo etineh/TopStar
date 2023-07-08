@@ -61,7 +61,6 @@ public class MessageActivity extends AppCompatActivity {
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
     private ImageView editOrReplyIV;
-
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
@@ -82,7 +81,7 @@ public class MessageActivity extends AppCompatActivity {
     private long count = 0, offCount = 0, newMsgCount = 0;
     private Boolean runnerCheck = false;
     private Map<String, Integer> dateNum, dateMonth;
-    String idKey, listener = "no", replyMsg, networkListener = "yes", insideChat = "no";
+    String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
 
     // receive broadcast
     public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -91,7 +90,7 @@ public class MessageActivity extends AppCompatActivity {
             // Get extra data included in the Intent
             idKey = intent.getStringExtra("id");
             listener = intent.getStringExtra("listener");
-            replyMsg = intent.getStringExtra("replyMsg");
+            replyFrom = intent.getStringExtra("replyFrom");
         }
     };
 
@@ -363,6 +362,7 @@ public class MessageActivity extends AppCompatActivity {
 
         if (listener == "reply") {
             messageMap.put("replyMsg", textViewReply.getText());
+            messageMap.put("replyFrom", replyFrom);
             visibility = 1;
         } else if (listener == "yes") {
             key = idKey;

@@ -7,18 +7,17 @@ import java.sql.Timestamp;
 public class MessageModel {
 
     private String message;
-    private String from;
+    private String from, replyFrom;
     private String idKey;
     private String edit;
     private String replyMsg;
     private long timeSent;
     private int visibility;
     private  int msgStatus;
-
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, long timeSent, String idKey, String edit, int visibility, String replyMsg, int msgStatus) {
+    public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit, int visibility, String replyMsg, int msgStatus) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -27,8 +26,8 @@ public class MessageModel {
         this.visibility = visibility;
         this.replyMsg = replyMsg;
         this.msgStatus = msgStatus;
+        this.replyFrom = replyFrom;
     }
-
     public String getMessage() {
         return message;
     }
@@ -91,5 +90,13 @@ public class MessageModel {
 
     public void setMsgStatus(int msgStatus) {
         this.msgStatus = msgStatus;
+    }
+
+    public String getReplyFrom() {
+        return replyFrom;
+    }
+
+    public void setReplyFrom(String replyFrom) {
+        this.replyFrom = replyFrom;
     }
 }

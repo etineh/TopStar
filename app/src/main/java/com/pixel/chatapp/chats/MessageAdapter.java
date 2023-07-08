@@ -113,7 +113,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // ----------------- reply msg setting
         int intValue = (int) modelList.get(pos).getVisibility();
         holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
-        holder.senderNameTV.setText(modelList.get(pos).getFrom());  //  set the username for reply msg
+        holder.senderNameTV.setText(modelList.get(pos).getReplyFrom());  //  set the username for reply msg
         holder.textViewReplyMsg.setText(modelList.get(pos).getReplyMsg());     //   set the reply text on top msg
 
         // set unsent and sent msg... delivery and seen settings-- msg status tick
@@ -142,7 +142,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
                 }
             }
             public void onSwipeLeft(View view) {
@@ -150,7 +151,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
                 }
             }
             public void onClick(View view) {
@@ -167,7 +169,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         };
 
-        holder.cardViewChatBox.setOnTouchListener(onGestureRegisterListener);   // swipe position
+        holder.imageViewOptions.setOnTouchListener(onGestureRegisterListener);   // swipe position
+        holder.textViewShowMsg.setOnTouchListener(onGestureRegisterListener);   // swipe position
+        holder.constrSlide.setOnTouchListener(onGestureRegisterListener);   // swipe position
+
 
         //  -------- swipe code ends        ---------------
 
@@ -182,7 +187,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
                 else {
                     editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
                 }
             }
         });
@@ -197,7 +202,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 } else {
                     editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
                     editTextMsg.setText(""+ modelList.get(pos).getMessage());
-                    editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder, pos);
+                    editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
                 }
 
             }
@@ -252,9 +257,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         TextView textViewShowMsg, textViewNewMsg, editNotify;
         ImageView seenMsg;
         ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
-        ImageView imageViewReact, imageViewCopy, imageViewDel;
+        ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
         ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
-        ConstraintLayout constraintReplyCon;
+        ConstraintLayout constraintReplyCon, constrSlide;
         TextView textViewReplyMsg, senderNameTV;
         CircleImageView circleSendMsg;
         EditText editTextMessage;
@@ -286,6 +291,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply);
                 senderNameTV = itemView.findViewById(R.id.senderNameTV);
+                constrSlide = itemView.findViewById(R.id.constrSlide);
+                imageViewOptions = itemView.findViewById(R.id.imageViewOptions);
 
             } else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
@@ -307,6 +314,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
                 editTextMessage = itemView.findViewById(R.id.editTextMessage);
                 senderNameTV = itemView.findViewById(R.id.senderName2);
+                constrSlide = itemView.findViewById(R.id.constrSlide2);
+                imageViewOptions = itemView.findViewById(R.id.imageViewOptions2);
 
                 constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox2);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply2);
@@ -351,7 +360,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         });
     }
 
-    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos){
+    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos, String replyFrom){
 
         editText.requestFocus();
         // pop up keyboard
@@ -367,6 +376,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         Intent intent = new Intent("editMsg");
         intent.putExtra("id", id);
         intent.putExtra("listener", listener);
+        intent.putExtra("replyFrom", replyFrom);
 
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
