@@ -57,7 +57,7 @@
 
     <!--    reply background sender-->
     <style name="replyBackgroundSend">
-        <item name="android:background">#FBF9F9</item>
+        <item name="android:background">#FFFFFF</item>
     </style>
 
     <style name="textColorCustomise">

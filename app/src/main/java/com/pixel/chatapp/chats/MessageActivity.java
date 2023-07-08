@@ -60,6 +60,8 @@ public class MessageActivity extends AppCompatActivity {
     private ImageView imageViewBack;
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
+    private ImageView editOrReplyIV;
+
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
@@ -105,7 +107,7 @@ public class MessageActivity extends AppCompatActivity {
         circleSendMesaage = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
-        cardViewMsg = findViewById(R.id.cardViewMsg);
+//        cardViewMsg = findViewById(R.id.cardViewMsg);
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
         textViewLastSeen = findViewById(R.id.textViewStatus);
         textViewTyping = findViewById(R.id.textViewTyping2);
@@ -119,6 +121,8 @@ public class MessageActivity extends AppCompatActivity {
         cardViewReply = findViewById(R.id.cardViewReply);
         textViewReply = findViewById(R.id.textViewReplyText);
         imageViewCancelReply = findViewById(R.id.imageViewCancleReply);
+        editOrReplyIV = findViewById(R.id.editOrReplyImage);
+
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
@@ -320,7 +324,7 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply, textViewDelOther);
+                cardViewReply, textViewDelOther, editOrReplyIV);
         recyclerViewChat.setAdapter(adapter);
 
     }

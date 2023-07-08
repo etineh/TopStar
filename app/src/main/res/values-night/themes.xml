@@ -81,7 +81,7 @@
 
     <!--    background Tink orange and white-->
     <style name="BackgroundTintOrange">
-        <item name="android:tint">@color/white</item>
+        <item name="android:tint">#E6CBB7</item>
     </style>
 
     <!--    background Tink Dark orange and white-->

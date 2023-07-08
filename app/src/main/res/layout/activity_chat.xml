@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/orange"
     tools:context=".chats.MessageActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:padding="7dp"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -49,7 +50,6 @@
                 android:layout_marginEnd="10dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="GetMeh"
                 android:textColor="@color/white"
                 android:textSize="18dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
@@ -139,9 +139,6 @@
                 android:layout_height="25dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
-                android:scaleType="fitXY"
-                android:scaleY="1.5"
-                android:tint="@color/orange"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewGift2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_videogame_asset_24" />
@@ -153,7 +150,6 @@
                 android:layout_height="25dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
-                android:tint="@color/orange"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_add_ic_call_24" />
@@ -196,7 +192,7 @@
                 android:id="@+id/textView17"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-4dp"
+                android:layout_marginTop="-10dp"
                 android:layout_marginBottom="1dp"
                 android:text="Game"
                 android:textSize="11sp"
@@ -332,6 +328,7 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewChatBox"
                 style="@style/BackgroundTintW_B"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -342,110 +339,109 @@
                 app:layout_constraintEnd_toStartOf="@+id/fab"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <EditText
-                    android:id="@+id/editTextMessage"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:backgroundTint="@color/orange"
-                    android:gravity="start|top"
-                    android:hint="Message"
-                    android:inputType="textMultiLine"
-                    android:maxLines="6" />
+                    android:layout_height="match_parent">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardViewReply"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:visibility="gone"
+                        app:cardCornerRadius="15dp"
+                        app:layout_constraintBottom_toTopOf="@+id/editTextMessage"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp">
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/constraintLay"
+                                android:layout_width="2dp"
+                                android:layout_height="0dp"
+                                android:layout_marginStart="2dp"
+                                android:background="@color/orange"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/editOrReplyImage"
+                                app:layout_constraintTop_toTopOf="parent">
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <TextView
+                                android:id="@+id/textViewReplyText"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="5dp"
+                                android:layout_marginEnd="4dp"
+                                android:ellipsize="end"
+                                android:fontFamily="monospace"
+                                android:maxLines="3"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/constraintLayout11"
+                                app:layout_constraintStart_toEndOf="@+id/constraintLay"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/imageViewCancleReply"
+                                android:layout_width="20dp"
+                                android:layout_height="0dp"
+                                android:paddingLeft="3dp"
+                                android:tint="#FF5722"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:srcCompat="@drawable/baseline_cancel_24" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/constraintLayout11"
+                                android:layout_width="2dp"
+                                android:layout_height="0dp"
+                                android:layout_marginEnd="1dp"
+                                android:background="@color/orange"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/imageViewCancleReply"
+                                app:layout_constraintTop_toTopOf="parent">
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <ImageView
+                                android:id="@+id/editOrReplyImage"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <EditText
+                        android:id="@+id/editTextMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="-2dp"
+                        android:backgroundTint="@color/orange"
+                        android:gravity="start|top"
+                        android:hint="Message"
+                        android:inputType="textMultiLine"
+                        android:maxLines="6"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </androidx.cardview.widget.CardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardViewMsg"
-            style="@style/Background"
-            android:layout_width="60dp"
-            android:layout_height="23dp"
-            android:layout_marginTop="15dp"
-            android:visibility="invisible"
-            app:cardCornerRadius="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintNextTop">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/imageViewMsg"
-                    style="@style/BackgroundTint"
-                    android:layout_width="18dp"
-                    android:layout_height="15dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
-                    app:srcCompat="@drawable/baseline_message_24" />
-
-                <ImageView
-                    android:id="@+id/imageViewTick"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="2dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imageViewMsg"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.5" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardViewReply"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="70dp"
-            android:visibility="gone"
-            app:cardCornerRadius="15dp"
-            app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox"
-            app:layout_constraintEnd_toStartOf="@+id/recyclerViewChat"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/recyclerViewChat">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp">
-
-                <TextView
-                    android:id="@+id/textViewReplyText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginBottom="5dp"
-                    android:ellipsize="end"
-                    android:fontFamily="monospace"
-                    android:maxLines="4"
-                    android:text="This is lovely. it is going well but sha lwets kjhslkfuh slhdf kjhgskygf lsdufgs df sdflsdufgsdl fusdl fsd flsdui fgsdl fsd ufgds fusdgl fdgus fls liusdg s flsdfku sdf sdlfusd fsd flsdh fsdjl fsd f  flfud fsdhlf sd fs flf hsd fsd f"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/imageViewCancleReply"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:paddingLeft="12dp"
-                    android:paddingBottom="12dp"
-                    android:tint="#FF5722"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_cancel_24" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
