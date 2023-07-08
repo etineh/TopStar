@@ -23,6 +23,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -62,7 +63,7 @@ public class MessageActivity extends AppCompatActivity {
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
     private ImageView editOrReplyIV;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
-    private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply;
+    private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply, nameReply, replyVisible;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
     private CircleImageView circleSendMesaage;
@@ -106,7 +107,6 @@ public class MessageActivity extends AppCompatActivity {
         circleSendMesaage = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
-//        cardViewMsg = findViewById(R.id.cardViewMsg);
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
         textViewLastSeen = findViewById(R.id.textViewStatus);
         textViewTyping = findViewById(R.id.textViewTyping2);
@@ -121,7 +121,8 @@ public class MessageActivity extends AppCompatActivity {
         textViewReply = findViewById(R.id.textViewReplyText);
         imageViewCancelReply = findViewById(R.id.imageViewCancleReply);
         editOrReplyIV = findViewById(R.id.editOrReplyImage);
-
+        nameReply = findViewById(R.id.fromTV);
+        replyVisible = findViewById(R.id.textReplying);
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
@@ -172,9 +173,57 @@ public class MessageActivity extends AppCompatActivity {
                     listener = "no";
                     scrollPosition = 0;
                     cardViewReply.setVisibility(View.GONE);
+                    nameReply.setVisibility(View.GONE);
+                    replyVisible.setVisibility(View.GONE);
                 }
             }
         });
+
+        // swiping for reply
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+
+                int position = viewHolder.getAdapterPosition();
+
+                // pop up keyboard
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
+                editTextMessage.requestFocus();
+
+                idKey = modelList.get(position).getIdKey();
+                listener = "reply";
+                replyFrom = modelList.get(position).getFrom();
+
+                // set reply name and replying hint
+                if (modelList.get(position).getFrom().equals(userName)) {
+                    nameReply.setText("From You.");
+                }
+                else {
+                    nameReply.setText(modelList.get(position).getFrom() +
+                            " (@" +modelList.get(position).getFrom()+")");
+                }
+                nameReply.setVisibility(View.VISIBLE);
+                replyVisible.setVisibility(View.VISIBLE);
+                replyVisible.setText("replying...");
+
+                cardViewReply.setVisibility(View.VISIBLE);
+                textViewReply.setText(modelList.get(position).getMessage());    // set the reply text
+                editOrReplyIV.setImageResource(R.drawable.reply);               // set reply icon
+
+                return super.getMovementFlags(recyclerView, viewHolder);
+            }
+        }).attachToRecyclerView(recyclerViewChat);
 
 
         // arrow back
@@ -187,91 +236,62 @@ public class MessageActivity extends AppCompatActivity {
         });
 
         // open user menu
-        imageViewOpenMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.VISIBLE);
-            }
-        });
+        imageViewOpenMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.VISIBLE));
 
         // close user menu
-        imageViewCloseMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.GONE);
-            }
-        });
-        constraintProfileMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintProfileMenu.setVisibility(View.GONE);
-            }
-        });
+        imageViewCloseMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
+        constraintProfileMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
 
         // Close delete message option
-        constraintDelBody.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                constraintDelBody.setVisibility(View.GONE);
-            }
-        });
+        constraintDelBody.setOnClickListener(view -> constraintDelBody.setVisibility(View.GONE));
 
         // Delete for only me
-        textViewDelMine.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        constraintDelBody.setVisibility(View.GONE);
-                        Toast.makeText(MessageActivity.this, "Message deleted for me.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                idKey = null;
-                listener = "no";
-            }
+        textViewDelMine.setOnClickListener(view -> {
+            refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    constraintDelBody.setVisibility(View.GONE);
+                    Toast.makeText(MessageActivity.this, "Message deleted for me.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            idKey = null;
+            listener = "no";
         });
 
         // Delete for others only
-        textViewDelOther.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
-                constraintDelBody.setVisibility(View.GONE);
-                Toast.makeText(MessageActivity.this, "Message deleted for "+otherName+".", Toast.LENGTH_SHORT).show();
+        textViewDelOther.setOnClickListener(view -> {
+            refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
+            constraintDelBody.setVisibility(View.GONE);
+            Toast.makeText(MessageActivity.this, "Message deleted for "+otherName+".", Toast.LENGTH_SHORT).show();
 
-                deleteMsgSeenKey();
-                listener = "no";
-            }
+            deleteMsgSeenKey();
+            listener = "no";
         });
 
         // Delete for everyone
-        textViewDelAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue();
-                refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
-                constraintDelBody.setVisibility(View.GONE);
-                Toast.makeText(MessageActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
-                refChecks.child(uID).child(user.getUid()).child("newMsgCount").setValue(0);
+        textViewDelAll.setOnClickListener(view -> {
 
-                deleteMsgSeenKey();                 // delete the push the un-deliver msg key from db
+            refMessages.child(userName).child(otherName).child(idKey).getRef().removeValue();
+            refMessages.child(otherName).child(userName).child(idKey).getRef().removeValue();
+            constraintDelBody.setVisibility(View.GONE);
+            Toast.makeText(MessageActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
+            refChecks.child(uID).child(user.getUid()).child("newMsgCount").setValue(0);
 
-                listener = "no";
-            }
+            deleteMsgSeenKey();                 // delete the push the un-deliver msg key from db
+            listener = "no";
         });
 
 
         // close and cancel reply and edit box
-        imageViewCancelReply.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int intGone = (int) 8;
-                cardViewReply.setVisibility(intGone);
-                listener = "no";
-                idKey = null;
-                editTextMessage.setText("");
-            }
+        imageViewCancelReply.setOnClickListener(view -> {
+
+            nameReply.setVisibility(View.GONE);
+            replyVisible.setVisibility(View.GONE);
+            cardViewReply.setVisibility((int) 8);   // 8 is for GONE
+
+            listener = "no";
+            idKey = null;
+            editTextMessage.setText("");
         });
 
 
@@ -323,7 +343,7 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply, textViewDelOther, editOrReplyIV);
+                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
         recyclerViewChat.setAdapter(adapter);
 
     }

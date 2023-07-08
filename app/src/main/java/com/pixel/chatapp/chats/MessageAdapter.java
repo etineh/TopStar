@@ -27,6 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 
+import org.w3c.dom.Text;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,13 +50,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     EditText editTextMsg;
     ConstraintLayout deleteBody;
     private CardView cardViewReply;
-    private TextView textViewReply, textViewDelOther;
+    private TextView textViewReply, textViewDelOther, nameReply, replyVisible;
     private ImageView editOrReplyIV;
 
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
                           ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther,
-                          ImageView editOrReplyIV) {
+                          ImageView editOrReplyIV, TextView nameReply, TextView replyVisible) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
@@ -65,6 +67,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.cardViewReply = cardViewReply;
         this.textViewDelOther = textViewDelOther;
         this.editOrReplyIV = editOrReplyIV;
+        this.nameReply = nameReply;
+        this.replyVisible = replyVisible;
 
         status = false;
         send = 1;
@@ -136,112 +140,108 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         // swipe method for reply
-        OnGestureRegisterListener onGestureRegisterListener = new OnGestureRegisterListener(mContext) {
-            public void onSwipeRight(View view) {
-                if(modelList.get(pos).getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
-                }
-            }
-            public void onSwipeLeft(View view) {
-                if(modelList.get(pos).getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
-                }
-            }
-            public void onClick(View view) {
-                // show chat options
-                if(holder.constraintChatTop.getVisibility() == View.GONE){
-                    holder.constraintChatTop.setVisibility(View.VISIBLE);
-                } else{
-                    holder.constraintChatTop.setVisibility(View.GONE);
-                }
-            }
-            public boolean onLongClick(View view) {
-                // Do something
-                return true;
-            }
-        };
-
-        holder.imageViewOptions.setOnTouchListener(onGestureRegisterListener);   // swipe position
-        holder.textViewShowMsg.setOnTouchListener(onGestureRegisterListener);   // swipe position
-        holder.constrSlide.setOnTouchListener(onGestureRegisterListener);   // swipe position
-
+//        OnGestureRegisterListener onGestureRegisterListener = new OnGestureRegisterListener(mContext) {
+//            public void onSwipeRight(View view) {
+//                if(modelList.get(pos).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+//                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
+//                }
+//            }
+//            public void onSwipeLeft(View view) {
+//                if(modelList.get(pos).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+//                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
+//                }
+//            }
+//            public void onClick(View view) {
+                    // Do something
+//            }
+//            public boolean onLongClick(View view) {
+//                // Do something
+//                return true;
+//            }
+//        };
+//
+//        holder.imageViewOptions.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.textViewShowMsg.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.constrSlide.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//
 
         //  -------- swipe code ends        ---------------
 
 
         // reply option
-        holder.imageViewReply.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.imageViewReply.setOnClickListener(view -> {
 
-                if(modelList.get(pos).getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
-                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
-                }
+            if(modelList.get(pos).getMsgStatus() == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+
+                editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder,
+                        pos, modelList.get(pos).getFrom(), "replying...", 1);
             }
         });
 
         // edit option
-        holder.imageViewEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.imageViewEdit.setOnClickListener(view -> {
 
-                if(modelList.get(pos).getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                } else {
-                    editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
-                    editTextMsg.setText(""+ modelList.get(pos).getMessage());
-                    editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
-                }
+            if(modelList.get(pos).getMsgStatus() == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
+                editTextMsg.setText(""+ modelList.get(pos).getMessage());
 
+                editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder,
+                        pos, modelList.get(pos).getFrom(), "editing...", 4);
             }
         });
 
         // delete option
-        holder.imageViewDel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.imageViewDel.setOnClickListener(view -> {
 
-                if(modelList.get(pos).getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            if(modelList.get(pos).getMsgStatus() == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            } else {
+                // user1 should be unable to delete user2 msg
+                if(!modelList.get(pos).getFrom().equals(userName)){
+                    textViewDelOther.setVisibility(View.GONE);
                 } else {
-                    // user1 should be unable to delete user2 msg
-                    if(!modelList.get(pos).getFrom().equals(userName)){
-                        textViewDelOther.setVisibility(View.GONE);
-                    } else {
-                        textViewDelOther.setVisibility(View.VISIBLE);
-                    }
-
-                    deleteBody.setVisibility(View.VISIBLE);
-                    // Send the idKey to messageActivity with LocalBroadcast
-                    Intent intent = new Intent("editMsg");
-                    intent.putExtra("id", modelList.get(pos).getIdKey());
-
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-
-                    holder.constraintChatTop.setVisibility(View.GONE);
+                    textViewDelOther.setVisibility(View.VISIBLE);
                 }
+
+                deleteBody.setVisibility(View.VISIBLE);
+                // Send the idKey to messageActivity with LocalBroadcast
+                Intent intent = new Intent("editMsg");
+                intent.putExtra("id", modelList.get(pos).getIdKey());
+
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+                holder.constraintChatTop.setVisibility(View.GONE);
+            }
+        });
+
+        //   show chat options
+        holder.cardViewChatBox.setOnClickListener(view -> {
+            if(holder.constraintChatTop.getVisibility() == View.GONE){
+                holder.constraintChatTop.setVisibility(View.VISIBLE);
+            } else{
+                holder.constraintChatTop.setVisibility(View.GONE);
             }
         });
 
         // close chat option
-        holder.constraintMsgContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
-                    holder.constraintChatTop.setVisibility(View.GONE);
-                }
+        holder.constraintMsgContainer.setOnClickListener(view -> {
+            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
+                holder.constraintChatTop.setVisibility(View.GONE);
             }
         });
 
@@ -360,7 +360,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         });
     }
 
-    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos, String replyFrom){
+    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos, String replyFrom, String status, int visibility){
 
         editText.requestFocus();
         // pop up keyboard
@@ -371,6 +371,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         cardViewReply.setVisibility(intValue);
         textViewReply.setText(modelList.get(pos).getMessage()); // set the reply text
         holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+        // set reply name and replying hint
+        replyVisible.setVisibility(View.VISIBLE);
+        replyVisible.setText(status);
+        nameReply.setVisibility(visibility);
+        if (modelList.get(pos).getFrom().equals(userName)) {
+            nameReply.setText("From You.");
+        }
+        else {
+            nameReply.setText(modelList.get(pos).getFrom() +
+                    " (@" +modelList.get(pos).getFrom()+")");
+        }
 
         // Send the idKey to messageActivity with LocalBroadcast
         Intent intent = new Intent("editMsg");

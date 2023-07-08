@@ -112,18 +112,18 @@ public class MainActivity extends AppCompatActivity {
             darkMoodSwitch.setChecked(true);
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             textLightAndDay.setText("Light");
-        } else textLightAndDay.setText("Dark");;
+        } else {
+            textLightAndDay.setText("Dark");
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        };
 
         darkMoodSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(nightMood){
-                    //activate the night moon
-                    if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){    // check out later
                         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                         sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
-                    }
                 } else{
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                     sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
@@ -152,14 +152,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // close the open option when background is clicked
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        v.setOnClickListener(view -> {
 
-                if (scrollMenu.getVisibility() == View.VISIBLE){
-                    scrollMenu.setVisibility(View.GONE);
-                    viewPager2General.setVisibility(View.VISIBLE);
-                }
+            if (scrollMenu.getVisibility() == View.VISIBLE){
+                scrollMenu.setVisibility(View.GONE);
+                viewPager2General.setVisibility(View.VISIBLE);
             }
         });
 

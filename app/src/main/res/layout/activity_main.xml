@@ -243,7 +243,6 @@
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
                     android:layout_marginTop="-5dp"
                     android:layout_marginBottom="3dp"
                     android:editable="false"
@@ -251,8 +250,10 @@
                     android:text="Home"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/imageViewHome"
                     app:layout_constraintStart_toStartOf="@+id/imageViewHome"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewHome" />
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewHome"
+                    app:layout_constraintVertical_bias="1.0" />
 
                 <TextView
                     android:id="@+id/textView5"
@@ -265,8 +266,8 @@
                     android:text="Games"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/imageViewGames"
+                    app:layout_constraintStart_toStartOf="@+id/imageViewGames"
                     app:layout_constraintTop_toBottomOf="@+id/imageViewGames" />
 
                 <TextView
@@ -275,13 +276,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-7dp"
-                    android:layout_marginEnd="10dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
                     android:text="More"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewMore"
+                    app:layout_constraintStart_toStartOf="@+id/imageViewMore"
                     app:layout_constraintTop_toBottomOf="@+id/imageViewMore" />
 
                 <TextView
@@ -292,11 +293,12 @@
                     android:layout_marginTop="-2dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
-                    android:text="Fund~p2p"
+                    android:text="Deposit"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/textView7"
+                    app:layout_constraintEnd_toEndOf="@+id/imageView12"
                     app:layout_constraintStart_toEndOf="@+id/textView5"
+                    app:layout_constraintStart_toStartOf="@+id/imageView12"
                     app:layout_constraintTop_toBottomOf="@+id/imageView12" />
 
                 <TextView
@@ -311,9 +313,10 @@
                     android:text="Players"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/textView5"
-                    app:layout_constraintStart_toEndOf="@+id/textView6"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewPlayers" />
+                    app:layout_constraintEnd_toEndOf="@+id/imageViewPlayers"
+                    app:layout_constraintStart_toStartOf="@+id/imageViewPlayers"
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewPlayers"
+                    app:layout_constraintVertical_bias="0.0" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/imageViewGames"
@@ -358,6 +361,21 @@
                     app:layout_constraintStart_toStartOf="@+id/imageViewHome">
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/textView15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-12dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@color/orange"
+                    android:paddingRight="2dp"
+                    android:paddingBottom="1dp"
+                    android:text="p2p"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    app:layout_constraintStart_toEndOf="@+id/imageView12"
+                    app:layout_constraintTop_toTopOf="@+id/imageView12" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
