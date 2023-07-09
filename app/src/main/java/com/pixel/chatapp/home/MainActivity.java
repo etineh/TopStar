@@ -6,26 +6,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.room.Database;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -161,13 +153,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // close the open option
-        menuClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        menuClose.setOnClickListener(view -> {
 
-                viewPager2General.setVisibility(View.VISIBLE);
-                scrollMenu.setVisibility(View.GONE);
-            }
+            viewPager2General.setVisibility(View.VISIBLE);
+            scrollMenu.setVisibility(View.GONE);
         });
 
         //logout

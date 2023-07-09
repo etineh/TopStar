@@ -83,19 +83,19 @@ public class ChatsListFragment extends Fragment {
 
 
         // get my userName
-            fReference = FirebaseDatabase.getInstance().getReference("Users");
-            fReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
+        fReference = FirebaseDatabase.getInstance().getReference("Users");
+        fReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    userName = snapshot.child(user.getUid()).child("userName").getValue().toString();
-                }
+                userName = snapshot.child(user.getUid()).child("userName").getValue().toString();
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+            }
+        });
 
         // add other users id to the list
         fReference = FirebaseDatabase.getInstance().getReference("ChatList").child(user.getUid());

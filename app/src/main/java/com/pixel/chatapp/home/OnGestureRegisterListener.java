@@ -1,4 +1,4 @@
-package com.pixel.chatapp.chats;
+package com.pixel.chatapp.home;
 
 import android.content.Context;
 import android.view.GestureDetector;
@@ -81,3 +81,38 @@ public abstract class OnGestureRegisterListener implements View.OnTouchListener 
 
     }
 }
+
+// usage code
+
+// swipe method for reply
+//        OnGestureRegisterListener onGestureRegisterListener = new OnGestureRegisterListener(mContext) {
+//            public void onSwipeRight(View view) {
+//                if(modelList.get(pos).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+//                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
+//                }
+//            }
+//            public void onSwipeLeft(View view) {
+//                if(modelList.get(pos).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+//                    editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder, pos, modelList.get(pos).getFrom());
+//                }
+//            }
+//            public void onClick(View view) {
+// Do something
+//            }
+//            public boolean onLongClick(View view) {
+//                // Do something
+//                return true;
+//            }
+//        };
+//
+//        holder.imageViewOptions.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.textViewShowMsg.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.constrSlide.setOnTouchListener(onGestureRegisterListener);   // swipe position
