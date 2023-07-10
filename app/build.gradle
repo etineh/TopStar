@@ -6,10 +6,9 @@ plugins {
 android {
     namespace 'com.pixel.chatapp'
     compileSdk 33
-
     defaultConfig {
         applicationId "com.pixel.chatapp"
-        minSdk 23
+        minSdk 24
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -54,6 +53,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-storage'
     implementation 'com.google.firebase:firebase-analytics'
+
+    // bug_fix.. change the sdk from + to 8.1.2. And minSDK to 24 above
+    implementation ('org.jitsi.react:jitsi-meet-sdk:8.1.2') { transitive = true }
 
 //    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
 

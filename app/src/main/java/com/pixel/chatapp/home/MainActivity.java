@@ -28,6 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     CardView cardViewSettings;
     SharedPreferences sharedPreferences;
     private Boolean nightMood;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         setUserDetails();
+
 
     }
 

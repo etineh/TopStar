@@ -167,7 +167,7 @@ public class SignUpActivity extends AppCompatActivity {
                         });
                     }
                     else{
-                        reference.child("Users").child(auth.getUid()).child("image").setValue(null);
+                        reference.child("Users").child(auth.getUid()).child("image").setValue("null");
                     }
 
                     Intent intent = new Intent(SignUpActivity.this, MainActivity.class);

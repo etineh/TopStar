@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/orange"
+    tools:context=".VideoCallComeIn">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/circleImageVideoIn"
+        android:layout_width="138dp"
+        android:layout_height="113dp"
+        android:src="@drawable/logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/outCallNameTV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Name"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/circleImageVideoIn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView92"
+        android:layout_width="73dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="164dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.482"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/outCallNameTV2"
+        app:srcCompat="@drawable/baseline_video_call_24" />
+
+    <TextView
+        android:id="@+id/textView272"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:text="Incoming Video Call"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/imageView92"
+        app:layout_constraintStart_toStartOf="@+id/imageView92"
+        app:layout_constraintTop_toBottomOf="@+id/imageView92" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ImageCancel2"
+        android:layout_width="61dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="56dp"
+        android:src="@drawable/baseline_call_end_24"
+        app:layout_constraintEnd_toStartOf="@+id/circleImageAnswer"
+        app:layout_constraintHorizontal_bias="0.231"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView272" />
+
+    <TextView
+        android:id="@+id/textView282"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Decline"
+        app:layout_constraintEnd_toEndOf="@+id/ImageCancel2"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="@+id/ImageCancel2"
+        app:layout_constraintTop_toBottomOf="@+id/ImageCancel2" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/circleImageAnswer"
+        android:layout_width="61dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="54dp"
+        android:layout_marginEnd="50dp"
+        android:src="@drawable/baseline_call_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView272" />
+
+    <TextView
+        android:id="@+id/textViewAnswer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Answer"
+        app:layout_constraintEnd_toEndOf="@+id/circleImageAnswer"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/circleImageAnswer"
+        app:layout_constraintTop_toBottomOf="@+id/circleImageAnswer" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

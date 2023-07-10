@@ -128,7 +128,7 @@
                 android:layout_height="25dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewVideoCall"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewTour"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/money_round" />
 
@@ -144,7 +144,7 @@
                 app:srcCompat="@drawable/baseline_videogame_asset_24" />
 
             <ImageView
-                android:id="@+id/imageViewVoiceCall"
+                android:id="@+id/imageViewCalls"
                 style="@style/BackgroundTintOrange"
                 android:layout_width="30dp"
                 android:layout_height="25dp"
@@ -162,8 +162,8 @@
                 android:text="Calls"
                 android:textSize="11sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/imageViewVoiceCall"
-                app:layout_constraintStart_toStartOf="@+id/imageViewVoiceCall" />
+                app:layout_constraintEnd_toEndOf="@+id/imageViewCalls"
+                app:layout_constraintStart_toStartOf="@+id/imageViewCalls" />
 
             <ImageView
                 android:id="@+id/imageViewOthers"
@@ -202,14 +202,14 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageViewGameMe" />
 
             <ImageView
-                android:id="@+id/imageViewVideoCall"
+                android:id="@+id/imageViewTour"
                 style="@style/BackgroundTintOrange"
                 android:layout_width="30dp"
                 android:layout_height="25dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="30dp"
                 android:scaleType="fitXY"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewVoiceCall"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewCalls"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/join_tour_24" />
 
@@ -221,8 +221,8 @@
                 android:text="Tour"
                 android:textSize="11sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/imageViewVideoCall"
-                app:layout_constraintStart_toStartOf="@+id/imageViewVideoCall" />
+                app:layout_constraintEnd_toEndOf="@+id/imageViewTour"
+                app:layout_constraintStart_toStartOf="@+id/imageViewTour" />
 
             <TextView
                 android:id="@+id/textView17"
@@ -342,7 +342,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingTop="6dp">
+                    android:paddingTop="2dp">
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardViewReply"

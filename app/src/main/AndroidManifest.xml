@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <application
         android:name=".FirebaseOffline"
@@ -16,6 +17,13 @@
         android:theme="@style/Theme.ChatApp"
         tools:targetApi="31">
         <activity
+            android:name=".VideoCallComingOut"
+            android:exported="false" />
+        <activity
+            android:name=".VideoCallComeIn"
+            android:parentActivityName=".chats.MessageActivity"
+            android:exported="false" />
+        <activity
             android:name=".contacts.UsersContactActivity"
             android:exported="false" />
         <activity
@@ -23,7 +31,7 @@
             android:exported="false" />
         <activity
             android:name=".chats.MessageActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".general.ProfileActivity"
             android:exported="false" />
@@ -35,7 +43,7 @@
             android:exported="false" />
         <activity
             android:name=".home.MainActivity"
-            android:exported="false"/>
+            android:exported="true" />
         <activity
             android:name=".signup_login.LoginActivity"
             android:exported="true">

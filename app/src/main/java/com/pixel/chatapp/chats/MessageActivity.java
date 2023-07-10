@@ -42,6 +42,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.VideoCallComeIn;
+import com.pixel.chatapp.VideoCallComingOut;
 import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;
@@ -61,7 +63,7 @@ public class MessageActivity extends AppCompatActivity {
     private ImageView imageViewBack;
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
-    private ImageView editOrReplyIV;
+    private ImageView editOrReplyIV, imageViewCalls;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply, nameReply, replyVisible;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
@@ -123,6 +125,7 @@ public class MessageActivity extends AppCompatActivity {
         editOrReplyIV = findViewById(R.id.editOrReplyImage);
         nameReply = findViewById(R.id.fromTV);
         replyVisible = findViewById(R.id.textReplying);
+        imageViewCalls = findViewById(R.id.imageViewCalls);
 
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
 
@@ -226,13 +229,9 @@ public class MessageActivity extends AppCompatActivity {
         }).attachToRecyclerView(recyclerViewChat);
 
 
-        // arrow back
-        imageViewBack.setOnClickListener(new View.OnClickListener() {   // return back when the arrow is clicked
-            @Override
-            public void onClick(View view) {
-//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                onBackPressed();
-            }
+        // return back when the arrow is clicked
+        imageViewBack.setOnClickListener(view -> {
+            onBackPressed();
         });
 
         // open user menu
@@ -294,8 +293,19 @@ public class MessageActivity extends AppCompatActivity {
             editTextMessage.setText("");
         });
 
+        // video call
+        imageViewCalls.setOnClickListener(view -> {
+            Intent intent = new Intent(MessageActivity.this, VideoCallComingOut.class);
+            intent.putExtra("uid", uID);
+            intent.putExtra("imageUri", imageUrl);
+            intent.putExtra("otherName", otherName);
+
+            startActivity(intent);
+        });
 
         getMessage();
+
+        alertMeWhenUserCallMe();
 
         setMsgSeen();
 
@@ -315,7 +325,9 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+
     //---------------------- methods -----------------
+
 
         // get messages
     private void getMessage(){
@@ -416,6 +428,33 @@ public class MessageActivity extends AppCompatActivity {
             checkAndSaveCounts_SendMsg();
         }
 
+    }
+
+    //  alert me when user is calling me
+    public void alertMeWhenUserCallMe() {
+        refChecks.child(uID).child(user.getUid()).child("vCall")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(!snapshot.exists()){
+                            refChecks.child(uID).child(user.getUid()).child("vCall").setValue("off");
+                        } else {
+                            if(snapshot.getValue().equals("on")){
+                                Intent intent = new Intent(MessageActivity.this, VideoCallComeIn.class);
+                                intent.putExtra("otherUid", uID);
+                                intent.putExtra("imageUri", imageUrl);
+                                startActivity(intent);
+
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     // delete key from MsgCheckDelivery db if user delete msg b4 it delivers.
@@ -930,6 +969,10 @@ public class MessageActivity extends AppCompatActivity {
 //    @Override
     protected void onResume() {
         refChecks.child(user.getUid()).child(uID).child("status").setValue(true);
+
+        // set responds to pend always      ------- will change later to check condition if user is still an active call
+        refChecks.child(user.getUid()).child(uID).child("vCallResp").setValue("pending");
+
 //        setIsOnline();
         runnerCheck = false;
         insideChat = "yes";

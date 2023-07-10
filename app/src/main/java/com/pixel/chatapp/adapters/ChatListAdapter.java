@@ -286,6 +286,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     }
                 });
 
+//        new MessageActivity().alertMeWhenUserCallMe(myUsersId, user);       // alert me when user is calling
 //
 //        // get user typing state
 //// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
