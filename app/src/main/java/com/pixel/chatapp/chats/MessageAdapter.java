@@ -2,6 +2,7 @@ package com.pixel.chatapp.chats;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,7 +99,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.setIsRecyclable(false);      // stop position from repeating itself
 
-        int pos = holder.getAdapterPosition();     //   to get the position of each msg
+        int pos = position;     //   to get the position of each msg
         holder.cardViewChatBox.setTag(pos);        //     to get cardView position
 
         long convert = (long) modelList.get(position).getTimeSent();
@@ -129,10 +130,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         } else if (intMsg == 700016) {
             numMsg = (int) R.drawable.baseline_grade_24;
         }
-
-        holder.seenMsg.setImageResource(numMsg);     // set msg status tick
-
         // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
+        holder.seenMsg.setImageResource(numMsg);     // set msg status tick
 
 
         //   get the number of new message I have
@@ -194,6 +193,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         //   show chat options
         holder.cardViewChatBox.setOnClickListener(view -> {
+            if(holder.constraintChatTop.getVisibility() == View.GONE){
+                holder.constraintChatTop.setVisibility(View.VISIBLE);
+            } else{
+                holder.constraintChatTop.setVisibility(View.GONE);
+            }
+        });
+        holder.textViewShowMsg.setOnClickListener(view -> {
             if(holder.constraintChatTop.getVisibility() == View.GONE){
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
             } else{
