@@ -94,7 +94,7 @@ public class VideoCallComingOut extends AppCompatActivity {
             @Override
             public void onFinish() {
                 refChecks.child(user.getUid()).child(otherUid).child("vCall").setValue("off");
-                Toast.makeText(VideoCallComingOut.this, "User not available", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(VideoCallComingOut.this, "User not available", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }.start();
@@ -114,7 +114,7 @@ public class VideoCallComingOut extends AppCompatActivity {
 
                             if (snapshot.getValue().equals("yes")){
 
-                                Toast.makeText(VideoCallComingOut.this, "User answer call", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(VideoCallComingOut.this, "Connecting...", Toast.LENGTH_SHORT).show();
                                 joinMeeting();
                                 refChecks.child(user.getUid()).child(otherUid).child("vCall").setValue("off");
 
@@ -143,10 +143,9 @@ public class VideoCallComingOut extends AppCompatActivity {
                     .setServerURL(new URL("https://meet.jit.si"))
                     .setRoom(user.getUid())
 //                    .setAudioMuted(false)
-//                    .setVideoMuted(false)
-//                    .setAudioOnly(false)
-//                    .setWelcomePageEnabled(false)
-//                    .setConfigOverride("requireDisplayName", true)
+//                    .setVideoMuted(true)
+//                    .setAudioOnly(true)
+                    .setConfigOverride("requireDisplayName", "Winner")
                     .build();
             JitsiMeetActivity.launch(VideoCallComingOut.this, options);
             finish();

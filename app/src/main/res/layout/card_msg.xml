@@ -213,6 +213,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:paddingLeft="3dp"
+                    android:paddingTop="2dp"
                     android:paddingRight="2dp"
                     app:layout_constraintBottom_toTopOf="@id/imageViewSeen"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewOptions">

@@ -973,7 +973,7 @@ public class MessageActivity extends AppCompatActivity {
         // set responds to pend always      ------- will change later to check condition if user is still an active call
         refChecks.child(user.getUid()).child(uID).child("vCallResp").setValue("pending");
 
-//        setIsOnline();
+        setIsOnline();
         runnerCheck = false;
         insideChat = "yes";
         super.onResume();

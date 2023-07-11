@@ -237,7 +237,7 @@
                         android:autoLink="web|phone|email"
                         android:gravity="start"
                         android:paddingLeft="10dp"
-                        android:paddingTop="2dp"
+                        android:paddingTop="4dp"
                         android:paddingEnd="10dp"
                         android:textColorLink="@color/orange"
                         android:textSize="16sp"

@@ -1,5 +1,7 @@
 package com.pixel.chatapp.chats;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.text.method.LinkMovementMethod;
@@ -191,6 +193,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // copy option
+        holder.imageViewCopy.setOnClickListener(view -> {
+
+            String selectedText = modelList.get(pos).getMessage();
+            ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", selectedText);
+
+            if (clipboard == null || clip == null) return;
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(mContext, "Text copied!", Toast.LENGTH_SHORT).show();
+            // for paste code
+//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+//                try {
+//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+//                } catch (Exception e) {
+//                    return;
+//                }
+        });
+
+
+
         //   show chat options
         holder.cardViewChatBox.setOnClickListener(view -> {
             if(holder.constraintChatTop.getVisibility() == View.GONE){
@@ -199,6 +223,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.constraintChatTop.setVisibility(View.GONE);
             }
         });
+
         holder.textViewShowMsg.setOnClickListener(view -> {
             if(holder.constraintChatTop.getVisibility() == View.GONE){
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
