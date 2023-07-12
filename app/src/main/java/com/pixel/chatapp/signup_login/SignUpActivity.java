@@ -146,22 +146,20 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 //  Create another StorageReference to get the url link where the image has been save in the storage
                                 StorageReference myStorageRef = storage.getReference(imageName);
-                                myStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        String filePath = uri.toString();       // convert img to string and save to FirebaseDataBase
-                                        reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                Toast.makeText(SignUpActivity.this, "Image saved successfully", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(SignUpActivity.this, "Image not saved successfully" + e, Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    }
+
+                                myStorageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String filePath = uri.toString();       // convert img to string and save to FirebaseDataBase
+                                    reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Toast.makeText(SignUpActivity.this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(SignUpActivity.this, "Image not saved successfully" + e, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 });
                             }
                         });

@@ -1,27 +1,33 @@
 package com.pixel.chatapp.chats;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,23 +36,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.devlomi.record_view.OnRecordListener;
+import com.devlomi.record_view.RecordButton;
+import com.devlomi.record_view.RecordView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.VideoCallComeIn;
 import com.pixel.chatapp.VideoCallComingOut;
+import com.pixel.chatapp.constants.AllConstants;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -85,7 +98,13 @@ public class MessageActivity extends AppCompatActivity {
     private long count = 0, offCount = 0, newMsgCount = 0;
     private Boolean runnerCheck = false;
     private Map<String, Integer> dateNum, dateMonth;
-    String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
+    private String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
+    private String audioPath;
+    private MediaRecorder mediaRecorder;
+    private Permission permission;
+
+    RecordView recordView;
+    RecordButton recordButton;
 
     // receive broadcast
     public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -134,6 +153,29 @@ public class MessageActivity extends AppCompatActivity {
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         modelList = new ArrayList<>();
 
+        //   audio permission
+        if(MessageActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)){
+
+            if(ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_DENIED
+            || ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED ){
+
+                ActivityCompat.requestPermissions(MessageActivity.this, new String[]
+                        {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE},
+                        AllConstants.RECORDING_REQUEST_CODE);
+            }
+
+        }
+
+        // audio swipe button option
+        recordView = (RecordView) findViewById(R.id.record_view);
+        recordButton = (RecordButton) findViewById(R.id.record_button);
+
+        recordButton.setRecordView(recordView);
+
+
+
 //        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
         refMessages = FirebaseDatabase.getInstance().getReference("Messages");
@@ -164,12 +206,13 @@ public class MessageActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("editMsg"));
 
+
         // send message
         circleSendMesaage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String message = editTextMessage.getText().toString();
+                String message = editTextMessage.getText().toString().trim();
                 if (!message.equals("")){
 
                     sendMessage(message);
@@ -205,9 +248,11 @@ public class MessageActivity extends AppCompatActivity {
                 inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
                 editTextMessage.requestFocus();
 
+                // fetch data
                 idKey = modelList.get(position).getIdKey();
-                listener = "reply";
                 replyFrom = modelList.get(position).getFrom();
+                String msg = modelList.get(position).getMessage();
+                listener = "reply";
 
                 // set reply name and replying hint
                 if (modelList.get(position).getFrom().equals(userName)) {
@@ -221,9 +266,10 @@ public class MessageActivity extends AppCompatActivity {
                 replyVisible.setVisibility(View.VISIBLE);
                 replyVisible.setText("replying...");
 
+                // set data
+                textViewReply.setText(msg);
+                editOrReplyIV.setImageResource(R.drawable.reply);
                 cardViewReply.setVisibility(View.VISIBLE);
-                textViewReply.setText(modelList.get(position).getMessage());    // set the reply text
-                editOrReplyIV.setImageResource(R.drawable.reply);               // set reply icon
 
                 return super.getMovementFlags(recyclerView, viewHolder);
             }
@@ -323,6 +369,8 @@ public class MessageActivity extends AppCompatActivity {
         getPreviousCounts();
 
         setIsOnline();
+
+        initView ();
 
     }
 
@@ -613,7 +661,7 @@ public class MessageActivity extends AppCompatActivity {
 
 
                 if(!snapshot.child("presence").exists()){
-                    textViewLastSeen.setText("GetMeh");
+                    textViewLastSeen.setText("WinnerChat");
                 }
                 else
                 {
@@ -678,7 +726,7 @@ public class MessageActivity extends AppCompatActivity {
                             {
                                 if(curDay - lastDay == 0)
                                 {
-                                    textViewLastSeen.setText("Last seen: Today, \n" + time.toLowerCase()+".");
+                                    textViewLastSeen.setText("Last seen: " + time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 1) {
                                     textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase()+".");
                                 } else if (curDay - lastDay == 2) {
@@ -916,6 +964,157 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+
+    // request voiceNote
+    private void initView (){
+
+        //IMPORTANT
+//        recordButton.setRecordView(recordView);
+
+
+        recordButton.setOnClickListener(view -> {
+            if (permission.isRecordingOk(MessageActivity.this))
+                if (permission.isStorageOk(MessageActivity.this))
+                    recordButton.setListenForRecord(true);
+                else permission.requestStorage(MessageActivity.this);
+            else permission.requestRecording(MessageActivity.this);
+
+        });
+
+
+        recordView.setOnRecordListener(new OnRecordListener() {
+            @Override
+            public void onStart() {
+                //Start Recording..
+                Log.i("RecordView", "onStart");
+
+                setUpRecording();
+
+                try {
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+                    Toast.makeText(MessageActivity.this, "Started record", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+//                messageLayout.setVisibility(View.GONE);   //  hide msg layout
+                recordView.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onCancel() {
+                //On Swipe To Cancel
+                Log.d("RecordView", "onCancel");
+
+                mediaRecorder.reset();
+                mediaRecorder.release();
+                File file = new File(getRecordFilePath());
+                if (file.exists())
+                    file.delete();
+
+//                recordView.setVisibility(View.GONE);
+//                messageLayout.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onFinish(long recordTime, boolean limitReached) {
+                //Stop Recording..
+                try {
+                    mediaRecorder.stop();
+                    mediaRecorder.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+//                recordView.setVisibility(View.GONE);
+//                messageLayout.setVisibility(View.VISIBLE);
+                textViewOtherUser.setText(getRecordFilePath());   // display their userName on top of their page
+
+                sendRecodingMessage();
+
+
+            }
+
+            @Override
+            public void onLessThanSecond() {
+                //When the record time is less than One Second
+                Log.d("RecordView", "onLessThanSecond");
+
+                mediaRecorder.reset();
+                mediaRecorder.release();
+
+                File file = new File(getRecordFilePath());
+                if (file.exists())
+                    file.delete();
+
+
+//                recordView.setVisibility(View.GONE);
+//                dataLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onLock() {
+
+            }
+        });
+
+    }
+
+    private void setUpRecording() {
+
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        mediaRecorder.setOutputFile(getRecordFilePath());
+
+        // bug fix by getRecordFilePath()
+//        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "/WinnerChat/Media/Recording");
+//        if (!file.exists())
+//            file.mkdirs();
+//        audioPath = file.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".3gp";
+//        mediaRecorder.setOutputFile(audioPath);
+    }
+
+    private String getRecordFilePath(){
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File audioDir = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        File file = new File(audioDir, "voice_note_" + ".3gp");
+        return file.getPath();
+    }
+
+    private void sendRecodingMessage(){
+        StorageReference storageReference = FirebaseStorage.getInstance()
+                .getReference("media/voice_note/" + user.getUid() + "/" + System.currentTimeMillis());
+
+        Uri audioFile = Uri.fromFile(new File(getRecordFilePath()));
+
+        storageReference.putFile(audioFile).addOnSuccessListener(success -> {
+            Task<Uri> audioUrl = success.getStorage().getDownloadUrl();
+
+            audioUrl.addOnCompleteListener(path -> {
+                if (path.isSuccessful()) {
+
+                    String url = path.getResult().toString();
+                    Log.i("Check ", "Successfully uploaded "+url) ;
+                    Toast.makeText(this, "Voice note sent" +url, Toast.LENGTH_SHORT).show();
+//                    if (chatID == null) {
+//                        createChat(url);
+//                    } else {
+//                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
+//                        MessageModel messageModel = new MessageModel(myID, hisID, url, util.currentData(), "recording");
+//                        databaseReference.push().setValue(messageModel);
+//                    }
+                }
+            });
+        });
+        
+    }
+
     // Turn on my online presence on
     public void setIsOnline(){
         refUsers.child(user.getUid()).child("presence").setValue(1);
@@ -977,6 +1176,43 @@ public class MessageActivity extends AppCompatActivity {
         runnerCheck = false;
         insideChat = "yes";
         super.onResume();
+    }
+
+
+    // permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+//            case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
+//                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    getGalleryImage();
+//                } else {
+//                    Toast.makeText(this, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
+//                }
+//
+//                break;
+
+            case  AllConstants.RECORDING_REQUEST_CODE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (this.permission.isStorageOk(MessageActivity.this))
+                        recordButton.setListenForRecord(true);
+                    else this.permission.requestStorage(MessageActivity.this);
+
+                } else
+                    Toast.makeText(this, "Recording permission denied", Toast.LENGTH_SHORT).show();
+                break;
+
+            case AllConstants.STORAGE_REQUEST_CODE:
+
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    recordButton.setListenForRecord(true);
+                else
+                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
+                break;
+
+        }
     }
 
 }
