@@ -82,7 +82,7 @@ public class MessageActivity extends AppCompatActivity {
     private TextView textViewOtherUser, textViewLastSeen, textViewTyping, textViewReply, nameReply, replyVisible;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
-    private CircleImageView circleSendMesaage;
+    private CircleImageView circleSendMessage;
     private CardView cardViewMsg, cardViewReply;
     String userName, otherName, uID, imageUrl;
     DatabaseReference refMessages, refChecks, refUsers, refMsgCheck, refMsgSeen;
@@ -101,7 +101,7 @@ public class MessageActivity extends AppCompatActivity {
     private String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
     private String audioPath;
     private MediaRecorder mediaRecorder;
-    private Permission permission;
+    private Permission permissions;
 
     RecordView recordView;
     RecordButton recordButton;
@@ -126,7 +126,7 @@ public class MessageActivity extends AppCompatActivity {
         imageViewBack = findViewById(R.id.imageViewBackArrow);
         textViewOtherUser = findViewById(R.id.textViewName);
         editTextMessage = findViewById(R.id.editTextMessage);
-        circleSendMesaage = findViewById(R.id.fab);
+        circleSendMessage = findViewById(R.id.fab);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu2);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel);
         constraintProfileMenu = findViewById(R.id.constraintProfileMenu);
@@ -153,28 +153,10 @@ public class MessageActivity extends AppCompatActivity {
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
         modelList = new ArrayList<>();
 
-        //   audio permission
-        if(MessageActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)){
-
-            if(ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.RECORD_AUDIO)
-                    == PackageManager.PERMISSION_DENIED
-            || ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_DENIED ){
-
-                ActivityCompat.requestPermissions(MessageActivity.this, new String[]
-                        {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE},
-                        AllConstants.RECORDING_REQUEST_CODE);
-            }
-
-        }
-
         // audio swipe button option
         recordView = (RecordView) findViewById(R.id.record_view);
         recordButton = (RecordButton) findViewById(R.id.record_button);
-
         recordButton.setRecordView(recordView);
-
-
 
 //        sharedPreferences = this.getSharedPreferences("MessageCount", Context.MODE_PRIVATE); // SharePreference Storage
 
@@ -208,7 +190,7 @@ public class MessageActivity extends AppCompatActivity {
 
 
         // send message
-        circleSendMesaage.setOnClickListener(new View.OnClickListener() {
+        circleSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -225,56 +207,6 @@ public class MessageActivity extends AppCompatActivity {
                 }
             }
         });
-
-        // swiping for reply
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-
-                int position = viewHolder.getAdapterPosition();
-
-                // pop up keyboard
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
-                editTextMessage.requestFocus();
-
-                // fetch data
-                idKey = modelList.get(position).getIdKey();
-                replyFrom = modelList.get(position).getFrom();
-                String msg = modelList.get(position).getMessage();
-                listener = "reply";
-
-                // set reply name and replying hint
-                if (modelList.get(position).getFrom().equals(userName)) {
-                    nameReply.setText("From You.");
-                }
-                else {
-                    nameReply.setText(modelList.get(position).getFrom() +
-                            " (@" +modelList.get(position).getFrom()+")");
-                }
-                nameReply.setVisibility(View.VISIBLE);
-                replyVisible.setVisibility(View.VISIBLE);
-                replyVisible.setText("replying...");
-
-                // set data
-                textViewReply.setText(msg);
-                editOrReplyIV.setImageResource(R.drawable.reply);
-                cardViewReply.setVisibility(View.VISIBLE);
-
-                return super.getMovementFlags(recyclerView, viewHolder);
-            }
-        }).attachToRecyclerView(recyclerViewChat);
-
 
         // return back when the arrow is clicked
         imageViewBack.setOnClickListener(view -> {
@@ -371,6 +303,10 @@ public class MessageActivity extends AppCompatActivity {
         setIsOnline();
 
         initView ();
+
+        swipeOptions();
+
+        checkPermissions();
 
     }
 
@@ -839,7 +775,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-        // add user id to db when user start typing and reset newMsgCount to 0
+        // add user id to db when user start typing and reset newMsgCount to 0  // interact with send and record buttons
     public void addUserWhenTyping(){
         editTextMessage.addTextChangedListener(new TextWatcher() {
             @Override
@@ -849,7 +785,14 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                //  interact with both send and record buttons
+                if(charSequence.length() > 0){
+                    circleSendMessage.setVisibility(View.VISIBLE);
+                    recordButton.setVisibility(View.INVISIBLE);
+                } else {
+                    circleSendMessage.setVisibility(View.GONE);
+                    recordButton.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -964,6 +907,74 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    // swiping for reply
+    private void swipeOptions(){
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+
+                int position = viewHolder.getAdapterPosition();
+
+                // pop up keyboard
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
+                editTextMessage.requestFocus();
+
+                // fetch data
+                idKey = modelList.get(position).getIdKey();
+                replyFrom = modelList.get(position).getFrom();
+                String msg = modelList.get(position).getMessage();
+                listener = "reply";
+
+                // set reply name and replying hint
+                if (modelList.get(position).getFrom().equals(userName)) {
+                    nameReply.setText("From You.");
+                }
+                else {
+                    nameReply.setText(modelList.get(position).getFrom() +
+                            " (@" +modelList.get(position).getFrom()+")");
+                }
+                nameReply.setVisibility(View.VISIBLE);
+                replyVisible.setVisibility(View.VISIBLE);
+                replyVisible.setText("replying...");
+
+                // set data
+                textViewReply.setText(msg);
+                editOrReplyIV.setImageResource(R.drawable.reply);
+                cardViewReply.setVisibility(View.VISIBLE);
+
+                return super.getMovementFlags(recyclerView, viewHolder);
+            }
+        }).attachToRecyclerView(recyclerViewChat);
+
+    }
+
+    //  check for permission status
+    private void checkPermissions(){
+        //   audio permission
+        if(MessageActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)){
+
+            if(ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_DENIED
+                    || ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED ){
+
+                ActivityCompat.requestPermissions(MessageActivity.this, new String[]
+                                {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE},
+                        AllConstants.RECORDING_REQUEST_CODE);
+            }
+        }
+    }
 
     // request voiceNote
     private void initView (){
@@ -971,15 +982,15 @@ public class MessageActivity extends AppCompatActivity {
         //IMPORTANT
 //        recordButton.setRecordView(recordView);
 
-
-        recordButton.setOnClickListener(view -> {
-            if (permission.isRecordingOk(MessageActivity.this))
-                if (permission.isStorageOk(MessageActivity.this))
-                    recordButton.setListenForRecord(true);
-                else permission.requestStorage(MessageActivity.this);
-            else permission.requestRecording(MessageActivity.this);
-
-        });
+//        recordButton.setListenForRecord(false);
+//        recordButton.setOnClickListener(view -> {
+//            if (permissions.isRecordingOk(MessageActivity.this))
+//                if (permissions.isStorageOk(MessageActivity.this))
+//                    recordButton.setListenForRecord(true);
+//                else permissions.requestStorage(MessageActivity.this);
+//            else permissions.requestRecording(MessageActivity.this);
+//
+//        });
 
 
         recordView.setOnRecordListener(new OnRecordListener() {
@@ -998,9 +1009,8 @@ public class MessageActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-//                messageLayout.setVisibility(View.GONE);   //  hide msg layout
-                recordView.setVisibility(View.VISIBLE);
-
+                editTextMessage.setVisibility(View.INVISIBLE);   //  hide msg edit text
+                recordView.setVisibility(View.VISIBLE);     // show swipe mode
             }
 
             @Override
@@ -1014,9 +1024,8 @@ public class MessageActivity extends AppCompatActivity {
                 if (file.exists())
                     file.delete();
 
-//                recordView.setVisibility(View.GONE);
-//                messageLayout.setVisibility(View.VISIBLE);
-
+                editTextMessage.setVisibility(View.VISIBLE);    //  hide msg edit text
+                recordView.setVisibility(View.GONE);            // show swipe mode
             }
 
             @Override
@@ -1029,13 +1038,10 @@ public class MessageActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-//                recordView.setVisibility(View.GONE);
-//                messageLayout.setVisibility(View.VISIBLE);
-                textViewOtherUser.setText(getRecordFilePath());   // display their userName on top of their page
+                editTextMessage.setVisibility(View.VISIBLE);    //  hide msg edit text
+                recordView.setVisibility(View.GONE);            // show swipe mode
 
                 sendRecodingMessage();
-
-
             }
 
             @Override
@@ -1050,9 +1056,8 @@ public class MessageActivity extends AppCompatActivity {
                 if (file.exists())
                     file.delete();
 
-
-//                recordView.setVisibility(View.GONE);
-//                dataLayout.setVisibility(View.VISIBLE);
+                editTextMessage.setVisibility(View.VISIBLE);    //  hide msg edit text
+                recordView.setVisibility(View.GONE);            // show swipe mode
             }
 
             @Override
@@ -1172,7 +1177,7 @@ public class MessageActivity extends AppCompatActivity {
         // set responds to pend always      ------- will change later to check condition if user is still an active call
         refChecks.child(user.getUid()).child(uID).child("vCallResp").setValue("pending");
 
-        setIsOnline();
+//        setIsOnline();
         runnerCheck = false;
         insideChat = "yes";
         super.onResume();
@@ -1196,21 +1201,25 @@ public class MessageActivity extends AppCompatActivity {
 
             case  AllConstants.RECORDING_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (this.permission.isStorageOk(MessageActivity.this))
+                    if (ContextCompat.checkSelfPermission(MessageActivity.this,
+                            Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
                         recordButton.setListenForRecord(true);
-                    else this.permission.requestStorage(MessageActivity.this);
+                    else {
+                        ActivityCompat.requestPermissions(MessageActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, AllConstants.STORAGE_REQUEST_CODE);
+                    };
 
                 } else
                     Toast.makeText(this, "Recording permission denied", Toast.LENGTH_SHORT).show();
                 break;
 
-            case AllConstants.STORAGE_REQUEST_CODE:
-
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    recordButton.setListenForRecord(true);
-                else
-                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
-                break;
+//            case AllConstants.STORAGE_REQUEST_CODE:
+//
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+//                    recordButton.setListenForRecord(true);
+//                else
+//                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
+//                break;
 
         }
     }

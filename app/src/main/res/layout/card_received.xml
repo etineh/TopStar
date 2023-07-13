@@ -39,7 +39,7 @@
         android:id="@+id/constraintBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="100dp"
+        android:layout_marginEnd="80dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintNewMsg2">
@@ -234,6 +234,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:layout_marginTop="2dp"
                         android:autoLink="web|phone|email"
                         android:gravity="start"
                         android:paddingLeft="10dp"
@@ -249,16 +250,52 @@
 
                     <ImageView
                         android:id="@+id/imageViewSeen2"
-                        style="@style/BackColorFullBlack"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_marginEnd="5dp"
-                        android:layout_marginBottom="2dp"
-                        android:tint="@color/orange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="@+id/textViewReceived"
-                        app:layout_constraintEnd_toStartOf="@+id/textViewChatTime2"
-                        app:srcCompat="@drawable/sent_pin" />
+                        app:srcCompat="@drawable/add_contact"
+                        tools:layout_editor_absoluteX="2dp" />
+
+                    <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
+                        android:id="@+id/voicePlayerView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="5dp"
+                        android:visibility="gone"
+                        app:enableVisualizer="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0"
+                        app:playPauseBackgroundColor="#ff7700"
+                        app:playPauseCornerRadius="100"
+                        app:playProgressbarColor="#ff7700"
+                        app:progressTimeColor="#000"
+                        app:seekBarProgressColor="@color/white"
+                        app:seekBarThumbColor="#FFC107"
+                        app:shareBackgroundColor="#ff7700"
+                        app:shareCornerRadius="100"
+                        app:shareText="SHARE ME"
+                        app:showShareButton="true"
+                        app:showTiming="true"
+                        app:timingBackgroundColor="@color/white"
+                        app:viewBackground="@color/trans"
+                        app:viewCornerRadius="100"
+                        app:visualizationNotPlayedColor="#727171"
+                        app:visualizationPlayedColor="#ff7700" />
+
+                    <!--                    <ImageView-->
+                    <!--                        android:id="@+id/imageViewSeen2"-->
+                    <!--                        style="@style/BackColorFullBlack"-->
+                    <!--                        android:layout_width="12dp"-->
+                    <!--                        android:layout_height="12dp"-->
+                    <!--                        android:layout_marginEnd="5dp"-->
+                    <!--                        android:layout_marginBottom="2dp"-->
+                    <!--                        android:tint="@color/orange"-->
+                    <!--                        android:visibility="gone-->
+                    <!--                        app:srcCompat="@drawable/sent_pin" />-->
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

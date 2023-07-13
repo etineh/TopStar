@@ -273,6 +273,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewEdit = itemView.findViewById(R.id.imageViewEdit);
                 imageViewPin = itemView.findViewById(R.id.imageViewPinMsg);
                 imageViewForward = itemView.findViewById(R.id.imageViewForward);
+                imageViewReact = itemView.findViewById(R.id.iVReact);
                 imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewDel2);
                 editNotify = itemView.findViewById(R.id.textViewEditSender);
@@ -354,7 +355,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         });
     }
 
-    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder, int pos, String replyFrom, String status, int visibility){
+    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder,
+                              int pos, String replyFrom, String status, int visibility){
 
         editText.requestFocus();
         // pop up keyboard

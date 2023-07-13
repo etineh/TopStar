@@ -39,7 +39,7 @@
         android:id="@+id/constraint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="80dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintNewMsg">
@@ -47,7 +47,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintChatTop"
             style="@style/card"
-            android:layout_width="220dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:visibility="gone"
@@ -61,7 +61,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="13dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewCopyText"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_forward_24" />
@@ -84,7 +84,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="13dp"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewForward"
@@ -98,7 +98,7 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="13dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewDel2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/copy" />
@@ -108,11 +108,24 @@
                 style="@style/BackgroundTintOrange"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewEdit"
+                android:layout_marginEnd="13dp"
+                app:layout_constraintEnd_toStartOf="@+id/iVReact"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/reply" />
+
+            <ImageView
+                android:id="@+id/iVReact"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="13dp"
+                app:layout_constraintEnd_toStartOf="@+id/imageViewEdit"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_add_reaction_24" />
 
             <ImageView
                 android:id="@+id/imageViewEdit"
@@ -120,7 +133,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="13dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageViewPinMsg"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_mode_edit_24" />
@@ -236,6 +249,38 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
+                        android:id="@+id/voicePlayerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="30dp"
+                        android:visibility="gone"
+                        app:enableVisualizer="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.2"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0"
+                        app:playPauseBackgroundColor="#ff7700"
+                        app:playPauseCornerRadius="100"
+                        app:playProgressbarColor="#ff7700"
+                        app:progressTimeColor="#000"
+                        app:seekBarProgressColor="@color/white"
+                        app:seekBarThumbColor="#FFC107"
+                        app:shareBackgroundColor="#ff7700"
+                        app:shareCornerRadius="100"
+                        app:shareText="SHARE ME"
+                        app:showShareButton="true"
+                        app:showTiming="true"
+                        app:timingBackgroundColor="@color/cool_orange"
+                        app:viewBackground="@color/trans"
+                        app:viewCornerRadius="100"
+                        app:visualizationNotPlayedColor="@color/cool_orange"
+                        app:visualizationPlayedColor="#ff7700" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
