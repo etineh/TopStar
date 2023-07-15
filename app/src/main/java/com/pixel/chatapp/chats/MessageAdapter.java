@@ -155,7 +155,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // ----------------- Voice Note setting
         int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
         holder.voicePlayerView.setVisibility(visible);
-//        holder.circleDownload.setVisibility(visible);
 
 
         // ----------------- reply msg setting
@@ -313,7 +312,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if (getVoiceNote(mContext) != null){
             for (Map<String, Object> mapAccess : getVoiceNote(mContext)) {
 
-//                Map<String, Object> mapData = new HashMap<>();
                 String input = mapAccess.toString();    // convert each map to string value
 
                  // Remove the curly braces at the start and end of the string
@@ -326,7 +324,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     String key = keyValue[0];
                     String value = keyValue[1];
 
-                    // check if vn map key == position key, then set vn.
+                    // check if vn map key == position key, then set vn and download icon visibility.
                     if(key.equals(modelList.get(pos).getIdKey()) ){
                         modelList.get(pos).setVoicenote(value);
                         String vnPath = modelList.get(pos).getVoicenote();
