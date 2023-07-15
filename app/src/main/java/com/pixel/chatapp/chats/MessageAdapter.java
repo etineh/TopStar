@@ -89,7 +89,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
     private static final String KEY_LIST = "myList";
-    private Map<String, Object> mapList;
+    private List<Map<String, Object>> mapList;
 
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
@@ -292,7 +292,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // set the voice note
         // fetch the downloaded audio to voicePlayer
         if (getVoiceNote(mContext) != null){
-            for (String mapAccess : getVoiceNote(mContext)) {
+            for (Map<String, Object> mapAccess : getVoiceNote(mContext)) {
                 // bug fix  ----  retrieving data from gson map, you need Object variable
 //            if(mapAccess.containsKey(pos)){
 //                Object vnPath = mapAccess.get(pos).toString();
@@ -304,12 +304,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 String id = modelList.get(pos).getIdKey();
                 System.out.println("int" + mapAccess);
             }
-            System.out.println("all list " + getVoiceNote(mContext));
         } else {
             System.out.println("all list " + getVoiceNote(mContext));
         }
 
 
+//        System.out.println("all list " + getVoiceNote(mContext));
 
     }
 
@@ -317,26 +317,25 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     // ---------------------- methods ---------------------------
 
     // save voice note to local storage sharePreference & json
-    public static void saveVoiceNoteToGson(Context context, Map<String, Object> mapList) {
+    public void saveVoiceNoteToGson(Context context, List<Map<String, Object>> mapList) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(VOICE_NOTE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
+
         String json = gson.toJson(mapList);     // save the map into gson and save the gson to the sharePre.
         editor.putString(KEY_LIST, json);
         editor.apply();
     }
 
     //  get voice note from sharePreference via gson
-    public Map<String, Object> getVoiceNote(Context context) {
+    public List<Map<String, Object>> getVoiceNote(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(VOICE_NOTE, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString(KEY_LIST, "");
         Gson gson = new Gson();
-        if (mapList == null){
-            mapList = new HashMap<>();
-        }
-        Type type = new TypeToken<Map<String, Object>>() {}.getType();    // fet out the array list from gson
+        Type type = new TypeToken<List<Map<String, Object>>>() {}.getType();
         return gson.fromJson(json, type);
     }
+
 
     private String getRecordFilePath(){
         ContextWrapper contextWrapper = new ContextWrapper(mContext);
@@ -382,17 +381,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                                }
                                 if(finalProgress == length) {
 
-                                    //  bug fix --- let gson mapList be the new HashMap so it wont generate new arraylist
-                                    if(getVoiceNote(mContext) == null){
-                                        mapList = new HashMap<>();
-                                    } else {
-                                    mapList = getVoiceNote(mContext);
+                                    //  bug fix --- let gson arraylist be the new arraylist so it wont generate new arraylist
 
+                                    if(getVoiceNote(mContext) == null){
+                                        mapList = new ArrayList<>();
+                                    } else {
+                                        mapList = getVoiceNote(mContext);
                                     }
 
+                                    // Create HashMap and add it to the ArrayList
+                                    Map<String, Object> mapVN = new HashMap<>();
                                     String id = modelList.get(pos).getIdKey();
                                     //  set the id as key and file path as the value
-                                    mapList.put(id, getRecordFilePath());
+                                    mapVN.put(id, getRecordFilePath());
+                                    mapList.add(mapVN);
 
                                     modelList.get(pos).setVoicenote(getRecordFilePath());   // change later
 
