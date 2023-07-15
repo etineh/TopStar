@@ -261,10 +261,10 @@
                         app:enableVisualizer="false"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.2"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.0"
+                        app:layout_constraintVertical_bias="1.0"
                         app:playPauseBackgroundColor="#ff7700"
                         app:playPauseCornerRadius="100"
                         app:playProgressbarColor="#ff7700"
@@ -274,13 +274,44 @@
                         app:shareBackgroundColor="#ff7700"
                         app:shareCornerRadius="100"
                         app:shareText="SHARE ME"
-                        app:showShareButton="true"
+                        app:showShareButton="false"
                         app:showTiming="true"
                         app:timingBackgroundColor="@color/cool_orange"
-                        app:viewBackground="@color/trans"
+                        app:viewBackground="@color/amp_transparent"
                         app:viewCornerRadius="100"
                         app:visualizationNotPlayedColor="@color/cool_orange"
-                        app:visualizationPlayedColor="#ff7700" />
+                        app:visualizationPlayedColor="#ff7700">
+
+                    </me.jagar.chatvoiceplayerlibrary.VoicePlayerView>
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/cirleDownload"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/msg_count"
+                        android:padding="3dp"
+                        android:src="@drawable/baseline_download_24"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@id/progressBarP6"
+                        app:layout_constraintEnd_toEndOf="@+id/progressBarP6"
+                        app:layout_constraintStart_toStartOf="@+id/progressBarP6"
+                        app:layout_constraintTop_toTopOf="@id/progressBarP6"
+                        app:layout_constraintVertical_bias="0.5" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBarP6"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="55dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/progress_circle"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:visibility="invisible"
+                        app:layout_constraintBottom_toBottomOf="@id/voicePlayerView"
+                        app:layout_constraintStart_toStartOf="@id/voicePlayerView"
+                        app:layout_constraintTop_toTopOf="@id/voicePlayerView" />
+
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

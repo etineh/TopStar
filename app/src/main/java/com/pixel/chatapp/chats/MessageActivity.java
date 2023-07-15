@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
@@ -51,6 +52,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.VideoCallComeIn;
@@ -68,6 +70,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -102,6 +105,7 @@ public class MessageActivity extends AppCompatActivity {
     private String audioPath;
     private MediaRecorder mediaRecorder;
     private Permission permissions;
+
 
     RecordView recordView;
     RecordButton recordButton;
@@ -197,7 +201,7 @@ public class MessageActivity extends AppCompatActivity {
                 String message = editTextMessage.getText().toString().trim();
                 if (!message.equals("")){
 
-                    sendMessage(message);
+                    sendMessage(message, 8, "");
                     editTextMessage.setText("");
                     listener = "no";
                     scrollPosition = 0;
@@ -286,11 +290,11 @@ public class MessageActivity extends AppCompatActivity {
 
         alertMeWhenUserCallMe();
 
-        setMsgSeen();
+//        setMsgSeen();
 
-        tellUserAmTyping();
+        tellUserAmTyping_AddUser();
 
-        addUserWhenTyping();
+        reloadUnsentMsg();
 
         getMyUserTyping();
 
@@ -302,12 +306,11 @@ public class MessageActivity extends AppCompatActivity {
 
         setIsOnline();
 
-        initView ();
+        voiceNote ();
 
-        swipeOptions();
+        swipeReplyOptions();
 
         checkPermissions();
-
     }
 
 
@@ -326,6 +329,7 @@ public class MessageActivity extends AppCompatActivity {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()){
 
                     MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                    messageModel.setIdKey(snapshot1.getKey());  // set msg keys to the adaptor
                     modelList.add(messageModel);
                     adapter.notifyDataSetChanged();
                 }
@@ -362,16 +366,16 @@ public class MessageActivity extends AppCompatActivity {
         refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
 
-    public void sendMessage(String message){
+    public void sendMessage(String message, int type, String vn){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
-        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
+//        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
         int visibility = 8;
         int msgStatus = 700024;
 
         if(networkListener == "no"){
             msgStatus = 700033;
-            refMsgCheck.child(user.getUid()).push().child("loadKey").setValue(key);     // push the un-deliver msg key to db
+//            refMsgCheck.child(user.getUid()).push().child("loadKey").setValue(key);     // push the un-deliver msg key to db
         }
 
         Map<String, Object> messageMap = new HashMap<>();
@@ -382,22 +386,26 @@ public class MessageActivity extends AppCompatActivity {
             messageMap.put("replyFrom", replyFrom);
             visibility = 1;
         } else if (listener == "yes") {
-            key = idKey;
+//            key = idKey;
             messageMap.put("edit", "edited");
         }
 
-        messageMap.put("idKey", key);
+        messageMap.put("type", type);
+//        messageMap.put("idKey", key);
         messageMap.put("message", message);
+        messageMap.put("voicenote", vn);
         messageMap.put("msgStatus", msgStatus);
-        messageMap.put( "timeSent", ServerValue.TIMESTAMP);
         messageMap.put("visibility", visibility);
+        messageMap.put( "timeSent", ServerValue.TIMESTAMP);
 
         //  now save the message to the database
-        refMessages.child(userName).child(otherName).child(key).setValue(messageMap);
-        refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
+//        refMessages.child(userName).child(otherName).child(key).setValue(messageMap);
+//        refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
+
+        refMessages.child(userName).child(otherName).push().setValue(messageMap);
 
         // send delivery id to MsgSeen
-        refMsgSeen.child(uID).child(user.getUid()).push().child("seenKey").setValue(key);
+//        refMsgSeen.child(uID).child(user.getUid()).push().child("seenKey").setValue(key);
 
         if (listener == "no" || listener == "reply")
         {
@@ -711,26 +719,17 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    // Alert the DB when I start typing, to notify the receiver
     // clear off msg load tick when network restores.
-    private void tellUserAmTyping(){
+    private void reloadUnsentMsg(){
         handler = new Handler();
         runnable = new Runnable() {
             @Override
             public void run() {
 
-                String message2 = editTextMessage.getText().toString();
-
-                if(!message2.equals("")){
-                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(1);
-                } else {
-                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
-                }
-
                 // clear off msg load tick when network restores.
                 if(checkNetworkConnection()){
                     refChecks.child(uID).child(user.getUid()).child("offCount").setValue(0);
-                    refreshMsgDeliveryIcon();
+//                    refreshMsgDeliveryIcon();   // reload unsentMsg
                     networkListener = "yes";
                 } else {
                     networkListener = "no";
@@ -746,37 +745,9 @@ public class MessageActivity extends AppCompatActivity {
         handler.post(runnable);
     }
 
-        // show when user is typing
-    public void getMyUserTyping()
-    {
-        refChecks.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (!snapshot.child(uID).child("typing").exists()){
-                    refChecks.child(user.getUid()).child(uID)
-                            .child("typing").setValue(0);
-                }
-                else {
-
-                    long typing = (long) snapshot.child(uID).child("typing").getValue();
-
-                    if(typing == 1){
-                        textViewTyping.setText("typing...");
-                    } else{
-                        textViewTyping.setText("");
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-        // add user id to db when user start typing and reset newMsgCount to 0  // interact with send and record buttons
-    public void addUserWhenTyping(){
+    // add user id to db when user start typing and (reset newMsgCount to 0  --- change later)
+    // Alert the DB when I start typing, to notify the receiver     // interact with send and record buttons
+    public void tellUserAmTyping_AddUser(){
         editTextMessage.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -789,9 +760,11 @@ public class MessageActivity extends AppCompatActivity {
                 if(charSequence.length() > 0){
                     circleSendMessage.setVisibility(View.VISIBLE);
                     recordButton.setVisibility(View.INVISIBLE);
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(1);
                 } else {
                     circleSendMessage.setVisibility(View.GONE);
                     recordButton.setVisibility(View.VISIBLE);
+                    refChecks.child(uID).child(user.getUid()).child("typing").setValue(0);
                 }
             }
 
@@ -868,6 +841,35 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
+    // show when user is typing
+    public void getMyUserTyping()
+    {
+        refChecks.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (!snapshot.child(uID).child("typing").exists()){
+                    refChecks.child(user.getUid()).child(uID)
+                            .child("typing").setValue(0);
+                }
+                else {
+
+                    long typing = (long) snapshot.child(uID).child("typing").getValue();
+
+                    if(typing == 1){
+                        textViewTyping.setText("typing...");
+                    } else{
+                        textViewTyping.setText("");
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     //  Get all previous counts of unreadMsg and offCount and newMsgCount
     private void getPreviousCounts(){
 
@@ -908,7 +910,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // swiping for reply
-    private void swipeOptions(){
+    private void swipeReplyOptions(){
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -977,7 +979,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // request voiceNote
-    private void initView (){
+    private void voiceNote (){
 
         //IMPORTANT
 //        recordButton.setRecordView(recordView);
@@ -1102,11 +1104,12 @@ public class MessageActivity extends AppCompatActivity {
             Task<Uri> audioUrl = success.getStorage().getDownloadUrl();
 
             audioUrl.addOnCompleteListener(path -> {
-                if (path.isSuccessful()) {
 
-                    String url = path.getResult().toString();
-                    Log.i("Check ", "Successfully uploaded "+url) ;
-                    Toast.makeText(this, "Voice note sent" +url, Toast.LENGTH_SHORT).show();
+                String url = path.getResult().toString();
+
+                sendMessage("", 1, url);    // 1 is for visibility
+
+//                if (path.isSuccessful()) {
 //                    if (chatID == null) {
 //                        createChat(url);
 //                    } else {
@@ -1114,7 +1117,7 @@ public class MessageActivity extends AppCompatActivity {
 //                        MessageModel messageModel = new MessageModel(myID, hisID, url, util.currentData(), "recording");
 //                        databaseReference.push().setValue(messageModel);
 //                    }
-                }
+//                }
             });
         });
         

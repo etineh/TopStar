@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.chats.MessageActivity;
 
 public class SettingsActivity extends AppCompatActivity {
 

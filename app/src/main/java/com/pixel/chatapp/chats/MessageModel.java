@@ -14,10 +14,15 @@ public class MessageModel {
     private long timeSent;
     private int visibility;
     private  int msgStatus;
+
+    private int type;
+    private String voicenote;
+
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit, int visibility, String replyMsg, int msgStatus) {
+    public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
+                        int visibility, String replyMsg, int msgStatus, int type, String voicenote) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -27,6 +32,8 @@ public class MessageModel {
         this.replyMsg = replyMsg;
         this.msgStatus = msgStatus;
         this.replyFrom = replyFrom;
+        this.type = type;
+        this.voicenote = voicenote;
     }
     public String getMessage() {
         return message;
@@ -98,5 +105,21 @@ public class MessageModel {
 
     public void setReplyFrom(String replyFrom) {
         this.replyFrom = replyFrom;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getVoicenote() {
+        return voicenote;
+    }
+
+    public void setVoicenote(String voicenote) {
+        this.voicenote = voicenote;
     }
 }

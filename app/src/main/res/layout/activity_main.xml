@@ -503,7 +503,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/textViewDisplayName2" />
 
                     <ImageView
-                        android:id="@+id/imageView6"
+                        android:id="@+id/copyNumberIV"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginStart="15dp"
@@ -514,7 +514,7 @@
                         app:srcCompat="@drawable/copy" />
 
                     <ImageView
-                        android:id="@+id/imageView3"
+                        android:id="@+id/copyUserNameIV"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginStart="15dp"
