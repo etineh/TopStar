@@ -969,11 +969,13 @@ public class MessageActivity extends AppCompatActivity {
             if(ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.RECORD_AUDIO)
                     == PackageManager.PERMISSION_DENIED
                     || ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_DENIED ){
+                    == PackageManager.PERMISSION_DENIED
+                    || ContextCompat.checkSelfPermission(MessageActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED){
 
                 ActivityCompat.requestPermissions(MessageActivity.this, new String[]
-                                {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE},
-                        AllConstants.RECORDING_REQUEST_CODE);
+                                {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        1);
             }
         }
     }
@@ -1191,41 +1193,50 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-//            case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-//                // If request is cancelled, the result arrays are empty.
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    getGalleryImage();
-//                } else {
-//                    Toast.makeText(this, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
-//                }
-//
-//                break;
 
-            case  AllConstants.RECORDING_REQUEST_CODE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(MessageActivity.this,
-                            Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-                        recordButton.setListenForRecord(true);
-                    else {
-                        ActivityCompat.requestPermissions(MessageActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, AllConstants.STORAGE_REQUEST_CODE);
-                    };
-
-                } else
-                    Toast.makeText(this, "Recording permission denied", Toast.LENGTH_SHORT).show();
-                break;
-
-//            case AllConstants.STORAGE_REQUEST_CODE:
-//
-//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//                    recordButton.setListenForRecord(true);
-//                else
-//                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
-//                break;
-
+        if(requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            getRecordFilePath();
         }
     }
+
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        switch (requestCode) {
+////            case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
+////                // If request is cancelled, the result arrays are empty.
+////                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+////                    getGalleryImage();
+////                } else {
+////                    Toast.makeText(this, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
+////                }
+////
+////                break;
+//
+//            case  AllConstants.RECORDING_REQUEST_CODE:
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    if (ContextCompat.checkSelfPermission(MessageActivity.this,
+//                            Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+//                        recordButton.setListenForRecord(true);
+//                    else {
+//                        ActivityCompat.requestPermissions(MessageActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+//                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, AllConstants.STORAGE_REQUEST_CODE);
+//                    };
+//
+//                } else
+//                    Toast.makeText(this, "Recording permission denied", Toast.LENGTH_SHORT).show();
+//                break;
+//
+////            case AllConstants.STORAGE_REQUEST_CODE:
+////
+////                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+////                    recordButton.setListenForRecord(true);
+////                else
+////                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
+////                break;
+//
+//        }
+//    }
 
 }
 

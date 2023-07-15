@@ -155,7 +155,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // ----------------- Voice Note setting
         int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
         holder.voicePlayerView.setVisibility(visible);
-        holder.circleDownload.setVisibility(visible);
+//        holder.circleDownload.setVisibility(visible);
 
 
         // ----------------- reply msg setting
@@ -289,35 +289,68 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         });
 
+
+//        ContextWrapper contextWrapper = new ContextWrapper(mContext);
+//        File audioDir = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+//        File[] files = audioDir.listFiles();
+//
+//        if (files != null) {
+//            for (File file : files) {
+//                if (file.isFile()) {
+//                    String fileName = file.getName();
+//                    long fileSize = file.length();
+//                    // Do something with the file information
+//                    System.out.println("File: " + fileName + ", Size: " + fileSize);
+//                }
+//            }
+//        } else {
+//            System.out.println("No files found in the directory");
+//        }
+
+
         // set the voice note
         // fetch the downloaded audio to voicePlayer
         if (getVoiceNote(mContext) != null){
             for (Map<String, Object> mapAccess : getVoiceNote(mContext)) {
-                // bug fix  ----  retrieving data from gson map, you need Object variable
-//            if(mapAccess.containsKey(pos)){
-//                Object vnPath = mapAccess.get(pos).toString();
-//    //                                        holder.voicePlayerView.setAudio(vnPath.toString());
-//                modelList.get(pos).setVoicenote(vnPath.toString());
-//                System.out.println(vnPath);
-//            } else System.out.println("nothing exist");
 
-                String id = modelList.get(pos).getIdKey();
-                System.out.println("int" + mapAccess);
+//                Map<String, Object> mapData = new HashMap<>();
+                String input = mapAccess.toString();    // convert each map to string value
+
+                 // Remove the curly braces at the start and end of the string
+                input = input.substring(1, input.length() - 1);
+
+                // Split the string into key and value using the "=" delimiter
+                String[] keyValue = input.split("=");
+
+                if (keyValue.length == 2) {
+                    String key = keyValue[0];
+                    String value = keyValue[1];
+
+                    // check if vn map key == position key, then set vn.
+                    if(key.equals(modelList.get(pos).getIdKey()) ){
+                        modelList.get(pos).setVoicenote(value);
+                        String vnPath = modelList.get(pos).getVoicenote();
+                        modelList.get(pos).setType(8);        // 8 is GONE
+                        holder.voicePlayerView.setAudio(vnPath);
+                        holder.circleDownload.setVisibility((int) modelList.get(pos).getType());
+//                    System.out.println("Go through data " + da);
+                    }
+                    else holder.circleDownload.setVisibility(visible);
+
+                } else {
+                    // Handle the case when the string cannot be split into key-value pair
+                    Toast.makeText(mContext, "Error", Toast.LENGTH_SHORT).show();
+                }
             }
-        } else {
-            System.out.println("all list " + getVoiceNote(mContext));
-        }
-
-
-//        System.out.println("all list " + getVoiceNote(mContext));
-
+        } else System.out.println("Nothing on the list");
+//getVoiceNote(mContext);
     }
 
 
     // ---------------------- methods ---------------------------
 
     // save voice note to local storage sharePreference & json
-    public void saveVoiceNoteToGson(Context context, List<Map<String, Object>> mapList) {
+    public void save_VN_PathFileToGson(Context context, List<Map<String, Object>> mapList) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(VOICE_NOTE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -331,8 +364,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public List<Map<String, Object>> getVoiceNote(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(VOICE_NOTE, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString(KEY_LIST, "");
+////        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         Gson gson = new Gson();
         Type type = new TypeToken<List<Map<String, Object>>>() {}.getType();
+////        editor.remove(KEY_LIST);
+////        editor.apply();
         return gson.fromJson(json, type);
     }
 
@@ -340,7 +377,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private String getRecordFilePath(){
         ContextWrapper contextWrapper = new ContextWrapper(mContext);
         File audioDir = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        File file = new File(audioDir, "dl_voice_note_" + System.currentTimeMillis() + ".3gp");
+        File file = new File(audioDir, "voice" + System.currentTimeMillis() + "note.3gp");
         return file.getPath();
     }
 
@@ -352,6 +389,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 try {
                     // bug fix--- by using thread
                     String address = modelList.get(pos).getVoicenote();
+                    String filePath = getRecordFilePath();
                     URL url = new URL(address);
 
                     // get the file total size
@@ -359,8 +397,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     connection.setRequestMethod("HEAD");
                     long length = connection.getContentLengthLong();
 
+                    // Download to local storage file path
                     InputStream is = url.openStream();
-                    OutputStream os = new FileOutputStream(new File(getRecordFilePath()));
+                    OutputStream os = new FileOutputStream(new File(filePath));
 
                     byte[] bytes = new byte[1024];
                     int len, downloaded = 0;
@@ -376,33 +415,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             @Override
                             public void run() {
 
-//                                for (int i = 0; i <= length; i+=(length/50)) {
-//                                    holder.progressBar.setProgress(i);
-//                                }
                                 if(finalProgress == length) {
 
                                     //  bug fix --- let gson arraylist be the new arraylist so it wont generate new arraylist
-
                                     if(getVoiceNote(mContext) == null){
                                         mapList = new ArrayList<>();
-                                    } else {
-                                        mapList = getVoiceNote(mContext);
-                                    }
+                                    } else mapList = getVoiceNote(mContext);
 
                                     // Create HashMap and add it to the ArrayList
                                     Map<String, Object> mapVN = new HashMap<>();
                                     String id = modelList.get(pos).getIdKey();
                                     //  set the id as key and file path as the value
-                                    mapVN.put(id, getRecordFilePath());
+                                    mapVN.put(id, filePath);
                                     mapList.add(mapVN);
 
-                                    modelList.get(pos).setVoicenote(getRecordFilePath());   // change later
+//                                    modelList.get(pos).setVoicenote(filePath);   // change later
+                                    holder.voicePlayerView.setAudio(filePath);  // put the filePath to the voicePlayer
 
-                                    saveVoiceNoteToGson(mContext, mapList);    // save to gson sharePre.
+                                    save_VN_PathFileToGson(mContext, mapList);    // save to gson sharePre.
 
                                     holder.progressBar.setVisibility(View.GONE);
                                     holder.circleDownload.setVisibility(View.GONE);
-
 
                                 }
                             }
