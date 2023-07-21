@@ -403,6 +403,7 @@ public class MessageActivity extends AppCompatActivity {
 //        refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
 
         refMessages.child(userName).child(otherName).push().setValue(messageMap);
+        refMessages.child(otherName).child(userName).push().setValue(messageMap);
 
         // send delivery id to MsgSeen
 //        refMsgSeen.child(uID).child(user.getUid()).push().child("seenKey").setValue(key);
