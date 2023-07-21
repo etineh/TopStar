@@ -410,6 +410,45 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
+    //      ---------- methods
+    //  ---------------- methods    -------------------------
+
+    //      --------- methods -----------
+
+    // get messages
+    private void getMessage(ChatViewHolder holder, String otherName2, String uID){
+        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
+        refMsg.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+//                modelList = new ArrayList<>();
+//                holder.modelList2.clear();
+
+                for (DataSnapshot snapshot1 : snapshot.getChildren()){
+
+                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                    messageModel.setIdKey(snapshot1.getKey());  // set msg keys to the adaptor
+                    holder.modelList2.add(messageModel);
+                    adapter.notifyDataSetChanged();
+                }
+
+                // scroll to the new message position number
+                holder.recyclerViewChat.scrollToPosition(holder.modelList2.size() - 1);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+//        System.out.println( " In userName " + userName + " In Othername " + otherName2 + " uId" +uID);
+//        adapter = new MessageAdapter(holder.modelList2, userName, uID, mContext, holder.editTextMessage, holder.constraintDelBody, holder.textViewReply,
+//                holder.cardViewReply, holder.textViewDelOther, holder.editOrReplyIV, holder.nameReply, holder.replyVisible);
+//        holder.recyclerViewChat.setAdapter(adapter);
+
+    }
+
     @Override
     public int getItemCount() {
         return otherUsersId.size();
