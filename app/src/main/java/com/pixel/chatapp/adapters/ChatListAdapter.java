@@ -27,13 +27,16 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -322,7 +325,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
-        referenceUsers.addValueEventListener(new ValueEventListener() {
+        referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -339,9 +342,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
-
                 //   get the number of new message I have to give my recycle position scrolling
-                referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+                referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot1) {
                         if(!snapshot1.child(myUsersId).child("newMsgCount").exists()){
@@ -349,6 +351,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         } else {
                             long numScroll = (long) snapshot1.child(myUsersId).child("newMsgCount").getValue();
                             int castNum = (int) numScroll;
+
+                            getMessage(holder, otherName);       //  call method of msg
+//                            System.out.println("What is " + myUsersId +" " + holder.modelList2);
 
                             // what happen when the cardView is click
                             holder.constraintLast.setOnClickListener(new View.OnClickListener() {
@@ -363,6 +368,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                                     intent.putExtra("ImageUrl", imageUrl);
                                     intent.putExtra("recyclerScroll", castNum);
                                     intent.putExtra("insideChat", "yes");
+                                    intent.putExtra("messageList", (Serializable) holder.modelList2);
 
                                     mContext.startActivity(intent);
 
@@ -416,25 +422,26 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     //      --------- methods -----------
 
     // get messages
-    private void getMessage(ChatViewHolder holder, String otherName2, String uID){
+    private void getMessage(ChatViewHolder holder, String otherName2){
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
-        refMsg.addValueEventListener(new ValueEventListener() {
+        refMsg.limitToLast(30).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
 //                modelList = new ArrayList<>();
-//                holder.modelList2.clear();
+                holder.modelList2.clear();
 
                 for (DataSnapshot snapshot1 : snapshot.getChildren()){
 
                     MessageModel messageModel = snapshot1.getValue(MessageModel.class);
                     messageModel.setIdKey(snapshot1.getKey());  // set msg keys to the adaptor
                     holder.modelList2.add(messageModel);
-                    adapter.notifyDataSetChanged();
+//                    adapter.notifyDataSetChanged();
+//                    return holder.modelList2;
                 }
 
                 // scroll to the new message position number
-                holder.recyclerViewChat.scrollToPosition(holder.modelList2.size() - 1);
+//                holder.recyclerViewChat.scrollToPosition(holder.modelList2.size() - 1);
             }
 
             @Override
@@ -463,6 +470,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
         private TextView textViewDay;
         private CardView cardView;
+        List<MessageModel> modelList2;
 
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -485,6 +493,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             constraintTop = itemView.findViewById(R.id.constraintTop);
             constraintLast = itemView.findViewById(R.id.constrainLast);
 
+            modelList2 = new ArrayList<>();
         }
     }
 

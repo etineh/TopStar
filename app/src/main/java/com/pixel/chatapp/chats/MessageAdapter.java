@@ -153,8 +153,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         // ----------------- Voice Note setting
-        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
-        holder.voicePlayerView.setVisibility(visible);
+//        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
+//        holder.voicePlayerView.setVisibility(visible);
 
 
         // ----------------- reply msg setting
@@ -177,7 +177,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         //   get the number of new message I have
-        newMsgNumber(holder, pos);
+//        newMsgNumber(holder, pos);
 
 
         // reply option
@@ -309,38 +309,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // set the voice note
         // fetch the downloaded audio to voicePlayer
-        if (getVoiceNote(mContext) != null){
-            for (Map<String, Object> mapAccess : getVoiceNote(mContext)) {
-
-                String input = mapAccess.toString();    // convert each map to string value
-
-                 // Remove the curly braces at the start and end of the string
-                input = input.substring(1, input.length() - 1);
-
-                // Split the string into key and value using the "=" delimiter
-                String[] keyValue = input.split("=");
-
-                if (keyValue.length == 2) {
-                    String key = keyValue[0];
-                    String value = keyValue[1];
-
-                    // check if vn map key == position key, then set vn and download icon visibility.
-                    if(key.equals(modelList.get(pos).getIdKey()) ){
-                        modelList.get(pos).setVoicenote(value);
-                        String vnPath = modelList.get(pos).getVoicenote();
-                        modelList.get(pos).setType(8);        // 8 is GONE
-                        holder.voicePlayerView.setAudio(vnPath);
-                        holder.circleDownload.setVisibility((int) modelList.get(pos).getType());
-//                    System.out.println("Go through data " + da);
-                    }
-                    else holder.circleDownload.setVisibility(visible);
-
-                } else {
-                    // Handle the case when the string cannot be split into key-value pair
-                    Toast.makeText(mContext, "Error", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else System.out.println("Nothing on the list");
+//        if (getVoiceNote(mContext) != null){
+//            for (Map<String, Object> mapAccess : getVoiceNote(mContext)) {
+//
+//                String input = mapAccess.toString();    // convert each map to string value
+//
+//                 // Remove the curly braces at the start and end of the string
+//                input = input.substring(1, input.length() - 1);
+//
+//                // Split the string into key and value using the "=" delimiter
+//                String[] keyValue = input.split("=");
+//
+//                if (keyValue.length == 2) {
+//                    String key = keyValue[0];
+//                    String value = keyValue[1];
+//
+//                    // check if vn map key == position key, then set vn and download icon visibility.
+//                    if(key.equals(modelList.get(pos).getIdKey()) ){
+//                        modelList.get(pos).setVoicenote(value);
+//                        String vnPath = modelList.get(pos).getVoicenote();
+//                        modelList.get(pos).setType(8);        // 8 is GONE
+//                        holder.voicePlayerView.setAudio(vnPath);
+//                        holder.circleDownload.setVisibility((int) modelList.get(pos).getType());
+////                    System.out.println("Go through data " + da);
+//                    }
+//                    else holder.circleDownload.setVisibility(visible);
+//
+//                } else {
+//                    // Handle the case when the string cannot be split into key-value pair
+//                    Toast.makeText(mContext, "Error", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        } else System.out.println("Nothing on the list");
 //getVoiceNote(mContext);
     }
 

@@ -2,9 +2,11 @@ package com.pixel.chatapp.chats;
 
 import android.view.View;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class MessageModel {
+public class MessageModel implements Serializable {
+//public class MessageModel {
 
     private String message;
     private String from, replyFrom;
