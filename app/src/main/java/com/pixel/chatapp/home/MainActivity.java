@@ -7,15 +7,19 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -25,17 +29,27 @@ import com.devlomi.record_view.RecordView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.chats.MessageAdapter;
+import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +66,47 @@ public class MainActivity extends AppCompatActivity {
     private Boolean nightMood;
 
 
+    //    ------- message declares
+    private RecyclerView recyclerViewChat;
+    private ImageView imageViewBack;
+    private CircleImageView circleImageOnline, circleImageLogo;
+    private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
+    private ImageView editOrReplyIV, imageViewCalls;
+    private ConstraintLayout constraintProfileMenu, constraintDelBody;
+    private TextView textViewOtherUser, textViewLastSeen, textViewTyping2, textViewReply, nameReply, replyVisible;
+    private TextView textViewDelMine, textViewDelOther, textViewDelAll;
+    private EditText editTextMessage;
+    private CircleImageView circleSendMessage;
+    private CardView cardViewMsg, cardViewReply;
+    String userName, otherName, uID, imageUrl;
+    List<Object> msgBodyArray = new ArrayList<>();
+    DatabaseReference refMessages, refChecks, refUsers, refMsgCheck, refMsgSeen;
+    DatabaseReference referenceMsgCount2, referenceMsgCount;
+    FirebaseUser user;
+    private MessageAdapter adapter;
+    List<MessageModel> modelList2;
+    int scrollPosition;
+    Map<String, Object> mapUpdate;
+    //    SharedPreferences sharedPreferences;
+    private Handler handler;
+    private Runnable runnable;
+    private long count = 0, offCount = 0, newMsgCount = 0;
+    private Boolean runnerCheck = false;
+    private Map<String, Integer> dateNum, dateMonth;
+    private String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
+    private String audioPath;
+    private MediaRecorder mediaRecorder;
+    private Permission permissions;
+    private static final int PAGE_SIZE = 20; // Number of items to fetch per page
+    private int currentPage = 1; // Current page number
+    ConstraintLayout constraintLayout;
+
+    RecordView recordView;
+    RecordButton recordButton;
+
+    //  ---------- msg end
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,39 +115,39 @@ public class MainActivity extends AppCompatActivity {
         //      --------- message ids
 
 
-        imageViewBack = itemView.findViewById(R.id.imageViewBackArrow9);
-        textViewOtherUser = itemView.findViewById(R.id.textViewName9);
-        editTextMessage = itemView.findViewById(R.id.editTextMessage9);
-        circleSendMessage = itemView.findViewById(R.id.fab9);
-        imageViewOpenMenu = itemView.findViewById(R.id.imageViewUserMenu29);
-//        imageViewCloseMenu = itemView.findViewById(R.id.imageViewCancel);
-//        constraintProfileMenu = itemView.findViewById(R.id.constraintProfileMenu9);
-        textViewLastSeen = itemView.findViewById(R.id.textViewStatus9);
-        textViewTyping2 = itemView.findViewById(R.id.textViewTyping29);
-        circleImageOnline = itemView.findViewById(R.id.circleImageOnline9);
-        circleImageLogo = itemView.findViewById(R.id.circleImageLogo9);
-//        constraintDelBody = itemView.findViewById(R.id.constDelBody9);
-//        textViewDelMine = itemView.findViewById(R.id.textViewDelMine9);
-//        textViewDelOther = itemView.findViewById(R.id.textViewDelOther9);
-//        textViewDelAll = itemView.findViewById(R.id.textViewDelEveryone9);
-//        imageViewCancelDel = itemView.findViewById(R.id.imageViewCancelDel9);
-        cardViewReply = itemView.findViewById(R.id.cardViewReply9);
-        textViewReply = itemView.findViewById(R.id.textViewReplyText9);
-        imageViewCancelReply = itemView.findViewById(R.id.imageViewCancleReply9);
-        editOrReplyIV = itemView.findViewById(R.id.editOrReplyImage9);
-        nameReply = itemView.findViewById(R.id.fromTV9);
-        replyVisible = itemView.findViewById(R.id.textReplying9);
-        imageViewCalls = itemView.findViewById(R.id.imageViewCalls9);
-        constraintLayout = itemView.findViewById(R.id.constraintContainer9);
+        imageViewBack = findViewById(R.id.imageViewBackArrow9);
+        textViewOtherUser = findViewById(R.id.textViewName9);
+        editTextMessage = findViewById(R.id.editTextMessage9);
+        circleSendMessage = findViewById(R.id.fab9);
+        imageViewOpenMenu = findViewById(R.id.imageViewUserMenu29);
+//        imageViewCloseMenu = findViewById(R.id.imageViewCancel);
+//        constraintProfileMenu = findViewById(R.id.constraintProfileMenu9);
+        textViewLastSeen = findViewById(R.id.textViewStatus9);
+        textViewTyping2 = findViewById(R.id.textViewTyping29);
+        circleImageOnline = findViewById(R.id.circleImageOnline9);
+        circleImageLogo = findViewById(R.id.circleImageLogo9);
+//        constraintDelBody = findViewById(R.id.constDelBody9);
+//        textViewDelMine = findViewById(R.id.textViewDelMine9);
+//        textViewDelOther = findViewById(R.id.textViewDelOther9);
+//        textViewDelAll = findViewById(R.id.textViewDelEveryone9);
+//        imageViewCancelDel = findViewById(R.id.imageViewCancelDel9);
+        cardViewReply = findViewById(R.id.cardViewReply9);
+        textViewReply = findViewById(R.id.textViewReplyText9);
+        imageViewCancelReply = findViewById(R.id.imageViewCancleReply9);
+        editOrReplyIV = findViewById(R.id.editOrReplyImage9);
+        nameReply = findViewById(R.id.fromTV9);
+        replyVisible = findViewById(R.id.textReplying9);
+        imageViewCalls = findViewById(R.id.imageViewCalls9);
+        constraintLayout = findViewById(R.id.constraintContainer9);
 
-        recyclerViewChat = itemView.findViewById(R.id.recyclerViewChat9);
+        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
 
         recyclerViewChat.setHasFixedSize(true);
-        recyclerViewChat.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
 
         // audio swipe button option
-        recordView = (RecordView) itemView.findViewById(R.id.record_view9);
-        recordButton = (RecordButton) itemView.findViewById(R.id.record_button9);
+        recordView = (RecordView) findViewById(R.id.record_view9);
+        recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
 
         // ----------------------
