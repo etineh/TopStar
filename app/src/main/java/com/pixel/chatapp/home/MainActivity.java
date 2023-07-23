@@ -36,6 +36,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageAdapter;
@@ -51,7 +52,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FragmentListener {
 
     private TabLayout tabLayoutGeneral;
     private ViewPager2 viewPager2General;

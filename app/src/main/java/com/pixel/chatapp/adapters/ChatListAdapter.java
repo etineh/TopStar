@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageModel;
@@ -53,6 +54,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
+
+    private listener;
+    public void setFragmentListener(FragmentListener listener) {
+        this.listener = listener;
+    }
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
