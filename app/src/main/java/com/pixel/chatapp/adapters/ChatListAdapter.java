@@ -55,7 +55,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
 
-    private listener;
+    private FragmentListener listener;
     public void setFragmentListener(FragmentListener listener) {
         this.listener = listener;
     }

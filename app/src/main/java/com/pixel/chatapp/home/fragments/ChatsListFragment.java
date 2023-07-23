@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.contacts.UsersContactActivity;;
@@ -163,6 +164,19 @@ public class ChatsListFragment extends Fragment {
             }
         });
     }
+
+    // when you want to control your mainActivity from your fragment or fetch a method from your mainActivity, use attach to link up
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        if (context instanceof FragmentListener) {
+            fragmentListener = (FragmentListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement FragmentListener");
+        }
+    }
+
 
 //    @Override
 //    public void onCreate(@Nullable Bundle savedInstanceState) {
