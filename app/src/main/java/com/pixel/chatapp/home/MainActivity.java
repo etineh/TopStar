@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
@@ -19,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.devlomi.record_view.RecordButton;
+import com.devlomi.record_view.RecordView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,6 +56,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //      --------- message ids
+
+
+        imageViewBack = itemView.findViewById(R.id.imageViewBackArrow9);
+        textViewOtherUser = itemView.findViewById(R.id.textViewName9);
+        editTextMessage = itemView.findViewById(R.id.editTextMessage9);
+        circleSendMessage = itemView.findViewById(R.id.fab9);
+        imageViewOpenMenu = itemView.findViewById(R.id.imageViewUserMenu29);
+//        imageViewCloseMenu = itemView.findViewById(R.id.imageViewCancel);
+//        constraintProfileMenu = itemView.findViewById(R.id.constraintProfileMenu9);
+        textViewLastSeen = itemView.findViewById(R.id.textViewStatus9);
+        textViewTyping2 = itemView.findViewById(R.id.textViewTyping29);
+        circleImageOnline = itemView.findViewById(R.id.circleImageOnline9);
+        circleImageLogo = itemView.findViewById(R.id.circleImageLogo9);
+//        constraintDelBody = itemView.findViewById(R.id.constDelBody9);
+//        textViewDelMine = itemView.findViewById(R.id.textViewDelMine9);
+//        textViewDelOther = itemView.findViewById(R.id.textViewDelOther9);
+//        textViewDelAll = itemView.findViewById(R.id.textViewDelEveryone9);
+//        imageViewCancelDel = itemView.findViewById(R.id.imageViewCancelDel9);
+        cardViewReply = itemView.findViewById(R.id.cardViewReply9);
+        textViewReply = itemView.findViewById(R.id.textViewReplyText9);
+        imageViewCancelReply = itemView.findViewById(R.id.imageViewCancleReply9);
+        editOrReplyIV = itemView.findViewById(R.id.editOrReplyImage9);
+        nameReply = itemView.findViewById(R.id.fromTV9);
+        replyVisible = itemView.findViewById(R.id.textReplying9);
+        imageViewCalls = itemView.findViewById(R.id.imageViewCalls9);
+        constraintLayout = itemView.findViewById(R.id.constraintContainer9);
+
+        recyclerViewChat = itemView.findViewById(R.id.recyclerViewChat9);
+
+        recyclerViewChat.setHasFixedSize(true);
+        recyclerViewChat.setLayoutManager(new LinearLayoutManager(mContext));
+
+        // audio swipe button option
+        recordView = (RecordView) itemView.findViewById(R.id.record_view9);
+        recordButton = (RecordButton) itemView.findViewById(R.id.record_button9);
+        recordButton.setRecordView(recordView);
+
+        // ----------------------
 
         tabLayoutGeneral = findViewById(R.id.tabLayerMain);
         viewPager2General = findViewById(R.id.viewPageMain);
