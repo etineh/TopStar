@@ -54,6 +54,7 @@ public class ChatsListFragment extends Fragment {
 
     private List<ChatListModel> chatListID;
     private List<String> mUsersID;
+    private FragmentListener fragmentListener;
 
     @Nullable
     @Override

@@ -285,6 +285,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  --------------- methods --------------------
 
+    //  ---------- interface
+
+    // after writing your method in the main activity, declare it on the FragmentListener interface and fetch it from the fragment
+//    @Override
+//    public void onFragmentAction() {
+//        System.out.println("This is mainactivity. You are controlling mr from fragment");
+//    }
+
+    //  -----------------------------
 
         // set user image on settings
     private void setUserDetails(){
