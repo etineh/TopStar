@@ -182,9 +182,9 @@ public class MessageActivity extends AppCompatActivity {
         modelList = (List<MessageModel>) getIntent().getSerializableExtra("messageList");
 
         recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
-        recyclerViewChat.setAdapter(adapter);
+//        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
+//                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
+//        recyclerViewChat.setAdapter(adapter);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
@@ -352,8 +352,8 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 //        recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
+//        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
+//                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
         recyclerViewChat.setAdapter(adapter);
 
     }
@@ -375,7 +375,8 @@ public class MessageActivity extends AppCompatActivity {
         refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
 
-    public void sendMessage(String message, int type, String vn){
+    public void sendMessage(String message, int type, String vn)
+    {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
 //        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message

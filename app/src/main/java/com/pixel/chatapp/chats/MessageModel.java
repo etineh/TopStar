@@ -18,13 +18,13 @@ public class MessageModel implements Serializable {
     private  int msgStatus;
 
     private int type;
-    private String voicenote;
+//    private String voicenote;
 
     public MessageModel() {
     }
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
-                        int visibility, String replyMsg, int msgStatus, int type, String voicenote) {
+                        int visibility, String replyMsg, int msgStatus, int type) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -35,7 +35,7 @@ public class MessageModel implements Serializable {
         this.msgStatus = msgStatus;
         this.replyFrom = replyFrom;
         this.type = type;
-        this.voicenote = voicenote;
+//        this.voicenote = voicenote;
     }
     public String getMessage() {
         return message;
@@ -117,11 +117,11 @@ public class MessageModel implements Serializable {
         this.type = type;
     }
 
-    public String getVoicenote() {
-        return voicenote;
-    }
-
-    public void setVoicenote(String voicenote) {
-        this.voicenote = voicenote;
-    }
+//    public String getVoicenote() {
+//        return voicenote;
+//    }
+//
+//    public void setVoicenote(String voicenote) {
+//        this.voicenote = voicenote;
+//    }
 }

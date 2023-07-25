@@ -5,20 +5,27 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.opengl.Visibility;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
@@ -54,6 +62,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     private FragmentListener listener;
     public void setFragmentListener(FragmentListener listener) {
@@ -331,6 +340,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
+//        referenceUsers.keepSynced(true);
         referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -348,8 +358,37 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MessageAdapter sendAdapter = getAdapter(holder, otherName, myUsersId);   //  call method of msg
+
+//                            System.out.println("What is1 " + testNum);
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                // -------- send adapter to MainActivity
+                                holder.constraintLast.setOnClickListener(view -> {
+
+                                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName);
+
+                                    listener.sendMsgAdapter(sendAdapter, holder.modelList2.size());
+
+                                    listener.getLastSeenAndOnline(myUsersId);
+
+                                    listener.msgBackgroundActivities(myUsersId);
+
+                                    listener.callAllMethods();
+                                });
+                            }
+                        });
+
+                    }
+                }).start();
+
                 //   get the number of new message I have to give my recycle position scrolling
-                referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot1) {
                         if(!snapshot1.child(myUsersId).child("newMsgCount").exists()){
@@ -358,11 +397,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                             long numScroll = (long) snapshot1.child(myUsersId).child("newMsgCount").getValue();
                             int castNum = (int) numScroll;
 
-                            getMessage(holder, otherName);       //  call method of msg
-//                            System.out.println("What is " + myUsersId +" " + holder.modelList2);
-
                             // what happen when the cardView is click
-                            holder.constraintLast.setOnClickListener(new View.OnClickListener() {
+                            holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
 
@@ -402,16 +438,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         });
 
         //  open option menu
-        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(holder.constraintTop.getVisibility() == View.GONE){
-                    holder.constraintTop.setVisibility(View.VISIBLE);
-                } else {
-                    holder.constraintTop.setVisibility(View.GONE);
-                }
-            }
-        });
+//        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(holder.constraintTop.getVisibility() == View.GONE){
+//                    holder.constraintTop.setVisibility(View.VISIBLE);
+//                } else {
+//                    holder.constraintTop.setVisibility(View.GONE);
+//                }
+//            }
+//        });
         //  close option menu
         holder.imageViewCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -422,13 +458,46 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
-    //      ---------- methods
-    //  ---------------- methods    -------------------------
-
     //      --------- methods -----------
 
     // get messages
-    private void getMessage(ChatViewHolder holder, String otherName2){
+    private MessageAdapter getAdapter(ChatViewHolder holder, String otherName2, String uID) {
+        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
+        refMsg.keepSynced(true);
+
+        refMsg.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<MessageModel> newMessages = new ArrayList<>();
+
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                    messageModel.setIdKey(snapshot1.getKey());
+                    newMessages.add(messageModel);
+                }
+
+                // Update the modelList2 with the new messages
+                holder.modelList2.clear();
+                holder.modelList2.addAll(newMessages);
+
+                // Notify the adapter that the data has changed
+                holder.adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle onCancelled if needed
+            }
+        });
+
+        holder.adapter = new MessageAdapter(holder.modelList2, userName, uID, mContext);
+        // Set MainActivity as the listener for messageAdapter
+        holder.adapter.setFragmentListener((FragmentListener) mContext);
+
+        return holder.adapter;
+    }
+
+    private void getMessage2(ChatViewHolder holder, String otherName2){
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
         refMsg.limitToLast(30).addValueEventListener(new ValueEventListener() {
             @Override
@@ -477,6 +546,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private TextView textViewDay;
         private CardView cardView;
         List<MessageModel> modelList2;
+        MessageAdapter adapter;
+        int listCount;
 
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -500,6 +571,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             constraintLast = itemView.findViewById(R.id.constrainLast);
 
             modelList2 = new ArrayList<>();
+//            adapter = null;
+
         }
     }
 

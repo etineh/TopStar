@@ -43,6 +43,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 
 import org.w3c.dom.Text;
@@ -91,22 +92,29 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private static final String KEY_LIST = "myList";
     private List<Map<String, Object>> mapList;
 
+    private FragmentListener fragmentListener;
+    public void setFragmentListener(FragmentListener fragmentListener) {
+        this.fragmentListener = fragmentListener;
+    }
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
-                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther,
-                          ImageView editOrReplyIV, TextView nameReply, TextView replyVisible) {
+//    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
+//                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther,
+//                          ImageView editOrReplyIV, TextView nameReply, TextView replyVisible) {
+
+    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
         this.mContext = mContext;
-        this.editTextMsg = editMsg;
-        this.deleteBody = deleteBody;
-        this.textViewReply = textViewReply;
-        this.cardViewReply = cardViewReply;
-        this.textViewDelOther = textViewDelOther;
-        this.editOrReplyIV = editOrReplyIV;
-        this.nameReply = nameReply;
-        this.replyVisible = replyVisible;
+        notifyDataSetChanged();
+//        this.editTextMsg = editMsg;
+//        this.deleteBody = deleteBody;
+//        this.textViewReply = textViewReply;
+//        this.cardViewReply = cardViewReply;
+//        this.textViewDelOther = textViewDelOther;
+//        this.editOrReplyIV = editOrReplyIV;
+//        this.nameReply = nameReply;
+//        this.replyVisible = replyVisible;
         handler = new Handler(Looper.getMainLooper());
 //        mapArrayList = new ArrayList<>();
 
@@ -150,7 +158,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.textViewShowMsg.setText(modelList.get(pos).getMessage());    //  Show messages
         holder.editNotify.setText(modelList.get(pos).getEdit());    // notify user when msg is edited
-
+//notifyDataSetChanged();
 
         // ----------------- Voice Note setting
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
@@ -201,11 +209,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             }
             else {
-                editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
-                editTextMsg.setText(""+ modelList.get(pos).getMessage());
 
-                editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder,
-                        pos, modelList.get(pos).getFrom(), "editing...", 4);
+                // show edit msg, show edit icon
+                fragmentListener.onEditMessage(modelList.get(pos).getMessage(), android.R.drawable.ic_menu_edit);
+                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+
+//                editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
+//                editTextMsg.setText(""+ modelList.get(pos).getMessage());
+//
+//                editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder,
+//                        pos, modelList.get(pos).getFrom(), "editing...", 4);
             }
         });
 
@@ -386,7 +400,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 try {
                     // bug fix--- by using thread
-                    String address = modelList.get(pos).getVoicenote();
+                    String address = modelList.get(pos).getMessage();
                     String filePath = getRecordFilePath();
                     URL url = new URL(address);
 

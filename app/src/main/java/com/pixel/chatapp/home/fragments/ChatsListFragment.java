@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -55,6 +56,7 @@ public class ChatsListFragment extends Fragment {
     private List<ChatListModel> chatListID;
     private List<String> mUsersID;
     private FragmentListener fragmentListener;
+
 
     @Nullable
     @Override
@@ -116,6 +118,7 @@ public class ChatsListFragment extends Fragment {
 
                 // changed the adapter from the chatList method to here and it was faster loading
                 adapter = new ChatListAdapter(mUsersID, getContext(), userName);
+                adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
                 recyclerView.setAdapter(adapter);
 
 //                chatList();
@@ -128,9 +131,13 @@ public class ChatsListFragment extends Fragment {
         });
 
         chatList();
+//        System.out.println("Hello world two");
+
 
         return view;
     }
+
+    //  ---------------  All   methods     -----------------
 
     private void chatList(){
 
@@ -164,6 +171,15 @@ public class ChatsListFragment extends Fragment {
 
             }
         });
+    }
+
+    //   ------------ Message Methods
+
+    public void updateAdapterData(String data) {
+//        if (adapter != null) {
+//            adapter.updateData(newData);
+//        }
+        System.out.println("This is the "+data);
     }
 
     // when you want to control your mainActivity from your fragment or fetch a method from your mainActivity, use attach to link up
