@@ -292,31 +292,31 @@ public class MessageActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-//        getMessage();
+        getMessage();
 
-//        alertMeWhenUserCallMe();
-//
-////        setMsgSeen();
-//
-//        tellUserAmTyping_AddUser();
-//
-//        reloadUnsentMsg();
-//
-//        getMyUserTyping();
-//
-//        getLastSeenAndOnline();
-//
-//        resetStatusAndMsgCount();
-//
-//        getPreviousCounts();
-//
-//        setIsOnline();
-//
-//        voiceNote ();
-//
-//        swipeReplyOptions();
-//
-//        checkPermissions();
+        alertMeWhenUserCallMe();
+
+//        setMsgSeen();
+
+        tellUserAmTyping_AddUser();
+
+        reloadUnsentMsg();
+
+        getMyUserTyping();
+
+        getLastSeenAndOnline();
+
+        resetStatusAndMsgCount();
+
+        getPreviousCounts();
+
+        setIsOnline();
+
+        voiceNote ();
+
+        swipeReplyOptions();
+
+        checkPermissions();
     }
 
 
@@ -351,9 +351,8 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-//        recyclerViewChat.scrollToPosition(modelList.size() - 1);
-//        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-//                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
+        recyclerViewChat.scrollToPosition(modelList.size() - 1);
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
 
     }

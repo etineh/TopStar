@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -308,7 +309,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //
 //        // get user typing state
 //// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
-        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -361,25 +362,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        MessageAdapter sendAdapter = getAdapter(holder, otherName, myUsersId);   //  call method of msg
 
-//                            System.out.println("What is1 " + testNum);
+                        MessageAdapter sendAdapter = getAdapter(holder, otherName, myUsersId);   //  call method of msg
 
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
+
                                 // -------- send adapter to MainActivity
                                 holder.constraintLast.setOnClickListener(view -> {
 
-                                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName);
+                                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName, myUsersId, mContext);
 
-                                    listener.sendMsgAdapter(sendAdapter, holder.modelList2.size());
+                                    listener.sendMsgAdapter(sendAdapter, (holder.modelList2.size() - 1));
 
                                     listener.getLastSeenAndOnline(myUsersId);
 
                                     listener.msgBackgroundActivities(myUsersId);
 
                                     listener.callAllMethods();
+
+                                    holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+
                                 });
                             }
                         });
@@ -465,7 +469,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
         refMsg.keepSynced(true);
 
-        refMsg.addListenerForSingleValueEvent(new ValueEventListener() {
+        refMsg.limitToLast(40).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<MessageModel> newMessages = new ArrayList<>();
@@ -547,6 +551,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private CardView cardView;
         List<MessageModel> modelList2;
         MessageAdapter adapter;
+//        RecyclerView recyclerView;
         int listCount;
 
         public ChatViewHolder(@NonNull View itemView) {
@@ -569,7 +574,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
             constraintTop = itemView.findViewById(R.id.constraintTop);
             constraintLast = itemView.findViewById(R.id.constrainLast);
-
+//
+//            recyclerView = itemView.findViewById(R.id.recycler);
+//            recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
             modelList2 = new ArrayList<>();
 //            adapter = null;
 
