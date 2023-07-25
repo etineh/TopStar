@@ -336,12 +336,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     // after writing your method in the main activity, declare it on the FragmentListener interface and fetch it from the fragment
     //  ---------- interface
 
-
     @Override
     public void callAllMethods() {
         reloadUnsentMsg();
         getMyUserTyping();
         tellUserAmTyping_AddUser();
+        getPreviousCounts();
     }
 
     @Override
@@ -431,15 +431,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             .child(otherUserUid).child(user.getUid());
                     fReference2.setValue(messageMap);
 
-//                checkAndSaveCounts_SendMsg();
+                    checkAndSaveCounts_SendMsg();
                 }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
 
                         recyclerViewChat.scrollToPosition(adapter.getItemCount() - 1);
-                        adapter.notifyDataSetChanged();
-                        System.out.println("Check count "+adapter.getItemCount());
 
                     }
                 });
@@ -449,6 +447,62 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 //        if (checkMsg)
 
+    }
+
+    //  get the previous count of new msg and add to it from sendMessage
+    private void checkAndSaveCounts_SendMsg(){
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // save the number of msg sent by me to receiver
+                referenceMsgCount = FirebaseDatabase.getInstance().getReference("Checks")
+                        .child(otherUserUid).child(user.getUid());
+                referenceMsgCount.child("unreadMsg").setValue(count+=1);
+
+                referenceMsgCount2 = FirebaseDatabase.getInstance().getReference("Checks")
+                        .child(user.getUid()).child(otherUserUid).child("unreadMsg");
+                referenceMsgCount2.setValue(0);
+
+                // check if there is network connection before sending message
+                if(!checkNetworkConnection()){
+                    refChecks.child(otherUserUid).child(user.getUid()).child("offCount").setValue(offCount+=1);
+                } else{
+                    refChecks.child(otherUserUid).child(user.getUid()).child("offCount").setValue(0);
+                }
+
+                //      check if the user is in my chat box and reset the count -- newMsgCount & unreadMsg
+                DatabaseReference statusCheck = FirebaseDatabase.getInstance().getReference("Checks");
+                statusCheck.child(otherUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        try{
+                            boolean statusState = (boolean) snapshot.child(user.getUid())
+                                    .child("status").getValue();
+
+                            if(statusState == true) {
+                                referenceMsgCount.child("unreadMsg").setValue(0);
+                            } else if (statusState == false) {
+                                // increase the new msg count
+                                statusCheck.child(otherUserUid).child(user.getUid())
+                                        .child("newMsgCount").setValue(newMsgCount+1);
+                            }
+                        } catch (Exception e){
+                            statusCheck.child(otherUserUid).child(user.getUid()).child("status").setValue(false);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
+
+        thread.start();
     }
 
     public void getMsg(){
@@ -840,7 +894,50 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         return networkInfo.isConnected();
     }
 
-    //  -----------------------------
+    //  Get all previous counts of unreadMsg and offCount and newMsgCount
+    private void getPreviousCounts(){
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
+                        .child(otherUserUid).child(user.getUid());
+                referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        try{
+                            // if last msg count is not 0, then get the count
+                            if(!snapshot.child("unreadMsg").getValue().equals(0)){
+                                count = (long) snapshot.child("unreadMsg").getValue();
+                            }
+                            // if last offline count is not 0, then get the count
+                            if(!snapshot.child("offCount").getValue().equals(0)){
+                                offCount = (long) snapshot.child("offCount").getValue();
+                            }
+                            // if last new msg count is not 0, then get the count
+                            if(!snapshot.child("offCount").getValue().equals(0)){
+                                newMsgCount = (long) snapshot.child("newMsgCount").getValue();
+                            }
+                        } catch (Exception e){
+                            referenceMsgCountCheck.child("unreadMsg").setValue(0);
+                            referenceMsgCountCheck.child("offCount").setValue(0);
+                            referenceMsgCountCheck.child("newMsgCount").setValue(0);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+            }
+        });
+
+        thread.start();
+    }
 
         // set user image on settings
     private void setUserDetails(){
