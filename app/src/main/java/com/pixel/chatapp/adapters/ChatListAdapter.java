@@ -10,6 +10,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,21 +55,25 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> {
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> implements MainActivity.ChatVisibilityListener{
 
-    List<String> otherUsersId;
-    Context mContext;
-    String userName;
+    private static List<String> otherUsersId;
+    private static Context mContext;
+    private static String userName;
     DatabaseReference referenceUsers, refUsersLast, referenceCheck;
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
     private Handler handler = new Handler(Looper.getMainLooper());
+    private List<RecyclerView> recyclerViews;
 
     private FragmentListener listener;
+
     public void setFragmentListener(FragmentListener listener) {
         this.listener = listener;
     }
+
+    private static ChatListAdapter instance;
 
     public ChatListAdapter(List<String> otherUsersId, Context mContext, String userName) {
         this.otherUsersId = otherUsersId;
@@ -80,9 +85,29 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceUsers = FirebaseDatabase.getInstance().getReference("Users");
         refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
 
+//        refMsg = FirebaseDatabase.getInstance().getReference("Messages");
+
         offlinePresenceAndStatus = new HashMap<>();
         dateMonth = new HashMap<>();
         dateNum = new HashMap<>();
+//        notifyDataSetChanged();
+
+        recyclerViews = new ArrayList<>(); // List to store RecyclerViews
+        // Initialize the list with empty RecyclerViews for each item
+        for (int i = 0; i < getItemCount(); i++) {
+            recyclerViews.add(new RecyclerView(mContext));
+        }
+    }
+
+    public RecyclerView getRecyclerViewForItem(int position) {
+        return recyclerViews.get(position);
+    }
+
+    public static ChatListAdapter getInstance() {
+        if (instance == null) {
+            instance = new ChatListAdapter(otherUsersId, mContext, userName);
+        }
+        return instance;
     }
 
     @NonNull
@@ -90,7 +115,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.users_card, parent, false);
-
         return new ChatViewHolder(view);
     }
 
@@ -100,6 +124,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         int pos = position;
 
         String myUsersId = otherUsersId.get(pos);
+//
+//        boolean isVisible = itemVisibilityStates.get(position, false);
+//        holder.recyclerChat.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
 
         // set user "typing" to be false when I disconnect
         referenceCheck.child(myUsersId).child(user.getUid())
@@ -237,8 +264,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             }
         });
-//
-//
+
+
 //        //         reset offline message count to 0 when network comes
         ConnectivityManager connMgr = (ConnectivityManager) mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -309,7 +336,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //
 //        // get user typing state
 //// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
-        referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -363,18 +390,35 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     @Override
                     public void run() {
 
-                        MessageAdapter sendAdapter = getAdapter(holder, otherName, myUsersId);   //  call method of msg
-
+//                        MessageAdapter sendAdapter = getAdapter(holder, otherName, myUsersId);   //  call method of msg
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
 
+                                RecyclerView recyclerChat = getView(holder, otherName, myUsersId);
+
+                                try{
+                                    listener.sendRecyclerView(recyclerChat);
+                                } catch (Exception e){
+                                    System.out.println("Error "+ e.getMessage());
+                                }
+
+//                                getView(holder, otherName, myUsersId);
+
                                 // -------- send adapter to MainActivity
                                 holder.constraintLast.setOnClickListener(view -> {
 
-                                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName, myUsersId, mContext);
+//                                    getView(holder, otherName, myUsersId);
+                                    holder.recyclerChat.setVisibility(View.VISIBLE);
+//
+                                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName, myUsersId,
+                                            mContext, pos, recyclerChat);
 
-                                    listener.sendMsgAdapter(sendAdapter, (holder.modelList2.size() - 1));
+//                                    try{
+//                                        listener.sendRecyclerView(recyclerChat, holder.adapter.getItemCount() - 1);
+//                                    } catch (Exception e){
+//                                        System.out.println("Error "+ e.getMessage());
+//                                    }
 
                                     listener.getLastSeenAndOnline(myUsersId);
 
@@ -465,10 +509,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     //      --------- methods -----------
 
     // get messages
-    private MessageAdapter getAdapter(ChatViewHolder holder, String otherName2, String uID) {
-        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
-        refMsg.keepSynced(true);
+    private RecyclerView getView(ChatViewHolder holder, String otherName2, String uID) {
 
+        DatabaseReference refMsg =FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
+        refMsg.keepSynced(true);
         refMsg.limitToLast(40).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -498,7 +542,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // Set MainActivity as the listener for messageAdapter
         holder.adapter.setFragmentListener((FragmentListener) mContext);
 
-        return holder.adapter;
+        holder.recyclerChat.setAdapter(holder.adapter);
+        holder.recyclerChat.scrollToPosition(holder.adapter.getItemCount() - 1);
+
+        System.out.println("Check the list " + holder.recyclerChat);
+        return holder.recyclerChat;
+//        return holder.adapter;
     }
 
     private void getMessage2(ChatViewHolder holder, String otherName2){
@@ -540,6 +589,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         return otherUsersId.size();
     }
 
+    @Override
+    public void constraintChatVisibility(int position, int isVisible) {
+//        // Change the visibility of the item view at the specified position
+//        if (position >= 0 && position < getItemCount()) {
+//            ChatViewHolder holder = recyclerViewHolders.get(position);
+//            if (holder != null) {
+//                holder.recyclerChat.setVisibility(isVisible);
+//            }
+//        }
+    }
+
     public class ChatViewHolder extends RecyclerView.ViewHolder{
 
         private CircleImageView imageView;
@@ -551,7 +611,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private CardView cardView;
         List<MessageModel> modelList2;
         MessageAdapter adapter;
-//        RecyclerView recyclerView;
+        RecyclerView recyclerChat;
         int listCount;
 
         public ChatViewHolder(@NonNull View itemView) {
@@ -575,12 +635,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             constraintTop = itemView.findViewById(R.id.constraintTop);
             constraintLast = itemView.findViewById(R.id.constrainLast);
 //
-//            recyclerView = itemView.findViewById(R.id.recycler);
-//            recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            recyclerChat = itemView.findViewById(R.id.recyclerChat);
+            recyclerChat.setLayoutManager(new LinearLayoutManager(mContext));
             modelList2 = new ArrayList<>();
 //            adapter = null;
 
+
         }
+//        public void setRecyclerView(RecyclerView recyclerView) {
+//            this.recyclerChat = recyclerView;
+//        }
     }
 
 }

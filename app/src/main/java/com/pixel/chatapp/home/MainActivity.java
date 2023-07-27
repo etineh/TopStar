@@ -19,11 +19,13 @@ import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -46,6 +48,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
@@ -115,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private MediaRecorder mediaRecorder;
     private Permission permissions;
     private static final int PAGE_SIZE = 20; // Number of items to fetch per page
-    private int currentPage = 1; // Current page number
+    private int currentPage; // Current page number
     ConstraintLayout constraintMsgBody;
     private ChatsListFragment chatsListFragment;
 
@@ -124,8 +127,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     RecordView recordView;
     RecordButton recordButton;
 
+//    private Bundle savedChildViewState; // Store the state of the child view
+
     private int readMsgDb = 0;  // 1 is read, 0 is no_read
     private Map<String, MessageAdapter> storeAdapter = new HashMap<>();
+
+    ConstraintLayout con;
+
+    public interface ChatVisibilityListener {
+        void constraintChatVisibility(int position, int isVisible);
+    }
 
     //  ---------- msg end
 
@@ -137,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         //      --------- message ids
 
+        con = findViewById(R.id.constraintRecyler);
 
         imageViewBack = findViewById(R.id.imageViewBackArrow9);
         textViewOtherUser = findViewById(R.id.textViewName9);
@@ -168,10 +180,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
 
-        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
+//        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
 
-        recyclerViewChat.setHasFixedSize(true);
-        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
+//        recyclerViewChat.setHasFixedSize(true);
+//        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
 
         refMessages = FirebaseDatabase.getInstance().getReference("Messages");
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -182,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refMsgSeen = FirebaseDatabase.getInstance().getReference("MsgSeen");
 
         modelList = new ArrayList<>();
+
 
         // ----------------------
 
@@ -254,6 +267,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
                 }
             }
+        });
+
+        //  close msg container
+        imageViewBack.setOnClickListener(view -> {
+            onBackPressed();
         });
 
         // open the menu option
@@ -355,7 +373,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID, Context mContext) {
+    public void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID,
+                                  Context mContext, int position, RecyclerView cy) {
 
         constraintMsgBody.setVisibility(data);
         menuOpen.setClickable(false);
@@ -373,6 +392,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherUserName = otherName;
         myUserName = userName;
         imageUri = imageUrl;
+        currentPage = position;
 
 //        if(storeAdapter.containsKey(otherName)){
 //
@@ -385,18 +405,51 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //        }
 //
 //            System.out.println("check side " + otherName + storeAdapter.size());
-        getMsg(userName, otherName, uID, mContext);
+//        getMsg(userName, otherName, uID, mContext);
 //        readMsgDb = 1;
 
+
+        for (int i = 0; i < con.getChildCount(); i++) {
+            View child = con.getChildAt(i);
+            RecyclerView recyclerView = (RecyclerView) child;
+            if (child instanceof RecyclerView && child != cy) {
+                child.setVisibility(View.INVISIBLE);
+            } else{
+//                recyclerView.scrollToPosition(scroll);
+                child.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
-    public void sendMsgAdapter(MessageAdapter adapter1, int scroll) {
-        recyclerViewChat.setAdapter(adapter1);
-        recyclerViewChat.scrollToPosition(scroll);
-//        adapter = adapter1;
-//        scrollPosition = scroll;
-//        System.out.println("Land Count "+adapter1.getItemCount());
+    public void sendRecyclerView(RecyclerView recyclerChat) {
+
+        // delay the count so that it will finish loading the recycler data before scrolling to last position
+        new CountDownTimer(2000, 1000){
+            @Override
+            public void onTick(long l) {
+                if (recyclerChat.getParent() != null) {
+                    // Remove the clicked RecyclerView from its current parent
+                    ((ViewGroup) recyclerChat.getParent()).removeView(recyclerChat);
+                }
+                con.addView(recyclerChat);
+
+            }
+            @Override
+            public void onFinish() {
+
+                // loop through each child and scroll to last position
+                for (int i = 0; i < con.getChildCount(); i++) {
+                    View child = con.getChildAt(i);
+                    RecyclerView recyclerView = (RecyclerView) child;
+
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int lastPosition = layoutManager.getItemCount() - 1;
+                    layoutManager.scrollToPosition(lastPosition);
+                    System.out.println("Land Count "+ lastPosition);
+                }
+            }
+        }.start();
 
     }
 
@@ -448,6 +501,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         }).start();
 
+
 //        recyclerViewChat.setAdapter(getMsg());
 //        recyclerViewChat.scrollToPosition(getMsg().getItemCount() - 1);
 //        if (checkMsg)
@@ -455,8 +509,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         MessageModel messageModel = new MessageModel(message, myUserName, "", 0, "",
                 "", 8, "", 700033, type);
         modelList.add(messageModel);
-        recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        recyclerViewChat.setAdapter(adapter);
+        adapter = new MessageAdapter(modelList, myUserName, otherUserUid, MainActivity.this);   // check later
+//        recyclerViewChat.scrollToPosition(modelList.size() - 1);
+//        recyclerViewChat.setAdapter(adapter);
+//
+//        con.removeAllViews();
+//        con.addView(recyclerViewChat);
 
     }
 
@@ -1095,6 +1153,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             menuOpen.setClickable(true);   // set the home menu page clickable false
             editTextMessage.setText("");    // clear message not sent
 
+//            ChatListAdapter.getInstance().constraintChatVisibility(currentPage, View.INVISIBLE);
+//            ChatListAdapter.getInstance().setItemVisibility(currentPage, false);
             new Thread(new Runnable() {
                 @Override
                 public void run() {

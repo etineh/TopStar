@@ -1086,6 +1086,16 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintRecyler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintNextTop9"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/contraintTop9"
                 style="@style/cardTopOrange"
                 android:layout_width="match_parent"
@@ -1355,26 +1365,6 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewChat9"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:fitsSystemWindows="true"
-                android:focusableInTouchMode="true"
-                android:paddingLeft="5dp"
-                android:paddingTop="7dp"
-                android:paddingRight="5dp"
-                android:paddingBottom="7dp"
-                app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintNextTop9"
-                tools:listitem="@layout/card_received">
-
-            </androidx.recyclerview.widget.RecyclerView>
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintSendMsgBox9"
                 android:layout_width="match_parent"
@@ -1578,6 +1568,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
