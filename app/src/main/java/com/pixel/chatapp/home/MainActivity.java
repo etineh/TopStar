@@ -130,9 +130,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //    private Bundle savedChildViewState; // Store the state of the child view
 
     private int readMsgDb = 0;  // 1 is read, 0 is no_read
-    private Map<String, MessageAdapter> storeAdapter = new HashMap<>();
+    private Map<String, MessageAdapter> storeAdapter;
+    private Map<String, RecyclerView> recyclerMap;
 
-    ConstraintLayout con;
+    private List<String> stringList;
+    ConstraintLayout recyclerContainer;
 
     public interface ChatVisibilityListener {
         void constraintChatVisibility(int position, int isVisible);
@@ -148,15 +150,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         //      --------- message ids
 
-        con = findViewById(R.id.constraintRecyler);
+        recyclerContainer = findViewById(R.id.constraintRecyler);
 
         imageViewBack = findViewById(R.id.imageViewBackArrow9);
         textViewOtherUser = findViewById(R.id.textViewName9);
         editTextMessage = findViewById(R.id.editTextMessage9);
         circleSendMessage = findViewById(R.id.fab9);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu29);
-//        imageViewCloseMenu = findViewById(R.id.imageViewCancel);
-//        constraintProfileMenu = findViewById(R.id.constraintProfileMenu9);
+        imageViewCloseMenu = findViewById(R.id.imageViewCancel9);
+        constraintProfileMenu = findViewById(R.id.constraintProfileMenu9);
         textViewLastSeen = findViewById(R.id.textViewStatus9);
         textViewMsgTyping = findViewById(R.id.textViewTyping29);
         circleImageOnline = findViewById(R.id.circleImageOnline9);
@@ -180,10 +182,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
 
-//        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
+        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
 
-//        recyclerViewChat.setHasFixedSize(true);
-//        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewChat.setHasFixedSize(true);
+        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
 
         refMessages = FirebaseDatabase.getInstance().getReference("Messages");
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -194,6 +196,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refMsgSeen = FirebaseDatabase.getInstance().getReference("MsgSeen");
 
         modelList = new ArrayList<>();
+        stringList = new ArrayList<>();
+        recyclerMap = new HashMap<>();
+        storeAdapter = new HashMap<>();
 
 
         // ----------------------
@@ -327,6 +332,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         });
 
+        // open user menu
+        imageViewOpenMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.VISIBLE));
+
+        // close user menu
+        imageViewCloseMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
+        constraintProfileMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
+
+
         // send message
         circleSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -340,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     editTextMessage.setText("");
                     listener = "no";
                     scrollPosition = 0;
-//                    adapter
+
                     cardViewReply.setVisibility(View.GONE);
                     nameReply.setVisibility(View.GONE);
                     replyVisible.setVisibility(View.GONE);
@@ -350,13 +363,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         setUserDetails();
 
-        try {
-
-        } catch (Exception e){
-        }
-
 //        sendMsgAdapter(adapter, 1);
-//        System.out.println("Check this method if it calls");
+//        System.out.println("MainActivity create2 ");
     }
 
     //  --------------- methods --------------------
@@ -373,13 +381,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID,
-                                  Context mContext, int position, RecyclerView cy) {
+    public void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID) {
 
         constraintMsgBody.setVisibility(data);
-        menuOpen.setClickable(false);
-
-        checkMsg = true;
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
@@ -392,65 +396,52 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherUserName = otherName;
         myUserName = userName;
         imageUri = imageUrl;
-        currentPage = position;
-
-//        if(storeAdapter.containsKey(otherName)){
-//
-//            recyclerViewChat.setAdapter(storeAdapter.get(otherName));
-//                            recyclerViewChat.scrollToPosition(storeAdapter.get(otherName).getItemCount() - 1);
-//            System.out.println("this is the adapter " + otherName + storeAdapter.get(otherName));
-//        } else{
-////            storeAdapter.put(otherName, recyclerViewChat);  // store the adapter of this message
-//            System.out.println("generating new adapter " + storeAdapter.get(otherName));
-//        }
-//
-//            System.out.println("check side " + otherName + storeAdapter.size());
-//        getMsg(userName, otherName, uID, mContext);
-//        readMsgDb = 1;
 
 
-        for (int i = 0; i < con.getChildCount(); i++) {
-            View child = con.getChildAt(i);
-            RecyclerView recyclerView = (RecyclerView) child;
-            if (child instanceof RecyclerView && child != cy) {
-                child.setVisibility(View.INVISIBLE);
+        checkNewMsg(otherName);
+
+        topMainContainer.setVisibility(View.INVISIBLE);
+        tabLayoutGeneral.setVisibility(View.INVISIBLE);
+
+    }
+
+    public void checkNewMsg(String otherName){
+        for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
+            View child = recyclerContainer.getChildAt(i);
+//            RecyclerView recyclerView = (RecyclerView) child;
+            if (child instanceof RecyclerView && child == recyclerMap.get(otherName)) {
+                child = recyclerMap.get(otherName);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherName).getLayoutManager();
+                int lastPosition = layoutManager.getItemCount() - 1;
+                layoutManager.scrollToPosition(lastPosition);
+
+                child.setVisibility(View.VISIBLE);  // make only child layer visible
+                System.out.println("Check out re " + otherName);
+
             } else{
-//                recyclerView.scrollToPosition(scroll);
-                child.setVisibility(View.VISIBLE);
+                child.setVisibility(View.INVISIBLE);
             }
         }
     }
 
     @Override
-    public void sendRecyclerView(RecyclerView recyclerChat) {
+    public void sendRecyclerView(RecyclerView recyclerChat, String otherName) {
 
-        // delay the count so that it will finish loading the recycler data before scrolling to last position
-        new CountDownTimer(2000, 1000){
-            @Override
-            public void onTick(long l) {
-                if (recyclerChat.getParent() != null) {
-                    // Remove the clicked RecyclerView from its current parent
-                    ((ViewGroup) recyclerChat.getParent()).removeView(recyclerChat);
-                }
-                con.addView(recyclerChat);
+        recyclerMap.put(otherName, recyclerChat);  // save each user recyclerChat to their username
 
-            }
-            @Override
-            public void onFinish() {
+        if (recyclerChat.getParent() != null) {
+            // Remove the clicked RecyclerView from its current parent
+            ((ViewGroup) recyclerChat.getParent()).removeView(recyclerChat);
+        }
+        recyclerContainer.addView(recyclerChat);
 
-                // loop through each child and scroll to last position
-                for (int i = 0; i < con.getChildCount(); i++) {
-                    View child = con.getChildAt(i);
-                    RecyclerView recyclerView = (RecyclerView) child;
+    }
 
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    int lastPosition = layoutManager.getItemCount() - 1;
-                    layoutManager.scrollToPosition(lastPosition);
-                    System.out.println("Land Count "+ lastPosition);
-                }
-            }
-        }.start();
+    @Override
+    public void getMessage(String userName, String otherName, String uID, Context mContext){
 
+        getMsg(userName, otherName, uID, mContext);
     }
 
     private Map<String, Object> setMessage(String message, int type){
@@ -501,20 +492,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         }).start();
 
+//        stringList.add(message);
 
 //        recyclerViewChat.setAdapter(getMsg());
 //        recyclerViewChat.scrollToPosition(getMsg().getItemCount() - 1);
 //        if (checkMsg)
 
+        List<MessageModel> modelList1 = new ArrayList<>();
+
         MessageModel messageModel = new MessageModel(message, myUserName, "", 0, "",
                 "", 8, "", 700033, type);
-        modelList.add(messageModel);
-        adapter = new MessageAdapter(modelList, myUserName, otherUserUid, MainActivity.this);   // check later
-//        recyclerViewChat.scrollToPosition(modelList.size() - 1);
-//        recyclerViewChat.setAdapter(adapter);
-//
-//        con.removeAllViews();
-//        con.addView(recyclerViewChat);
+        modelList1.add(messageModel);
+        MessageAdapter adapter1 = new MessageAdapter(modelList1, myUserName, otherUserUid, MainActivity.this);   // check later
+
+//        recycler.get(otherUserName).setAdapter(adapter1);
 
     }
 
@@ -597,25 +588,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     public void getMsg(String userName, String otherName, String uID, Context mContext){
 
+        // create new modelList and Adapter instance so it wont replace only the item that's updates
+        List<MessageModel> modelList1 = new ArrayList<>();
+        MessageAdapter adapter1 = new MessageAdapter(modelList1, userName, uID, mContext);
+
         DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName);
-        refMsg.addListenerForSingleValueEvent(new ValueEventListener() {
+        refMsg.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                modelList.clear();
+                modelList1.clear();
 
                 for (DataSnapshot snapshot1 : snapshot.getChildren()){
 
                     MessageModel messageModel = snapshot1.getValue(MessageModel.class);
                     messageModel.setIdKey(snapshot1.getKey());  // set msg keys to the adaptor
-                    modelList.add(messageModel);
-//                    adapter.notifyDataSetChanged();
+                    modelList1.add(messageModel);
+                    adapter1.notifyDataSetChanged();
                 }
 
-                // scroll to the new message position number
-//                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1);
-                recyclerViewChat.scrollToPosition(modelList.size() - 1);
-
+                checkNewMsg(otherName); // notify the recyclerView inside the map when there's update
             }
 
             @Override
@@ -624,49 +616,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         });
 
-//        modelList.clear();
-//        refMsg.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 //
-//                MessageModel messageModel = snapshot.getValue(MessageModel.class);
-//                messageModel.setIdKey(snapshot.getKey());  // set msg keys to the adaptor
-//                modelList.add(messageModel);
-//                adapter.notifyDataSetChanged();
-//
-//                recyclerViewChat.scrollToPosition(modelList.size() - 1);
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
+        adapter1.setFragmentListener((FragmentListener) mContext);
 
-        recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        adapter = new MessageAdapter(modelList, userName, uID, mContext);
-//        System.out.println("this is the adapter " + adapterMes);
-        adapter.setFragmentListener((FragmentListener) mContext);
+        recyclerMap.get(otherName).setAdapter(adapter1);
 
-//        if(readMsgDb == 0){
-//            recyclerViewChat.setAdapter(adapter);
-//        }
     }
 
     @Override
@@ -1126,11 +1080,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         builder.create().show();
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        refUser.child(auth.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
-//        super.onBackPressed();
-//    }
 
     @Override
     protected void onPause() {
@@ -1150,11 +1099,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         if(constraintMsgBody.getVisibility() == View.VISIBLE){
             constraintMsgBody.setVisibility(View.INVISIBLE);
             cardViewReply.setVisibility(View.GONE);
-            menuOpen.setClickable(true);   // set the home menu page clickable false
+            topMainContainer.setVisibility(View.VISIBLE);
+            tabLayoutGeneral.setVisibility(View.VISIBLE);
+
             editTextMessage.setText("");    // clear message not sent
+
 
 //            ChatListAdapter.getInstance().constraintChatVisibility(currentPage, View.INVISIBLE);
 //            ChatListAdapter.getInstance().setItemVisibility(currentPage, false);
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
