@@ -140,125 +140,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
 
-        // get lastMessage, and Date/Time sent, and set delivery msg to visibility
-        refUsersLast.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                String lastMsg = snapshot.child(myUsersId).child("message").getValue().toString();
-                long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
-                String lastSender = snapshot.child(myUsersId).child("from").getValue().toString();
-
-                // set message delivery visibility
-                if(lastSender.equals(userName)){
-                    holder.imageViewDeliver.setVisibility(View.VISIBLE);
-                } else {
-                    holder.imageViewDeliver.setVisibility(View.INVISIBLE);
-                }
-
-                // set last message
-                holder.textViewMsg.setText(lastMsg);
-
-                // current date and time
-                Timestamp stamp = new Timestamp(System.currentTimeMillis());
-                Date date = new Date(stamp.getTime());
-                String currentDateString = String.valueOf(date);
-
-                // last user date and time
-                Date d = new Date(lastTime);    // convert the timestamp to current time
-                DateFormat formatter = new SimpleDateFormat("h:mm a");
-                String time = formatter.format(d);
-                String previousDateString = String.valueOf(d);
-
-                dateMonth = new HashMap<>();     // months
-                dateMonth.put("Jan", 1);
-                dateMonth.put("Feb", 2);
-                dateMonth.put("Mar", 3);
-                dateMonth.put("Apr", 4);
-                dateMonth.put("May", 5);
-                dateMonth.put("Jun", 6);
-                dateMonth.put("Jul", 7);
-                dateMonth.put("Aug", 8);
-                dateMonth.put("Sep", 9);
-                dateMonth.put("Oct", 10);
-                dateMonth.put("Nov", 11);
-                dateMonth.put("Dec", 12);
-
-                dateNum = new HashMap<>();      // days
-                dateNum.put("Mon", 1);
-                dateNum.put("Tue", 2);
-                dateNum.put("Wed", 3);
-                dateNum.put("Thu", 4);
-                dateNum.put("Fri", 5);
-                dateNum.put("Sat", 6);
-                dateNum.put("Sun", 7);
-
-                String lastYear = previousDateString.substring(30, 34);  // last year
-
-                int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
-                int lastMonth = dateMonth.get(previousDateString.substring(4,7));
-
-                int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
-                int lastDay = dateNum.get(previousDateString.substring(0,3));
-
-                String lastDayString = previousDateString.substring(0,3);   // get the day string
-//                int dateLastString = Integer.parseInt(previousDateString.substring(8, 10));
-
-                int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
-                int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
-
-                if (curMonth - lastMonth == 0)
-                {
-                    if (dateCur - dateLast < 7)
-                    {
-                        if(curDay - lastDay == 0)
-                        {
-                            holder.textViewDay.setText("Today");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 1) {
-                            holder.textViewDay.setText("Yesterday");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 2) {
-                            holder.textViewDay.setText("2days ago");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 3) {
-                            holder.textViewDay.setText("3days ago");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 4) {
-                            holder.textViewDay.setText("4days ago");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 5) {
-                            holder.textViewDay.setText("5days ago");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        } else if (curDay - lastDay == 6) {
-                            holder.textViewDay.setText("6days ago");
-                            holder.textViewTime.setText(time.toLowerCase());
-                        }
-                    } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
-                        holder.textViewDay.setText(lastDayString);
-                        holder.textViewTime.setText("1wk ago");
-                    } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
-                        holder.textViewDay.setText(lastDayString);
-                        holder.textViewTime.setText("2wk ago");
-                    } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
-                        holder.textViewDay.setText(lastDayString);
-                        holder.textViewTime.setText("3wk ago");
-                    } else {
-                        holder.textViewDay.setText(lastDayString);
-                        holder.textViewTime.setText("month ago");
-                    }
-                } else{
-//                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
-                    holder.textViewTime.setText(dateLast +"/"+ lastMonth+"/"+ lastYear);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
 
 //        //         reset offline message count to 0 when network comes
         ConnectivityManager connMgr = (ConnectivityManager) mContext
@@ -268,98 +149,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         if (networkInfo != null && networkInfo.isConnected()) {
             referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
         }
-//
-////        set message tick deliver;   // bug - move all child inside since it starts with myUserId
-        referenceCheck.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                try{
-                    long msgCount = (long) snapshot.child(myUsersId)
-                            .child(user.getUid()).child("unreadMsg").getValue();
-                    long offCount = (long) snapshot.child(myUsersId)
-                            .child(user.getUid()).child("offCount").getValue();
-
-                    if (msgCount == 0) {
-                        holder.imageViewDeliver.setImageResource(R.drawable.read_orange);
-                    } else{
-                        if(offCount > 0){
-                            holder.imageViewDeliver.setImageResource(R.drawable.message_load);
-                        }
-                        else holder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
-                    }
-                } catch (Exception e){
-                    referenceCheck.child(myUsersId).child(user.getUid()).child("unreadMsg").setValue(0);
-                    referenceCheck.child(user.getUid()).child(myUsersId).child("unreadMsg").setValue(0);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-//
-//
-//        // get number of unread message count
-        referenceCheck.keepSynced(true);
-        referenceCheck.child(user.getUid())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        try{
-                            long unreadMsg = (long) snapshot.child(myUsersId).child("unreadMsg").getValue();
-                            if(unreadMsg > 0) {
-                                holder.textViewMsgCount.setVisibility(View.VISIBLE);
-                                holder.textViewMsgCount.setText(""+unreadMsg);
-                            } else{
-                                holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-                            }
-                        }catch (Exception e){
-                            referenceCheck.child(user.getUid()).child(myUsersId)
-                                    .child("unreadMsg").setValue(1);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-//        new MessageActivity().alertMeWhenUserCallMe(myUsersId, user);       // alert me when user is calling
-//
-//        // get user typing state
-//// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
-        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    try{
-                        long typing = (long) snapshot.child(myUsersId).child("typing").getValue();
-
-                        if(typing == 1){
-                            holder.textViewMsg.setVisibility(View.INVISIBLE);
-                            holder.textViewTyping.setVisibility(View.VISIBLE);
-                            holder.textViewTyping.setText("typing...");
-                            holder.textViewTyping.setTypeface(null, Typeface.ITALIC);  // Italic style
-                        }
-                        else {
-                            holder.textViewMsg.setVisibility(View.VISIBLE);
-                            holder.textViewTyping.setVisibility(View.GONE);
-                        }
-                    } catch (Exception e){
-                        referenceCheck.child(user.getUid()).child(myUsersId).child("typing").setValue(0);
-                    }
-
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
 
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
@@ -500,6 +289,223 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     //      --------- methods -----------
+
+    // get lastMessage, and Date/Time sent, and set delivery msg to visibility
+    private void getLastMsg_TimeSent_MsgDeliveryVisible(ChatViewHolder holder, String myUsersId){
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+        refUsersLast.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                String lastMsg = snapshot.child(myUsersId).child("message").getValue().toString();
+                long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
+                String lastSender = snapshot.child(myUsersId).child("from").getValue().toString();
+
+                // set message delivery visibility
+                if(lastSender.equals(userName)){
+                    holder.imageViewDeliver.setVisibility(View.VISIBLE);
+                } else {
+                    holder.imageViewDeliver.setVisibility(View.INVISIBLE);
+                }
+
+                // set last message
+                holder.textViewMsg.setText(lastMsg);
+
+                // current date and time
+                Timestamp stamp = new Timestamp(System.currentTimeMillis());
+                Date date = new Date(stamp.getTime());
+                String currentDateString = String.valueOf(date);
+
+                // last user date and time
+                Date d = new Date(lastTime);    // convert the timestamp to current time
+                DateFormat formatter = new SimpleDateFormat("h:mm a");
+                String time = formatter.format(d);
+                String previousDateString = String.valueOf(d);
+
+                dateMonth = new HashMap<>();     // months
+                dateMonth.put("Jan", 1);
+                dateMonth.put("Feb", 2);
+                dateMonth.put("Mar", 3);
+                dateMonth.put("Apr", 4);
+                dateMonth.put("May", 5);
+                dateMonth.put("Jun", 6);
+                dateMonth.put("Jul", 7);
+                dateMonth.put("Aug", 8);
+                dateMonth.put("Sep", 9);
+                dateMonth.put("Oct", 10);
+                dateMonth.put("Nov", 11);
+                dateMonth.put("Dec", 12);
+
+                dateNum = new HashMap<>();      // days
+                dateNum.put("Mon", 1);
+                dateNum.put("Tue", 2);
+                dateNum.put("Wed", 3);
+                dateNum.put("Thu", 4);
+                dateNum.put("Fri", 5);
+                dateNum.put("Sat", 6);
+                dateNum.put("Sun", 7);
+
+                String lastYear = previousDateString.substring(30, 34);  // last year
+
+                int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
+                int lastMonth = dateMonth.get(previousDateString.substring(4,7));
+
+                int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
+                int lastDay = dateNum.get(previousDateString.substring(0,3));
+
+                String lastDayString = previousDateString.substring(0,3);   // get the day string
+//                int dateLastString = Integer.parseInt(previousDateString.substring(8, 10));
+
+                int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
+                int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
+
+                if (curMonth - lastMonth == 0)
+                {
+                    if (dateCur - dateLast < 7)
+                    {
+                        if(curDay - lastDay == 0)
+                        {
+                            holder.textViewDay.setText("Today");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 1) {
+                            holder.textViewDay.setText("Yesterday");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 2) {
+                            holder.textViewDay.setText("2days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 3) {
+                            holder.textViewDay.setText("3days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 4) {
+                            holder.textViewDay.setText("4days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 5) {
+                            holder.textViewDay.setText("5days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        } else if (curDay - lastDay == 6) {
+                            holder.textViewDay.setText("6days ago");
+                            holder.textViewTime.setText(time.toLowerCase());
+                        }
+                    } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("1wk ago");
+                    } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("2wk ago");
+                    } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("3wk ago");
+                    } else {
+                        holder.textViewDay.setText(lastDayString);
+                        holder.textViewTime.setText("month ago");
+                    }
+                } else{
+//                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
+                    holder.textViewTime.setText(dateLast +"/"+ lastMonth+"/"+ lastYear);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+//            }
+//        }).start();
+
+    }
+
+    // set message tick deliver;   // bug - move all child inside since it starts with myUserId
+    private void msgDeliverStatus(ChatViewHolder holder, String myUsersId){
+        referenceCheck.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long msgCount = (long) snapshot.child(myUsersId)
+                        .child(user.getUid()).child("unreadMsg").getValue();
+                long offCount = (long) snapshot.child(myUsersId)
+                        .child(user.getUid()).child("offCount").getValue();
+
+                if (msgCount == 0) {
+                    holder.imageViewDeliver.setImageResource(R.drawable.read_orange);
+                } else{
+                    if(offCount > 0){
+                        holder.imageViewDeliver.setImageResource(R.drawable.message_load);
+                    }
+                    else holder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    // get number of unread message count
+    private void unreadMsgNumber(ChatViewHolder holder, String myUsersId){
+
+        referenceCheck.keepSynced(true);
+        referenceCheck.child(user.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if (!snapshot.child(myUsersId).child("unreadMsg").exists()){
+                            referenceCheck.child(user.getUid()).child(myUsersId)
+                                    .child("unreadMsg").setValue(1);
+                        }
+                        else
+                        {
+                            long unreadMsg = (long) snapshot.child(myUsersId).child("unreadMsg").getValue();
+                            if(unreadMsg > 0) {
+                                holder.textViewMsgCount.setVisibility(View.VISIBLE);
+                                holder.textViewMsgCount.setText(""+unreadMsg);
+                            } else{
+                                holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+    }
+
+    // get user typing state
+    private void getTypingState(ChatViewHolder holder, String myUsersId){
+//// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
+        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long typing = (long) snapshot.child(myUsersId).child("typing").getValue();
+
+                if(typing == 1){
+                    holder.textViewMsg.setVisibility(View.INVISIBLE);
+                    holder.textViewTyping.setVisibility(View.VISIBLE);
+                    holder.textViewTyping.setText("typing...");
+                    holder.textViewTyping.setTypeface(null, Typeface.ITALIC);  // Italic style
+                }
+                else {
+                    holder.textViewMsg.setVisibility(View.VISIBLE);
+                    holder.textViewTyping.setVisibility(View.GONE);
+                }
+//
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 
 
     @Override
