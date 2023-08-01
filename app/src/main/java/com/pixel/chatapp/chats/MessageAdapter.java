@@ -128,6 +128,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    public void addNewMessages(List<MessageModel> newMessages) {
+//        modelList.clear();
+        int startPosition = modelList.size();
+        modelList.addAll(newMessages);
+        notifyItemRangeInserted(startPosition, newMessages.size());
+    }
+
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

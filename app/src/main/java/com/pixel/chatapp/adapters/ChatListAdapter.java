@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -396,6 +397,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         @Override
                         public void onFinish() {
                             loadMsg = false;    // stop the getVIew method from loading at every instance
+                            MainActivity.readMsgDb = 1;     // stop old message from refreshing @ MainActivity
                         }
                     }.start();
                 }
@@ -403,17 +405,23 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                 // -------- send adapter to MainActivity
                 holder.constraintLast.setOnClickListener(view -> {
-//                    holder.recyclerChat.setVisibility(View.VISIBLE);
 
-                    listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName, myUsersId);
+                    try {
 
-                    listener.getLastSeenAndOnline(myUsersId);
+                        listener.msgBodyVisibility(View.VISIBLE, otherName, imageUrl, userName, myUsersId);
 
-                    listener.msgBackgroundActivities(myUsersId);
+                        listener.getLastSeenAndOnline(myUsersId);
 
-                    listener.callAllMethods();
+                        listener.msgBackgroundActivities(myUsersId);
 
-                    holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+                        listener.callAllMethods();
+
+                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+
+                    } catch (Exception e){
+                        Toast.makeText(mContext, "Send your first message here!", Toast.LENGTH_SHORT).show();
+                        System.out.println("Error occur" + e.getMessage());
+                    }
 
 //                    listener.sendAdapterAndModelList(holder.adapter, holder.modelList2, userName, otherName, myUsersId);
 
@@ -430,29 +438,29 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                             int castNum = (int) numScroll;
 
                             // what happen when the cardView is click
-                            holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-
-                                    // send userName, otherName and each user UiD to display on the chat box
-                                    Intent intent = new Intent(mContext, MessageActivity.class);
-                                    intent.putExtra("otherName", otherName);
-                                    intent.putExtra("userName", userName);
-                                    intent.putExtra("Uid", myUsersId);
-                                    intent.putExtra("ImageUrl", imageUrl);
-                                    intent.putExtra("recyclerScroll", castNum);
-                                    intent.putExtra("insideChat", "yes");
-                                    intent.putExtra("messageList", (Serializable) holder.modelList2);
-
-                                    mContext.startActivity(intent);
-
-                                    // set my unreadMessage to 0 and hide my count layer
-                                    holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-
-                                    // close option menu if open
-                                    holder.constraintTop.setVisibility(View.GONE);
-                                }
-                            });
+//                            holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View view) {
+//
+//                                    // send userName, otherName and each user UiD to display on the chat box
+//                                    Intent intent = new Intent(mContext, MessageActivity.class);
+//                                    intent.putExtra("otherName", otherName);
+//                                    intent.putExtra("userName", userName);
+//                                    intent.putExtra("Uid", myUsersId);
+//                                    intent.putExtra("ImageUrl", imageUrl);
+//                                    intent.putExtra("recyclerScroll", castNum);
+//                                    intent.putExtra("insideChat", "yes");
+//                                    intent.putExtra("messageList", (Serializable) holder.modelList2);
+//
+//                                    mContext.startActivity(intent);
+//
+//                                    // set my unreadMessage to 0 and hide my count layer
+//                                    holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+//
+//                                    // close option menu if open
+//                                    holder.constraintTop.setVisibility(View.GONE);
+//                                }
+//                            });
                         }
                     }
 
@@ -470,16 +478,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         });
 
         //  open option menu
-//        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(holder.constraintTop.getVisibility() == View.GONE){
-//                    holder.constraintTop.setVisibility(View.VISIBLE);
-//                } else {
-//                    holder.constraintTop.setVisibility(View.GONE);
-//                }
-//            }
-//        });
+        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(holder.constraintTop.getVisibility() == View.GONE){
+                    holder.constraintTop.setVisibility(View.VISIBLE);
+                } else {
+                    holder.constraintTop.setVisibility(View.GONE);
+                }
+            }
+        });
+
         //  close option menu
         holder.imageViewCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -492,81 +501,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     //      --------- methods -----------
 
-    // get messages
-    private RecyclerView getView(ChatViewHolder holder, String otherName2, String uID) {
-
-        DatabaseReference refMsg =FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
-//        refMsg.keepSynced(true);
-        refMsg.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                List<MessageModel> newMessages = new ArrayList<>();
-                holder.modelList2.clear();
-
-                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
-                    messageModel.setIdKey(snapshot1.getKey());
-                    holder.modelList2.add(messageModel);
-                }
-
-                // Update the modelList2 with the new messages
-//                holder.modelList2.addAll(newMessages);
-
-                // Notify the adapter that the data has changed
-                holder.adapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Handle onCancelled if needed
-            }
-        });
-
-        holder.adapter = new MessageAdapter(holder.modelList2, userName, uID, mContext);
-        // Set MainActivity as the listener for messageAdapter
-        holder.adapter.setFragmentListener((FragmentListener) mContext);
-
-        holder.recyclerChat.setAdapter(holder.adapter);
-        holder.recyclerChat.scrollToPosition(holder.adapter.getItemCount() - 1);
-
-        return holder.recyclerChat;
-//        return holder.adapter;
-    }
-
-    private void getMessage2(ChatViewHolder holder, String otherName2){
-        DatabaseReference refMsg = FirebaseDatabase.getInstance().getReference("Messages").child(userName).child(otherName2);
-        refMsg.limitToLast(30).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-//                modelList = new ArrayList<>();
-                holder.modelList2.clear();
-
-                for (DataSnapshot snapshot1 : snapshot.getChildren()){
-
-                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
-                    messageModel.setIdKey(snapshot1.getKey());  // set msg keys to the adaptor
-                    holder.modelList2.add(messageModel);
-//                    adapter.notifyDataSetChanged();
-//                    return holder.modelList2;
-                }
-
-                // scroll to the new message position number
-//                holder.recyclerViewChat.scrollToPosition(holder.modelList2.size() - 1);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-//        System.out.println( " In userName " + userName + " In Othername " + otherName2 + " uId" +uID);
-//        adapter = new MessageAdapter(holder.modelList2, userName, uID, mContext, holder.editTextMessage, holder.constraintDelBody, holder.textViewReply,
-//                holder.cardViewReply, holder.textViewDelOther, holder.editOrReplyIV, holder.nameReply, holder.replyVisible);
-//        holder.recyclerViewChat.setAdapter(adapter);
-
-    }
 
     @Override
     public int getItemCount() {
