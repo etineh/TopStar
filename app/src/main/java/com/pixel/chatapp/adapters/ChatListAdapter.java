@@ -113,13 +113,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
 
         int pos = position;
-
         String myUsersId = otherUsersId.get(pos);
-//
-//        boolean isVisible = itemVisibilityStates.get(position, false);
-//        holder.recyclerChat.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
 
-//        new Thread(() -> {
+        new Thread(() -> {
             // set user "typing" to be false when I disconnect
             referenceCheck.child(myUsersId).child(user.getUid())
                     .child("typing").onDisconnect().setValue(0);
@@ -136,19 +132,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             offlinePresenceAndStatus.put("status", false);
             referenceCheck.child(user.getUid()).child(myUsersId).onDisconnect()
                     .updateChildren(offlinePresenceAndStatus);
-//        }).start();
+
+            //         reset offline message count to 0 when network comes
+            ConnectivityManager connMgr = (ConnectivityManager) mContext
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+            if (networkInfo != null && networkInfo.isConnected()) {
+                referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
+            }
+        }).start();
 
 
+        //  ----------- call methods    ---------------------
 
+        // get lastMessage, and Date/Time sent, and set delivery msg to visibility
+        getLastMsg_TimeSent_MsgDeliveryVisible(holder, myUsersId);
 
-//        //         reset offline message count to 0 when network comes
-        ConnectivityManager connMgr = (ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        msgDeliverStatus(holder, myUsersId);    // set message tick deliver;
 
-        if (networkInfo != null && networkInfo.isConnected()) {
-            referenceCheck.child(myUsersId).child(user.getUid()).child("offCount").setValue(0);
-        }
+        unreadMsgNumber(holder, myUsersId);     // get number of unread message count
+
+        getTypingState(holder, myUsersId);      // show when other user is typing
 
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
@@ -186,7 +191,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         @Override
                         public void onFinish() {
                             loadMsg = false;    // stop the getVIew method from loading at every instance
-                            MainActivity.readMsgDb = 1;     // stop old message from refreshing @ MainActivity
+                            MainActivity.readMsgDb = 1;     // stop old message from retrieving recyclerView position @ MainActivity
                         }
                     }.start();
                 }
