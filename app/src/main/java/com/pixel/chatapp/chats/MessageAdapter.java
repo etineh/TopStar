@@ -45,6 +45,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 
 import org.w3c.dom.Text;
 
@@ -73,20 +74,30 @@ import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    List<MessageModel> modelList;
-    String uId;
-    String userName;
+//    public static List<MessageModel> modelList;
+//    public static String uId;
+//    public static String userName;
+//    public static Context mContext;
+
+    public  List<MessageModel> modelList;
+    public  List<MessageModel> modelList2;
+
+    public String uId;
+    public String userName;
+    public  Context mContext;
+
     Boolean status;
     private int send;
     private int receive;
     FirebaseUser user;
     DatabaseReference refCheck, refUsers;
-    Context mContext;
     EditText editTextMsg;
     ConstraintLayout deleteBody;
     private CardView cardViewReply;
     private TextView textViewReply, textViewDelOther, nameReply, replyVisible;
     private ImageView editOrReplyIV;
+    List<MessageModel> modelList5 = new ArrayList<>();
+
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
     private static final String KEY_LIST = "myList";
@@ -97,6 +108,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.fragmentListener = fragmentListener;
     }
 
+    public static MessageAdapter instance;
+
 //    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
 //                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther,
 //                          ImageView editOrReplyIV, TextView nameReply, TextView replyVisible) {
@@ -106,7 +119,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.userName = userName;
         this.uId = uId;
         this.mContext = mContext;
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
 //        this.editTextMsg = editMsg;
 //        this.deleteBody = deleteBody;
 //        this.textViewReply = textViewReply;
@@ -128,12 +141,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    public void addNewMessages(List<MessageModel> newMessages) {
-//        modelList.clear();
-        int startPosition = modelList.size();
-        modelList.addAll(newMessages);
-        notifyItemRangeInserted(startPosition, newMessages.size());
+    // Public method to get the singleton instance
+//    public static MessageAdapter getInstance() {
+//        if (instance == null) {
+//            instance = new MessageAdapter(modelList, userName, uId, mContext);
+//        }
+//        return instance;
+//    }
+
+    public void addNewMessageDB(MessageModel newMessages) {
+        modelList.add(newMessages);
     }
+    public void addNewMessage(MessageModel localMsg) {
+
+//        modelList5.clear();
+//        modelList5.add(localMsg);
+        modelList.add(localMsg);
+//        notifyDataSetChanged();
+//        modelList.removeAll(localMsg);
+
+    }
+
 
     @NonNull
     @Override

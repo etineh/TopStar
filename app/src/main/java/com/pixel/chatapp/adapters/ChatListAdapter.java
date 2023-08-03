@@ -213,8 +213,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
                     } catch (Exception e){
-                        Toast.makeText(mContext, "Send your first message here!", Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur" + e.getMessage());
+                        Toast.makeText(mContext, "Send your first message here...!", Toast.LENGTH_SHORT).show();
+                        System.out.println("Error occur " + e.getMessage());
                     }
 
 //                    listener.sendAdapterAndModelList(holder.adapter, holder.modelList2, userName, otherName, myUsersId);
@@ -528,12 +528,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private CircleImageView imageView;
         private ImageView imageViewDeliver, imageViewMenu;
         private ImageView imageViewPin, imageViewMute, imageViewMove, imageViewDel, imageViewCancel;
-        ConstraintLayout constraintTop, constraintLast;
+        private ConstraintLayout constraintTop, constraintLast;
         private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
         private TextView textViewDay;
         private CardView cardView;
-        List<MessageModel> modelList2;
-        MessageAdapter adapter;
         RecyclerView recyclerChat;
         int listCount;
 
@@ -560,9 +558,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
             recyclerChat.setLayoutManager(new LinearLayoutManager(mContext));
-            modelList2 = new ArrayList<>();
-//            adapter = null;
-
 
         }
 //        public void setRecyclerView(RecyclerView recyclerView) {
