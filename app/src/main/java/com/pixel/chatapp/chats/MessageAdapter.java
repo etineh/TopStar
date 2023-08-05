@@ -208,12 +208,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // set unsent and sent msg... delivery and seen settings-- msg status tick
         int intMsg = modelList.get(pos).getMsgStatus();
-        int numMsg = (int) R.drawable.message_tick_one;
+        int numMsg = (int) R.drawable.baseline_grade_24;
+//        int numMsg = (int) R.drawable.message_tick_one;
 
-        if(intMsg == 700033){
+        if(intMsg == 700033){   // load
             numMsg = (int) R.drawable.message_load;
-        } else if (intMsg == 700016) {
-            numMsg = (int) R.drawable.baseline_grade_24;
+        } else if (intMsg == 700024) {  // read
+            numMsg = (int) R.drawable.message_tick_one;
+        } else {
+
         }
         // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick

@@ -208,7 +208,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.msgBackgroundActivities(myUsersId);
 
-                        listener.callAllMethods();
+                        listener.callAllMethods(otherName, userName);
 
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 

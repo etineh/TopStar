@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private Map<String, List<MessageModel>> modelListMap;
     private Map<String, MessageAdapter> adapterMap;
     private Map<String, RecyclerView> recyclerMap;
-    private Map<String, Object>  notifyCountMap;
+    private Map<String, Object>  notifyCountMap, loopCountMap;
     private int lastStartIndex, notifyCount, adapterSize;
     ConstraintLayout recyclerContainer;
 
@@ -208,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         recyclerMap = new HashMap<>();
         modelListMap = new HashMap<>();
         adapterMap = new HashMap<>();
+        loopCountMap = new HashMap<>();
         readMsgDb = 0;  // 1 is read, 0 is no_read
         notifyCount = 0;
         lastStartIndex = 0; // Start index of the last 10 items (or 0 if there are less than 10 items)
@@ -360,7 +361,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             if (!message.equals("")){
 
                 sendMessage(message, 0);    // 0 is for text while 1 is for voice note
-                saveLastMsgDetails(message, 0);
 
                 editTextMessage.setText("");
                 listener = "no";
@@ -374,9 +374,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         setUserDetails();
 
-//        getMessage();
-//        sendMsgAdapter(adapter, 1);
-//        System.out.println("MainActivity create2 ");
     }
 
     //  --------------- methods --------------------
@@ -385,11 +382,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     //  ---------- interface
 
     @Override
-    public void callAllMethods() {
+    public void callAllMethods(String otherName, String userName) {
         reloadUnsentMsg();
         getMyUserTyping();
         tellUserAmTyping_AddUser();
         getPreviousCounts();
+        convertUnreadToReadMessageAndTransfer(otherName, userName);
     }
 
     @Override
@@ -415,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherUserName = otherName;
         myUserName = userName;
         imageUri = imageUrl;
-        adapterSize = adapterMap.get(otherName).getItemCount();
+//        adapterSize = adapterMap.get(otherName).getItemCount();
 
         checkMsg = false;
 
@@ -429,6 +427,72 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer.setVisibility(View.INVISIBLE);
         tabLayoutGeneral.setVisibility(View.INVISIBLE);
 
+    }
+
+    // change unread message to read status when I open the chat box and Transfer to Main Msg DB
+    private void convertUnreadToReadMessageAndTransfer(String otherName, String userName){
+
+        new Thread(() -> {
+            // check if message hasn't been read
+            refMsgFast.child(otherName).child(userName).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    for (DataSnapshot snapshotCheck : snapshot.getChildren()){
+
+                        if(snapshotCheck.child("from").exists()){
+                            String getKey = snapshotCheck.getKey();
+                            if(insideChat == "yes"){
+                                long readStatus = (long) snapshotCheck.child("msgStatus").getValue();
+                                if(readStatus != 700016){
+                                    refMsgFast.child(otherName).child(userName).child(getKey).child("msgStatus").setValue(700016);
+                                }
+                            }
+                        } else {
+                            refMsgFast.child(otherName).child(userName).child(snapshotCheck.getKey()).removeValue();
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            // transfer data to main message storage if it has been read
+            refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    for (DataSnapshot snapshotNew : snapshot.getChildren()){
+
+                        // change inside "yes" to personal later
+                        if((long)snapshotNew.child("msgStatus").getValue() == 700016 && insideChat == "no"){
+
+                            String key = snapshotNew.getKey();
+                            MessageModel messageModel = snapshotNew.getValue(MessageModel.class);
+
+                            // add to the read messages to old message db
+                            refMessages.child(userName).child(otherName).child(key).setValue(messageModel)
+                                    //  delete from the new database if the msg has been read
+                                    .addOnCompleteListener(task -> {
+                                        if(task.isSuccessful()){
+                                            refMsgFast.child(userName).child(otherName).child(key).removeValue();
+                                        }
+                                    });
+
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }).start();
     }
 
     public void recyclerViewChatVisibility(String otherName){
@@ -466,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
-    private Map<String, Object> setMessage(String message, int type){
+    private Map<String, Object> setMessage(String message, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         int visibility = 8;
@@ -490,7 +554,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
 
         messageMap.put("type", type);
-//        messageMap.put("idKey", key);
+        messageMap.put("randomID", randomID);
         messageMap.put("message", message);
 //            messageMap.put("voicenote", vn);
         messageMap.put("msgStatus", msgStatus);
@@ -502,23 +566,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     public void sendMessage(String message, int type) {
 
+        long randomID = (long)(Math.random() * 1_010_001);
+
         MessageModel messageModel = new MessageModel(message, myUserName, "", 0, "",
-                "", 8, "", 700033, type);
+                "", 8, "", 700033, type, randomID);
 
         MessageAdapter adapter = adapterMap.get(otherUserName);
         adapter.addNewMessageDB(messageModel);
 
         // scroll to position on new message update
-        scrollPosition(otherUserName);
+        scrollToPreviousPosition(otherUserName);  // scroll to position on new message update
 
         new Thread(() -> {
             String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
-            refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type));
-            refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type));
+            refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
+            refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+
+            saveLastMsgDetails(message, type, randomID);
+
         }).start();
     }
 
-    private void saveLastMsgDetails(String message, int type){
+    private void saveLastMsgDetails(String message, int type, long randomID){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -527,11 +596,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     // --- set the last send message details
                     DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
                             .child(user.getUid()).child(otherUserUid);
-                    fReference.setValue(setMessage(message, type));
+                    fReference.setValue(setMessage(message, type, randomID));
 
                     DatabaseReference fReference2 = FirebaseDatabase.getInstance().getReference("UsersList")
                             .child(otherUserUid).child(user.getUid());
-                    fReference2.setValue(setMessage(message, type));
+                    fReference2.setValue(setMessage(message, type, randomID));
 
                     checkAndSaveCounts_SendMsg();
                 }
@@ -597,10 +666,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     public void retrieveMessages(String userName, String otherName, String uID, Context mContext){
 
-        List<MessageModel> modelListNewMsg = new ArrayList<>(); // save all new messages from refFastMsg database
+        List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
+        List<MessageModel> storeReadMsgList = new ArrayList<>();    // save all read messages from refFastMsg database
+        List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg database
+        List<MessageModel> loopCount = new ArrayList<>();           // save total count messages from refFastMsg database
 
-        // create AllMsg modelList and Adapter instance that will contain all messages (old and new)
-        List<MessageModel> modelListAllMsg = new ArrayList<>();
 
         MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, uID, mContext); // initialise adapter
 
@@ -608,25 +678,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         new CountDownTimer(2000, 1000){
             @Override
             public void onTick(long l) {
-                // push new msg that has been read by user to the old Message database container
-                // and delete from the new message database(refMsgFast) container
+                // push new msg that has been read by user to modelListAllMsg
                 refMsgFast.child(userName).child(otherName).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        msgListNotRead.clear();
+                        loopCount.clear();
+
                         for (DataSnapshot snapshotNew : snapshot.getChildren()){
 
-                            // check if msg has been read, then add it to the Old Message Database
-                            if((long)snapshotNew.child("msgStatus").getValue() == 700024){
-
-                                String key = snapshotNew.getKey();
+                            if(snapshotNew.child("from").exists()){
                                 MessageModel messageModel = snapshotNew.getValue(MessageModel.class);
-                                // add to the read messages to old message db
-                                refMessages.child(userName).child(otherName).child(key).setValue(messageModel)
-                                        //  delete from the database if the msg has been read
-                                        .addOnCompleteListener(task -> {
-                                            refMsgFast.child(userName).child(otherName).child(key).removeValue();
-                                        });
+                                messageModel.setIdKey(snapshotNew.getKey());
+                                msgListNotRead.add(messageModel);
+
+                                // store the number of message for looping the main message later on
+                                loopCount.add(messageModel);
                             }
                         }
 
@@ -648,14 +716,25 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         modelListAllMsg.clear();
+                        storeReadMsgList.clear();
 
                         for (DataSnapshot snapshotOld : snapshot.getChildren()){
 
-                            MessageModel messageModelOldMsg = snapshotOld.getValue(MessageModel.class);
-                            messageModelOldMsg.setIdKey(snapshotOld.getKey());  // set msg keys to the adaptor
-                            modelListAllMsg.add(messageModelOldMsg);
-                            adapter.notifyDataSetChanged();
+                            if(snapshotOld.child("from").exists()){
+                                MessageModel messageModelOldMsg = snapshotOld.getValue(MessageModel.class);
+                                messageModelOldMsg.setIdKey(snapshotOld.getKey());  // set msg keys to the adaptor
+                                storeReadMsgList.add(messageModelOldMsg);
+
+                                modelListAllMsg.addAll(storeReadMsgList);
+                                modelListAllMsg.addAll(msgListNotRead);    // add message that's not read yet from msgFastDb
+
+                            } else {
+                                refMessages.child(userName).child(otherName).child(snapshotOld.getKey()).removeValue();
+                            }
+                                adapter.notifyDataSetChanged();
                         }
+
+                        scrollToPreviousPosition(otherName);  // scroll to position on new message update
                     }
 
                     @Override
@@ -676,70 +755,97 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        loopCount.clear();
+
                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
 
                             MessageModel messageModel = snapshot1.getValue(MessageModel.class);
                             messageModel.setIdKey(snapshot1.getKey());
 
-                            adapterSize = adapterMap.get(otherName).getItemCount();
+                            // get the total number of message in the msgFast Db for looping
+                            loopCount.add(messageModel);
+                            int startCount = modelListAllMsg.size() - (loopCount.size() + 5); // add dafault 5 incase of any error
 
                             boolean isNewMessage = true;
+                            boolean isRead = true;
 
                             // Check if the message already exists in the current messages list
-                            for (MessageModel existingMessage : modelListAllMsg) {
+                            for (int i = startCount; i < modelListAllMsg.size(); i++) {
+                                MessageModel existingMessage = modelListAllMsg.get(i);
                                 if (messageModel.getIdKey().equals(existingMessage.getIdKey())) {
                                     isNewMessage = false;
-//                                    break;
+                                    // break; // You can choose to include this line if you want to exit the loop after finding a match.
+                                }
+
+                                if (messageModel.getIdKey().equals(existingMessage.getIdKey()) &&
+                                        messageModel.getMsgStatus() == existingMessage.getMsgStatus()) {
+                                    isRead = false;
                                 }
                             }
-//
+
 //                            // Add the message to modelListNewMsg if it's a new message
                             if (isNewMessage) {
 
                                 if(messageModel.getFrom().equals(otherName)){
+
                                     adapter.addNewMessageDB(messageModel);
-                                }
-                                else{   // update the local message with the database details
+
+                                } else{   // update the local message with the database details
 
                                     // Check if the message is "700033" ~ unread
-                                    for (int i = 0; i < modelListAllMsg.size(); i++) {
+                                    for (int i = startCount; i < modelListAllMsg.size(); i++) {
+
                                         MessageModel existingMessage = modelListAllMsg.get(i);
                                         if (messageModel.getMessage().equals(existingMessage.getMessage())
-                                                && existingMessage.getMsgStatus() == 700033) {
+                                                && messageModel.getRandomID() == existingMessage.getRandomID()) {
 
-                                            // set details for each message found
-                                            modelListAllMsg.get(i).setMsgStatus(messageModel.getMsgStatus());
-                                            modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyFrom());
-                                            modelListAllMsg.get(i).setTimeSent(messageModel.getTimeSent());
-                                            modelListAllMsg.get(i).setIdKey(messageModel.getIdKey());
-                                            modelListAllMsg.get(i).setEdit(messageModel.getEdit());
-                                            modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyMsg());
-//                                            modelListAllMsg.get(i).setEdit(messageModel.getEdit());
+                                            if(existingMessage.getMsgStatus() == 700033){  //700033 -- not sent, 700024 -- sent, 700016 -- read
+                                                // set details for each message found
+                                                modelListAllMsg.get(i).setMsgStatus(messageModel.getMsgStatus());
+                                                modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyFrom());
+                                                modelListAllMsg.get(i).setTimeSent(messageModel.getTimeSent());
+                                                modelListAllMsg.get(i).setIdKey(messageModel.getIdKey());
+                                                modelListAllMsg.get(i).setEdit(messageModel.getEdit());
+                                                modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyMsg());
+                                                //  modelListAllMsg.get(i).setEdit(messageModel.getEdit());
+                                            }
 
-                                            adapter.notifyItemChanged(i, new Object());     // notify will empty object so it doesn't duplicate
+                                            adapter.notifyItemChanged(i, new Object());     // notify with empty object so it doesn't duplicate
 
                                         }
                                     }
                                 }
                             }
 
+                                // replace the unread message status to read status
+                            if(isRead){
+
+                                try{
+                                    if(messageModel.getFrom().equals(userName)){
+                                        // Check if the message is "700033" ~ unread
+                                        // i = 0 ----> start with latest count --> change later
+                                        for (int i = startCount; i < modelListAllMsg.size(); i++) {
+                                            MessageModel msgStatus = modelListAllMsg.get(i);
+
+                                            if (messageModel.getMessage().equals(msgStatus.getMessage())
+                                                    && messageModel.getRandomID() == msgStatus.getRandomID()) {
+
+                                                // set details for unread message found to read status
+                                                modelListAllMsg.get(i).setMsgStatus(messageModel.getMsgStatus());
+
+                                                adapter.notifyItemChanged(i, new Object());     // notify with empty object so it doesn't duplicate
+                                            }
+
+                                        }
+                                    }
+                                } catch (Exception e){
+                                    System.out.println("Error in converting message (M847) " + e.getMessage());
+                                }
+                            }
+
                         }
 
-                        // scroll to position on new message update
-                        scrollPosition(otherName);
-
-                        // Now, fetch data from Firebase and add new messages to modelListNewMsg
-//                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-//                            MessageModel messageModel = snapshot1.getValue(MessageModel.class);
-//                            messageModel.setIdKey(snapshot1.getKey());
-//
-//                            // Check if the message already exists in the current messages set using the unique ID
-//                            if (!messageIdSet.contains(messageModel.getIdKey())) {
-//                                modelListAllMsg.add(messageModel);
-//                                // Also, add the new message ID to the messageIdSet for future quick lookups
-//                                messageIdSet.add(messageModel.getIdKey());
-//                            }
-//                        }
+                        scrollToPreviousPosition(otherName);  // scroll to position on new message update
 
                     }
 
@@ -760,7 +866,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     // scroll to position on new message update
-    private void scrollPosition(String otherName){
+    private void scrollToPreviousPosition(String otherName){
         for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
             View child = recyclerContainer.getChildAt(i);
 
@@ -924,23 +1030,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     @Override
     public void msgBackgroundActivities(String otherUid) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                // set my status to be true in case I receive msg, it will be tick as seen
-                Map <String, Object> statusAndMSgCount = new HashMap<>();
-                statusAndMSgCount.put("status", true);
-                statusAndMSgCount.put("unreadMsg", 0);
+            // set my status to be true in case I receive msg, it will be tick as seen
+            Map <String, Object> statusAndMSgCount = new HashMap<>();
+            statusAndMSgCount.put("status", true);
+            statusAndMSgCount.put("unreadMsg", 0);
 
-                refChecks.child(user.getUid()).child(otherUserUid).updateChildren(statusAndMSgCount);
+            refChecks.child(user.getUid()).child(otherUserUid).updateChildren(statusAndMSgCount);
 
-                // set responds to pend always      ------- will change later to check condition if user is still an active call
-                refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
+            // set responds to pend always      ------- will change later to check condition if user is still an active call
+            refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
 
-                runnerCheck = false;
-                insideChat = "yes";
-            }
+            runnerCheck = false;
+            insideChat = "yes";
         }).start();
     }
 

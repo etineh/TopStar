@@ -24,7 +24,7 @@ public interface FragmentListener {
 
     void msgBackgroundActivities(String otherUid);
 
-    void callAllMethods();
+    void callAllMethods(String otherName, String userName);
 
 //    void onClickOpenMessage(ConstraintLayout itemLayout);
 
