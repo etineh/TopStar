@@ -19,8 +19,8 @@
     <string name="meet">Meet</string>
     <string name="tour">Tour</string>
     <string name="gift">Gift</string>
-    <string name="game">Game</string>
+    <string name="host">Host</string>
 
-
+    <string name="connect">connecting...</string>
 
 </resources>

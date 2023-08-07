@@ -36,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
+import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageAdapter;
@@ -57,7 +58,7 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import kotlin.reflect.jvm.internal.impl.descriptors.ClassOrPackageFragmentDescriptor;
 
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> implements MainActivity.ChatVisibilityListener{
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> implements MainActivity.ChatVisibilityListener {
 
     private static List<String> otherUsersId;
     private static Context mContext;
@@ -109,6 +110,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         return new ChatViewHolder(view);
     }
 
+    public static void checkNum(){
+//        System.out.println("What is numner ");
+    }
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
 
@@ -149,7 +153,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // get lastMessage, and Date/Time sent, and set delivery msg to visibility
         getLastMsg_TimeSent_MsgDeliveryVisible(holder, myUsersId);
 
-        msgDeliverStatus(holder, myUsersId);    // set message tick deliver;
+//        msgDeliverStatus(holder, myUsersId);    // set message tick deliver;
 
         unreadMsgNumber(holder, myUsersId);     // get number of unread message count
 
@@ -176,24 +180,26 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
 
-                if(loadMsg){    // check before loading message to recyclerView
-                    new CountDownTimer(2000, 1000){
+                // send all recyclerView to mainActivty just once and call the getMessage to load message to it
+                if(loadMsg){
+                    new CountDownTimer(1500, 750){
                         @Override
                         public void onTick(long l) {
                             try{
-                                listener.sendRecyclerView(holder.recyclerChat, otherName);
+                                listener.sendRecyclerView(holder.recyclerChat, otherName, myUsersId);
                                 listener.getMessage(userName, otherName, myUsersId, mContext);
                             } catch (Exception e){
-                                System.out.println("Error "+ e.getMessage());
+                                System.out.println("Error (ChatListAdapter L187)"+ e.getMessage());
                             }
                         }
 
                         @Override
                         public void onFinish() {
                             loadMsg = false;    // stop the getVIew method from loading at every instance
-                            MainActivity.readMsgDb = 1;     // stop old message from retrieving recyclerView position @ MainActivity
+//                            MainActivity.readMsgDb = 1;     // stop old message from retrieving recyclerView position @ MainActivity
                         }
                     }.start();
+
                 }
 
 
@@ -208,13 +214,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.msgBackgroundActivities(myUsersId);
 
-                        listener.callAllMethods(otherName, userName);
+                        listener.callAllMethods(otherName, userName, myUsersId);
 
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
                     } catch (Exception e){
                         Toast.makeText(mContext, "Send your first message here...!", Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur " + e.getMessage());
+                        System.out.println("Error occur (ChatListAdapter L218)" + e.getMessage());
                     }
 
 //                    listener.sendAdapterAndModelList(holder.adapter, holder.modelList2, userName, otherName, myUsersId);
@@ -313,6 +319,22 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     holder.imageViewDeliver.setVisibility(View.VISIBLE);
                 } else {
                     holder.imageViewDeliver.setVisibility(View.INVISIBLE);
+                }
+
+                try{
+                    long statusNum = (long) snapshot.child(myUsersId).child("msgStatus").getValue();
+
+                    int numMsg = R.drawable.message_load;
+
+                    if(statusNum == 700024){   // delivery
+                        numMsg = R.drawable.message_tick_one;
+                    } else if (statusNum == 700016) {  // read
+                        numMsg = R.drawable.baseline_grade_24;
+                    }
+                    holder.imageViewDeliver.setImageResource(numMsg);
+
+                }catch (Exception e){
+                    refUsersLast.child(user.getUid()).child(myUsersId).child("msgStatus").setValue(700024);
                 }
 
                 // set last message
@@ -423,48 +445,55 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     // set message tick deliver;   // bug - move all child inside since it starts with myUserId
-    private void msgDeliverStatus(ChatViewHolder holder, String myUsersId){
-        referenceCheck.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                long msgCount = (long) snapshot.child(myUsersId)
-                        .child(user.getUid()).child("unreadMsg").getValue();
-                long offCount = (long) snapshot.child(myUsersId)
-                        .child(user.getUid()).child("offCount").getValue();
-
-                if (msgCount == 0) {
-                    holder.imageViewDeliver.setImageResource(R.drawable.read_orange);
-                } else{
-                    if(offCount > 0){
-                        holder.imageViewDeliver.setImageResource(R.drawable.message_load);
-                    }
-                    else holder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
+//    private void msgDeliverStatus(ChatViewHolder holder, String myUsersId){
+//
+//        refUsersLast.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+////        referenceCheck.addValueEventListener(new ValueEventListener() {
+////            @Override
+////            public void onDataChange(@NonNull DataSnapshot snapshot) {
+////
+////                long msgCount = (long) snapshot.child(myUsersId)
+////                        .child(user.getUid()).child("unreadMsg").getValue();
+////                long offCount = (long) snapshot.child(myUsersId)
+////                        .child(user.getUid()).child("offCount").getValue();
+////
+////                if (msgCount == 0) {
+////                    holder.imageViewDeliver.setImageResource(R.drawable.read_orange);
+////                } else{
+////                    if(offCount > 0){
+////                        holder.imageViewDeliver.setImageResource(R.drawable.message_load);
+////                    }
+////                    else holder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
+////                }
+////            }
+////
+////            @Override
+////            public void onCancelled(@NonNull DatabaseError error) {
+////
+////            }
+////        });
+//    }
 
     // get number of unread message count
     private void unreadMsgNumber(ChatViewHolder holder, String myUsersId){
 
-        referenceCheck.keepSynced(true);
+//        referenceCheck.keepSynced(true);
         referenceCheck.child(user.getUid())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        if (!snapshot.child(myUsersId).child("unreadMsg").exists()){
-                            referenceCheck.child(user.getUid()).child(myUsersId)
-                                    .child("unreadMsg").setValue(1);
-                        }
-                        else
-                        {
+                        try{
                             long unreadMsg = (long) snapshot.child(myUsersId).child("unreadMsg").getValue();
                             if(unreadMsg > 0) {
                                 holder.textViewMsgCount.setVisibility(View.VISIBLE);
@@ -472,6 +501,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                             } else{
                                 holder.textViewMsgCount.setVisibility(View.INVISIBLE);
                             }
+                        } catch (Exception e){
+                            referenceCheck.child(user.getUid()).child(myUsersId)
+                                    .child("unreadMsg").setValue(0);
                         }
 
                     }

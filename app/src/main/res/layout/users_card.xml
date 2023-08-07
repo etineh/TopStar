@@ -78,13 +78,37 @@
                     app:srcCompat="@drawable/baseline_cancel_24" />
 
                 <ImageView
+                    android:id="@+id/imageViewHost"
+                    style="@style/BackgroundTintOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_videogame_asset_24" />
+
+                <TextView
+                    android:id="@+id/textViewHost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:text="@string/host"
+                    android:textSize="11sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/imageViewHost"
+                    app:layout_constraintStart_toStartOf="@+id/imageViewHost"
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewHost" />
+
+                <ImageView
                     android:id="@+id/imageViewPin"
                     style="@style/BackgroundTintOrange"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="30dp"
                     android:layout_marginTop="5dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewHost"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/baseline_push_pin_24" />
 

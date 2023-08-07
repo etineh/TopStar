@@ -215,9 +215,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             numMsg = (int) R.drawable.message_load;
         } else if (intMsg == 700024) {  // read
             numMsg = (int) R.drawable.message_tick_one;
-        } else {
-
         }
+
         // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick
 

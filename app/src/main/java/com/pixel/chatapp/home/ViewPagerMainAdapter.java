@@ -32,6 +32,9 @@ public class ViewPagerMainAdapter extends FragmentStateAdapter {
             case 2:
                 fragment = Hosts_Game.newInstance(); // testing
                 break;
+            case 3:
+                fragment = Hosts_Game.newInstance(); // testing
+                break;
 
             default:
                 return null;
@@ -43,6 +46,6 @@ public class ViewPagerMainAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 4;
     }
 }

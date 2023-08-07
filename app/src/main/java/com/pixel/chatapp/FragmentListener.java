@@ -16,7 +16,7 @@ public interface FragmentListener {
 
     void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID);
 
-    void sendRecyclerView(RecyclerView recyclerChat, String otherName);
+    void sendRecyclerView(RecyclerView recyclerChat, String otherName, String otherUid);
     void getMessage(String userName, String otherName, String uID, Context mContext);
     void onEditMessage(String itemList, int icon);
 
@@ -24,7 +24,9 @@ public interface FragmentListener {
 
     void msgBackgroundActivities(String otherUid);
 
-    void callAllMethods(String otherName, String userName);
+    void callAllMethods(String otherName, String userName, String uID);
+
+    void onNetworkStatusChanged(boolean isConnected);
 
 //    void onClickOpenMessage(ConstraintLayout itemLayout);
 
