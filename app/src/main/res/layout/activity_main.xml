@@ -13,20 +13,23 @@
         style="@style/cardTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/trans"
         android:elevation="8dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ProgressBar
             android:id="@+id/progressConnect"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
             android:layout_marginEnd="5dp"
             android:elevation="8dp"
             android:progressTint="@color/orange"
-            app:layout_constraintEnd_toStartOf="@+id/connectTV" />
+            app:layout_constraintBottom_toBottomOf="@+id/connectTV"
+            app:layout_constraintEnd_toStartOf="@+id/connectTV"
+            app:layout_constraintTop_toTopOf="@+id/connectTV" />
 
         <TextView
             android:id="@+id/connectTV"
@@ -34,7 +37,8 @@
             android:layout_height="wrap_content"
             android:elevation="8dp"
             android:text="@string/connect"
-            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:textSize="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -67,11 +71,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/v"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constrNetCheck">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintMsgContainer"
@@ -443,8 +447,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintMenu"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="100dp"
+        android:layout_height="0dp"
+        android:background="@color/trans"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -454,10 +458,9 @@
         <ScrollView
             android:id="@+id/scrollView"
             style="@style/cardTop"
-            android:layout_width="match_parent"
+            android:layout_width="300dp"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -1133,7 +1136,7 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constrNetCheck">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/imageViewBackArrow9"
@@ -1209,9 +1212,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintProfileMenu9"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/trans"
         android:elevation="6dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ScrollView
             android:layout_width="230dp"
@@ -1552,6 +1560,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintMsgBody"
+        style="@style/ChatBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"
@@ -1563,13 +1572,74 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintContainer9"
-            style="@style/ChatBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/trans"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/sendIndicatorIV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dp"
+                android:background="@drawable/msg_count"
+                android:elevation="6dp"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="@id/scrollToPositionIV"
+                app:layout_constraintRight_toRightOf="@id/scrollToPositionIV"
+                app:layout_constraintTop_toBottomOf="@id/scrollToPositionIV"
+                app:srcCompat="@drawable/sent_pin"
+                app:tint="@color/white" />
+
+            <ImageView
+                android:id="@+id/scrollToPositionIV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="30dp"
+                android:layout_marginBottom="25dp"
+                android:background="@drawable/msg_count"
+                android:elevation="5dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/constraintSendMsgBox9"
+                app:layout_constraintRight_toRightOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_circle_down_24" />
+
+            <TextView
+                android:id="@+id/scrollCountTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-5dp"
+                android:background="@drawable/msg_count"
+                android:elevation="5dp"
+                android:paddingStart="3sp"
+                android:paddingEnd="3dp"
+                android:text="23"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/scrollToPositionIV"
+                app:layout_constraintEnd_toEndOf="@+id/scrollToPositionIV"
+                app:layout_constraintStart_toStartOf="@+id/scrollToPositionIV" />
+
+            <TextView
+                android:id="@+id/receiveIndicatorTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dp"
+                android:background="@drawable/msg_count"
+                android:elevation="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:text="@string/newMsg"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="@id/scrollToPositionIV"
+                app:layout_constraintRight_toRightOf="@id/scrollToPositionIV"
+                app:layout_constraintTop_toBottomOf="@id/scrollToPositionIV" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout14"
@@ -1598,29 +1668,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout14">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewChat9"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true"
-                    android:focusableInTouchMode="true"
-                    android:paddingLeft="5dp"
-                    android:paddingTop="7dp"
-                    android:paddingRight="5dp"
-                    android:paddingBottom="7dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0"
-                    tools:listitem="@layout/card_received">
-
-                </androidx.recyclerview.widget.RecyclerView>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout14" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintSendMsgBox9"
@@ -1638,10 +1686,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="4dp"
                     android:elevation="2dp"
                     app:cardCornerRadius="20dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/record_button9"
+                    app:layout_constraintEnd_toStartOf="@id/constrSend"
                     app:layout_constraintStart_toStartOf="parent">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
@@ -1792,34 +1841,45 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <com.devlomi.record_view.RecordButton
-                    android:id="@+id/record_button9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="43dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="13dp"
-                    android:background="@drawable/msg_count"
-                    android:elevation="3dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:scaleType="centerInside"
-                    app:layout_constraintBottom_toBottomOf="@+id/fab9"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:mic_icon="@drawable/recv_ic_mic_white" />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/fab9"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constrSend"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:layout_marginEnd="12dp"
-                    android:layout_marginBottom="3dp"
-                    android:background="@drawable/msg_count"
-                    android:padding="7dp"
-                    android:src="@drawable/baseline_send_24"
-                    android:visibility="invisible"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.devlomi.record_view.RecordButton
+                        android:id="@+id/record_button9"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="1dp"
+                        android:background="@drawable/msg_count"
+                        android:elevation="3dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:scaleType="centerInside"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:mic_icon="@drawable/recv_ic_mic_white" />
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/fab9"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:background="@drawable/msg_count"
+                        android:padding="7dp"
+                        android:src="@drawable/baseline_send_24"
+                        android:visibility="invisible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -138,6 +138,7 @@
             android:id="@+id/cardViewReceived"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"

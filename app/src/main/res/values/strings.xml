@@ -23,4 +23,6 @@
 
     <string name="connect">connecting...</string>
 
+    <string name="newMsg">New</string>
+
 </resources>

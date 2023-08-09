@@ -294,7 +294,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if (clipboard == null || clip == null) return;
             clipboard.setPrimaryClip(clip);
 
-            Toast.makeText(mContext, "Text copied!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
             // for paste code
 //                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
 //                try {

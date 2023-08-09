@@ -17,7 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -29,15 +28,12 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,29 +47,25 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
-import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -93,8 +85,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 
     //    ------- message declares
-
-    private RecyclerView recyclerViewChat;
     private ImageView imageViewBack;
     private CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
@@ -106,23 +96,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private EditText editTextMessage;
     private CircleImageView circleSendMessage;
     private CardView cardViewMsg, cardViewReply;
-
+    private ImageView scrollPositionIV, sendIndicator;
+    private TextView scrollCountTV, receiveIndicator;
     // network settings
     private ConstraintLayout constrNetConnect, constrNetork;
-
     private String otherUserUid, otherUserName, myUserName, imageUri;
-
-    List<Object> msgBodyArray = new ArrayList<>();
     DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails;
-    DatabaseReference referenceMsgCount2, referenceMsgCount;
     FirebaseUser user;
-//    private MessageAdapter adapter;
-    int scrollPosition;
-
-    private boolean checkMsg = true;
-
+    private int scrollNum;
     private long count = 0, newMsgCount = 0;
-    private Boolean runnerCheck = false;
     private Map<String, Integer> dateNum, dateMonth;
     private String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
     private String audioPath;
@@ -144,11 +126,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private Map<String, MessageAdapter> adapterMap;
     private Map<String, RecyclerView> recyclerMap;
     private List<String> stringList, otherUidList;
-
-    private Map<String, Object>  notifyCountMap, loopCountMap;
+    private Map<String, Object> downMsgCountMap;
+    private Map<String, Object>  notifyCountMap, scrollPositionMap;
 
     private int lastStartIndex, notifyCount, adapterSize;
     ConstraintLayout recyclerContainer;
+
+    NetworkChangeReceiver networkChangeReceiver;
+    Handler handler1;
+    Runnable internetCheckRunnable;
 
     public interface ChatVisibilityListener {
         void constraintChatVisibility(int position, int isVisible);
@@ -194,31 +180,30 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
         constrNetork = findViewById(R.id.constrNetwork);
         constrNetConnect = findViewById(R.id.constrNetCheck);
+        scrollPositionIV = findViewById(R.id.scrollToPositionIV);
+        scrollCountTV = findViewById(R.id.scrollCountTV);
+        receiveIndicator = findViewById(R.id.receiveIndicatorTV);
+        sendIndicator = findViewById(R.id.sendIndicatorIV);
 
         // audio swipe button option
         recordView = (RecordView) findViewById(R.id.record_view9);
         recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
 
-        recyclerViewChat = findViewById(R.id.recyclerViewChat9);
-
-        recyclerViewChat.setHasFixedSize(true);
-        recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
-
         refMessages = FirebaseDatabase.getInstance().getReference("Messages");
         refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
         refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         notifyCountMap = new HashMap<>();
         recyclerMap = new HashMap<>();
         modelListMap = new HashMap<>();
         adapterMap = new HashMap<>();
-        loopCountMap = new HashMap<>();
+        scrollPositionMap = new HashMap<>();
+        downMsgCountMap = new HashMap<>();
         stringList = new ArrayList<>();
         otherUidList = new ArrayList<>();
         readMsgDb = 0;  // 1 is read, 0 is no_read
@@ -245,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer = findViewById(R.id.constraintMsgContainer);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
-        new CountDownTimer(30000, 1000){
+        new CountDownTimer(20000, 1000){
             @Override
             public void onTick(long l) {
                 readMsgDb2 = 0;
@@ -259,21 +244,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 
         // Register the NetworkChangeReceiver to receive network connectivity changes
-        NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver(this);
+        networkChangeReceiver = new NetworkChangeReceiver(this);
         registerReceiver(networkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
-        // manually check for the network
-        Handler handler1 = new Handler();
-        Runnable internetCheckRunnable = new Runnable() {
-            @Override
-            public void run() {
+        // manually call and check for the network
+        handler1 = new Handler();   // used lamda for the runnable
+        internetCheckRunnable = () -> networkChangeReceiver.onReceive(MainActivity.this, new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
 
-                networkChangeReceiver.onReceive(MainActivity.this, new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
-
-                handler1.postDelayed(this, 3000);       // Repeat the network check after 3 sec
-            }
-        };
-
+        handler1.postDelayed(internetCheckRunnable, 3000);       // Repeat the network check everything 3 sce till network is back
         handler1.post(internetCheckRunnable);
 
 
@@ -400,18 +378,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 editTextMessage.setText("");
                 listener = "no";
-                scrollPosition = 0;
 
                 cardViewReply.setVisibility(View.GONE);
                 nameReply.setVisibility(View.GONE);
                 replyVisible.setVisibility(View.GONE);
+
             }
         });
 
         setUserDetails();
 
+        // scroll to previous position
+        scrollPositionIV.setOnClickListener(view -> {
+            // edit and activate later
+            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherUserName).getLayoutManager();
+            int lastPosition = layoutManager.getItemCount() - 1;   // retrieve previous position and scroll
+            layoutManager.scrollToPosition(lastPosition);
+        });
+
         // Delay 5 seconds to load message
-        new CountDownTimer(5000, 1000){
+        new CountDownTimer(6000, 1000){
             @Override
             public void onTick(long l) {
                 constrNetork.setVisibility(View.VISIBLE);
@@ -438,20 +424,69 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void msgBodyVisibility(int data, String otherName, String imageUrl, String userName, String uID) {
+    public void firstCallLoadPage(String otherName) {
+        constraintMsgBody.setVisibility(View.INVISIBLE);
+        conTopUserDetails.setVisibility(View.INVISIBLE);
+        conUserClick.setVisibility(View.INVISIBLE);
+    }
 
-        // edit and activate later
+    @Override
+    public void msgBodyVisibility(String otherName, String imageUrl, String userName, String uID) {
+
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherName).getLayoutManager();
-        int lastPosition = layoutManager.getItemCount() - 1;   // retrieve previous position and scroll
-        layoutManager.scrollToPosition(lastPosition);
 
-        constraintMsgBody.setVisibility(data);
+        // get the number of message under
+        int dCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
+        scrollCountTV.setText(""+dCount);           // set down msg count
+        downMsgCountMap.put(otherName, dCount);     // set it for "sending message onClick"
+
+        //  check count and display/hide the scroll arrow
+        if(dCount > 2){
+            scrollCountTV.setVisibility(View.VISIBLE);
+            scrollPositionIV.setVisibility(View.VISIBLE);
+        } else {
+            scrollCountTV.setVisibility(View.GONE);
+            scrollPositionIV.setVisibility(View.GONE);
+            receiveIndicator.setVisibility(View.GONE);
+        }
+
+        // Add an OnScrollListener to the RecyclerView
+        recyclerMap.get(otherName).addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // Get the position of the item while scrolling
+                scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
+                System.out.println("Scrolling count " + scrollNum);
+
+                int downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
+                scrollCountTV.setText(""+downMsgCount);
+
+                //  store the downMsgCount in a map for each user
+                downMsgCountMap.put(otherName, downMsgCount);
+
+                //  check count and display/hide the scroll arrow
+                if(downMsgCount > 2){
+                    scrollCountTV.setVisibility(View.VISIBLE);
+                    scrollPositionIV.setVisibility(View.VISIBLE);
+                } else {
+                    scrollCountTV.setVisibility(View.GONE);
+                    scrollPositionIV.setVisibility(View.GONE);
+                    receiveIndicator.setVisibility(View.GONE);
+                }
+
+            }
+        });
+
+
+        constraintMsgBody.setVisibility(View.VISIBLE);
         conTopUserDetails.setVisibility(View.VISIBLE);
         conUserClick.setVisibility(View.VISIBLE);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
-//         get user image
+        //  get user image
         if (imageUrl.equals("null")) {
             circleImageLogo.setImageResource(R.drawable.person_round);
         }
@@ -460,9 +495,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherUserName = otherName;
         myUserName = userName;
         imageUri = imageUrl;
-//        adapterSize = adapterMap.get(otherName).getItemCount();
-
-        checkMsg = false;
 
         try{
             recyclerViewChatVisibility(otherName);
@@ -474,7 +506,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer.setVisibility(View.INVISIBLE);
         tabLayoutGeneral.setVisibility(View.INVISIBLE);
 
-        System.out.println("Total adapter (M430) " + adapterMap.get(otherName).getItemCount());
+        System.out.println("Total adapter (M500) " + adapterMap.get(otherName).getItemCount());
 
     }
 
@@ -520,7 +552,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             refLastDetails.child(otherUid).child(user.getUid()).child("msgStatus").setValue(700016);
                         }
                     }catch (Exception e){
-                        System.out.println("LastMessageDetails error (M522) " + e.getMessage());
+                        System.out.println("LastMessageDetails error (M546) " + e.getMessage());
                     }
                 }
 
@@ -559,6 +591,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 ((ViewGroup) recyclerChat.getParent()).removeView(recyclerChat);
             }
             recyclerContainer.addView(recyclerChat);
+
             recyclerViewChatVisibility(otherName);  // set to INVISIBLE since it's "GONE" on XML
         }
 
@@ -621,14 +654,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         long randomID = (long)(Math.random() * 1_010_001);
 
+        // save to local list for fast update
         MessageModel messageModel = new MessageModel(message, myUserName, "", 0, "",
                 "", 8, "", 700033, type, randomID);
 
         MessageAdapter adapter = adapterMap.get(otherUserName);
         adapter.addNewMessageDB(messageModel);
 
-        // scroll to position on new message update
-        scrollToPreviousPosition(otherUserName);  // scroll to position on new message update
+        // set scroll position count
+        int increaseScroll = (int) downMsgCountMap.get(otherUserName) + 1;
+        scrollCountTV.setText(""+increaseScroll);
+        downMsgCountMap.put(otherUserName, increaseScroll); // save new position
+
+        // show indicator that when was send
+        if(scrollPositionIV.getVisibility() == View.VISIBLE){
+            sendIndicator.setVisibility(View.VISIBLE);
+            receiveIndicator.setVisibility(View.GONE);
+        }
+
+        // scroll to new position
+        int scrollNumCheck = scrollNum < 5 ? (int) scrollPositionMap.get(otherUserName) : scrollNum;
+        int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
+        scrollToPreviousPosition(otherUserName, scrollCheck);  // scroll to position on new message update
 
         executor.submit(() -> {
             String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
@@ -641,32 +688,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
             refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
 
-            saveLastMsgDetails(message, type, randomID);
 
+            // --- save the last send message details
+            if (listener == "no" || listener == "reply")
+            {
+                refLastDetails.child(user.getUid()).child(otherUserUid).setValue(setMessage(message, type, randomID));
+
+                refLastDetails.child(otherUserUid).child(user.getUid()).setValue(setMessage(message, type, randomID));
+
+                checkAndSaveCounts_SendMsg();   // save the number of new message I am sending
+            }
         });
 
     }
 
-    private void saveLastMsgDetails(String message, int type, long randomID){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (listener == "no" || listener == "reply")
-                {
-                    // --- set the last send message details
-                    DatabaseReference fReference = FirebaseDatabase.getInstance().getReference("UsersList")
-                            .child(user.getUid()).child(otherUserUid);
-                    fReference.setValue(setMessage(message, type, randomID));
-
-                    DatabaseReference fReference2 = FirebaseDatabase.getInstance().getReference("UsersList")
-                            .child(otherUserUid).child(user.getUid());
-                    fReference2.setValue(setMessage(message, type, randomID));
-
-                    checkAndSaveCounts_SendMsg();
-                }
-            }
-        }).start();
-    }
 
     //  get the previous count of new msg and add to it from sendMessage
     private void checkAndSaveCounts_SendMsg(){
@@ -727,6 +762,45 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         new CountDownTimer(1500, 750){
             @Override
             public void onTick(long l) {
+
+                // retrieve the last previous scroll position
+                refChecks.child(user.getUid()).child(uID).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        try{
+                            // get the values(e.g frank4032) and split it -- frank , 4032
+                            String details = snapshot.child("scrollPosition").getValue().toString();
+
+                            // Use regular expression to split letters and numbers
+                            Pattern pattern = Pattern.compile("([A-Za-z_]+)([0-9]+)");
+                            Matcher matcher = pattern.matcher(details);
+
+                            String otherName2 = "";
+                            String position = "";
+
+                            if (matcher.find()) {
+                                otherName2 = matcher.group(1);  // Group 1 contains letters
+                                position = matcher.group(2);    // Group 2 contains numbers
+
+                                int convertPosition = Integer.parseInt(position);
+
+                                if (readMsgDb2 == 0) {
+                                    scrollPositionMap.put(otherName2, convertPosition);
+                                }
+                            }
+
+                        } catch (Exception e){
+                            refChecks.child(user.getUid()).child(uID).child("scrollPosition").setValue(otherName+5);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
                 // delete from the database
                 refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
                     @Override
@@ -746,7 +820,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                         refMsgFast.child(userName).child(otherName).child(key).removeValue();
 //
                                     } else {
-                                        if(readMsgDb2 == 0){    // only read once
+                                        if(readMsgDb2 == 0){    // only read once to get the total number of message
                                             MessageModel messageModel = snapshotNew.getValue(MessageModel.class);
                                             msgListNotRead.add(messageModel);   // add to list to get the total
                                         }
@@ -803,7 +877,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 }
                             }
 
-                            scrollToPreviousPosition(otherName);  // scroll to position on new message update
+                            // scroll to previous position UI of user
+                            try{
+                                scrollToPreviousPosition(otherName, (int) scrollPositionMap.get(otherName));
+                            } catch (Exception e){
+                                scrollToPreviousPosition(otherName, adapter.getItemCount() - 1);
+                            }
 
                         }
                     }
@@ -814,14 +893,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     }
                 });
 
-
-                // add new message --- msg that hasn't be read yet by the other user.
+                // add new message directly to local List and interact with few msg in refMsgFast database
                 refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         loopCount.clear();
-//                        readMsgDb = 1;
 
                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
 
@@ -831,6 +908,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             // get the total number of message in the msgFast Db for looping
                             loopCount.add(messageModel);    // not use yet (observing error)
                             int startCount = modelListAllMsg.size() > 50 ? modelListAllMsg.size() - 50: 0;  // set default to 50
+//                            System.out.println("Check here down 2 " + otherName + modelListAllMsg.size());
 
                             boolean isNewMessage = true;
                             boolean isRead = true;
@@ -849,13 +927,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 }
                             }
 
-                            // Add the message to modelListNewMsg if it's a new message
+                            // If there's new message, check who sent it and add/update
                             if (isNewMessage) {
 
                                 if(messageModel.getFrom().equals(otherName)){
 
                                     adapter.addNewMessageDB(messageModel);
-                                    if(insideChat == "yes") scrollToPreviousPosition(otherName);  // scroll to position on new message update
+
+                                    // check recycler position before scrolling
+                                    int scrollNumCheck = scrollNum < 5 ? (int) scrollPositionMap.get(otherName) : scrollNum;
+                                    int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
+                                    scrollToPreviousPosition(otherName, scrollCheck);  // scroll to position on new message update
+
+                                    // show new msg alert text for user
+                                    if(scrollPositionIV.getVisibility() == View.VISIBLE){
+                                        receiveIndicator.setVisibility(View.VISIBLE);
+                                        sendIndicator.setVisibility(View.GONE);
+                                    }
 
                                 } else{   // update the local message with the database details
 
@@ -884,7 +972,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 }
                             }
 
-                            // replace the unread message status to read status
+                            // change the unread message status to read status
                             if(isRead){
 
                                 try{
@@ -909,6 +997,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                     System.out.println("Error in converting message (M879) " + e.getMessage());
                                 }
                             }
+
                         }
 
                     }
@@ -924,26 +1013,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         adapter.setFragmentListener((FragmentListener) mContext);
 
-        adapterMap.put(otherName, adapter);
+        adapterMap.put(otherName, adapter); // save each user adapter
         recyclerMap.get(otherName).setAdapter(adapter);
 
     }
 
     // scroll to position on new message update
-    private void scrollToPreviousPosition(String otherName){
+    private void scrollToPreviousPosition(String otherName, int position){
         for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
             View child = recyclerContainer.getChildAt(i);
 
             if (child == recyclerMap.get(otherName)){
                 RecyclerView recyclerView = (RecyclerView) child;
 
-                //  readMsgDb2 -- to scroll to previous msg position on first onCreate load
-                if ( insideChat == "yes" || readMsgDb2 == 0) {  // change "yes" later to individual
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    //  change later -- retrieve previous position and scroll
-                    int lastPosition = layoutManager.getItemCount() - 1;
-                    layoutManager.scrollToPosition(lastPosition);
-                }
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                layoutManager.scrollToPosition(position);
             }
         }
     }
@@ -1035,7 +1119,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 {
                                     if(curDay - lastDay == 0)
                                     {
-                                        textViewLastSeen.setText("Last seen: " + time.toLowerCase()+".");
+                                        textViewLastSeen.setText("Seen: Today, " + time.toLowerCase()+".");
                                     } else if (curDay - lastDay == 1) {
                                         textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase()+".");
                                     } else if (curDay - lastDay == 2) {
@@ -1106,7 +1190,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             // set responds to pend always      ------- will change later to check condition if user is still an active call
             refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
 
-            runnerCheck = false;
             insideChat = "yes";
         }).start();
     }
@@ -1125,9 +1208,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //  interact with both send and record buttons
                 if(charSequence.length() > 0){
+
+                    // call handler runnable to check for internet access when typing
+                    handler1.post(internetCheckRunnable);
+
                     circleSendMessage.setVisibility(View.VISIBLE);
                     recordButton.setVisibility(View.INVISIBLE);
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(1);
+
                 } else {
                     circleSendMessage.setVisibility(View.GONE);
                     recordButton.setVisibility(View.VISIBLE);
@@ -1179,36 +1267,36 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             }
                         });
 
-                        // reset the new msg count
-                        DatabaseReference statusCheck2 = FirebaseDatabase.getInstance().getReference("Checks");
-                        statusCheck2.child(otherUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                try{
-                                    boolean statusState = (boolean) snapshot.child(user.getUid())
-                                            .child("status").getValue();
-
-                                    // receiver should be 0
-                                    if(statusState == true) {
-                                        statusCheck2.child(otherUserUid).child(user.getUid()).child("newMsgCount").setValue(0);
-                                    }
-
-                                    // Mine should be 0
-                                    statusCheck2.child(user.getUid()).child(otherUserUid).child("newMsgCount").setValue(0);
-
-                                } catch (Exception e){
-                                    statusCheck2.child(otherUserUid).child(user.getUid())
-                                            .child("status").setValue(false);
-                                }
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
+//                        // reset the new msg count
+//                        DatabaseReference statusCheck2 = FirebaseDatabase.getInstance().getReference("Checks");
+//                        statusCheck2.child(otherUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                                try{
+//                                    boolean statusState = (boolean) snapshot.child(user.getUid())
+//                                            .child("status").getValue();
+//
+//                                    // receiver should be 0
+//                                    if(statusState == true) {
+//                                        statusCheck2.child(otherUserUid).child(user.getUid()).child("newMsgCount").setValue(0);
+//                                    }
+//
+//                                    // Mine should be 0
+//                                    statusCheck2.child(user.getUid()).child(otherUserUid).child("newMsgCount").setValue(0);
+//
+//                                } catch (Exception e){
+//                                    statusCheck2.child(otherUserUid).child(user.getUid())
+//                                            .child("status").setValue(false);
+//                                }
+//
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(@NonNull DatabaseError error) {
+//
+//                            }
+//                        });
 
                     }
                 }).start();
@@ -1227,7 +1315,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 try {
                     long typing = (long) snapshot.child(otherUserUid).child("typing").getValue();
 
-                    //
                     handler.post(() -> {
 
                         if(typing == 1){
@@ -1336,8 +1423,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public void onNetworkStatusChanged(boolean isConnected) {
         if (isConnected) {
             // Network is connected, perform actions accordingly
-            constrNetConnect.setVisibility(View.GONE);
+            constrNetConnect.setVisibility(View.INVISIBLE);
             networkListener = "yes";
+
+            // remove runnable when network is okay to prevent continuous data usage
+            handler1.removeCallbacks(internetCheckRunnable);
 
             reloadFailedMessagesWhenNetworkIsOk();  // reload message loadStatus
 
@@ -1345,6 +1435,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             // Network is disconnected, handle this case as well
             constrNetConnect.setVisibility(View.VISIBLE);
             networkListener = "no";
+
+            handler1.post(internetCheckRunnable);   // call runnable when no internet
+
         }
     }
 
@@ -1448,13 +1541,48 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     @Override
     protected void onPause() {
+        // turn off my online and set my last seen date/time
         refUser.child(user.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
+
+        new Thread(()->{
+            if(constraintMsgBody.getVisibility() == View.VISIBLE){
+                try{
+                    refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(0);
+
+                    Map<String, Object> mapUpdate = new HashMap<>();
+                    mapUpdate.put("status", false);
+                    mapUpdate.put("newMsgCount", 0);
+                    mapUpdate.put("scrollPosition", otherUserName+scrollNum);   //split when recovering the values later
+                    refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
+
+                    scrollPositionMap.put(otherUserName, scrollNum);
+
+                } catch (Exception e){
+                    System.out.println("Check onPause (M1497) " + e.getMessage());
+                }
+            }
+        }).start();
+
         super.onPause();
+
     }
 
     @Override
     protected void onResume() {
+        // change my presence back to "online"
         refUser.child(auth.getUid()).child("presence").setValue(1);
+
+        if(constraintMsgBody.getVisibility() == View.VISIBLE){
+            try{
+//                Map<String, Object> mapUpdate = new HashMap<>();
+//                mapUpdate.put("status", true);
+                refChecks.child(user.getUid()).child(otherUserUid).child("status").setValue(true);
+
+            } catch (Exception e){
+                System.out.println("Check onResume (M1546) " + e.getMessage());
+            }
+        }
+
         super.onResume();
     }
 
@@ -1475,19 +1603,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             circleImageOnline.setVisibility(View.INVISIBLE);
             constraintProfileMenu.setVisibility(View.GONE);
 
-            otherUserName = null;
-
             new Thread(() -> {
+
+                int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
 
                 Map<String, Object> mapUpdate = new HashMap<>();
                 mapUpdate.put("status", false);
                 mapUpdate.put("newMsgCount", 0);
+                mapUpdate.put("scrollPosition", otherUserName+(scroll));
                 refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
+
+                scrollPositionMap.put(otherUserName, scroll);
+                System.out.println("I have saved it " + scroll);
 
                 // set responds to pend always      ------- will change later to check condition if user is still an active call
 //                    refChecks.child(user.getUid()).child(otherUserUid).child("vCallResp").setValue("pending");
 
-                runnerCheck = true;
                 insideChat = "no";
 
             }).start();
@@ -1496,7 +1627,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             super.onBackPressed();
         }
     }
+
 }
+
+
+
+
+
+
+
 
 
 

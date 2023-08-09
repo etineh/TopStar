@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
@@ -71,4 +72,62 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         return false; // No network connection or no internet access
     }
 
+
+
+
+    // Alternate solution
+
+//    private void networkResponse(){
+//        handler1 = new Handler();
+//        internetCheckRunnable = () -> {
+//
+//            // Execute the background task using the executor
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            executor.execute(() -> {
+//                boolean hasInternet = hasInternetAccess();
+//
+//                new Handler(Looper.getMainLooper()).post(() -> {
+//                    if (hasInternet) {
+//                        constrNetConnect.setVisibility(View.INVISIBLE);
+//                        networkListener = "yes";
+//                        handler1.removeCallbacks(internetCheckRunnable);
+//                        reloadFailedMessagesWhenNetworkIsOk();
+//                    } else {
+//                        constrNetConnect.setVisibility(View.VISIBLE);
+//                        networkListener = "no";
+//                        handler1.post(internetCheckRunnable);
+//                    }
+//                });
+//
+//                executor.shutdown();
+//            });
+//
+//        };
+//
+//        handler1.postDelayed(internetCheckRunnable, 3000); // Repeat the network check every 3 seconds
+//        handler1.post(internetCheckRunnable);
+//    }
+//
+//    public boolean hasInternetAccess() {
+//        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+//
+//        if (networkInfo != null && networkInfo.isConnected()) {
+//            try {
+//                HttpURLConnection urlc = (HttpURLConnection) (new URL("https://www.google.com").openConnection());
+//                urlc.setRequestProperty("User-Agent", "Test");
+//                urlc.setRequestProperty("Connection", "close");
+//                urlc.setConnectTimeout(1500);
+//                urlc.connect();
+//
+//                return (urlc.getResponseCode() == 200);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return false;
+//    }
 }
+
+
