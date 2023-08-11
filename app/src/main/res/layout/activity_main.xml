@@ -1582,10 +1582,10 @@
 
             <ImageView
                 android:id="@+id/sendIndicatorIV"
+                style="@style/drawableBG"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-10dp"
-                android:background="@drawable/msg_count"
                 android:elevation="6dp"
                 android:visibility="gone"
                 app:layout_constraintLeft_toLeftOf="@id/scrollToPositionIV"
@@ -1596,11 +1596,11 @@
 
             <ImageView
                 android:id="@+id/scrollToPositionIV"
+                style="@style/drawableBG"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="30dp"
                 android:layout_marginBottom="25dp"
-                android:background="@drawable/msg_count"
                 android:elevation="5dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/constraintSendMsgBox9"
@@ -1609,16 +1609,15 @@
 
             <TextView
                 android:id="@+id/scrollCountTV"
+                style="@style/drawableBG"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="-5dp"
-                android:background="@drawable/msg_count"
+                android:layout_marginBottom="-3dp"
                 android:elevation="5dp"
                 android:paddingStart="3sp"
                 android:paddingEnd="3dp"
-                android:text="23"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/scrollToPositionIV"
                 app:layout_constraintEnd_toEndOf="@+id/scrollToPositionIV"
@@ -1626,10 +1625,10 @@
 
             <TextView
                 android:id="@+id/receiveIndicatorTV"
+                style="@style/drawableBG"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-10dp"
-                android:background="@drawable/msg_count"
                 android:elevation="5dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
@@ -1685,18 +1684,52 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_marginBottom="4dp"
                     android:elevation="2dp"
                     app:cardCornerRadius="20dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/constrSend"
+                    app:layout_constraintEnd_toStartOf="@id/record_button9"
                     app:layout_constraintStart_toStartOf="parent">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:paddingTop="2dp">
+
+                        <ImageView
+                            android:id="@+id/camera_IV"
+                            style="@style/BackgroundTintOrange"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
+                            android:layout_marginBottom="10dp"
+                            android:elevation="6dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/files_IV"
+                            app:srcCompat="@drawable/baseline_photo_camera_24" />
+
+                        <ImageView
+                            android:id="@+id/files_IV"
+                            style="@style/BackgroundTintOrange"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="7dp"
+                            android:layout_marginBottom="10dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:srcCompat="@drawable/baseline_attach_file_24" />
+
+                        <ImageView
+                            android:id="@+id/emoji_IV"
+                            style="@style/BackgroundTintOrange"
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_marginStart="7dp"
+                            android:layout_marginBottom="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:srcCompat="@drawable/baseline_add_reaction_24" />
 
                         <androidx.cardview.widget.CardView
                             android:id="@+id/cardViewReply9"
@@ -1783,19 +1816,19 @@
 
                         <EditText
                             android:id="@+id/editTextMessage9"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="5dp"
+                            android:layout_marginStart="2dp"
                             android:layout_marginEnd="5dp"
                             android:layout_marginBottom="-2dp"
                             android:backgroundTint="@color/orange"
                             android:gravity="start|top"
-                            android:hint="Message"
+                            android:hint="@string/chat"
                             android:inputType="textMultiLine"
                             android:maxLines="6"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            app:layout_constraintEnd_toStartOf="@+id/files_IV"
+                            app:layout_constraintStart_toEndOf="@+id/emoji_IV" />
 
                         <com.devlomi.record_view.RecordView
                             android:id="@+id/record_view9"
@@ -1841,45 +1874,35 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constrSend"
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/fab9"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="2dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@drawable/msg_count"
+                    android:padding="7dp"
+                    android:src="@drawable/baseline_send_24"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintEnd_toEndOf="parent" />
 
-                    <com.devlomi.record_view.RecordButton
-                        android:id="@+id/record_button9"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="1dp"
-                        android:background="@drawable/msg_count"
-                        android:elevation="3dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:scaleType="centerInside"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:mic_icon="@drawable/recv_ic_mic_white" />
-
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/fab9"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/msg_count"
-                        android:padding="7dp"
-                        android:src="@drawable/baseline_send_24"
-                        android:visibility="invisible"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                <com.devlomi.record_view.RecordButton
+                    android:id="@+id/record_button9"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@drawable/msg_count"
+                    android:elevation="3dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:scaleType="centerInside"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:mic_icon="@drawable/recv_ic_mic_white" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

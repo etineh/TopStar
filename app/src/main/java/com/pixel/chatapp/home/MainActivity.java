@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,6 +22,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -42,6 +44,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
@@ -49,6 +52,7 @@ import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
+import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
@@ -87,26 +91,29 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     //    ------- message declares
     private ImageView imageViewBack;
     private CircleImageView circleImageOnline, circleImageLogo;
-    private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, imageViewCancelReply;
+    private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
     private ConstraintLayout conTopUserDetails, conUserClick;
     private ImageView editOrReplyIV, imageViewCalls;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
-    private TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReply, nameReply, replyVisible;
+    private TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
     private CircleImageView circleSendMessage;
-    private CardView cardViewMsg, cardViewReply;
+    private CardView cardViewMsg, cardViewReplyOrEdit;
     private ImageView scrollPositionIV, sendIndicator;
     private TextView scrollCountTV, receiveIndicator;
+    private ImageView emoji_IV, file_IV, camera_IV;
     // network settings
     private ConstraintLayout constrNetConnect, constrNetork;
     private String otherUserUid, otherUserName, myUserName, imageUri;
-    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails;
+    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails, refEditMsg;
     FirebaseUser user;
-    private int scrollNum;
+    private int scrollNum = 0;
     private long count = 0, newMsgCount = 0;
     private Map<String, Integer> dateNum, dateMonth;
-    private String idKey, listener = "no", replyFrom, networkListener = "yes", insideChat = "no";
+    private String idKey, listener = "no", replyFrom, replyText, networkListener = "yes", insideChat = "no";
+    private int replyVisibility = 8;    // gone as dafault
+    private long randomKey;     // use to fetch randomID when on edit mode
     private String audioPath;
     private MediaRecorder mediaRecorder;
     private Permission permissions;
@@ -119,18 +126,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     RecordView recordView;
     RecordButton recordButton;
 
-    public static int readMsgDb;  // 1 is read, 0 is no_read
-    public static int readMsgDb2;  // 1 is read, 0 is no_read
-
+    public static int readDatabase;  // 0 is read, 1 is no_read
+    private Map<String, Object> editMessageMap;
     private Map<String, List<MessageModel>> modelListMap;
     private Map<String, MessageAdapter> adapterMap;
     private Map<String, RecyclerView> recyclerMap;
     private List<String> stringList, otherUidList;
-    private Map<String, Object> downMsgCountMap;
+    private Map<String, Object> downMsgCountMap, scrollNumMap;
     private Map<String, Object>  notifyCountMap, scrollPositionMap;
 
     private int lastStartIndex, notifyCount, adapterSize;
     ConstraintLayout recyclerContainer;
+    private List<MessageModel> dataList = new ArrayList<>();
 
     NetworkChangeReceiver networkChangeReceiver;
     Handler handler1;
@@ -170,9 +177,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //        textViewDelOther = findViewById(R.id.textViewDelOther9);
 //        textViewDelAll = findViewById(R.id.textViewDelEveryone9);
 //        imageViewCancelDel = findViewById(R.id.imageViewCancelDel9);
-        cardViewReply = findViewById(R.id.cardViewReply9);
-        textViewReply = findViewById(R.id.textViewReplyText9);
-        imageViewCancelReply = findViewById(R.id.imageViewCancleReply9);
+        cardViewReplyOrEdit = findViewById(R.id.cardViewReply9);
+        textViewReplyOrEdit = findViewById(R.id.textViewReplyText9);
+        replyOrEditCancel_IV = findViewById(R.id.imageViewCancleReply9);
         editOrReplyIV = findViewById(R.id.editOrReplyImage9);
         nameReply = findViewById(R.id.fromTV9);
         replyVisible = findViewById(R.id.textReplying9);
@@ -184,6 +191,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         scrollCountTV = findViewById(R.id.scrollCountTV);
         receiveIndicator = findViewById(R.id.receiveIndicatorTV);
         sendIndicator = findViewById(R.id.sendIndicatorIV);
+        emoji_IV = findViewById(R.id.emoji_IV);
+        file_IV = findViewById(R.id.files_IV);
+        camera_IV = findViewById(R.id.camera_IV);
+
 
         // audio swipe button option
         recordView = (RecordView) findViewById(R.id.record_view9);
@@ -195,10 +206,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
         refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
+        refEditMsg = FirebaseDatabase.getInstance().getReference("EditMessage");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        editMessageMap = new HashMap<>();
         notifyCountMap = new HashMap<>();
+        scrollNumMap = new HashMap<>();
         recyclerMap = new HashMap<>();
         modelListMap = new HashMap<>();
         adapterMap = new HashMap<>();
@@ -206,10 +220,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         downMsgCountMap = new HashMap<>();
         stringList = new ArrayList<>();
         otherUidList = new ArrayList<>();
-        readMsgDb = 0;  // 1 is read, 0 is no_read
-        readMsgDb2 = 0;
-        notifyCount = 0;
-        lastStartIndex = 0; // Start index of the last 10 items (or 0 if there are less than 10 items)
+        readDatabase = 0;  // 0 is read, 1 is no_read
+
+//        replyText = "";
 
         // ----------------------
 
@@ -230,15 +243,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer = findViewById(R.id.constraintMsgContainer);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
-        new CountDownTimer(20000, 1000){
+        new CountDownTimer(25000, 1000){
             @Override
             public void onTick(long l) {
-                readMsgDb2 = 0;
+                readDatabase = 0;   // 0 is read, 1 is stop reading
             }
 
             @Override
             public void onFinish() {
-                readMsgDb2 = 1;
+                readDatabase = 1;
             }
         }.start();
 
@@ -377,16 +390,49 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 sendMessage(message, 0);    // 0 is for text while 1 is for voice note
 
                 editTextMessage.setText("");
+                textViewReplyOrEdit.setText("");
                 listener = "no";
+                replyText = null;
+                replyFrom = null;
+                replyVisibility = 8;
 
-                cardViewReply.setVisibility(View.GONE);
+                cardViewReplyOrEdit.setVisibility(View.GONE);
                 nameReply.setVisibility(View.GONE);
                 replyVisible.setVisibility(View.GONE);
 
             }
         });
 
-        setUserDetails();
+        // set camera
+        camera_IV.setOnClickListener(view -> {
+            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+        });
+
+        // set files(documents)
+        file_IV.setOnClickListener(view -> {
+            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+        });
+
+        // set emoji
+        emoji_IV.setOnClickListener(view -> {
+            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+        });
+
+        // close and cancel reply and edit box
+        replyOrEditCancel_IV.setOnClickListener(view -> {
+
+            nameReply.setVisibility(View.GONE);
+            replyVisible.setVisibility(View.GONE);
+            cardViewReplyOrEdit.setVisibility((int) 8);   // 8 is for GONE
+
+            listener = "no";
+            idKey = null;
+            editTextMessage.setText("");
+            replyText = null;
+            replyFrom = null;
+            replyVisibility = 8;
+            textViewReplyOrEdit.setText("");
+        });
 
         // scroll to previous position
         scrollPositionIV.setOnClickListener(view -> {
@@ -394,10 +440,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherUserName).getLayoutManager();
             int lastPosition = layoutManager.getItemCount() - 1;   // retrieve previous position and scroll
             layoutManager.scrollToPosition(lastPosition);
+
+            sendIndicator.setVisibility(View.GONE);
+            receiveIndicator.setVisibility(View.GONE);
         });
 
         // Delay 5 seconds to load message
-        new CountDownTimer(6000, 1000){
+        new CountDownTimer(5000, 1000){
             @Override
             public void onTick(long l) {
                 constrNetork.setVisibility(View.VISIBLE);
@@ -408,12 +457,50 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 constrNetork.setVisibility(View.GONE);
             }
         }.start();
+
+        setUserDetails();
+
     }
 
     //  --------------- methods --------------------
 
     // after writing your method in the main activity, declare it on the FragmentListener interface and fetch it from the fragment
     //  ---------- interface
+
+
+    @Override
+    public void onEditMessage(String message, String edit, String id, long randomID, String status, int icon) {
+
+
+        // pop up keyboard
+        editTextMessage.requestFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
+
+        editTextMessage.setText(message);       // set the edit message on the text field
+        editOrReplyIV.setImageResource(icon);
+        textViewReplyOrEdit.setText(message);         // set the edit text box with the message
+        cardViewReplyOrEdit.setVisibility(View.VISIBLE);  // make the container of the edit text visible
+
+        replyVisible.setVisibility(View.VISIBLE);
+        replyVisible.setText(status);               // indicating its on editing mood
+        nameReply.setVisibility(View.VISIBLE);
+
+        listener = edit;
+        idKey = id;
+        randomKey = randomID;
+
+
+//        // set reply name and hint
+//        if (msgFrom.equals(myUserName)) {
+//            nameReply.setText("From You.");
+//        }
+//        else {
+//            // edit later to username and display name
+//            nameReply.setText(otherUserName + " (@" +otherUserName+")");
+//        }
+
+    }
 
     @Override
     public void callAllMethods(String otherName, String userName, String uID) {
@@ -438,7 +525,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // get the number of message under
         int dCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
         scrollCountTV.setText(""+dCount);           // set down msg count
-        downMsgCountMap.put(otherName, dCount);     // set it for "sending message onClick"
+        downMsgCountMap.put(otherName, dCount);     // set it for "sending message method"
+
+        // Get the position of the item for sendMessage() and retrieveMessage()
+        scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
+        scrollNumMap.put(otherName, scrollNum);
 
         //  check count and display/hide the scroll arrow
         if(dCount > 2){
@@ -448,6 +539,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             scrollCountTV.setVisibility(View.GONE);
             scrollPositionIV.setVisibility(View.GONE);
             receiveIndicator.setVisibility(View.GONE);
+            sendIndicator.setVisibility(View.GONE);
         }
 
         // Add an OnScrollListener to the RecyclerView
@@ -456,14 +548,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                // Get the position of the item while scrolling
+                // keep saving the recycler position while scrolling
                 scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
-                System.out.println("Scrolling count " + scrollNum);
+                scrollNumMap.put(otherName, scrollNum);
 
+                // keep updating the number of down messages
                 int downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
                 scrollCountTV.setText(""+downMsgCount);
 
-                //  store the downMsgCount in a map for each user
+                //  store the downMsgCount in a map for each user, to enable me
+                //  add to the number on sendMessage() when I send new message
                 downMsgCountMap.put(otherName, downMsgCount);
 
                 //  check count and display/hide the scroll arrow
@@ -474,6 +568,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     scrollCountTV.setVisibility(View.GONE);
                     scrollPositionIV.setVisibility(View.GONE);
                     receiveIndicator.setVisibility(View.GONE);
+                    sendIndicator.setVisibility(View.GONE);
                 }
 
             }
@@ -496,7 +591,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         myUserName = userName;
         imageUri = imageUrl;
 
-        try{
+        try{    // make only the active recyclerView to be visible
             recyclerViewChatVisibility(otherName);
         } catch (Exception e){
             Toast.makeText(MainActivity.this, "Send your first message here! WC", Toast.LENGTH_SHORT).show();
@@ -618,7 +713,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private Map<String, Object> setMessage(String message, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
-        int visibility = 8;
         int msgStatus = 700024;
 
         if(networkListener == "no"){
@@ -626,24 +720,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
 
         Map<String, Object> messageMap = new HashMap<>();
+
         messageMap.put("from", myUserName);
-
-        if (listener == "reply") {
-            messageMap.put("replyMsg", textViewReply.getText());
-            messageMap.put("replyFrom", replyFrom);
-            visibility = 1;
-        } else if (listener == "yes") {
-//            key = idKey;
-            messageMap.put("edit", "edited");
-        }
-
         messageMap.put("type", type);
         messageMap.put("randomID", randomID);
         messageMap.put("message", message);
 //            messageMap.put("voicenote", vn);
         messageMap.put("msgStatus", msgStatus);
-        messageMap.put("visibility", visibility);
         messageMap.put( "timeSent", ServerValue.TIMESTAMP);
+        messageMap.put("replyFrom", replyFrom);
+        messageMap.put("visibility", replyVisibility);
+        messageMap.put("replyMsg", textViewReplyOrEdit.getText());
 
         return messageMap;
     }
@@ -652,53 +739,63 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         ExecutorService executor = Executors.newFixedThreadPool(5);
 
-        long randomID = (long)(Math.random() * 1_010_001);
+        if(listener == "edit"){ // check if it's on edit mode
 
-        // save to local list for fast update
-        MessageModel messageModel = new MessageModel(message, myUserName, "", 0, "",
-                "", 8, "", 700033, type, randomID);
+            editMessageMap.put("from", myUserName);
+            editMessageMap.put("message", message);
+            editMessageMap.put("edit", "edited");
+            editMessageMap.put("randomID", randomKey);
+            editMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
 
-        MessageAdapter adapter = adapterMap.get(otherUserName);
-        adapter.addNewMessageDB(messageModel);
+            // save to edit message
+            refEditMsg.child(myUserName).child(otherUserName).child(idKey).setValue(editMessageMap);
+            refEditMsg.child(otherUserName).child(myUserName).child(idKey).setValue(editMessageMap);
 
-        // set scroll position count
-        int increaseScroll = (int) downMsgCountMap.get(otherUserName) + 1;
-        scrollCountTV.setText(""+increaseScroll);
-        downMsgCountMap.put(otherUserName, increaseScroll); // save new position
+        } else {
+            long randomID = (long)(Math.random() * 1_010_001);
 
-        // show indicator that when was send
-        if(scrollPositionIV.getVisibility() == View.VISIBLE){
-            sendIndicator.setVisibility(View.VISIBLE);
-            receiveIndicator.setVisibility(View.GONE);
-        }
+            // save to local list for fast update
+            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "",
+                    "", replyVisibility, replyText, 700033, type, randomID);
 
-        // scroll to new position
-        int scrollNumCheck = scrollNum < 5 ? (int) scrollPositionMap.get(otherUserName) : scrollNum;
-        int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
-        scrollToPreviousPosition(otherUserName, scrollCheck);  // scroll to position on new message update
+            MessageAdapter adapter = adapterMap.get(otherUserName);
+            adapter.addNewMessageDB(messageModel);
 
-        executor.submit(() -> {
-            String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
+            // add one to the dowm message number
+            int increaseScroll = (int) downMsgCountMap.get(otherUserName) + 1;
+            scrollCountTV.setText(""+increaseScroll);
+            downMsgCountMap.put(otherUserName, increaseScroll); // save new position
 
-            // save to new message db for fast response
-            refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
-            refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+            // show indicator that msg is sent
+            if(scrollPositionIV.getVisibility() == View.VISIBLE){
+                sendIndicator.setVisibility(View.VISIBLE);
+                receiveIndicator.setVisibility(View.GONE);
+            }
 
-            // save to main message
-            refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
-            refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+            // scroll to new position
+            int scrollNumCheck = (int) scrollNumMap.get(otherUserName);
+            int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
+            scrollToPreviousPosition(otherUserName, scrollCheck);  // scroll to position on new message update
 
+            executor.submit(() -> {
+                String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
 
-            // --- save the last send message details
-            if (listener == "no" || listener == "reply")
-            {
+                // save to new message db for fast response
+                refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
+                refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+
+                // save to main message
+                refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
+                refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+
+                // save last msg for outside chat display
                 refLastDetails.child(user.getUid()).child(otherUserUid).setValue(setMessage(message, type, randomID));
-
                 refLastDetails.child(otherUserUid).child(user.getUid()).setValue(setMessage(message, type, randomID));
 
                 checkAndSaveCounts_SendMsg();   // save the number of new message I am sending
-            }
-        });
+            });
+
+        }
 
     }
 
@@ -753,8 +850,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public void retrieveMessages(String userName, String otherName, String uID, Context mContext){
 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
-        List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg database
-        List<MessageModel> loopCount = new ArrayList<>();           // save total count messages from refFastMsg database
+        List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
+//        List<MessageModel> loopCount = new ArrayList<>();           // save total count messages from refFastMsg database
 
         MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, uID, mContext); // initialise adapter
 
@@ -764,249 +861,25 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             public void onTick(long l) {
 
                 // retrieve the last previous scroll position
-                refChecks.child(user.getUid()).child(uID).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                getLastScrollPosition(uID, otherName);
 
-                        try{
-                            // get the values(e.g frank4032) and split it -- frank , 4032
-                            String details = snapshot.child("scrollPosition").getValue().toString();
-
-                            // Use regular expression to split letters and numbers
-                            Pattern pattern = Pattern.compile("([A-Za-z_]+)([0-9]+)");
-                            Matcher matcher = pattern.matcher(details);
-
-                            String otherName2 = "";
-                            String position = "";
-
-                            if (matcher.find()) {
-                                otherName2 = matcher.group(1);  // Group 1 contains letters
-                                position = matcher.group(2);    // Group 2 contains numbers
-
-                                int convertPosition = Integer.parseInt(position);
-
-                                if (readMsgDb2 == 0) {
-                                    scrollPositionMap.put(otherName2, convertPosition);
-                                }
-                            }
-
-                        } catch (Exception e){
-                            refChecks.child(user.getUid()).child(uID).child("scrollPosition").setValue(otherName+5);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-                // delete from the database
-                refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        new Thread(() -> {
-                            msgListNotRead.clear();
-
-                            for (DataSnapshot snapshotNew : snapshot.getChildren()){
-
-                                if(insideChat == "no"){
-                                    // change inside "yes" to personal later
-                                    if((long)snapshotNew.child("msgStatus").getValue() == 700016){
-
-                                        String key = snapshotNew.getKey();
-//                                 //  delete from the new database if the msg has been read
-                                        refMsgFast.child(userName).child(otherName).child(key).removeValue();
-//
-                                    } else {
-                                        if(readMsgDb2 == 0){    // only read once to get the total number of message
-                                            MessageModel messageModel = snapshotNew.getValue(MessageModel.class);
-                                            msgListNotRead.add(messageModel);   // add to list to get the total
-                                        }
-                                    }
-                                }
-                            }
-                        }).start();
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                // delete from the database when message is read and get the total number of msg not read yet
+                deleteMessageWhenRead(userName, otherName, msgListNotRead);
 
             }
 
 
             @Override
-            public void onFinish() {
+            public void onFinish() { // call all methods
 
                 // retrieve all message from the database just once
-                refMessages.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if(readMsgDb2 == 0) {   // run only once
-
-                            modelListAllMsg.clear();
-
-                            for (DataSnapshot snapshotOld : snapshot.getChildren()){
-
-                                if(snapshotOld.child("from").exists()){
-                                    MessageModel messageModelOldMsg = snapshotOld.getValue(MessageModel.class);
-                                    messageModelOldMsg.setIdKey(snapshotOld.getKey());  // set msg keys to the adaptor
-                                    modelListAllMsg.add(messageModelOldMsg);
-
-                                    // set old message to read status
-                                    if(msgListNotRead.size() < 1){
-                                        messageModelOldMsg.setMsgStatus(700016);    // change later to loop through only 2000 msg
-                                    } else {
-                                        // loop through only 2000 message for efficiency, and set readStatus
-                                        int changeOnly = modelListAllMsg.size()-msgListNotRead.size();
-                                        int startCount = modelListAllMsg.size() > 2000 ? modelListAllMsg.size() - 2000: 0;
-                                        for (int i = startCount; i < changeOnly; i++) {
-                                            MessageModel msgStatus = modelListAllMsg.get(i);
-                                            msgStatus.setMsgStatus(700016);
-                                        }
-                                    }
-
-                                } else {
-                                    refMessages.child(userName).child(otherName).child(snapshotOld.getKey()).removeValue();
-                                }
-                            }
-
-                            // scroll to previous position UI of user
-                            try{
-                                scrollToPreviousPosition(otherName, (int) scrollPositionMap.get(otherName));
-                            } catch (Exception e){
-                                scrollToPreviousPosition(otherName, adapter.getItemCount() - 1);
-                            }
-
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter);
 
                 // add new message directly to local List and interact with few msg in refMsgFast database
-                refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                newMessageInteraction(userName, otherName, modelListAllMsg, adapter);
 
-                        loopCount.clear();
-
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-
-                            MessageModel messageModel = snapshot1.getValue(MessageModel.class);
-                            messageModel.setIdKey(snapshot1.getKey());
-
-                            // get the total number of message in the msgFast Db for looping
-                            loopCount.add(messageModel);    // not use yet (observing error)
-                            int startCount = modelListAllMsg.size() > 50 ? modelListAllMsg.size() - 50: 0;  // set default to 50
-//                            System.out.println("Check here down 2 " + otherName + modelListAllMsg.size());
-
-                            boolean isNewMessage = true;
-                            boolean isRead = true;
-
-                            // Check if the message already exists in the current messages list
-                            for (int i = startCount; i < modelListAllMsg.size(); i++) {
-                                MessageModel existingMessage = modelListAllMsg.get(i);
-                                if (messageModel.getIdKey().equals(existingMessage.getIdKey())) {
-                                    isNewMessage = false;
-                                    // break; // You can choose to include this line if you want to exit the loop after finding a match.
-                                }
-
-                                if (messageModel.getIdKey().equals(existingMessage.getIdKey()) &&
-                                        messageModel.getMsgStatus() == existingMessage.getMsgStatus()) {
-                                    isRead = false;
-                                }
-                            }
-
-                            // If there's new message, check who sent it and add/update
-                            if (isNewMessage) {
-
-                                if(messageModel.getFrom().equals(otherName)){
-
-                                    adapter.addNewMessageDB(messageModel);
-
-                                    // check recycler position before scrolling
-                                    int scrollNumCheck = scrollNum < 5 ? (int) scrollPositionMap.get(otherName) : scrollNum;
-                                    int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
-                                    scrollToPreviousPosition(otherName, scrollCheck);  // scroll to position on new message update
-
-                                    // show new msg alert text for user
-                                    if(scrollPositionIV.getVisibility() == View.VISIBLE){
-                                        receiveIndicator.setVisibility(View.VISIBLE);
-                                        sendIndicator.setVisibility(View.GONE);
-                                    }
-
-                                } else{   // update the local message with the database details
-
-                                    // Check if the message is "700033" ~ unread
-                                    for (int i = startCount; i < modelListAllMsg.size(); i++) {
-
-                                        MessageModel existingMessage = modelListAllMsg.get(i);
-                                        if (messageModel.getMessage().equals(existingMessage.getMessage())
-                                                && messageModel.getRandomID() == existingMessage.getRandomID()) {
-
-                                            if(existingMessage.getMsgStatus() == 700033){  //700033 -- not sent, 700024 -- sent, 700016 -- read
-                                                // set details for each message found
-                                                modelListAllMsg.get(i).setMsgStatus(messageModel.getMsgStatus());
-                                                modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyFrom());
-                                                modelListAllMsg.get(i).setTimeSent(messageModel.getTimeSent());
-                                                modelListAllMsg.get(i).setIdKey(messageModel.getIdKey());
-                                                modelListAllMsg.get(i).setEdit(messageModel.getEdit());
-                                                modelListAllMsg.get(i).setReplyMsg(messageModel.getReplyMsg());
-                                                //  modelListAllMsg.get(i).setEdit(messageModel.getEdit());
-                                            }
-
-                                            adapter.notifyItemChanged(i, new Object());     // notify with empty object so it doesn't duplicate
-
-                                        }
-                                    }
-                                }
-                            }
-
-                            // change the unread message status to read status
-                            if(isRead){
-
-                                try{
-                                    if(messageModel.getFrom().equals(userName)){
-                                        // Check if the message is "700033" ~ unread
-                                        for (int i = startCount; i < modelListAllMsg.size(); i++) {
-                                            MessageModel msgStatus = modelListAllMsg.get(i);
-
-                                            if (messageModel.getMessage().equals(msgStatus.getMessage())
-                                                    && messageModel.getRandomID() == msgStatus.getRandomID()) {
-
-                                                // set details for unread message found to read status
-                                                modelListAllMsg.get(i).setMsgStatus(messageModel.getMsgStatus());
-
-                                                // notify with empty object so it doesn't duplicate
-                                                adapter.notifyItemChanged(i, new Object());
-                                            }
-
-                                        }
-                                    }
-                                } catch (Exception e){
-                                    System.out.println("Error in converting message (M879) " + e.getMessage());
-                                }
-                            }
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                // edit message
+                getEditMessage(userName, otherName, modelListAllMsg, adapter, uID);
 
             }
         }.start();
@@ -1016,6 +889,368 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         adapterMap.put(otherName, adapter); // save each user adapter
         recyclerMap.get(otherName).setAdapter(adapter);
 
+    }
+
+    // retrieve the last previous scroll position
+    private void getLastScrollPosition(String uID, String otherName)
+    {
+        refChecks.child(user.getUid()).child(uID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                try{
+                    // get the values(e.g frank4032) and split it -- frank , 4032
+                    String details = snapshot.child("scrollPosition").getValue().toString();
+
+                    // Use regular expression to split letters and numbers
+                    Pattern pattern = Pattern.compile("([A-Za-z_]+)([0-9]+)");
+                    Matcher matcher = pattern.matcher(details);
+
+                    String otherName2 = "";
+                    String position = "";
+
+                    if (matcher.find()) {
+                        otherName2 = matcher.group(1);  // Group 1 contains letters
+                        position = matcher.group(2);    // Group 2 contains numbers
+
+                        int convertPosition = Integer.parseInt(position);
+
+                        if (readDatabase == 0) {  // fetch data just once
+                            scrollPositionMap.put(otherName2, convertPosition);
+                            scrollNumMap.put(otherName2, convertPosition);
+                        }
+                    }
+
+                } catch (Exception e){
+                    refChecks.child(user.getUid()).child(uID).child("scrollPosition").setValue(otherName+5);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    // delete from the database when message is read and get the total number of msg not read yet
+    private void deleteMessageWhenRead(String userName, String otherName, List<MessageModel>msgListNotRead)
+    {
+        refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                new Thread(() -> {
+                    msgListNotRead.clear();
+
+                    for (DataSnapshot snapshotNew : snapshot.getChildren()){
+
+                        if(insideChat == "no"){
+                            // check if the message has been read
+                            if((long)snapshotNew.child("msgStatus").getValue() == 700016){
+
+//                              //  delete from the new database if the msg has been read
+                                String key = snapshotNew.getKey();
+                                refMsgFast.child(userName).child(otherName).child(key).removeValue();
+//
+                            } else {
+                                // if not read yet, add to msgListNotRead to get the total of unread msg
+                                if(readDatabase == 0){    // only read once to get the total number of message
+                                    MessageModel messageModel = snapshotNew.getValue(MessageModel.class);
+                                    msgListNotRead.add(messageModel);
+                                }
+                            }
+                        }
+                    }
+                }).start();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    // retrieve all message from the database just once
+    private void getAllMessages(String userName, String otherName, List<MessageModel> allMsgList,
+                                List<MessageModel> msgListNotRead, MessageAdapter adapter)
+    {
+        refMessages.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(readDatabase == 0) {   // run only once
+
+                    allMsgList.clear();
+
+                    for (DataSnapshot snapshotOld : snapshot.getChildren()){
+
+                        if(snapshotOld.child("from").exists()){
+                            MessageModel messageModelOldMsg = snapshotOld.getValue(MessageModel.class);
+                            messageModelOldMsg.setIdKey(snapshotOld.getKey());  // set msg keys to the adaptor
+                            allMsgList.add(messageModelOldMsg);
+
+                            // set old message to read status
+                            if(msgListNotRead.size() < 1){
+                                messageModelOldMsg.setMsgStatus(700016);    // change later to loop through only 2000 msg
+                            } else {
+                                // loop through only 2000 message for efficiency, and set readStatus
+                                int changeOnly = allMsgList.size()-msgListNotRead.size();
+                                int startCount = allMsgList.size() > 2000 ? allMsgList.size() - 2000: 0;
+
+                                for (int i = startCount; i < changeOnly; i++) {
+                                    MessageModel msgStatus = allMsgList.get(i);
+                                    msgStatus.setMsgStatus(700016);
+                                }
+                            }
+
+                        } else {
+                            refMessages.child(userName).child(otherName).child(snapshotOld.getKey()).removeValue();
+                        }
+                    }
+
+                    // scroll to previous position UI of user
+                    try{
+                        scrollToPreviousPosition(otherName, (int) scrollPositionMap.get(otherName));
+                    } catch (Exception e){
+                        scrollToPreviousPosition(otherName, adapter.getItemCount() - 1);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    // add new message to local List and interact with few msg in refMsgFast database for delivery and read status
+    private void newMessageInteraction(String userName, String otherName, List<MessageModel> allMsgList, MessageAdapter adapter)
+    {
+        refMsgFast.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+
+                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                    messageModel.setIdKey(snapshot1.getKey());
+
+                    // get the total number of message in the msgFast Db for looping
+                    int startCount = allMsgList.size() > 50 ? allMsgList.size() - 50: 0;  // set default to 0
+
+                    boolean isNewMessage = true;
+                    boolean isSentOrRead = true;
+
+                    // Check if the message already exists in the current messages list
+                    // loop in descending order and break, to make it fast (E.g 200 - 150)
+                    for (int i = allMsgList.size()-1; i >= startCount; i--) {
+                        MessageModel existingMessage = allMsgList.get(i);
+                        if (messageModel.getIdKey().equals(existingMessage.getIdKey())) {
+                            isNewMessage = false;
+                            break;
+                        }
+
+                        if (messageModel.getIdKey().equals(existingMessage.getIdKey()) &&
+                                messageModel.getMsgStatus() == existingMessage.getMsgStatus()) {
+                            isSentOrRead = false;
+                            break;
+                        }
+                    }
+
+                    // If there's new message from otherUser, add here
+                    if (isNewMessage && messageModel.getFrom().equals(otherName)) {
+
+                        // add the new msg to the modelList method at MessageAdapter (L152)
+                        adapter.addNewMessageDB(messageModel);
+
+                        // check recycler position before scrolling
+                        int scrollNumCheck = (int) scrollNumMap.get(otherName);
+                        int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
+                        scrollToPreviousPosition(otherName, scrollCheck);  // scroll to position on new message update
+
+                        // show new msg alert text for user
+                        if(scrollPositionIV.getVisibility() == View.VISIBLE){
+                            receiveIndicator.setVisibility(View.VISIBLE);
+                            sendIndicator.setVisibility(View.GONE);
+                        }
+                    }
+
+                    //     change the load status to unread message status or read status
+                    if(isSentOrRead){
+                        try{
+                            if(messageModel.getFrom().equals(userName)){
+
+                                // Check if the message is "700033" ~ unread
+                                for (int i = allMsgList.size()-1; i >= startCount; i--) {
+                                    MessageModel msgStatus = allMsgList.get(i);
+
+                                    // check if both message and randomID are same
+                                    if (messageModel.getMessage().equals(msgStatus.getMessage())
+                                            && messageModel.getRandomID() == msgStatus.getRandomID()) {
+
+                                        // set details for unread message found to read status
+                                        allMsgList.get(i).setMsgStatus(messageModel.getMsgStatus());
+                                        allMsgList.get(i).setTimeSent(messageModel.getTimeSent());
+                                        allMsgList.get(i).setIdKey(messageModel.getIdKey());
+                                        allMsgList.get(i).setEdit(messageModel.getEdit());
+
+                                        allMsgList.get(i).setReplyFrom(messageModel.getReplyFrom());
+                                        allMsgList.get(i).setReplyMsg(messageModel.getReplyMsg());
+
+                                        // notify with empty object so it doesn't duplicate
+                                        adapter.notifyItemChanged(i, new Object());
+                                    }
+
+                                    break;
+                                }
+                            }
+
+                        } catch (Exception e){
+                            System.out.println("Error in converting message (M879) " + e.getMessage());
+                        }
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    // retrieve message when edited and delete after 10sec
+    private void getEditMessage(String userName, String otherName, List<MessageModel> allMsgList, MessageAdapter adapter, String otherUid)
+    {
+        refEditMsg.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                // loop through each child
+                for (DataSnapshot snapshotEdit : snapshot.getChildren()) {
+
+                    if(snapshotEdit.child("from").exists()){
+                        // get the messages from the database and set the idKey
+                        EditMessageModel editMessageModel = snapshotEdit.getValue(EditMessageModel.class);
+                        editMessageModel.setId(snapshotEdit.getKey());
+
+                        int startCount = allMsgList.size() > 50 ? allMsgList.size() - 50: 0;  // set default to 50
+
+                        boolean isEditMessage = false;
+                        int position = 0;
+
+                        // Check if the message already exists in the current messages list
+                        for (int i = allMsgList.size()-1; i >= startCount; i--) {
+                            MessageModel existingMessage = allMsgList.get(i);
+                            if (editMessageModel.getId().equals(existingMessage.getIdKey())) {
+                                isEditMessage = true;
+                                position = i;
+                                break;
+                            }
+                        }
+
+                        if(isEditMessage){  // replace the message details if found
+                            allMsgList.get(position).setMessage(editMessageModel.getMessage());
+                            allMsgList.get(position).setTimeSent(editMessageModel.getTimeSent());
+                            allMsgList.get(position).setEdit(editMessageModel.getEdit());
+
+                            // notify with empty object so it doesn't duplicate
+                            adapter.notifyItemChanged(position, new Object());
+                        }
+
+                        // delete message after 10 secs
+                        new CountDownTimer(10_000, 1_000){
+                            @Override
+                            public void onTick(long l) {
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                //  check only last 100, if message exist in the main Message database
+                                Query query = refMessages.child(userName).child(otherName).limitToLast(100);
+                                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        for(DataSnapshot snapshotAll : snapshot.getChildren()){
+                                            // compare both keys
+                                            if(snapshotEdit.getKey().equals(snapshotAll.getKey())){
+                                                // fetch out the data via map
+                                                Map<String, Object> updateMap = new HashMap<>();
+                                                updateMap.put("message", editMessageModel.getMessage());
+                                                updateMap.put("edit", "edited");
+                                                updateMap.put( "timeSent", editMessageModel.getTimeSent());
+
+                                                // update the Main Message DB with the map data
+                                                refMessages.child(userName).child(otherName)
+                                                        .child(snapshotAll.getKey())
+                                                        .updateChildren(updateMap).addOnCompleteListener(task -> {
+                                                            if(task.isSuccessful()){
+                                                                // delete is updated successfully
+                                                                refEditMsg.child(userName).child(otherName)
+                                                                        .child(snapshotEdit.getKey())
+                                                                        .removeValue();
+                                                            }
+                                                        });
+
+                                            } else {    // delete if not found
+                                                refEditMsg.child(userName).child(otherName).child(snapshotEdit.getKey()).removeValue();
+                                            }
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                            }
+                        }.start();
+
+
+                        // check outside message if it's same same id message that was edited and update it
+                        refLastDetails.child(user.getUid()).child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshotLast) {
+                                //  check if the key id is same
+                                long editID = editMessageModel.getRandomID();
+                                long outSideChatID = (long) snapshotLast.child("randomID").getValue();
+
+                                if(editID == outSideChatID){
+                                    //  update and replace the message
+                                    refLastDetails.child(user.getUid()).child(otherUid)
+                                            .child("message").setValue(editMessageModel.getMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     // scroll to position on new message update
@@ -1030,19 +1265,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 layoutManager.scrollToPosition(position);
             }
         }
-    }
-    @Override
-    public void onEditMessage(String itemList, int icon) {
-        editTextMessage.setText(itemList);
-        editOrReplyIV.setImageResource(icon);
-
-        // pop up keyboard
-        editTextMessage.requestFocus();
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
-
-        cardViewReply.setVisibility(View.VISIBLE);
-
     }
 
     // get last seen and set inbox status to be true
@@ -1214,11 +1436,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                     circleSendMessage.setVisibility(View.VISIBLE);
                     recordButton.setVisibility(View.INVISIBLE);
+                    camera_IV.setVisibility(View.INVISIBLE);
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(1);
 
                 } else {
-                    circleSendMessage.setVisibility(View.GONE);
+                    circleSendMessage.setVisibility(View.INVISIBLE);
                     recordButton.setVisibility(View.VISIBLE);
+                    camera_IV.setVisibility(View.VISIBLE);
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(0);
                 }
 
@@ -1336,8 +1560,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     // change all load status message to delivery status (700033 ---> 700024)
-    private void reloadFailedMessagesWhenNetworkIsOk(){
-        if(readMsgDb2 == 1){
+    private void reloadFailedMessagesWhenNetworkIsOk()
+    {
+        if(readDatabase == 1){  // always read
 
             // reload message for inside chat box
             new Thread(() -> {
@@ -1586,18 +1811,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         super.onResume();
     }
 
+
     @Override
     public void onBackPressed() {
 
         if(constraintMsgBody.getVisibility() == View.VISIBLE){
             constraintMsgBody.setVisibility(View.INVISIBLE);
-            cardViewReply.setVisibility(View.GONE);
+            cardViewReplyOrEdit.setVisibility(View.GONE);
             topMainContainer.setVisibility(View.VISIBLE);
             tabLayoutGeneral.setVisibility(View.VISIBLE);
             conTopUserDetails.setVisibility(View.INVISIBLE);
             conUserClick.setVisibility(View.INVISIBLE);
 
             editTextMessage.setText("");    // clear message not sent
+            replyText = null;
+            replyFrom = null;
+            replyVisibility = 8;
+            textViewReplyOrEdit.setText("");
 
             textViewLastSeen.setText("");   // clear last seen
             circleImageOnline.setVisibility(View.INVISIBLE);
@@ -1610,6 +1840,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 Map<String, Object> mapUpdate = new HashMap<>();
                 mapUpdate.put("status", false);
                 mapUpdate.put("newMsgCount", 0);
+                // save scroll to database to recover the recycler position it was
                 mapUpdate.put("scrollPosition", otherUserName+(scroll));
                 refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
 
@@ -1620,6 +1851,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //                    refChecks.child(user.getUid()).child(otherUserUid).child("vCallResp").setValue("pending");
 
                 insideChat = "no";
+                idKey = null;
 
             }).start();
 
@@ -1628,6 +1860,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
     }
 
+
+    // later ------------- on screen rotate. Save mode or alert
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save important data to the bundle
+        outState.putString("key", "Hello " + otherUserName);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore data from the bundle
+        String value = savedInstanceState.getString("key");
+        Toast.makeText(this, "yes "+value, Toast.LENGTH_SHORT).show();
+    }
 }
 
 

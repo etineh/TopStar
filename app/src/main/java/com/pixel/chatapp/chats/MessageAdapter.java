@@ -30,6 +30,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.EnvironmentCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,14 +75,7 @@ import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-//    public static List<MessageModel> modelList;
-//    public static String uId;
-//    public static String userName;
-//    public static Context mContext;
-
     public  List<MessageModel> modelList;
-    public  List<MessageModel> modelList2;
-
     public String uId;
     public String userName;
     public  Context mContext;
@@ -93,10 +87,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     DatabaseReference refCheck, refUsers;
     EditText editTextMsg;
     ConstraintLayout deleteBody;
-    private CardView cardViewReply;
-    private TextView textViewReply, textViewDelOther, nameReply, replyVisible;
-    private ImageView editOrReplyIV;
-    List<MessageModel> modelList5 = new ArrayList<>();
 
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
@@ -152,11 +142,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void addNewMessageDB(MessageModel newMessages) {
         modelList.add(newMessages);
     }
-    public void addNewMessage(MessageModel localMsg) {
+    public void addNewMessage(List<MessageModel> localMsg) {
 
 //        modelList5.clear();
 //        modelList5.add(localMsg);
-        modelList.add(localMsg);
+        modelList.addAll(localMsg);
 //        notifyDataSetChanged();
 //        modelList.removeAll(localMsg);
 
@@ -232,31 +222,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             }
             else {
-                editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
+//                editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
 
-                editAndReply("reply", modelList.get(pos).getIdKey(), editTextMsg, holder,
-                        pos, modelList.get(pos).getFrom(), "replying...", 1);       // 1 is visibility, 8 is Gone and 4 is Invisible
             }
         });
 
         // edit option
         holder.imageViewEdit.setOnClickListener(view -> {
 
-            if(modelList.get(pos).getMsgStatus() == 700033){
-                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            int deliveryStatus = modelList.get(pos).getMsgStatus();
+            int positionCheck = modelList.size() - pos;    // 1000 - 960 => 40
 
-                // show edit msg, show edit icon
-                fragmentListener.onEditMessage(modelList.get(pos).getMessage(), android.R.drawable.ic_menu_edit);
+            if(deliveryStatus == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            } else if (positionCheck > 100) {
+                Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
+            } else {
+
+                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
-
-//                editOrReplyIV.setImageResource(android.R.drawable.ic_menu_edit);    // set edit icon
-//                editTextMsg.setText(""+ modelList.get(pos).getMessage());
-//
-//                editAndReply("yes", modelList.get(pos).getIdKey(), editTextMsg, holder,
-//                        pos, modelList.get(pos).getFrom(), "editing...", 4);
+                fragmentListener.onEditMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
+                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit);
             }
         });
 
@@ -268,9 +255,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             } else {
                 // user1 should be unable to delete user2 msg
                 if(!modelList.get(pos).getFrom().equals(userName)){
-                    textViewDelOther.setVisibility(View.GONE);
+//                    textViewDelOther.setVisibility(View.GONE);
                 } else {
-                    textViewDelOther.setVisibility(View.VISIBLE);
+//                    textViewDelOther.setVisibility(View.VISIBLE);
                 }
 
                 deleteBody.setVisibility(View.VISIBLE);
@@ -310,14 +297,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.cardViewChatBox.setOnClickListener(view -> {
             if(holder.constraintChatTop.getVisibility() == View.GONE){
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
+                if(modelList.size() - pos > 100){    // indicate sign that msg can't be edited
+                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
+                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
+                }
             } else{
                 holder.constraintChatTop.setVisibility(View.GONE);
             }
         });
 
-        holder.textViewShowMsg.setOnClickListener(view -> {
+        holder.textViewShowMsg.setOnClickListener(view -> { // open when the text is clicked
             if(holder.constraintChatTop.getVisibility() == View.GONE){
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
+                if(modelList.size() - pos > 100){    // indicate sign that msg can't be edited
+                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
+                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
+                }
             } else{
                 holder.constraintChatTop.setVisibility(View.GONE);
             }
@@ -544,40 +539,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             }
         });
-    }
-
-    private void editAndReply(String listener, String id, EditText editText, MessageViewHolder holder,
-                              int pos, String replyFrom, String status, int visibility){
-
-        editText.requestFocus();
-        // pop up keyboard
-        InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-
-        int intValue = (int) 1; // visibility
-        cardViewReply.setVisibility(intValue);
-        textViewReply.setText(modelList.get(pos).getMessage()); // set the reply text
-        holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-
-        // set reply name and replying hint
-        replyVisible.setVisibility(View.VISIBLE);
-        replyVisible.setText(status);
-        nameReply.setVisibility(visibility);
-        if (modelList.get(pos).getFrom().equals(userName)) {
-            nameReply.setText("From You.");
-        }
-        else {
-            nameReply.setText(modelList.get(pos).getFrom() +
-                    " (@" +modelList.get(pos).getFrom()+")");
-        }
-
-        // Send the idKey to messageActivity with LocalBroadcast
-        Intent intent = new Intent("editMsg");
-        intent.putExtra("id", id);
-        intent.putExtra("listener", listener);
-        intent.putExtra("replyFrom", replyFrom);
-
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     @Override

@@ -116,6 +116,15 @@
 <!--        <item name="android:background">#fedfb9</item>-->
     </style>
 
+    <!--    drawable background-->
+    <style name="drawableBG">
+        <item name="android:background">@drawable/msg_count</item>
+    </style>
+
+<!--    <style name="fileTintO2">-->
+<!--        <item name="android:tint">@color/orange</item>-->
+<!--    </style>-->
+
 <!--    Custom TabLayout-->
     <style name="CustomTab" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>

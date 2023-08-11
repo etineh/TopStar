@@ -1,6 +1,7 @@
 package com.pixel.chatapp;
 
 import android.content.Context;
+import android.widget.EditText;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,8 +18,8 @@ public interface FragmentListener {
     void msgBodyVisibility(String otherName, String imageUrl, String userName, String uID);
 
     void sendRecyclerView(RecyclerView recyclerChat, String otherName, String otherUid);
+
     void getMessage(String userName, String otherName, String uID, Context mContext);
-    void onEditMessage(String itemList, int icon);
 
     void getLastSeenAndOnline(String otherUid);
 
@@ -28,6 +29,7 @@ public interface FragmentListener {
 
     void onNetworkStatusChanged(boolean isConnected);
 
+    void onEditMessage(String itemList, String edit, String id, long randomID, String status, int icon);
 //    void onClickOpenMessage(ConstraintLayout itemLayout);
 
 }
