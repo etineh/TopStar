@@ -60,6 +60,7 @@ import kotlin.reflect.jvm.internal.impl.descriptors.ClassOrPackageFragmentDescri
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder> implements MainActivity.ChatVisibilityListener {
 
+    private ChatViewHolder lastOpenViewHolder = null;
     private static List<String> otherUsersId;
     private static Context mContext;
     private static String userName;
@@ -265,15 +266,19 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         });
 
         //  open option menu
-        holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(holder.constraintTop.getVisibility() == View.GONE){
-                    holder.constraintTop.setVisibility(View.VISIBLE);
-                } else {
-                    holder.constraintTop.setVisibility(View.GONE);
-                }
+        holder.imageViewMenu.setOnClickListener(view -> {
+
+            if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
+                lastOpenViewHolder.constraintTop.setVisibility(View.GONE);
             }
+
+            if(holder.constraintTop.getVisibility() == View.GONE){
+                holder.constraintTop.setVisibility(View.VISIBLE);
+            } else {
+                holder.constraintTop.setVisibility(View.GONE);
+            }
+
+            lastOpenViewHolder = holder;
         });
 
         //  close option menu
@@ -301,13 +306,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 long lastTime = (long)  snapshot.child(myUsersId).child("timeSent").getValue();
                 String lastSender = snapshot.child(myUsersId).child("from").getValue().toString();
 
-                // set message delivery visibility
-                if(lastSender.equals(userName)){
-                    holder.imageViewDeliver.setVisibility(View.VISIBLE);
-                } else {
-                    holder.imageViewDeliver.setVisibility(View.INVISIBLE);
-                }
-
                 //  set the delivery status
                 try{
                     long statusNum = (long) snapshot.child(myUsersId).child("msgStatus").getValue();
@@ -320,6 +318,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         numMsg = R.drawable.baseline_grade_24;
                     }
                     holder.imageViewDeliver.setImageResource(numMsg);
+
+                    // set message delivery visibility
+                    if(lastSender.equals(userName)){
+                        holder.imageViewDeliver.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.imageViewDeliver.setVisibility(View.INVISIBLE);
+                    }
 
                 }catch (Exception e){
                     refUsersLast.child(user.getUid()).child(myUsersId).child("msgStatus").setValue(700024);

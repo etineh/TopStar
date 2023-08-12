@@ -105,7 +105,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView emoji_IV, file_IV, camera_IV;
     // network settings
     private ConstraintLayout constrNetConnect, constrNetork;
-    private String otherUserUid, otherUserName, myUserName, imageUri;
+    public static String otherUserUid, otherUserName, myUserName, imageUri;
+//    public static String goToLastMessage;
+    public static int goToNum;
+    public static Boolean goToLastMessage = false;
+
     DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails, refEditMsg;
     FirebaseUser user;
     private int scrollNum = 0;
@@ -126,11 +130,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     RecordView recordView;
     RecordButton recordButton;
 
-    public static int readDatabase;  // 0 is read, 1 is no_read
+    private int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
     private Map<String, Object> editMessageMap;
     private Map<String, List<MessageModel>> modelListMap;
     private Map<String, MessageAdapter> adapterMap;
-    private Map<String, RecyclerView> recyclerMap;
+    public static Map<String, RecyclerView> recyclerMap;
     private List<String> stringList, otherUidList;
     private Map<String, Object> downMsgCountMap, scrollNumMap;
     private Map<String, Object>  notifyCountMap, scrollPositionMap;
@@ -395,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 replyText = null;
                 replyFrom = null;
                 replyVisibility = 8;
+                idKey = null;
 
                 cardViewReplyOrEdit.setVisibility(View.GONE);
                 nameReply.setVisibility(View.GONE);
@@ -430,19 +435,25 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             editTextMessage.setText("");
             replyText = null;
             replyFrom = null;
+            idKey = null;
             replyVisibility = 8;
             textViewReplyOrEdit.setText("");
         });
 
         // scroll to previous position
         scrollPositionIV.setOnClickListener(view -> {
-            // edit and activate later
-            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherUserName).getLayoutManager();
-            int lastPosition = layoutManager.getItemCount() - 1;   // retrieve previous position and scroll
-            layoutManager.scrollToPosition(lastPosition);
 
-            sendIndicator.setVisibility(View.GONE);
-            receiveIndicator.setVisibility(View.GONE);
+            if(goToLastMessage){
+
+                recyclerMap.get(otherUserName).scrollToPosition(goToNum - 2);
+                adapterMap.get(otherUserName).highlightItem(goToNum); // notify Colour
+                adapterMap.get(otherUserName).highlightedPositions.add(goToNum);    // change color
+
+                goToLastMessage = false;
+            } else {
+                recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
+            }
+
         });
 
         // Delay 5 seconds to load message
@@ -467,41 +478,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     // after writing your method in the main activity, declare it on the FragmentListener interface and fetch it from the fragment
     //  ---------- interface
 
-
-    @Override
-    public void onEditMessage(String message, String edit, String id, long randomID, String status, int icon) {
-
-
-        // pop up keyboard
-        editTextMessage.requestFocus();
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
-
-        editTextMessage.setText(message);       // set the edit message on the text field
-        editOrReplyIV.setImageResource(icon);
-        textViewReplyOrEdit.setText(message);         // set the edit text box with the message
-        cardViewReplyOrEdit.setVisibility(View.VISIBLE);  // make the container of the edit text visible
-
-        replyVisible.setVisibility(View.VISIBLE);
-        replyVisible.setText(status);               // indicating its on editing mood
-        nameReply.setVisibility(View.VISIBLE);
-
-        listener = edit;
-        idKey = id;
-        randomKey = randomID;
-
-
-//        // set reply name and hint
-//        if (msgFrom.equals(myUserName)) {
-//            nameReply.setText("From You.");
-//        }
-//        else {
-//            // edit later to username and display name
-//            nameReply.setText(otherUserName + " (@" +otherUserName+")");
-//        }
-
-    }
-
     @Override
     public void callAllMethods(String otherName, String userName, String uID) {
         getMyUserTyping();
@@ -523,16 +499,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherName).getLayoutManager();
 
         // get the number of message under
-        int dCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
-        scrollCountTV.setText(""+dCount);           // set down msg count
-        downMsgCountMap.put(otherName, dCount);     // set it for "sending message method"
+        downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
+        scrollCountTV.setText(""+ downMsgCount);           // set down msg count
+        downMsgCountMap.put(otherName, downMsgCount);     // set it for "sending message method"
 
         // Get the position of the item for sendMessage() and retrieveMessage()
         scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
         scrollNumMap.put(otherName, scrollNum);
 
         //  check count and display/hide the scroll arrow
-        if(dCount > 2){
+        if(downMsgCount > 2){
             scrollCountTV.setVisibility(View.VISIBLE);
             scrollPositionIV.setVisibility(View.VISIBLE);
         } else {
@@ -553,7 +529,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 scrollNumMap.put(otherName, scrollNum);
 
                 // keep updating the number of down messages
-                int downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
+                downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
                 scrollCountTV.setText(""+downMsgCount);
 
                 //  store the downMsgCount in a map for each user, to enable me
@@ -710,10 +686,61 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         myUserName = userName;
     }
 
+
+    @Override
+    public void onEditOrReplyMessage(String message, String editOrReply, String id, long randomID, String status, int icon, String fromWho, int visible) {
+
+
+        // pop up keyboard
+        editTextMessage.requestFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
+
+        // General settings
+        editOrReplyIV.setImageResource(icon);               //  show edit or reply icon at left view
+        textViewReplyOrEdit.setText(message);               // set the text box with the message
+        cardViewReplyOrEdit.setVisibility(View.VISIBLE);    // make the container of the text visible
+        replyVisible.setVisibility(View.VISIBLE);
+        replyVisible.setText(status);                       // indicating its on edit or reply mood
+        nameReply.setVisibility(View.VISIBLE);
+        listener = editOrReply;
+
+        // this id will enable user to click a reply msg and scroll there
+        // Edit -- it will replace the message with the id
+        idKey = id;
+
+
+        // edit settings
+        if(editOrReply == "edit"){
+            randomKey = randomID;
+            nameReply.setText("");
+            editTextMessage.setText(message);  // set the edit message on the text field
+            editTextMessage.setSelection(editTextMessage.getText().length()); // Set focus to the end of the text
+        }
+
+        // set reply name and hint
+        if(editOrReply == "reply"){
+            replyVisibility = visible;      // send visible to the database to make the replied msg Visible on the UI
+//            editTextMessage.setText("");
+            replyFrom = fromWho;
+            replyText = message;
+
+            if (fromWho.equals(myUserName)) {
+                nameReply.setText("From You.");
+            }
+            else {
+                // edit later to username and display name
+                nameReply.setText(fromWho + " (@" +fromWho+")");
+            }
+        }
+
+    }
+
     private Map<String, Object> setMessage(String message, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         int msgStatus = 700024;
+//        int msgStatus = 700033;
 
         if(networkListener == "no"){
             msgStatus = 700033;
@@ -730,14 +757,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         messageMap.put( "timeSent", ServerValue.TIMESTAMP);
         messageMap.put("replyFrom", replyFrom);
         messageMap.put("visibility", replyVisibility);
-        messageMap.put("replyMsg", textViewReplyOrEdit.getText());
+        messageMap.put("replyID", idKey);
+        messageMap.put("replyMsg", replyText);
 
         return messageMap;
     }
 
     public void sendMessage(String message, int type) {
 
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(10);
 
         if(listener == "edit"){ // check if it's on edit mode
 
@@ -756,7 +784,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             // save to local list for fast update
             MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "",
-                    "", replyVisibility, replyText, 700033, type, randomID);
+                    "", replyVisibility, replyText, 700033, type, randomID, idKey);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
             adapter.addNewMessageDB(messageModel);
@@ -773,11 +801,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
 
             // scroll to new position
-            int scrollNumCheck = (int) scrollNumMap.get(otherUserName);
-            int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
-            scrollToPreviousPosition(otherUserName, scrollCheck);  // scroll to position on new message update
+            int scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherUserName);
+            if(scrollCheck < 25){    // scroll to last position on new message update.
+//                scrollToPreviousPosition(otherUserName, (adapter.getItemCount() - 1));
+                recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
+            }   // else don't scroll.
 
-            executor.submit(() -> {
+//            executor.submit(() -> {
                 String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
 
                 // save to new message db for fast response
@@ -793,7 +823,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 refLastDetails.child(otherUserUid).child(user.getUid()).setValue(setMessage(message, type, randomID));
 
                 checkAndSaveCounts_SendMsg();   // save the number of new message I am sending
-            });
+//            });
 
         }
 
@@ -862,7 +892,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 // retrieve the last previous scroll position
                 getLastScrollPosition(uID, otherName);
-
+//                Toast.makeText(mContext, "WHat is " + l, Toast.LENGTH_SHORT).show();
                 // delete from the database when message is read and get the total number of msg not read yet
                 deleteMessageWhenRead(userName, otherName, msgListNotRead);
 
@@ -871,6 +901,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             @Override
             public void onFinish() { // call all methods
+//                Toast.makeText(mContext, "I am done", Toast.LENGTH_SHORT).show();
 
                 // retrieve all message from the database just once
                 getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter);
@@ -1072,9 +1103,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                         adapter.addNewMessageDB(messageModel);
 
                         // check recycler position before scrolling
-                        int scrollNumCheck = (int) scrollNumMap.get(otherName);
-                        int scrollCheck = adapter.getItemCount() - scrollNumCheck > 24 ? scrollNumCheck : (adapter.getItemCount() - 1);
-                        scrollToPreviousPosition(otherName, scrollCheck);  // scroll to position on new message update
+                        int scrollNumCheck = scrollNumMap.get(otherName) == null ? adapter.getItemCount() - 1: (int) scrollNumMap.get(otherName) ;
+                        int scrollCheck = adapter.getItemCount() - scrollNumCheck;
+
+                        if(scrollCheck > 25){    // don't scroll. Just update.
+                            adapter.notifyItemChanged((adapter.getItemCount() - 1), new Object());
+                        } else {
+                            // scroll to last position on new message update
+//                            scrollToPreviousPosition(otherName, (adapter.getItemCount() - 1));
+                            recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
+                        }
 
                         // show new msg alert text for user
                         if(scrollPositionIV.getVisibility() == View.VISIBLE){
@@ -1104,6 +1142,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                                         allMsgList.get(i).setReplyFrom(messageModel.getReplyFrom());
                                         allMsgList.get(i).setReplyMsg(messageModel.getReplyMsg());
+                                        allMsgList.get(i).setReplyID(messageModel.getReplyID());
 
                                         // notify with empty object so it doesn't duplicate
                                         adapter.notifyItemChanged(i, new Object());
@@ -1168,8 +1207,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             adapter.notifyItemChanged(position, new Object());
                         }
 
-                        // delete message after 10 secs
-                        new CountDownTimer(10_000, 1_000){
+                        // delete message after 3 secs
+                        new CountDownTimer(3_000, 1_000){
                             @Override
                             public void onTick(long l) {
                             }
@@ -1204,7 +1243,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                                         });
 
                                             } else {    // delete if not found
-                                                refEditMsg.child(userName).child(otherName).child(snapshotEdit.getKey()).removeValue();
+                                                refEditMsg.child(userName).child(otherName)
+                                                        .child(snapshotEdit.getKey()).removeValue();
                                             }
                                         }
 
@@ -1263,6 +1303,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 layoutManager.scrollToPosition(position);
+
             }
         }
     }
@@ -1669,38 +1710,36 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     //  Get all previous counts of unreadMsg and newMsgCount
     private void getPreviousCounts(){
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
-                        .child(otherUserUid).child(user.getUid());
-                referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        Thread thread = new Thread(() -> {
 
-                        try{
-                            // if last msg count is not 0, then get the count
-                            if(!snapshot.child("unreadMsg").getValue().equals(0)){
-                                count = (long) snapshot.child("unreadMsg").getValue();
-                            }
-                            // if last new msg count is not 0, then get the count
-                            if(!snapshot.child("newMsgCount").getValue().equals(0)){
-                                newMsgCount = (long) snapshot.child("newMsgCount").getValue();
-                            }
-                        } catch (Exception e){
-                            referenceMsgCountCheck.child("unreadMsg").setValue(0);
-                            referenceMsgCountCheck.child("newMsgCount").setValue(0);
+            DatabaseReference referenceMsgCountCheck = FirebaseDatabase.getInstance().getReference("Checks")
+                    .child(otherUserUid).child(user.getUid());
+            referenceMsgCountCheck.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    try{
+                        // if last msg count is not 0, then get the count
+                        if(!snapshot.child("unreadMsg").getValue().equals(0)){
+                            count = (long) snapshot.child("unreadMsg").getValue();
                         }
-
+                        // if last new msg count is not 0, then get the count
+                        if(!snapshot.child("newMsgCount").getValue().equals(0)){
+                            newMsgCount = (long) snapshot.child("newMsgCount").getValue();
+                        }
+                    } catch (Exception e){
+                        referenceMsgCountCheck.child("unreadMsg").setValue(0);
+                        referenceMsgCountCheck.child("newMsgCount").setValue(0);
                     }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                }
 
-                    }
-                });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
+                }
+            });
+
         });
 
         thread.start();
@@ -1773,11 +1812,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             if(constraintMsgBody.getVisibility() == View.VISIBLE){
                 try{
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(0);
+                    int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
 
                     Map<String, Object> mapUpdate = new HashMap<>();
                     mapUpdate.put("status", false);
                     mapUpdate.put("newMsgCount", 0);
-                    mapUpdate.put("scrollPosition", otherUserName+scrollNum);   //split when recovering the values later
+                    mapUpdate.put("scrollPosition", otherUserName+scroll);   //split when recovering the values later
                     refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
 
                     scrollPositionMap.put(otherUserName, scrollNum);
@@ -1827,6 +1867,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             replyText = null;
             replyFrom = null;
             replyVisibility = 8;
+            idKey = null;
             textViewReplyOrEdit.setText("");
 
             textViewLastSeen.setText("");   // clear last seen
@@ -1862,21 +1903,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 
     // later ------------- on screen rotate. Save mode or alert
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // Save important data to the bundle
-        outState.putString("key", "Hello " + otherUserName);
-
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // Restore data from the bundle
-        String value = savedInstanceState.getString("key");
-        Toast.makeText(this, "yes "+value, Toast.LENGTH_SHORT).show();
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        // Save important data to the bundle
+//        outState.putString("key", "Hello " + otherUserName);
+//
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        // Restore data from the bundle
+//        String value = savedInstanceState.getString("key");
+//        Toast.makeText(this, "yes "+value, Toast.LENGTH_SHORT).show();
+//    }
 }
 
 

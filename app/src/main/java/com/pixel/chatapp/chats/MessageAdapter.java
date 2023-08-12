@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
@@ -47,6 +49,7 @@ import com.google.gson.reflect.TypeToken;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.home.MainActivity;
 
 import org.w3c.dom.Text;
 
@@ -66,28 +69,29 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import kotlinx.coroutines.GlobalScope;
 import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
-
+    // Declare a Set to keep track of highlighted positions
+    public static Set<Integer> highlightedPositions = new HashSet<>();;
     public  List<MessageModel> modelList;
     public String uId;
     public String userName;
     public  Context mContext;
-
     Boolean status;
     private int send;
     private int receive;
     FirebaseUser user;
     DatabaseReference refCheck, refUsers;
-    EditText editTextMsg;
     ConstraintLayout deleteBody;
-
+    private MessageViewHolder lastOpenViewHolder = null;
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
     private static final String KEY_LIST = "myList";
@@ -98,28 +102,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.fragmentListener = fragmentListener;
     }
 
-    public static MessageAdapter instance;
-
-//    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, EditText editMsg,
-//                          ConstraintLayout deleteBody, TextView textViewReply, CardView cardViewReply, TextView textViewDelOther,
-//                          ImageView editOrReplyIV, TextView nameReply, TextView replyVisible) {
-
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
         this.mContext = mContext;
-//        notifyDataSetChanged();
-//        this.editTextMsg = editMsg;
-//        this.deleteBody = deleteBody;
-//        this.textViewReply = textViewReply;
-//        this.cardViewReply = cardViewReply;
-//        this.textViewDelOther = textViewDelOther;
-//        this.editOrReplyIV = editOrReplyIV;
-//        this.nameReply = nameReply;
-//        this.replyVisible = replyVisible;
         handler = new Handler(Looper.getMainLooper());
-//        mapArrayList = new ArrayList<>();
 
         status = false;
         send = 1;
@@ -131,24 +119,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    // Public method to get the singleton instance
-//    public static MessageAdapter getInstance() {
-//        if (instance == null) {
-//            instance = new MessageAdapter(modelList, userName, uId, mContext);
-//        }
-//        return instance;
-//    }
-
     public void addNewMessageDB(MessageModel newMessages) {
         modelList.add(newMessages);
     }
     public void addNewMessage(List<MessageModel> localMsg) {
 
-//        modelList5.clear();
-//        modelList5.add(localMsg);
         modelList.addAll(localMsg);
-//        notifyDataSetChanged();
-//        modelList.removeAll(localMsg);
 
     }
 
@@ -198,16 +174,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // set unsent and sent msg... delivery and seen settings-- msg status tick
         int intMsg = modelList.get(pos).getMsgStatus();
-        int numMsg = (int) R.drawable.baseline_grade_24;
-//        int numMsg = (int) R.drawable.message_tick_one;
-
-        if(intMsg == 700033){   // load
-            numMsg = (int) R.drawable.message_load;
-        } else if (intMsg == 700024) {  // read
-            numMsg = (int) R.drawable.message_tick_one;
-        }
+        int numMsg = R.drawable.baseline_grade_24;
 
         // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
+        if(intMsg == 700033){   // load
+            numMsg = R.drawable.message_load;
+        } else if (intMsg == 700024) {  // read
+            numMsg = R.drawable.message_tick_one;
+        }
+
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick
 
 
@@ -222,8 +197,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             }
             else {
-//                editOrReplyIV.setImageResource(R.drawable.reply);   // set reply icon
 
+                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+                // call method in MainActivity and set up the details
+                fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"reply", modelList.get(pos).getIdKey(),
+                        modelList.get(pos).getRandomID(), "replying...", R.drawable.reply, modelList.get(pos).getFrom(), 1);
+                //  1 is visible, 4 is invisible, 8 is Gone
             }
         });
 
@@ -240,10 +219,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             } else {
 
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
-                fragmentListener.onEditMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
-                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit);
+                fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
+                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit, "", View.GONE);
             }
         });
 
@@ -271,6 +249,50 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        //  scroll and highlight reply message
+        holder.constraintReplyCon.setOnClickListener(view -> {
+
+            String originalMessageId = modelList.get(pos).getReplyID();
+            int originalPosition = findReplyMsgPositionById(originalMessageId);
+
+                // Scroll to the original message's position
+            if (originalPosition != RecyclerView.NO_POSITION) {
+                // pos is the item number clicked, originalPosition is the item number found.
+                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
+                int positionCount = pos - originalPosition;
+
+                if( positionCount < 15 ){
+                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-9);
+//                Toast.makeText(mContext, "what is downCount " + downCount, Toast.LENGTH_SHORT).show();
+                } else {
+                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
+//                Toast.makeText(mContext, "what is total length " + totalLength, Toast.LENGTH_SHORT).show();
+                }
+
+                // Highlight the original message
+                highlightItem(originalPosition);    // use method as notifyItemChanged();
+
+                // Add the original position to the set of highlighted positions
+                highlightedPositions.clear();
+                highlightedPositions.add(originalPosition);
+
+                // when the down-arrow button on MainActivity(444) is clicked, it should check first if
+                // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
+                MainActivity.goToLastMessage = true;
+                MainActivity.goToNum = pos;
+
+            }
+        });
+
+        // Apply highlighting if the current position is in the set of highlighted positions
+        if (highlightedPositions.contains(position)) {
+            // Apply highlighting to the view
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent_orangeLow));
+        } else {
+            // Reset the view's background to default
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
         // copy option
         holder.imageViewCopy.setOnClickListener(view -> {
 
@@ -291,37 +313,66 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                }
         });
 
-
-
         //   show chat options
-        holder.cardViewChatBox.setOnClickListener(view -> {
-            if(holder.constraintChatTop.getVisibility() == View.GONE){
-                holder.constraintChatTop.setVisibility(View.VISIBLE);
-                if(modelList.size() - pos > 100){    // indicate sign that msg can't be edited
-                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
-                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
-                }
-            } else{
-                holder.constraintChatTop.setVisibility(View.GONE);
-            }
-        });
+        View.OnClickListener optionClickListener = view -> {
 
-        holder.textViewShowMsg.setOnClickListener(view -> { // open when the text is clicked
-            if(holder.constraintChatTop.getVisibility() == View.GONE){
+            // Close the previously open chat options
+            if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
+                lastOpenViewHolder.constraintChatTop.setVisibility(View.GONE);
+
+                // reverse the image resource to it's original imageView
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
+            }
+
+            if(holder.constraintChatTop.getVisibility() == View.GONE){ // make visible if it's gone
+
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
+
                 if(modelList.size() - pos > 100){    // indicate sign that msg can't be edited
                     int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
                     holder.imageViewEdit.setColorFilter(fadedOrangeColor);
                 }
-            } else{
+
+                // reverse the image resource to arrow_right or left
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                } else{
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                }
+
+            } else{ // hide if it's visible and return arrow image
                 holder.constraintChatTop.setVisibility(View.GONE);
+                // reverse the image resource to it's original imageView
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
             }
-        });
+
+            // Update the last open ViewHolder
+            lastOpenViewHolder = holder;
+
+        };
+
+        holder.cardViewChatBox.setOnClickListener(optionClickListener);
+        holder.textViewShowMsg.setOnClickListener(optionClickListener);
+        holder.imageViewOptions.setOnClickListener(optionClickListener);
 
         // close chat option
         holder.constraintMsgContainer.setOnClickListener(view -> {
             if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
                 holder.constraintChatTop.setVisibility(View.GONE);
+            }
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+//                holder.imageViewOptions.setBackground((R.color.transparent_orange);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
             }
         });
 
@@ -392,6 +443,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
     // ---------------------- methods ---------------------------
+
+    private int findReplyMsgPositionById(String messageId) {
+        for (int i = modelList.size()-1; i >= 0; i--) {
+            if (modelList.get(i).getIdKey().equals(messageId)) {
+                return i;
+            }
+        }
+        return RecyclerView.NO_POSITION;
+    }
+    public void highlightItem(int position) {
+        // Clear previous highlight, if any.
+        for (int i = 0; i < MainActivity.recyclerMap.get(MainActivity.otherUserName).getChildCount(); i++) {
+            View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserName).getChildAt(i);
+            itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        // Highlight the clicked item
+        View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserName).getLayoutManager().findViewByPosition(position);
+        if (itemView != null) {
+            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
+        }
+    }
 
     // save voice note to local storage sharePreference & json
     public void save_VN_PathFileToGson(Context context, List<Map<String, Object>> mapList) {

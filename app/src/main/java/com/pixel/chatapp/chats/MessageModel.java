@@ -19,13 +19,14 @@ public class MessageModel implements Serializable {
 
     private int type;
     private long randomID;
+    private String replyID;
 //    private String voicenote;
 
     public MessageModel() {
     }
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
-                        int visibility, String replyMsg, int msgStatus, int type, long randomID) {
+                        int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -124,6 +125,13 @@ public class MessageModel implements Serializable {
         return randomID;
     }
 
+    public String getReplyID() {
+        return replyID;
+    }
+
+    public void setReplyID(String replyID) {
+        this.replyID = replyID;
+    }
     //    public String getVoicenote() {
 //        return voicenote;
 //    }
