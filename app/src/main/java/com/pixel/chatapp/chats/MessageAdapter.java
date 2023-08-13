@@ -122,6 +122,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void addNewMessageDB(MessageModel newMessages) {
         modelList.add(newMessages);
     }
+
+    public void deleteMessage(String id){
+        for (int i = modelList.size()-1; i >= 0; i--) {
+            String all_IDs = modelList.get(i).getIdKey();
+            if (id.equals(all_IDs)) { // Use equals() for string comparison
+                modelList.remove(i);
+//                notifyItemChanged(i, new Object());
+                notifyDataSetChanged();
+                break;
+            }
+        }
+    }
     public void addNewMessage(List<MessageModel> localMsg) {
 
         modelList.addAll(localMsg);
@@ -204,6 +216,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         modelList.get(pos).getRandomID(), "replying...", R.drawable.reply, modelList.get(pos).getFrom(), 1);
                 //  1 is visible, 4 is invisible, 8 is Gone
             }
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
         });
 
         // edit option
@@ -221,7 +239,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
                 fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
-                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit, "", View.GONE);
+                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
+            }
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
             }
         });
 
@@ -231,21 +255,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(modelList.get(pos).getMsgStatus() == 700033){
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             } else {
-                // user1 should be unable to delete user2 msg
-                if(!modelList.get(pos).getFrom().equals(userName)){
-//                    textViewDelOther.setVisibility(View.GONE);
-                } else {
-//                    textViewDelOther.setVisibility(View.VISIBLE);
-                }
-
-                deleteBody.setVisibility(View.VISIBLE);
-                // Send the idKey to messageActivity with LocalBroadcast
-                Intent intent = new Intent("editMsg");
-                intent.putExtra("id", modelList.get(pos).getIdKey());
-
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
                 holder.constraintChatTop.setVisibility(View.GONE);
+
+                String id = modelList.get(pos).getIdKey();
+                String fromWho = modelList.get(pos).getFrom();
+                long randomID = modelList.get(pos).getRandomID();
+
+                fragmentListener.onDeleteMessage(id, fromWho, randomID);  // call method on MainActivity(L700)
+
+                // reverse arrow
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
             }
         });
 
@@ -261,16 +285,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
                 int positionCount = pos - originalPosition;
 
-                if( positionCount < 15 ){
-                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-9);
+                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
+                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
 //                Toast.makeText(mContext, "what is downCount " + downCount, Toast.LENGTH_SHORT).show();
-                } else {
+                } else {    // decrease the number (11-- to shift the highlight msg down)
                     MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
 //                Toast.makeText(mContext, "what is total length " + totalLength, Toast.LENGTH_SHORT).show();
                 }
 
                 // Highlight the original message
-                highlightItem(originalPosition);    // use method as notifyItemChanged();
+                highlightItem(originalPosition);    // use this method as notifyItemChanged();
 
                 // Add the original position to the set of highlighted positions
                 highlightedPositions.clear();
@@ -311,6 +335,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                } catch (Exception e) {
 //                    return;
 //                }
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
         });
 
         //   show chat options
@@ -337,12 +367,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     holder.imageViewEdit.setColorFilter(fadedOrangeColor);
                 }
 
-                // reverse the image resource to arrow_right or left
-                if(modelList.get(pos).getFrom().equals(userName)){
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-                } else{
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-                }
+                holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
 
             } else{ // hide if it's visible and return arrow image
                 holder.constraintChatTop.setVisibility(View.GONE);
@@ -370,7 +395,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
             if(modelList.get(pos).getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-//                holder.imageViewOptions.setBackground((R.color.transparent_orange);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
             }

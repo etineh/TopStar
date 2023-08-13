@@ -115,6 +115,11 @@
         <!--        <item name="android:background">#fedfb9</item>-->
     </style>
 
+    <!--    transparent background-->
+    <style name="trans_background">
+        <item name="android:background">@color/trans</item>
+    </style>
+
     <!--    Custom TabLayout-->
     <style name="CustomTab" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>

@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -36,6 +37,8 @@ import android.widget.Toast;
 
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,6 +53,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.model.EditMessageModel;
@@ -94,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
     private ConstraintLayout conTopUserDetails, conUserClick;
     private ImageView editOrReplyIV, imageViewCalls;
-    private ConstraintLayout constraintProfileMenu, constraintDelBody;
     private TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
+    private ConstraintLayout constraintProfileMenu, constraintDelBody;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
     private CircleImageView circleSendMessage;
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public static int goToNum;
     public static Boolean goToLastMessage = false;
 
-    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails, refEditMsg;
+    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails, refEditMsg, refDeleteMsg;
     FirebaseUser user;
     private int scrollNum = 0;
     private long count = 0, newMsgCount = 0;
@@ -132,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     private int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
     private Map<String, Object> editMessageMap;
+    private Map<String, Object> deleteMap;
     private Map<String, List<MessageModel>> modelListMap;
     private Map<String, MessageAdapter> adapterMap;
     public static Map<String, RecyclerView> recyclerMap;
@@ -176,11 +181,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         textViewMsgTyping = findViewById(R.id.textViewTyping29);
         circleImageOnline = findViewById(R.id.circleImageOnline9);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
-//        constraintDelBody = findViewById(R.id.constDelBody9);
-//        textViewDelMine = findViewById(R.id.textViewDelMine9);
-//        textViewDelOther = findViewById(R.id.textViewDelOther9);
-//        textViewDelAll = findViewById(R.id.textViewDelEveryone9);
-//        imageViewCancelDel = findViewById(R.id.imageViewCancelDel9);
+
+        constraintDelBody = findViewById(R.id.constDelBody);
+        textViewDelMine = findViewById(R.id.textViewDelMine);
+        textViewDelOther = findViewById(R.id.textViewDelOther);
+        textViewDelAll = findViewById(R.id.textViewDelEveryone);
+        imageViewCancelDel = findViewById(R.id.imageViewCancelDel);
+
         cardViewReplyOrEdit = findViewById(R.id.cardViewReply9);
         textViewReplyOrEdit = findViewById(R.id.textViewReplyText9);
         replyOrEditCancel_IV = findViewById(R.id.imageViewCancleReply9);
@@ -211,9 +218,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
         refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
         refEditMsg = FirebaseDatabase.getInstance().getReference("EditMessage");
+        refDeleteMsg = FirebaseDatabase.getInstance().getReference("DeleteMessage");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        deleteMap = new HashMap<>();
         editMessageMap = new HashMap<>();
         notifyCountMap = new HashMap<>();
         scrollNumMap = new HashMap<>();
@@ -440,6 +449,88 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             textViewReplyOrEdit.setText("");
         });
 
+
+        // Close delete message option
+        constraintDelBody.setOnClickListener(view -> {
+            constraintDelBody.setVisibility(View.GONE);
+            idKey = null;
+        });
+        imageViewCancelDel.setOnClickListener(view -> {
+            constraintDelBody.setVisibility(View.GONE);
+            idKey = null;
+        });
+
+        // Delete for only me
+        textViewDelMine.setOnClickListener(view -> {
+            // delete from my local list
+            MessageAdapter adapter = adapterMap.get(otherUserName);
+            adapter.deleteMessage(idKey);
+            try{
+                refMessages.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+                refMsgFast.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+                refEditMsg.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+            } catch (Exception e){
+                System.out.println("message key not found to delete (M460) " + e.getMessage());
+            }
+
+            constraintDelBody.setVisibility(View.GONE);
+            Toast.makeText(MainActivity.this, "Message deleted for only you.", Toast.LENGTH_SHORT).show();
+            idKey = null;
+
+        });
+
+        // Delete for others only
+        textViewDelOther.setOnClickListener(view -> {
+
+            // save to delete database to loop through the other user local list and delete if idkey is found
+            deleteMap.put("idKey", idKey);
+            deleteMap.put("randomID", randomKey);
+            refDeleteMsg.child(otherUserName).child(myUserName).child(idKey).setValue(deleteMap);
+
+            try{
+                refMessages.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+                refMsgFast.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+                refEditMsg.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+            } catch (Exception e){
+                System.out.println("message key not found to delete for other (M474) " + e.getMessage());
+            }
+
+            constraintDelBody.setVisibility(View.GONE);
+            Toast.makeText(MainActivity.this, "Message deleted for "+otherUserName+".", Toast.LENGTH_SHORT).show();
+
+        });
+
+        // Delete for everyone
+        textViewDelAll.setOnClickListener(view -> {
+
+            // delete from my local list
+            MessageAdapter adapter = adapterMap.get(otherUserName);
+            adapter.deleteMessage(idKey);
+
+            // save to delete database to loop through the other user local list and delete if idkey is found
+            deleteMap.put("idKey", idKey);
+            deleteMap.put("randomID", randomKey);
+            refDeleteMsg.child(otherUserName).child(myUserName).child(idKey).setValue(deleteMap);
+
+            try{    // delete from all database
+                refMessages.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+                refMessages.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+
+                refEditMsg.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+                refEditMsg.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+
+                refMsgFast.child(myUserName).child(otherUserName).child(idKey).getRef().removeValue();
+                refMsgFast.child(otherUserName).child(myUserName).child(idKey).getRef().removeValue();
+
+            } catch (Exception e){
+                System.out.println("message key not found to deleteAll (M490) " + e.getMessage());
+            }
+
+            constraintDelBody.setVisibility(View.GONE);
+            Toast.makeText(MainActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
+
+        });
+
         // scroll to previous position
         scrollPositionIV.setOnClickListener(view -> {
 
@@ -475,9 +566,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  --------------- methods --------------------
 
-    // after writing your method in the main activity, declare it on the FragmentListener interface and fetch it from the fragment
-    //  ---------- interface
-
+    //  ----------   interface    ---------------------
     @Override
     public void callAllMethods(String otherName, String userName, String uID) {
         getMyUserTyping();
@@ -504,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         downMsgCountMap.put(otherName, downMsgCount);     // set it for "sending message method"
 
         // Get the position of the item for sendMessage() and retrieveMessage()
-        scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
+        scrollNum = layoutManager.findLastVisibleItemPosition() - 10;
         scrollNumMap.put(otherName, scrollNum);
 
         //  check count and display/hide the scroll arrow
@@ -525,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 super.onScrolled(recyclerView, dx, dy);
 
                 // keep saving the recycler position while scrolling
-                scrollNum = layoutManager.findLastVisibleItemPosition() - 20;
+                scrollNum = layoutManager.findLastVisibleItemPosition() - 10;
                 scrollNumMap.put(otherName, scrollNum);
 
                 // keep updating the number of down messages
@@ -581,75 +670,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
-    // change unread message of otherUser to read status when I open the chat box
-    private void convertUnreadToReadMessage(String otherName, String userName, String otherUid){
-
-        new Thread(() -> {
-            refMsgFast.child(otherName).child(userName).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    for (DataSnapshot snapshotCheck : snapshot.getChildren()){
-
-                        // check if otherUser message exist and change to "read status" (700016)
-                        if(snapshotCheck.child("from").exists()){
-                            String getKey = snapshotCheck.getKey();
-                            if(insideChat == "yes"){
-                                long readStatus = (long) snapshotCheck.child("msgStatus").getValue();
-                                if(readStatus != 700016){
-                                    refMsgFast.child(otherName).child(userName).child(getKey).child("msgStatus").setValue(700016);
-                                }
-                            }
-                        } else {
-                            refMsgFast.child(otherName).child(userName).child(snapshotCheck.getKey()).removeValue();
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-            // change lastMessageDetails too
-            refLastDetails.child(otherUid).child(user.getUid()).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    try{
-                        long readStatus = (long) snapshot.child("msgStatus").getValue();
-                        if(insideChat == "yes" && readStatus != 700016){
-                            refLastDetails.child(otherUid).child(user.getUid()).child("msgStatus").setValue(700016);
-                        }
-                    }catch (Exception e){
-                        System.out.println("LastMessageDetails error (M546) " + e.getMessage());
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-        }).start();
-    }
-
-    public void recyclerViewChatVisibility(String otherName){
-        for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
-            View child = recyclerContainer.getChildAt(i);
-            if (child == recyclerMap.get(otherName)) {
-
-                child = recyclerMap.get(otherName);
-                child.setVisibility(View.VISIBLE);  // make only child layer visible
-
-            } else{
-                child.setVisibility(View.INVISIBLE);
-            }
-        }
-    }
-
     @Override       // run only once
     public void sendRecyclerView(RecyclerView recyclerChat, String otherName, String otherUid) {
 
@@ -686,11 +706,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         myUserName = userName;
     }
 
+    @Override
+    public void onDeleteMessage(String id, String fromWho, long randomID) {
+
+        idKey = id;
+        randomKey = randomID;
+        constraintDelBody.setVisibility(View.VISIBLE);
+
+        // user1 should be unable to delete user2 msg
+        if(!fromWho.equals(myUserName)){
+            textViewDelOther.setVisibility(View.GONE);
+        } else {
+            textViewDelOther.setVisibility(View.VISIBLE);
+        }
+
+    }
 
     @Override
-    public void onEditOrReplyMessage(String message, String editOrReply, String id, long randomID, String status, int icon, String fromWho, int visible) {
-
-
+    public void onEditOrReplyMessage(String message, String editOrReply, String id, long randomID,
+                                     String status, int icon, String fromWho, int visible)
+    {
         // pop up keyboard
         editTextMessage.requestFocus();
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -720,22 +755,197 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // set reply name and hint
         if(editOrReply == "reply"){
-            replyVisibility = visible;      // send visible to the database to make the replied msg Visible on the UI
-//            editTextMessage.setText("");
-            replyFrom = fromWho;
+
+            replyVisibility = visible;      // send visible on the database to make the replied msg Visible on the UI
             replyText = message;
 
-            if (fromWho.equals(myUserName)) {
-                nameReply.setText("From You.");
+            if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
+                replyFrom = "From You." + " (@" +fromWho+")";
+                nameReply.setText(replyFrom);
             }
             else {
                 // edit later to username and display name
-                nameReply.setText(fromWho + " (@" +fromWho+")");
+                replyFrom = fromWho + " (@" +fromWho+")";
+                nameReply.setText(replyFrom);
             }
         }
 
     }
 
+    @Override
+    public void msgBackgroundActivities(String otherUid) {
+
+        new Thread(() -> {
+
+            // set my status to be true in case I receive msg, it will be tick as seen
+            Map <String, Object> statusAndMSgCount = new HashMap<>();
+            statusAndMSgCount.put("status", true);
+            statusAndMSgCount.put("unreadMsg", 0);
+
+            refChecks.child(user.getUid()).child(otherUserUid).updateChildren(statusAndMSgCount);
+
+            // set responds to pend always      ------- will change later to check condition if user is still an active call
+            refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
+
+            insideChat = "yes";
+        }).start();
+    }
+
+    // get last seen and set inbox status to be true
+    @Override
+    public void getLastSeenAndOnline(String otherUid) {
+
+        otherUserUid = otherUid;
+
+        // get last seen
+        try{
+            refUsers.child(otherUid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    try{
+                        long onlineValue = (long) snapshot.child("presence").getValue();
+                        if (onlineValue == 1){
+                            textViewLastSeen.setText("Online");
+                            circleImageOnline.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            circleImageOnline.setVisibility(View.GONE);
+                            //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
+                            // current date and time
+                            Timestamp stamp = new Timestamp(System.currentTimeMillis());
+                            Date date = new Date(stamp.getTime());
+                            String dateString = String.valueOf(date);
+
+                            // last user date and time
+                            Date d = new Date(onlineValue);
+                            DateFormat formatter = new SimpleDateFormat("h:mm a");
+                            String time = formatter.format(d);
+                            String previousDateString = String.valueOf(d);
+
+                            dateMonth = new HashMap<>();     // months
+                            dateMonth.put("Jan", 1);
+                            dateMonth.put("Feb", 2);
+                            dateMonth.put("Mar", 3);
+                            dateMonth.put("Apr", 4);
+                            dateMonth.put("May", 5);
+                            dateMonth.put("Jun", 6);
+                            dateMonth.put("Jul", 7);
+                            dateMonth.put("Aug", 8);
+                            dateMonth.put("Sep", 9);
+                            dateMonth.put("Oct", 10);
+                            dateMonth.put("Nov", 11);
+                            dateMonth.put("Dec", 12);
+
+                            dateNum = new HashMap<>();      // days
+                            dateNum.put("Mon", 1);
+                            dateNum.put("Tue", 2);
+                            dateNum.put("Wed", 3);
+                            dateNum.put("Thu", 4);
+                            dateNum.put("Fri", 5);
+                            dateNum.put("Sat", 6);
+                            dateNum.put("Sun", 7);
+
+                            String lastYear = previousDateString.substring(30, 34);  // last year
+
+                            int curMonth = dateMonth.get(dateString.substring(4,7));    // Months
+                            int lastMonth = dateMonth.get(previousDateString.substring(4,7));
+
+                            int curDay = dateNum.get(dateString.substring(0,3));    // Mon - Sun
+                            int lastDay = dateNum.get(previousDateString.substring(0,3));
+
+                            String lastDayString = previousDateString.substring(0,3);   // get the day
+
+                            int dateCur = Integer.parseInt(dateString.substring(8, 10));    // day 1 - 30
+                            int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
+
+                            if (curMonth - lastMonth == 0)
+                            {
+                                if (dateCur - dateLast < 7)
+                                {
+                                    if(curDay - lastDay == 0)
+                                    {
+                                        textViewLastSeen.setText("Seen: Today, " + time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 1) {
+                                        textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 2) {
+                                        textViewLastSeen.setText("Last seen: 2days ago, \n"+time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 3) {
+                                        textViewLastSeen.setText("Last seen: 3days ago, \n"+time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 4) {
+                                        textViewLastSeen.setText("Last seen: 4days ago, \n"+time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 5) {
+                                        textViewLastSeen.setText("Last seen: 5days ago, \n"+time.toLowerCase()+".");
+                                    } else if (curDay - lastDay == 6) {
+                                        textViewLastSeen.setText("Last seen: 6days ago, \n"+time.toLowerCase()+".");
+                                    }
+                                } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
+                                    textViewLastSeen.setText("Last seen: \nLast week "+lastDayString+".");
+                                } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
+                                    textViewLastSeen.setText("Last seen: \nLast 2 weeks "+lastDayString+".");
+                                } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
+                                    textViewLastSeen.setText("Last seen: \nLast 3 weeks "+lastDayString+".");
+                                } else {
+                                    textViewLastSeen.setText("Last seen: a month \nago");
+                                }
+                            } else if(curMonth - lastMonth == 1){
+                                textViewLastSeen.setText("Last seen: \none month ago..");
+                            } else if(curMonth - lastMonth == 2){
+                                textViewLastSeen.setText("Last seen: \ntwo months ago.");
+                            }else if(curMonth - lastMonth == 3){
+                                textViewLastSeen.setText("Last seen: \nthree months ago.");
+                            }else if(curMonth - lastMonth == 4){
+                                textViewLastSeen.setText("Last seen: \nFour months ago.");
+                            }else if(curMonth - lastMonth == 5){
+                                textViewLastSeen.setText("Last seen: \nFive months ago.");
+                            } else {
+                                textViewLastSeen.setText("Last seen: "+dateLast +"/"+ lastMonth+"/"+ lastYear);
+                            }
+
+                        }
+                    } catch (Exception e){
+                        textViewLastSeen.setText("WinnerChat");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }catch (Exception e){
+            textViewLastSeen.setText("WinnerChat");
+
+        }
+
+    }
+
+    // This method will be called by NetworkChangeReceiver whenever network status changes   // reload message loadStatus
+    @Override
+    public void onNetworkStatusChanged(boolean isConnected) {
+        if (isConnected) {
+            // Network is connected, perform actions accordingly
+            constrNetConnect.setVisibility(View.INVISIBLE);
+            networkListener = "yes";
+
+            // remove runnable when network is okay to prevent continuous data usage
+            handler1.removeCallbacks(internetCheckRunnable);
+
+            reloadFailedMessagesWhenNetworkIsOk();  // reload message loadStatus
+
+        } else {
+            // Network is disconnected, handle this case as well
+            constrNetConnect.setVisibility(View.VISIBLE);
+            networkListener = "no";
+
+            handler1.post(internetCheckRunnable);   // call runnable when no internet
+
+        }
+    }
+
+
+    //  ------------    methods     ---------------
     private Map<String, Object> setMessage(String message, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
@@ -764,8 +974,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     public void sendMessage(String message, int type) {
-
-        ExecutorService executor = Executors.newFixedThreadPool(10);
 
         if(listener == "edit"){ // check if it's on edit mode
 
@@ -802,12 +1010,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             // scroll to new position
             int scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherUserName);
-            if(scrollCheck < 25){    // scroll to last position on new message update.
+            if(scrollCheck < 20){    // scroll to last position on new message update.
 //                scrollToPreviousPosition(otherUserName, (adapter.getItemCount() - 1));
                 recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
             }   // else don't scroll.
 
-//            executor.submit(() -> {
+//            new Thread(() -> {
+
                 String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
 
                 // save to new message db for fast response
@@ -825,10 +1034,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 checkAndSaveCounts_SendMsg();   // save the number of new message I am sending
 //            });
 
+
         }
 
     }
-
 
     //  get the previous count of new msg and add to it from sendMessage
     private void checkAndSaveCounts_SendMsg(){
@@ -901,7 +1110,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             @Override
             public void onFinish() { // call all methods
-//                Toast.makeText(mContext, "I am done", Toast.LENGTH_SHORT).show();
 
                 // retrieve all message from the database just once
                 getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter);
@@ -911,6 +1119,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 // edit message
                 getEditMessage(userName, otherName, modelListAllMsg, adapter, uID);
+
+                // delete local list with idkey
+                getDeleteMsgId(userName, otherName, modelListAllMsg, adapter, uID);
 
             }
         }.start();
@@ -1106,12 +1317,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                         int scrollNumCheck = scrollNumMap.get(otherName) == null ? adapter.getItemCount() - 1: (int) scrollNumMap.get(otherName) ;
                         int scrollCheck = adapter.getItemCount() - scrollNumCheck;
 
-                        if(scrollCheck > 25){    // don't scroll. Just update.
+                        if(scrollCheck > 20){    // don't scroll. Just update.
                             adapter.notifyItemChanged((adapter.getItemCount() - 1), new Object());
                         } else {
                             // scroll to last position on new message update
-//                            scrollToPreviousPosition(otherName, (adapter.getItemCount() - 1));
-                            recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
+                            scrollToPreviousPosition(otherName, (adapter.getItemCount() - 1));
                         }
 
                         // show new msg alert text for user
@@ -1168,7 +1378,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
-    // retrieve message when edited and delete after 10sec
+    // retrieve message when edited and delete after 3sec (after updating the Main Message DB)
     private void getEditMessage(String userName, String otherName, List<MessageModel> allMsgList, MessageAdapter adapter, String otherUid)
     {
         refEditMsg.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
@@ -1188,7 +1398,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                         boolean isEditMessage = false;
                         int position = 0;
 
-                        // Check if the message already exists in the current messages list
+                        // Check if the message already exists in the current local messages list
                         for (int i = allMsgList.size()-1; i >= startCount; i--) {
                             MessageModel existingMessage = allMsgList.get(i);
                             if (editMessageModel.getId().equals(existingMessage.getIdKey())) {
@@ -1207,7 +1417,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             adapter.notifyItemChanged(position, new Object());
                         }
 
-                        // delete message after 3 secs
+                        // update Main Message DB and delete from EditMessage DB after 3 secs
                         new CountDownTimer(3_000, 1_000){
                             @Override
                             public void onTick(long l) {
@@ -1222,7 +1432,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                                         for(DataSnapshot snapshotAll : snapshot.getChildren()){
-                                            // compare both keys
+                                            // compare both keys (EditMsg DB and Main Message DB)
                                             if(snapshotEdit.getKey().equals(snapshotAll.getKey())){
                                                 // fetch out the data via map
                                                 Map<String, Object> updateMap = new HashMap<>();
@@ -1242,7 +1452,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                                             }
                                                         });
 
-                                            } else {    // delete if not found
+                                            } else {    // delete msg from EditMsg DB if not found in Main Message DB
                                                 refEditMsg.child(userName).child(otherName)
                                                         .child(snapshotEdit.getKey()).removeValue();
                                             }
@@ -1260,7 +1470,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                         }.start();
 
 
-                        // check outside message if it's same same id message that was edited and update it
+                        // check outside message if it's same id message that was edited and update it
                         refLastDetails.child(user.getUid()).child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshotLast) {
@@ -1293,6 +1503,61 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         });
     }
 
+    //  retrieve the delete message id and compare it my local list id and delete if found
+    private void getDeleteMsgId(String userName, String otherName, List<MessageModel> allMsgList, MessageAdapter adapter, String otherUid)
+    {
+        refDeleteMsg.child(userName).child(otherName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for (DataSnapshot snapshotDelete: snapshot.getChildren()) {
+                    // get the randomID for outside chat, and keyID for inside chat
+                    long deleteRandomID = (long) snapshotDelete.child("randomID").getValue();
+                    String deleteIdKey = snapshotDelete.getKey();
+                    // loop through the local list and search for same idkey
+                    for (int i = allMsgList.size() - 1; i >= 0; i--) {
+                        String listMessageID = allMsgList.get(i).getIdKey();
+                        if(deleteIdKey.equals(listMessageID)){
+                            // delete from list if id key matches
+                            allMsgList.remove(i);
+                            adapter.notifyDataSetChanged();
+                            // delete idkey from database if id key matches
+                            refDeleteMsg.child(userName).child(otherName).child(deleteIdKey).removeValue();
+                            break;
+                        }
+                    }
+
+                    // check outside message if it's same message that was deleted and delete for both user
+                    refLastDetails.child(user.getUid()).child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshotLast) {
+                            //  check if the random id is same
+                            long outSideChatID = (long) snapshotLast.child("randomID").getValue();
+                            if(deleteRandomID == outSideChatID){
+                                //   the message
+                                refLastDetails.child(user.getUid()).child(otherUid)
+                                        .child("message").setValue("...");
+                                refLastDetails.child(otherUid).child(user.getUid())
+                                        .child("message").setValue("...");
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     // scroll to position on new message update
     private void scrollToPreviousPosition(String otherName, int position){
         for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
@@ -1308,120 +1573,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
     }
 
-    // get last seen and set inbox status to be true
-    @Override
-    public void getLastSeenAndOnline(String otherUid) {
+    // change unread message of otherUser to read status when I open the chat box
+    private void convertUnreadToReadMessage(String otherName, String userName, String otherUid){
 
-        otherUserUid = otherUid;
-
-        // get last seen
-        try{
-            refUsers.child(otherUid).addValueEventListener(new ValueEventListener() {
+        new Thread(() -> {
+            refMsgFast.child(otherName).child(userName).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    try{
-                        long onlineValue = (long) snapshot.child("presence").getValue();
-                        if (onlineValue == 1){
-                            textViewLastSeen.setText("Online");
-                            circleImageOnline.setVisibility(View.VISIBLE);
-                        }
-                        else {
-                            circleImageOnline.setVisibility(View.GONE);
-                            //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
-                            // current date and time
-                            Timestamp stamp = new Timestamp(System.currentTimeMillis());
-                            Date date = new Date(stamp.getTime());
-                            String dateString = String.valueOf(date);
+                    for (DataSnapshot snapshotCheck : snapshot.getChildren()){
 
-                            // last user date and time
-                            Date d = new Date(onlineValue);
-                            DateFormat formatter = new SimpleDateFormat("h:mm a");
-                            String time = formatter.format(d);
-                            String previousDateString = String.valueOf(d);
-
-                            dateMonth = new HashMap<>();     // months
-                            dateMonth.put("Jan", 1);
-                            dateMonth.put("Feb", 2);
-                            dateMonth.put("Mar", 3);
-                            dateMonth.put("Apr", 4);
-                            dateMonth.put("May", 5);
-                            dateMonth.put("Jun", 6);
-                            dateMonth.put("Jul", 7);
-                            dateMonth.put("Aug", 8);
-                            dateMonth.put("Sep", 9);
-                            dateMonth.put("Oct", 10);
-                            dateMonth.put("Nov", 11);
-                            dateMonth.put("Dec", 12);
-
-                            dateNum = new HashMap<>();      // days
-                            dateNum.put("Mon", 1);
-                            dateNum.put("Tue", 2);
-                            dateNum.put("Wed", 3);
-                            dateNum.put("Thu", 4);
-                            dateNum.put("Fri", 5);
-                            dateNum.put("Sat", 6);
-                            dateNum.put("Sun", 7);
-
-                            String lastYear = previousDateString.substring(30, 34);  // last year
-
-                            int curMonth = dateMonth.get(dateString.substring(4,7));    // Months
-                            int lastMonth = dateMonth.get(previousDateString.substring(4,7));
-
-                            int curDay = dateNum.get(dateString.substring(0,3));    // Mon - Sun
-                            int lastDay = dateNum.get(previousDateString.substring(0,3));
-
-                            String lastDayString = previousDateString.substring(0,3);   // get the day
-
-                            int dateCur = Integer.parseInt(dateString.substring(8, 10));    // day 1 - 30
-                            int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
-
-                            if (curMonth - lastMonth == 0)
-                            {
-                                if (dateCur - dateLast < 7)
-                                {
-                                    if(curDay - lastDay == 0)
-                                    {
-                                        textViewLastSeen.setText("Seen: Today, " + time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 1) {
-                                        textViewLastSeen.setText("Last seen: Yesterday, \n"+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 2) {
-                                        textViewLastSeen.setText("Last seen: 2days ago, \n"+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 3) {
-                                        textViewLastSeen.setText("Last seen: 3days ago, \n"+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 4) {
-                                        textViewLastSeen.setText("Last seen: 4days ago, \n"+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 5) {
-                                        textViewLastSeen.setText("Last seen: 5days ago, \n"+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 6) {
-                                        textViewLastSeen.setText("Last seen: 6days ago, \n"+time.toLowerCase()+".");
-                                    }
-                                } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
-                                    textViewLastSeen.setText("Last seen: \nLast week "+lastDayString+".");
-                                } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
-                                    textViewLastSeen.setText("Last seen: \nLast 2 weeks "+lastDayString+".");
-                                } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
-                                    textViewLastSeen.setText("Last seen: \nLast 3 weeks "+lastDayString+".");
-                                } else {
-                                    textViewLastSeen.setText("Last seen: a month \nago");
+                        // check if otherUser message exist and change to "read status" (700016)
+                        if(snapshotCheck.child("from").exists()){
+                            String getKey = snapshotCheck.getKey();
+                            if(insideChat == "yes"){
+                                long readStatus = (long) snapshotCheck.child("msgStatus").getValue();
+                                if(readStatus != 700016){
+                                    refMsgFast.child(otherName).child(userName).child(getKey).child("msgStatus").setValue(700016);
                                 }
-                            } else if(curMonth - lastMonth == 1){
-                                textViewLastSeen.setText("Last seen: \none month ago..");
-                            } else if(curMonth - lastMonth == 2){
-                                textViewLastSeen.setText("Last seen: \ntwo months ago.");
-                            }else if(curMonth - lastMonth == 3){
-                                textViewLastSeen.setText("Last seen: \nthree months ago.");
-                            }else if(curMonth - lastMonth == 4){
-                                textViewLastSeen.setText("Last seen: \nFour months ago.");
-                            }else if(curMonth - lastMonth == 5){
-                                textViewLastSeen.setText("Last seen: \nFive months ago.");
-                            } else {
-                                textViewLastSeen.setText("Last seen: "+dateLast +"/"+ lastMonth+"/"+ lastYear);
                             }
-
+                        } else {
+                            refMsgFast.child(otherName).child(userName).child(snapshotCheck.getKey()).removeValue();
                         }
-                    } catch (Exception e){
-                        textViewLastSeen.setText("WinnerChat");
                     }
                 }
 
@@ -1431,32 +1604,43 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 }
             });
 
-        }catch (Exception e){
-            textViewLastSeen.setText("WinnerChat");
+            // change lastMessageDetails too
+            refLastDetails.child(otherUid).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-        }
+                    try{
+                        long readStatus = (long) snapshot.child("msgStatus").getValue();
+                        if(insideChat == "yes" && readStatus != 700016){
+                            refLastDetails.child(otherUid).child(user.getUid()).child("msgStatus").setValue(700016);
+                        }
+                    }catch (Exception e){
+                        System.out.println("LastMessageDetails error (M546) " + e.getMessage());
+                    }
+                }
 
-    }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-    @Override
-    public void msgBackgroundActivities(String otherUid) {
+                }
+            });
 
-        new Thread(() -> {
-
-            // set my status to be true in case I receive msg, it will be tick as seen
-            Map <String, Object> statusAndMSgCount = new HashMap<>();
-            statusAndMSgCount.put("status", true);
-            statusAndMSgCount.put("unreadMsg", 0);
-
-            refChecks.child(user.getUid()).child(otherUserUid).updateChildren(statusAndMSgCount);
-
-            // set responds to pend always      ------- will change later to check condition if user is still an active call
-            refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
-
-            insideChat = "yes";
         }).start();
     }
 
+    public void recyclerViewChatVisibility(String otherName){
+        for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
+            View child = recyclerContainer.getChildAt(i);
+            if (child == recyclerMap.get(otherName)) {
+
+                child = recyclerMap.get(otherName);
+                child.setVisibility(View.VISIBLE);  // make only child layer visible
+
+            } else{
+                child.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
 
     // add user id to db when user start typing and (reset newMsgCount to 0  --- change later)
     // Alert the DB when I start typing, to notify the receiver     // interact with send and record buttons
@@ -1684,29 +1868,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
     }
 
-   // This method will be called by NetworkChangeReceiver whenever network status changes   // reload message loadStatus
-    @Override
-    public void onNetworkStatusChanged(boolean isConnected) {
-        if (isConnected) {
-            // Network is connected, perform actions accordingly
-            constrNetConnect.setVisibility(View.INVISIBLE);
-            networkListener = "yes";
-
-            // remove runnable when network is okay to prevent continuous data usage
-            handler1.removeCallbacks(internetCheckRunnable);
-
-            reloadFailedMessagesWhenNetworkIsOk();  // reload message loadStatus
-
-        } else {
-            // Network is disconnected, handle this case as well
-            constrNetConnect.setVisibility(View.VISIBLE);
-            networkListener = "no";
-
-            handler1.post(internetCheckRunnable);   // call runnable when no internet
-
-        }
-    }
-
     //  Get all previous counts of unreadMsg and newMsgCount
     private void getPreviousCounts(){
 
@@ -1856,6 +2017,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public void onBackPressed() {
 
         if(constraintMsgBody.getVisibility() == View.VISIBLE){
+
             constraintMsgBody.setVisibility(View.INVISIBLE);
             cardViewReplyOrEdit.setVisibility(View.GONE);
             topMainContainer.setVisibility(View.VISIBLE);
@@ -1869,10 +2031,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             replyVisibility = 8;
             idKey = null;
             textViewReplyOrEdit.setText("");
-
+            constraintDelBody.setVisibility(View.GONE); // close delete options
             textViewLastSeen.setText("");   // clear last seen
             circleImageOnline.setVisibility(View.INVISIBLE);
-            constraintProfileMenu.setVisibility(View.GONE);
+            constraintProfileMenu.setVisibility(View.GONE); // close profile menu
+            // high send and new message indicator
+            receiveIndicator.setVisibility(View.GONE);
+            sendIndicator.setVisibility(View.GONE);
+
+            adapterMap.get(otherUserName).highlightedPositions.clear(); // clear the highlight if any
+            // Clear previous highlight, if any.
+            for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+                View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+                itemView.setBackgroundColor(Color.TRANSPARENT);
+            }
 
             new Thread(() -> {
 

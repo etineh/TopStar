@@ -30,6 +30,6 @@ public interface FragmentListener {
     void onNetworkStatusChanged(boolean isConnected);
 
     void onEditOrReplyMessage(String itemList, String editOrReply, String id, long randomID, String status, int icon, String fromWho, int visible);
-//    void onClickOpenMessage(ConstraintLayout itemLayout);
+    void onDeleteMessage(String id, String fromWho, long randomID);
 
 }

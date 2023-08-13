@@ -14,8 +14,8 @@
     <color name="dark_orange2">#301a00</color>
     <color name="light_orange">#ffc278</color>#E6CBB7
     <color name="cool_orange">#E6CBB7</color>
-    <color name="transparent_orange">#80FFA500</color>
-    <color name="transparent_orangeLow">#33FFA500</color>
+    <color name="transparent_orange">#55FFA500</color>
+    <color name="transparent_orangeLow">#33FFA500</color> <!-- 80% transparent -->
 
 
 </resources>
