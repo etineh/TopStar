@@ -541,8 +541,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             constraintLast = itemView.findViewById(R.id.constrainLast);
 //
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
-            recyclerChat.setLayoutManager(new LinearLayoutManager(mContext));
+            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
 
+//            recyclerChat = itemView.findViewById(R.id.recyclerChat);
+//
+//            // Set the layout manager with desired properties
+//            LinearLayoutManager layoutManager = new LinearLayoutManager(itemView.getContext());
+////            layoutManager.setReverseLayout(true); // Start from the bottom
+////            layoutManager.setStackFromEnd(true);   // Stack items from the bottom
+//
+//            recyclerChat.setLayoutManager(layoutManager);
         }
 //        public void setRecyclerView(RecyclerView recyclerView) {
 //            this.recyclerChat = recyclerView;

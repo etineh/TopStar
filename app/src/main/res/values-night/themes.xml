@@ -111,8 +111,14 @@
 
     <!--    drawable background-->
     <style name="drawableBG">
-        <item name="android:background">@drawable/black_bg</item>
+        <item name="android:background">@drawable/black_circle_round</item>
         <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <!--    drawable tint and background-->
+    <style name="roundBackgroundAndTint">
+        <item name="android:background">@drawable/black_circle_round</item>
+        <item name="android:tint">@color/cool_orange</item>
     </style>
 
     <!--    transparent background-->

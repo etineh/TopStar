@@ -43,6 +43,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -50,6 +51,7 @@ import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.model.PinMessageModel;
 
 import org.w3c.dom.Text;
 
@@ -70,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,6 +80,7 @@ import java.util.Set;
 import de.hdodenhof.circleimageview.CircleImageView;
 import kotlinx.coroutines.GlobalScope;
 import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
+import okhttp3.CertificatePinner;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
     // Declare a Set to keep track of highlighted positions
@@ -89,8 +93,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private int send;
     private int receive;
     FirebaseUser user;
-    DatabaseReference refCheck, refUsers;
-    ConstraintLayout deleteBody;
+    DatabaseReference refCheck, refUsers, refPinMessages;
     private MessageViewHolder lastOpenViewHolder = null;
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
@@ -116,9 +119,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         user = FirebaseAuth.getInstance().getCurrentUser();
         refCheck = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
+        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
 
     }
 
+    // add new message to list method
     public void addNewMessageDB(MessageModel newMessages) {
         modelList.add(newMessages);
     }
@@ -128,7 +133,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             String all_IDs = modelList.get(i).getIdKey();
             if (id.equals(all_IDs)) { // Use equals() for string comparison
                 modelList.remove(i);
-//                notifyItemChanged(i, new Object());
                 notifyDataSetChanged();
                 break;
             }
@@ -161,6 +165,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         int pos = position;     //   to get the position of each msg
         holder.cardViewChatBox.setTag(pos);        //     to get cardView position
+        MessageModel modelUser = modelList.get(pos);
 
         long convert = (long) modelList.get(position).getTimeSent();
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
@@ -239,7 +244,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
                 fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
-                      modelList.get(pos).getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
+                      modelUser.getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
             }
             // reverse arrow
             if(modelList.get(pos).getFrom().equals(userName)){
@@ -252,20 +257,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // delete option
         holder.imageViewDel.setOnClickListener(view -> {
 
-            if(modelList.get(pos).getMsgStatus() == 700033){
+            if(modelUser.getMsgStatus() == 700033){
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             } else {
 
                 holder.constraintChatTop.setVisibility(View.GONE);
 
-                String id = modelList.get(pos).getIdKey();
-                String fromWho = modelList.get(pos).getFrom();
-                long randomID = modelList.get(pos).getRandomID();
+                String id = modelUser.getIdKey();
+                String fromWho = modelUser.getFrom();
+                long randomID = modelUser.getRandomID();
 
                 fragmentListener.onDeleteMessage(id, fromWho, randomID);  // call method on MainActivity(L700)
 
                 // reverse arrow
-                if(modelList.get(pos).getFrom().equals(userName)){
+                if(modelUser.getFrom().equals(userName)){
                     holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
                 } else{
                     holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -276,7 +281,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         //  scroll and highlight reply message
         holder.constraintReplyCon.setOnClickListener(view -> {
 
-            String originalMessageId = modelList.get(pos).getReplyID();
+            String originalMessageId = modelUser.getReplyID();
             int originalPosition = findReplyMsgPositionById(originalMessageId);
 
                 // Scroll to the original message's position
@@ -343,6 +348,83 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // save pin message
+        holder.imageViewPin.setOnClickListener(view -> {
+
+            int getPrevCount = MainActivity.pinMessageMap.get(MainActivity.otherUserName).size();
+
+            Map<String, Object> pinDetails = new HashMap<>();
+            pinDetails.put("msgId", modelUser.getIdKey());
+            pinDetails.put("message", modelUser.getMessage());
+            pinDetails.put("pinTime", ServerValue.TIMESTAMP);
+
+            // loop through to check if pin msg already exist or not before adding or removing
+            for (Map.Entry<String, List<PinMessageModel>> pinMes :
+                    MainActivity.pinMessageMap.entrySet()) {
+
+                String otherName = pinMes.getKey();
+                List<PinMessageModel> pinMsgValue = pinMes.getValue();
+
+                boolean found = false;
+                Iterator<PinMessageModel> pinMsgIterator = pinMsgValue.iterator();
+                while (pinMsgIterator.hasNext()) {
+                    PinMessageModel pins = pinMsgIterator.next();
+
+                    if (modelUser.getIdKey().equals(pins.getMsgId())) {
+                        // Remove the pinned message from the list
+                        pinMsgIterator.remove();
+                        // Remove the pinned message from database
+                        refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey()).removeValue();
+
+                        // decrement the total pin msg count
+                        int newCount = getPrevCount - 1;
+                        MainActivity.totalPinCount_TV.setText(""+ newCount);
+                        Toast.makeText(mContext, "Message unpin", Toast.LENGTH_SHORT).show();
+
+                        found = true;
+                        break; // No need to continue iterating
+                    }
+                }
+
+                if (!found) {
+                    // Add the message to the list since it was not found
+                    PinMessageModel newPin = new PinMessageModel(modelUser.getIdKey(), modelUser.getMessage(), 0);
+                    pinMsgValue.add(newPin);
+                    // add the pin message to database
+                    refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey()).setValue(pinDetails);
+
+                    if(MainActivity.pinMessageMap.get(MainActivity.otherUserName) == null){
+                        MainActivity.pinMessageMap.put(MainActivity.otherUserName, pinMsgValue);
+                        MainActivity.pinMsgContainer.setVisibility(View.VISIBLE);
+                        MainActivity.totalPinCount_TV.setText("" + 1);
+                        Toast.makeText(mContext, "Null here", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // increment the total pin msg count
+                        int newCount = getPrevCount + 1;
+                        MainActivity.totalPinCount_TV.setText("" + newCount);
+                        Toast.makeText(mContext, "Message pin", Toast.LENGTH_SHORT).show();
+                    }
+                    
+                }
+
+                // If the list is now empty, remove the entry from the map
+                if (pinMsgValue.isEmpty()) {
+                    MainActivity.pinMessageMap.remove(otherName);
+                }
+            }
+
+
+
+            holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
+
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
         //   show chat options
         View.OnClickListener optionClickListener = view -> {
 
@@ -358,7 +440,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
             }
 
-            if(holder.constraintChatTop.getVisibility() == View.GONE){ // make visible if it's gone
+            // make option menu visible if it's gone
+            if(holder.constraintChatTop.getVisibility() == View.GONE){
 
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
 
@@ -368,6 +451,32 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
 
                 holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
+
+                // change the pin icon to unpin/view
+                for (Map.Entry<String, List<PinMessageModel>> pinMes :
+                        MainActivity.pinMessageMap.entrySet()) {
+
+                    String otherName = pinMes.getKey();
+                    List<PinMessageModel> pinMsgValue = pinMes.getValue();
+
+                    Iterator<PinMessageModel> pinMsgIterator = pinMsgValue.iterator();
+                    while (pinMsgIterator.hasNext()) {
+                        PinMessageModel pins = pinMsgIterator.next();
+
+                        if (modelUser.getIdKey().equals(pins.getMsgId())) {
+                            // Remove the pinned message from the list
+                            holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
+                            break; // No need to continue iterating
+                        } else {
+                            holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
+                        }
+                    }
+
+                    // If the list is now empty, remove the entry from the map
+                    if (pinMsgValue.isEmpty()) {
+                        MainActivity.pinMessageMap.remove(otherName);
+                    }
+                }
 
             } else{ // hide if it's visible and return arrow image
                 holder.constraintChatTop.setVisibility(View.GONE);

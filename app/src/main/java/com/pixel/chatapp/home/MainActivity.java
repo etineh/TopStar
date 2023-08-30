@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -23,7 +22,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -37,8 +35,6 @@ import android.widget.Toast;
 
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,10 +49,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
-import com.pixel.chatapp.chats.MessageActivity;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.model.EditMessageModel;
+import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.pixel.chatapp.R;
@@ -76,6 +72,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.CertificatePinner;
 
 public class MainActivity extends AppCompatActivity implements FragmentListener {
 
@@ -84,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView menuOpen, home, menuClose, imageViewLogo, imageViewUserPhoto;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     DatabaseReference refUser = FirebaseDatabase.getInstance().getReference("Users");
-    ConstraintLayout scrollMenu, topMainContainer, v;
+    ConstraintLayout scrollMenu, topMainContainer, mainViewConstraint;
     private TextView logout, textLightAndDay, textViewDisplayName, textViewUserName;
     Switch darkMoodSwitch;
     CardView cardViewSettings;
@@ -100,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView editOrReplyIV, imageViewCalls;
     private TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
+    private ConstraintLayout openPinMsg_Constr, pinMsgBox_Constr;
+    public static ConstraintLayout pinMsgContainer;
+    private ImageView hidePinMsg_IV, pinMsg_IV;
+    public static TextView totalPinCount_TV, pinCount_TV;
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
     private CircleImageView circleSendMessage;
@@ -114,7 +115,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public static int goToNum;
     public static Boolean goToLastMessage = false;
 
-    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails, refEditMsg, refDeleteMsg;
+    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails,
+            refEditMsg, refDeleteMsg, refPinMessages;
     FirebaseUser user;
     private int scrollNum = 0;
     private long count = 0, newMsgCount = 0;
@@ -135,12 +137,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     RecordButton recordButton;
 
     private int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
+    public static Map<String, List<PinMessageModel>> pinMessageMap;
     private Map<String, Object> editMessageMap;
     private Map<String, Object> deleteMap;
     private Map<String, List<MessageModel>> modelListMap;
     private Map<String, MessageAdapter> adapterMap;
     public static Map<String, RecyclerView> recyclerMap;
-    private List<String> stringList, otherUidList;
+    private List<String> otherNameList, otherUidList;
     private Map<String, Object> downMsgCountMap, scrollNumMap;
     private Map<String, Object>  notifyCountMap, scrollPositionMap;
 
@@ -182,11 +185,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         circleImageOnline = findViewById(R.id.circleImageOnline9);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
 
+        // delete ids
         constraintDelBody = findViewById(R.id.constDelBody);
         textViewDelMine = findViewById(R.id.textViewDelMine);
         textViewDelOther = findViewById(R.id.textViewDelOther);
         textViewDelAll = findViewById(R.id.textViewDelEveryone);
         imageViewCancelDel = findViewById(R.id.imageViewCancelDel);
+
+        // pin message ids
+        pinMsgContainer = findViewById(R.id.pinMsgConst);
+        openPinMsg_Constr = findViewById(R.id.openPinMsg_Constr);
+        pinMsgBox_Constr = findViewById(R.id.pinMsgBox);
+        hidePinMsg_IV = findViewById(R.id.view_IV);
+        pinMsg_IV = findViewById(R.id.pins_IV);
+        pinCount_TV = findViewById(R.id.pinCount_TV);
+        totalPinCount_TV = findViewById(R.id.totalPinMsg_TV);
 
         cardViewReplyOrEdit = findViewById(R.id.cardViewReply9);
         textViewReplyOrEdit = findViewById(R.id.textViewReplyText9);
@@ -219,9 +232,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
         refEditMsg = FirebaseDatabase.getInstance().getReference("EditMessage");
         refDeleteMsg = FirebaseDatabase.getInstance().getReference("DeleteMessage");
+        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        pinMessageMap = new HashMap<>();
         deleteMap = new HashMap<>();
         editMessageMap = new HashMap<>();
         notifyCountMap = new HashMap<>();
@@ -231,13 +246,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         adapterMap = new HashMap<>();
         scrollPositionMap = new HashMap<>();
         downMsgCountMap = new HashMap<>();
-        stringList = new ArrayList<>();
+        otherNameList = new ArrayList<>();
         otherUidList = new ArrayList<>();
         readDatabase = 0;  // 0 is read, 1 is no_read
 
 //        replyText = "";
 
-        // ----------------------
+        // -------------    msg id ends
 
         tabLayoutGeneral = findViewById(R.id.tabLayerMain);
         viewPager2General = findViewById(R.id.viewPageMain);
@@ -250,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
         textViewDisplayName = findViewById(R.id.textViewDisplayName2);
         textViewUserName = findViewById(R.id.textViewUserName2);
-        v = findViewById(R.id.v);
+        mainViewConstraint = findViewById(R.id.mainViewConstraint);
         darkMoodSwitch = findViewById(R.id.switch1);
         textLightAndDay = findViewById(R.id.textView13);
         topMainContainer = findViewById(R.id.constraintMsgContainer);
@@ -275,7 +290,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // manually call and check for the network
         handler1 = new Handler();   // used lamda for the runnable
-        internetCheckRunnable = () -> networkChangeReceiver.onReceive(MainActivity.this, new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
+        internetCheckRunnable = () -> networkChangeReceiver.onReceive(MainActivity.this,
+                new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
 
         handler1.postDelayed(internetCheckRunnable, 3000);       // Repeat the network check everything 3 sce till network is back
         handler1.post(internetCheckRunnable);
@@ -365,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         });
 
         // close the open option when background is clicked
-        v.setOnClickListener(view -> {
+        mainViewConstraint.setOnClickListener(view -> {
 
             if (scrollMenu.getVisibility() == View.VISIBLE){
                 scrollMenu.setVisibility(View.GONE);
@@ -534,8 +550,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // scroll to previous position
         scrollPositionIV.setOnClickListener(view -> {
 
-            if(goToLastMessage){
-
+            if(goToLastMessage) {
                 recyclerMap.get(otherUserName).scrollToPosition(goToNum - 2);
                 adapterMap.get(otherUserName).highlightItem(goToNum); // notify Colour
                 adapterMap.get(otherUserName).highlightedPositions.add(goToNum);    // change color
@@ -543,9 +558,32 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 goToLastMessage = false;
             } else {
                 recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
+                // clear highlight background if any
+                adapterMap.get(otherUserName).highlightedPositions.clear();
+                // Clear previous highlight, if any.
+                for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+                    View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+                    itemView.setBackgroundColor(Color.TRANSPARENT);
+                }
             }
 
         });
+
+        // hide pin message
+        hidePinMsg_IV.setOnClickListener(view -> {  // personalise later
+            openPinMsg_Constr.setVisibility(View.VISIBLE);
+            pinMsgBox_Constr.setVisibility(View.INVISIBLE);
+        });
+
+        // open pin message box
+        View.OnClickListener openPinMsg = view -> { // personalise later
+            openPinMsg_Constr.setVisibility(View.GONE);
+            pinMsgBox_Constr.setVisibility(View.VISIBLE);
+        };
+        pinMsg_IV.setOnClickListener(openPinMsg);
+        totalPinCount_TV.setOnClickListener(openPinMsg);
+        openPinMsg_Constr.setOnClickListener(openPinMsg);
+
 
         // Delay 5 seconds to load message
         new CountDownTimer(5000, 1000){
@@ -564,7 +602,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
-    //  --------------- methods --------------------
+    //  --------------- methods && interface --------------------
 
     //  ----------   interface    ---------------------
     @Override
@@ -573,6 +611,49 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         tellUserAmTyping_AddUser();
         getPreviousCounts();
         convertUnreadToReadMessage(otherName, userName, uID);
+
+        if(pinMessageMap.get(otherName) != null){
+            int totalPins = pinMessageMap.get(otherName).size();
+            if(totalPins > 0){
+                pinMsgContainer.setVisibility(View.VISIBLE);
+                totalPinCount_TV.setText(""+ totalPins);
+//                pinMsgContainer.setVisibility(View.VISIBLE);
+            }
+
+        } else {
+            System.out.println("Nothing in the PIN map");
+            pinMsgContainer.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    private void getPinMessages(String myID, String otherID, String otherName){
+
+        List<PinMessageModel> pinMsgList = new ArrayList<>();
+        refPinMessages.child(myID).child(otherID).orderByChild("pinTime").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(readDatabase == 0){
+                    pinMsgList.clear();
+
+                    for (DataSnapshot snapshotPin : snapshot.getChildren()) {
+                        // check if pin message still exist
+                        if(snapshotPin.child("msgId").exists()){
+                            PinMessageModel pinMsgModel = snapshotPin.getValue(PinMessageModel.class);
+                            pinMsgList.add(pinMsgModel);
+                            pinMessageMap.put(otherName, pinMsgList);
+                            System.out.println("Check if I add pins (M636)" );
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
@@ -639,7 +720,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         });
 
-
+        // make chat box visible
         constraintMsgBody.setVisibility(View.VISIBLE);
         conTopUserDetails.setVisibility(View.VISIBLE);
         conUserClick.setVisibility(View.VISIBLE);
@@ -687,8 +768,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
 
         // store otherName for looping through load message status and change to delivery status
-        if (!stringList.contains(otherName)) {
-            stringList.add(otherName);
+        if (!otherNameList.contains(otherName)) {
+            otherNameList.add(otherName);
         }
 
         // store otherUserUid to loop and change to delivery status -- of outsider chat
@@ -704,6 +785,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // store myUserName for looping through load message status and change to delivery status
         myUserName = userName;
+
+        // get pinMessage once
+        getPinMessages(user.getUid(), uID, otherName);
     }
 
     @Override
@@ -753,10 +837,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             editTextMessage.setSelection(editTextMessage.getText().length()); // Set focus to the end of the text
         }
 
-        // set reply name and hint
+        // reply setting
         if(editOrReply == "reply"){
 
-            replyVisibility = visible;      // send visible on the database to make the replied msg Visible on the UI
+            replyVisibility = visible;      // send visible to database to make the replied msg Visible on the UI
             replyText = message;
 
             if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
@@ -1792,7 +1876,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             // reload message for inside chat box
             new Thread(() -> {
                 // loop through the otherUserNames stored in stringList and check if any user has load message status
-                for (String names : stringList) {
+                for (String names : otherNameList) {
                     refMsgFast.child(myUserName).child(names).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -2045,6 +2129,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 View itemView = recyclerMap.get(otherUserName).getChildAt(i);
                 itemView.setBackgroundColor(Color.TRANSPARENT);
             }
+
+            pinMsgContainer.setVisibility(View.GONE);// hide pin Msg container
 
             new Thread(() -> {
 

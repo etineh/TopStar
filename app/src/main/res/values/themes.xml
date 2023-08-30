@@ -121,6 +121,12 @@
         <item name="android:background">@drawable/msg_count</item>
     </style>
 
+    <!--    drawable tint and background-->
+    <style name="roundBackgroundAndTint">
+        <item name="android:background">@drawable/msg_count</item>
+        <item name="android:tint">@color/dark_orange2</item>
+    </style>
+
 <!--    transparent background-->
     <style name="trans_background">
         <item name="android:background">@color/transparent_orange</item>

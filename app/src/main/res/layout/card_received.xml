@@ -159,7 +159,7 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toTopOf="@id/constraintLayout9"
+                    app:layout_constraintBottom_toTopOf="@id/line2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -218,7 +218,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout9"
+                    android:id="@+id/line2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"

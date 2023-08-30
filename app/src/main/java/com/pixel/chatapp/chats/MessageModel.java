@@ -38,6 +38,7 @@ public class MessageModel implements Serializable {
         this.replyFrom = replyFrom;
         this.type = type;
         this.randomID = randomID;
+        this.replyID = replyID;
 
 //        this.voicenote = voicenote;
     }
@@ -132,6 +133,7 @@ public class MessageModel implements Serializable {
     public void setReplyID(String replyID) {
         this.replyID = replyID;
     }
+
     //    public String getVoicenote() {
 //        return voicenote;
 //    }

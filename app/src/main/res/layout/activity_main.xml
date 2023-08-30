@@ -69,7 +69,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/v"
+        android:id="@+id/mainViewConstraint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -1375,13 +1375,13 @@
         android:layout_height="40dp"
         android:elevation="4dp"
         android:fitsSystemWindows="false"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/contraintTop9">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout9"
+            android:id="@+id/line2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/orange"
@@ -1538,7 +1538,7 @@
             android:layout_marginBottom="4dp"
             android:textSize="13sp"
             android:textStyle="italic"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout9"
+            app:layout_constraintBottom_toTopOf="@+id/line2"
             app:layout_constraintEnd_toEndOf="@+id/textViewStatus9"
             app:layout_constraintStart_toStartOf="@+id/textViewStatus9" />
 
@@ -1550,7 +1550,7 @@
             android:layout_marginTop="1dp"
             android:layout_marginEnd="21dp"
             android:layout_marginBottom="1dp"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout9"
+            app:layout_constraintBottom_toTopOf="@+id/line2"
             app:layout_constraintEnd_toStartOf="@+id/imageViewGameMe9"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -1684,7 +1684,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="7dp"
                     android:layout_marginBottom="4dp"
                     android:elevation="2dp"
                     app:cardCornerRadius="20dp"
@@ -1878,7 +1878,7 @@
                     android:id="@+id/fab9"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="12dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
                     android:padding="7dp"
@@ -1893,7 +1893,7 @@
                     android:layout_height="45dp"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="12dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
                     android:elevation="3dp"
@@ -1999,6 +1999,161 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pinMsgConst"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintNextTop9">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/openPinMsg_Constr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/pins_IV"
+                style="@style/roundBackgroundAndTint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/baseline_push_pin_24" />
+
+            <TextView
+                android:id="@+id/totalPinMsg_TV"
+                style="@style/drawableBG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-8dp"
+                android:elevation="2dp"
+                android:paddingLeft="4dp"
+                android:paddingTop="2dp"
+                android:paddingRight="5dp"
+                android:paddingBottom="2dp"
+                android:text="~200"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pins_IV"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pinMsgBox"
+            style="@style/BackgroundW_B"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="3dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/line4"
+                android:layout_width="2dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="3dp"
+                android:background="@color/cool_orange"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/downArrow_IV"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/pinCount_TV"
+                app:layout_constraintStart_toEndOf="@id/view_IV"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/pinMsg_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:text="A pin message here.. this is the begiining of th ew rokf ljhf lisg sdisdukgfsd fs f ,kjdssdjkfsksdjf  sdfjsd sdf sdnj sf" />
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/line3"
+                android:layout_width="2dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="3dp"
+                android:background="@color/cool_orange"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/upArrow_IV"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/downArrow_IV"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_downward_24" />
+
+            <ImageView
+                android:id="@+id/view_IV"
+                android:layout_width="15dp"
+                android:layout_height="25dp"
+                android:layout_marginLeft="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/line4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_disabled_visible_view_24" />
+
+            <ImageView
+                android:id="@+id/pinIV"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/line3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@drawable/baseline_push_pin_24" />
+
+            <TextView
+                android:id="@+id/pinCount_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(1/200)"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/pinIV"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/upArrow_IV"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_upward_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
