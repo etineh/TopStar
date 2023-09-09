@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 tab.setText("Players");
                                 break;
                             case 3:
-                                tab.setText("Hosts");
+                                tab.setText("Team");
                                 break;
                         }
                     }
@@ -330,28 +330,29 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
         nightMood = sharedPreferences.getBoolean("MoodStatus", false);
 
+        darkMoodSwitch.setOnClickListener(view -> {
+            if (nightMood) {
+                sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
+            } else {
+                sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
+            }
+
+            //  initialize UI theme setup manually -- later
+            recreate(); // call automatic UI initialization method
+        });
+
         if(nightMood){
-            darkMoodSwitch.setChecked(true);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            // Turn on night mode
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            darkMoodSwitch.setChecked(false);
             textLightAndDay.setText("Light");
         } else {
+            // Turn off night mode
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            darkMoodSwitch.setChecked(true);
             textLightAndDay.setText("Dark");
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         };
 
-        darkMoodSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(nightMood){
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                        sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
-                } else{
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
-                }
-            }
-        });
 
         //  Return back, close msg container
         imageViewBack.setOnClickListener(view -> {
@@ -747,8 +748,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer.setVisibility(View.INVISIBLE);
         tabLayoutGeneral.setVisibility(View.INVISIBLE);
 
-        System.out.println("Total adapter (M500) " + adapterMap.get(otherName).getItemCount());
-
+        System.out.println("Total adapter (M750) " + adapterMap.get(otherName).getItemCount());
+//        System.out.println("What is recyler side (M750)" + recyclerMap.get(otherName).getAdapter().getItemCount());
     }
 
     @Override       // run only once
@@ -779,15 +780,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override       // run only once
-    public void getMessage(String userName, String otherName, String uID, Context mContext){
+    public void getMessage(String userName, String otherName, String otherUID, Context mContext){
 
-        retrieveMessages(userName, otherName, uID, mContext);
+        retrieveMessages(userName, otherName, otherUID, mContext);
 
         // store myUserName for looping through load message status and change to delivery status
         myUserName = userName;
 
         // get pinMessage once
-        getPinMessages(user.getUid(), uID, otherName);
+        getPinMessages(user.getUid(), otherUID, otherName);
     }
 
     @Override
@@ -1174,7 +1175,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
         List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
-//        List<MessageModel> loopCount = new ArrayList<>();           // save total count messages from refFastMsg database
 
         MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, uID, mContext); // initialise adapter
 
@@ -1185,7 +1185,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 // retrieve the last previous scroll position
                 getLastScrollPosition(uID, otherName);
-//                Toast.makeText(mContext, "WHat is " + l, Toast.LENGTH_SHORT).show();
                 // delete from the database when message is read and get the total number of msg not read yet
                 deleteMessageWhenRead(userName, otherName, msgListNotRead);
 
@@ -1207,6 +1206,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 // delete local list with idkey
                 getDeleteMsgId(userName, otherName, modelListAllMsg, adapter, uID);
 
+//                System.out.println("What is recyler side (M1210)" + recyclerMap.get(otherName).getAdapter().getItemCount());
             }
         }.start();
 
