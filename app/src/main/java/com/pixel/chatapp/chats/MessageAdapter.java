@@ -1,28 +1,18 @@
 package com.pixel.chatapp.chats;
 
-import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Build;
-import android.os.CountDownTimer;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
-import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -33,8 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.os.EnvironmentCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,38 +37,28 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.PinMessageModel;
 
-import org.w3c.dom.Text;
-
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import kotlinx.coroutines.GlobalScope;
 import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
-import okhttp3.CertificatePinner;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
     // Declare a Set to keep track of highlighted positions
@@ -282,7 +260,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.constraintReplyCon.setOnClickListener(view -> {
 
             String originalMessageId = modelUser.getReplyID();
-            int originalPosition = findReplyMsgPositionById(originalMessageId);
+            int originalPosition = findMessagePositionById(originalMessageId);
 
                 // Scroll to the original message's position
             if (originalPosition != RecyclerView.NO_POSITION) {
@@ -292,10 +270,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
                     MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
-//                Toast.makeText(mContext, "what is downCount " + downCount, Toast.LENGTH_SHORT).show();
                 } else {    // decrease the number (11-- to shift the highlight msg down)
                     MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
-//                Toast.makeText(mContext, "what is total length " + totalLength, Toast.LENGTH_SHORT).show();
                 }
 
                 // Highlight the original message
@@ -346,74 +322,76 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
             }
+            holder.constraintChatTop.setVisibility(View.GONE);
         });
 
         // save pin message
         holder.imageViewPin.setOnClickListener(view -> {
 
-            int getPrevCount = MainActivity.pinMessageMap.get(MainActivity.otherUserName).size();
+            // get total pin messages
+            int totalPinMsgCount = MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName).size();
 
+            // get data to save to database
             Map<String, Object> pinDetails = new HashMap<>();
             pinDetails.put("msgId", modelUser.getIdKey());
             pinDetails.put("message", modelUser.getMessage());
             pinDetails.put("pinTime", ServerValue.TIMESTAMP);
 
-            // loop through to check if pin msg already exist or not before adding or removing
-            for (Map.Entry<String, List<PinMessageModel>> pinMes :
-                    MainActivity.pinMessageMap.entrySet()) {
+            boolean found = false;
+            String id = null;
 
-                String otherName = pinMes.getKey();
-                List<PinMessageModel> pinMsgValue = pinMes.getValue();
+            for (PinMessageModel pinMes :
+                    MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
 
-                boolean found = false;
-                Iterator<PinMessageModel> pinMsgIterator = pinMsgValue.iterator();
-                while (pinMsgIterator.hasNext()) {
-                    PinMessageModel pins = pinMsgIterator.next();
-
-                    if (modelUser.getIdKey().equals(pins.getMsgId())) {
-                        // Remove the pinned message from the list
-                        pinMsgIterator.remove();
-                        // Remove the pinned message from database
-                        refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey()).removeValue();
-
-                        // decrement the total pin msg count
-                        int newCount = getPrevCount - 1;
-                        MainActivity.totalPinCount_TV.setText(""+ newCount);
-                        Toast.makeText(mContext, "Message unpin", Toast.LENGTH_SHORT).show();
-
-                        found = true;
-                        break; // No need to continue iterating
-                    }
-                }
-
-                if (!found) {
-                    // Add the message to the list since it was not found
-                    PinMessageModel newPin = new PinMessageModel(modelUser.getIdKey(), modelUser.getMessage(), 0);
-                    pinMsgValue.add(newPin);
-                    // add the pin message to database
-                    refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey()).setValue(pinDetails);
-
-                    if(MainActivity.pinMessageMap.get(MainActivity.otherUserName) == null){
-                        MainActivity.pinMessageMap.put(MainActivity.otherUserName, pinMsgValue);
-                        MainActivity.pinMsgContainer.setVisibility(View.VISIBLE);
-                        MainActivity.totalPinCount_TV.setText("" + 1);
-                        Toast.makeText(mContext, "Null here", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // increment the total pin msg count
-                        int newCount = getPrevCount + 1;
-                        MainActivity.totalPinCount_TV.setText("" + newCount);
-                        Toast.makeText(mContext, "Message pin", Toast.LENGTH_SHORT).show();
-                    }
-                    
-                }
-
-                // If the list is now empty, remove the entry from the map
-                if (pinMsgValue.isEmpty()) {
-                    MainActivity.pinMessageMap.remove(otherName);
+                if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
+                    found = true;
+                    id = pinMes.getMsgId();
+                    break;
                 }
             }
 
+            if (found) {
+                // Delete message from the local map
+                MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)
+                        .removeIf(pinMesExist -> pinMesExist.getMsgId().equals(modelUser.getIdKey()));
 
+                //  Delete message from firebase database
+                refPinMessages.child(user.getUid()).child(uId).child(id).removeValue();
+
+                //  Decrement the count
+                int newCount = totalPinMsgCount - 1;
+                MainActivity.totalPinPrivate_TV.setText("" + newCount);
+                MainActivity.pinCount_TV.setText("(1/" + newCount + ")");
+
+                // check if message that is unpin is same with what is on the UI
+                if(MainActivity.pinMsg_TV.getText().equals(modelUser.getMessage())){
+                    MainActivity.pinMsg_TV.setText("Message unpin...");
+                    MainActivity.pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
+                }
+
+            } else {
+                // Add the new pin message to the local map
+                PinMessageModel newPin = new PinMessageModel(modelUser.getIdKey(),
+                        modelUser.getMessage(), ServerValue.TIMESTAMP);
+                MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName).add(newPin);
+
+                // Add the new pin message to firebase database
+                refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey())
+                        .setValue(pinDetails);
+
+                //  Increment the count
+                int newCount = totalPinMsgCount + 1;
+                MainActivity.totalPinPrivate_TV.setText("" + newCount);
+                MainActivity.pinCount_TV.setText("(1/" + newCount + ")");
+
+                // update to new msg on UI
+                MainActivity.pinMsg_TV.setText(modelUser.getMessage());
+                MainActivity.pinNextNumber = 1; // return nextPinNumber to default, 1
+
+                // trigger pinContainer visible if it's the pin
+                MainActivity.pinMsgContainer.setVisibility(View.VISIBLE);
+
+            }
 
             holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
 
@@ -453,29 +431,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
 
                 // change the pin icon to unpin/view
-                for (Map.Entry<String, List<PinMessageModel>> pinMes :
-                        MainActivity.pinMessageMap.entrySet()) {
+                boolean check = false;
+                for (PinMessageModel pinMes :
+                        MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
 
-                    String otherName = pinMes.getKey();
-                    List<PinMessageModel> pinMsgValue = pinMes.getValue();
-
-                    Iterator<PinMessageModel> pinMsgIterator = pinMsgValue.iterator();
-                    while (pinMsgIterator.hasNext()) {
-                        PinMessageModel pins = pinMsgIterator.next();
-
-                        if (modelUser.getIdKey().equals(pins.getMsgId())) {
-                            // Remove the pinned message from the list
-                            holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
-                            break; // No need to continue iterating
-                        } else {
-                            holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
-                        }
+                    if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
+                        check = true;
                     }
 
-                    // If the list is now empty, remove the entry from the map
-                    if (pinMsgValue.isEmpty()) {
-                        MainActivity.pinMessageMap.remove(otherName);
+                    if(check){
+                        holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
+                    }else {
+                        holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
                     }
+
                 }
 
             } else{ // hide if it's visible and return arrow image
@@ -577,7 +546,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     // ---------------------- methods ---------------------------
 
-    private int findReplyMsgPositionById(String messageId) {
+    public int findMessagePositionById(String messageId) {
         for (int i = modelList.size()-1; i >= 0; i--) {
             if (modelList.get(i).getIdKey().equals(messageId)) {
                 return i;

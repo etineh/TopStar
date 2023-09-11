@@ -93,6 +93,11 @@
         <item name="android:tint">@color/dark_orange2</item>
     </style>
 
+    <!--    background White and Cool orange -->
+    <style name="tintWhiteAndCoolOrange">
+        <item name="android:tint">@color/white</item>
+    </style>
+
     <style name="BackgroundTintW_B">
         <item name="android:backgroundTint">#FBF9F9</item>
     </style>

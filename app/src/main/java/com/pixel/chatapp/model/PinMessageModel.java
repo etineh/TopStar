@@ -4,12 +4,12 @@ public class PinMessageModel {
 
     private String msgId;
     private String message;
-    private long pinTime;
+    private Object pinTime;
 
     public PinMessageModel() {
     }
 
-    public PinMessageModel(String msgId, String message, long pinTime) {
+    public PinMessageModel(String msgId, String message, Object pinTime) {
         this.msgId = msgId;
         this.message = message;
         this.pinTime = pinTime;
@@ -23,7 +23,7 @@ public class PinMessageModel {
         return message;
     }
 
-    public long getPinTime() {
+    public Object getPinTime() {
         return pinTime;
     }
 

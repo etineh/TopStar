@@ -91,6 +91,11 @@
         <item name="android:tint">@color/white</item>
     </style>
 
+    <!--    background White and Cool orange -->
+    <style name="tintWhiteAndCoolOrange">
+        <item name="android:tint">@color/cool_orange</item>
+    </style>
+
     <style name="Background">
         <item name="android:background">@color/white</item>
     </style>

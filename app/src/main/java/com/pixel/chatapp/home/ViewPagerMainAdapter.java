@@ -27,13 +27,13 @@ public class ViewPagerMainAdapter extends FragmentStateAdapter {
                 fragment = ChatsListFragment.newInstance();
                 break;
             case 1:
-                fragment = TournamentsFragment.newInstance();
+                fragment = Hosts_Game.newInstance(); // testing
                 break;
             case 2:
                 fragment = Hosts_Game.newInstance(); // testing
                 break;
             case 3:
-                fragment = Hosts_Game.newInstance(); // testing
+                fragment = TournamentsFragment.newInstance();
                 break;
 
             default:

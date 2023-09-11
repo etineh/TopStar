@@ -11,14 +11,14 @@
     <string name="clear_chats">Clear Chats</string>
     <string name="disappear_msg">Set disappear message</string>
     <string name="search">Search</string>
-    <string name="join_tour">Join tour</string>
+    <string name="join_tour">Join Tournament</string>
     <string name="file">File</string>
     <string name="chat">Chat...</string>
     <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
     <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
 
     <string name="meet">Meet</string>
-    <string name="tour">Tour</string>
+    <string name="tour">Tour.</string>
     <string name="gift">Gift</string>
     <string name="host">Host</string>
 

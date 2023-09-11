@@ -1562,7 +1562,6 @@
         style="@style/ChatBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -1640,6 +1639,17 @@
                 app:layout_constraintTop_toBottomOf="@id/scrollToPositionIV" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lineDepartConstr"
+                android:layout_width="3dp"
+                android:layout_height="0dp"
+                android:background="@color/cool_orange"
+                app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
+                app:layout_constraintRight_toLeftOf="@id/constraintRecyler"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout14"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -1662,11 +1672,14 @@
                 android:id="@+id/constraintRecyler"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginStart="60dp"
+                android:layout_marginBottom="7dp"
                 app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout14" />
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout14">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintSendMsgBox9"
@@ -2005,29 +2018,111 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintNextTop9">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/openPinMsg_Constr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
+            <TextView
+                android:id="@+id/newPinIndicator_TV"
+                style="@style/drawableBG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-12dp"
+                android:elevation="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:text="@string/newMsg"
+                android:textColor="@color/white"
+                android:textSize="8dp"
+                app:layout_constraintBottom_toTopOf="@id/pinsPublic_IV"
+                app:layout_constraintLeft_toLeftOf="@id/pinsPublic_IV"
+                app:layout_constraintRight_toRightOf="@id/pinsPublic_IV" />
+
+            <TextView
+                android:id="@+id/totalPinMsgPublic_TV"
+                style="@style/drawableBG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="-8dp"
+                android:elevation="2dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="2dp"
+                android:paddingRight="3dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/pinsPublic_IV"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+
             <ImageView
-                android:id="@+id/pins_IV"
+                android:id="@+id/public_IV"
+                style="@style/tintWhiteAndCoolOrange"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginEnd="10dp"
+                android:elevation="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/pinsPublic_IV"
+                app:layout_constraintEnd_toStartOf="@+id/line_"
+                app:layout_constraintTop_toTopOf="@+id/pinsPublic_IV"
+                app:srcCompat="@drawable/baseline_public_24" />
+
+            <ImageView
+                android:id="@+id/pinsPublic_IV"
                 style="@style/roundBackgroundAndTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="-10dp"
                 android:padding="5dp"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/public_IV"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
                 app:srcCompat="@drawable/baseline_push_pin_24" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/line_"
+                android:layout_width="2dp"
+                android:layout_height="30dp"
+                android:background="@color/cool_orange"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/pinsPrivate_IV"
+                style="@style/roundBackgroundAndTint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-10dp"
+                android:padding="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/private_IV"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@drawable/baseline_push_pin_24" />
+
+            <ImageView
+                android:id="@+id/private_IV"
+                style="@style/tintWhiteAndCoolOrange"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintBottom_toBottomOf="@id/pinsPrivate_IV"
+                app:layout_constraintStart_toEndOf="@+id/line_"
+                app:layout_constraintTop_toTopOf="@id/pinsPrivate_IV"
+                app:srcCompat="@drawable/lock" />
+
             <TextView
-                android:id="@+id/totalPinMsg_TV"
+                android:id="@+id/totalPinMsgPrivate_TV"
                 style="@style/drawableBG"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -2037,10 +2132,9 @@
                 android:paddingTop="2dp"
                 android:paddingRight="5dp"
                 android:paddingBottom="2dp"
-                android:text="~200"
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/pins_IV"
+                app:layout_constraintStart_toEndOf="@+id/pinsPrivate_IV"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -2051,7 +2145,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="3dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
