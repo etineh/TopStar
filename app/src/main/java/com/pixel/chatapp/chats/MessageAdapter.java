@@ -97,7 +97,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         user = FirebaseAuth.getInstance().getCurrentUser();
         refCheck = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
-        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
+//        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
 
     }
 
@@ -256,13 +256,138 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // copy option
+        holder.imageViewCopy.setOnClickListener(view -> {
+
+            String selectedText = modelList.get(pos).getMessage();
+            ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", selectedText);
+
+            if (clipboard == null || clip == null) return;
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
+            // for paste code
+//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+//                try {
+//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+//                } catch (Exception e) {
+//                    return;
+//                }
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+            holder.constraintChatTop.setVisibility(View.GONE);
+        });
+
+        // pin options -- (for me or everyone)
+        holder.imageViewPin.setOnClickListener(view -> {
+            // show pin option
+            MainActivity.pinOptionBox.setVisibility(View.VISIBLE);
+
+            // send pin data
+            fragmentListener.sendPinData(modelUser.getIdKey(),
+                    modelUser.getMessage(), ServerValue.TIMESTAMP);
+
+            holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
+
+            // reverse arrow
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
+
+        //   show chat selection options
+        View.OnClickListener optionClickListener = view -> {
+
+            // Close the previously open chat options
+            if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
+                lastOpenViewHolder.constraintChatTop.setVisibility(View.GONE);
+
+                // reverse the image resource to it's original imageView
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
+            }
+
+            // make option menu visible if it's gone
+            if(holder.constraintChatTop.getVisibility() == View.GONE){
+
+                holder.constraintChatTop.setVisibility(View.VISIBLE);
+
+                // indicate sign that msg can't be edited
+                if(modelList.size() - pos > 100){
+                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
+                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
+                }
+
+                holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
+
+                // change the pin icon to unpin/view
+                boolean check = false;
+                for (PinMessageModel pinMes :
+                        MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
+
+                    if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
+                        check = true;
+                    }
+
+                    if(check){
+                        holder.imageViewPin.setImageResource(R.drawable.baseline_private_connectivity_24);
+                        MainActivity.pinMineTV.setText("Unpin for me");
+                    }else {
+                        holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
+                        MainActivity.pinMineTV.setText("Pin for me only");
+                    }
+
+                }
+
+            } else{ // hide if it's visible and return arrow image
+                holder.constraintChatTop.setVisibility(View.GONE);
+                // reverse the image resource to it's original imageView
+                if(modelList.get(pos).getFrom().equals(userName)){
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
+            }
+
+            // Update the last open ViewHolder
+            lastOpenViewHolder = holder;
+
+        };
+
+        holder.cardViewChatBox.setOnClickListener(optionClickListener);
+        holder.textViewShowMsg.setOnClickListener(optionClickListener);
+        holder.imageViewOptions.setOnClickListener(optionClickListener);
+
+        // close chat option
+        holder.constraintMsgContainer.setOnClickListener(view -> {
+            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
+                holder.constraintChatTop.setVisibility(View.GONE);
+            }
+            if(modelList.get(pos).getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
         //  scroll and highlight reply message
         holder.constraintReplyCon.setOnClickListener(view -> {
 
             String originalMessageId = modelUser.getReplyID();
             int originalPosition = findMessagePositionById(originalMessageId);
 
-                // Scroll to the original message's position
+            // Scroll to the original message's position
             if (originalPosition != RecyclerView.NO_POSITION) {
                 // pos is the item number clicked, originalPosition is the item number found.
                 // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
@@ -298,185 +423,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
-        // copy option
-        holder.imageViewCopy.setOnClickListener(view -> {
-
-            String selectedText = modelList.get(pos).getMessage();
-            ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("label", selectedText);
-
-            if (clipboard == null || clip == null) return;
-            clipboard.setPrimaryClip(clip);
-
-            Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
-            // for paste code
-//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-//                try {
-//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
-//                } catch (Exception e) {
-//                    return;
-//                }
-            // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-            holder.constraintChatTop.setVisibility(View.GONE);
-        });
-
-        // save pin message
-        holder.imageViewPin.setOnClickListener(view -> {
-
-            // get total pin messages
-            int totalPinMsgCount = MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName).size();
-
-            // get data to save to database
-            Map<String, Object> pinDetails = new HashMap<>();
-            pinDetails.put("msgId", modelUser.getIdKey());
-            pinDetails.put("message", modelUser.getMessage());
-            pinDetails.put("pinTime", ServerValue.TIMESTAMP);
-
-            boolean found = false;
-            String id = null;
-
-            for (PinMessageModel pinMes :
-                    MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
-
-                if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
-                    found = true;
-                    id = pinMes.getMsgId();
-                    break;
-                }
-            }
-
-            if (found) {
-                // Delete message from the local map
-                MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)
-                        .removeIf(pinMesExist -> pinMesExist.getMsgId().equals(modelUser.getIdKey()));
-
-                //  Delete message from firebase database
-                refPinMessages.child(user.getUid()).child(uId).child(id).removeValue();
-
-                //  Decrement the count
-                int newCount = totalPinMsgCount - 1;
-                MainActivity.totalPinPrivate_TV.setText("" + newCount);
-                MainActivity.pinCount_TV.setText("(1/" + newCount + ")");
-
-                // check if message that is unpin is same with what is on the UI
-                if(MainActivity.pinMsg_TV.getText().equals(modelUser.getMessage())){
-                    MainActivity.pinMsg_TV.setText("Message unpin...");
-                    MainActivity.pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
-                }
-
-            } else {
-                // Add the new pin message to the local map
-                PinMessageModel newPin = new PinMessageModel(modelUser.getIdKey(),
-                        modelUser.getMessage(), ServerValue.TIMESTAMP);
-                MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName).add(newPin);
-
-                // Add the new pin message to firebase database
-                refPinMessages.child(user.getUid()).child(uId).child(modelUser.getIdKey())
-                        .setValue(pinDetails);
-
-                //  Increment the count
-                int newCount = totalPinMsgCount + 1;
-                MainActivity.totalPinPrivate_TV.setText("" + newCount);
-                MainActivity.pinCount_TV.setText("(1/" + newCount + ")");
-
-                // update to new msg on UI
-                MainActivity.pinMsg_TV.setText(modelUser.getMessage());
-                MainActivity.pinNextNumber = 1; // return nextPinNumber to default, 1
-
-                // trigger pinContainer visible if it's the pin
-                MainActivity.pinMsgContainer.setVisibility(View.VISIBLE);
-
-            }
-
-            holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
-
-            // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
-
-        //   show chat options
-        View.OnClickListener optionClickListener = view -> {
-
-            // Close the previously open chat options
-            if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
-                lastOpenViewHolder.constraintChatTop.setVisibility(View.GONE);
-
-                // reverse the image resource to it's original imageView
-                if(modelList.get(pos).getFrom().equals(userName)){
-                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-                } else{
-                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-                }
-            }
-
-            // make option menu visible if it's gone
-            if(holder.constraintChatTop.getVisibility() == View.GONE){
-
-                holder.constraintChatTop.setVisibility(View.VISIBLE);
-
-                if(modelList.size() - pos > 100){    // indicate sign that msg can't be edited
-                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
-                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
-                }
-
-                holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
-
-                // change the pin icon to unpin/view
-                boolean check = false;
-                for (PinMessageModel pinMes :
-                        MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
-
-                    if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
-                        check = true;
-                    }
-
-                    if(check){
-                        holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
-                    }else {
-                        holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
-                    }
-
-                }
-
-            } else{ // hide if it's visible and return arrow image
-                holder.constraintChatTop.setVisibility(View.GONE);
-                // reverse the image resource to it's original imageView
-                if(modelList.get(pos).getFrom().equals(userName)){
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-                } else{
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-                }
-            }
-
-            // Update the last open ViewHolder
-            lastOpenViewHolder = holder;
-
-        };
-
-        holder.cardViewChatBox.setOnClickListener(optionClickListener);
-        holder.textViewShowMsg.setOnClickListener(optionClickListener);
-        holder.imageViewOptions.setOnClickListener(optionClickListener);
-
-        // close chat option
-        holder.constraintMsgContainer.setOnClickListener(view -> {
-            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
-                holder.constraintChatTop.setVisibility(View.GONE);
-            }
-            if(modelList.get(pos).getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
 
         // download voice
         holder.circleDownload.setOnClickListener(view -> {

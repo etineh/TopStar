@@ -5,6 +5,7 @@ import android.widget.EditText;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.ServerValue;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
@@ -31,5 +32,7 @@ public interface FragmentListener {
 
     void onEditOrReplyMessage(String itemList, String editOrReply, String id, long randomID, String status, int icon, String fromWho, int visible);
     void onDeleteMessage(String id, String fromWho, long randomID);
+
+    void sendPinData(String msgId_, String message_, Object timeStamp_);
 
 }
