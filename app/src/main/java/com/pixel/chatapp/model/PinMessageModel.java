@@ -5,14 +5,16 @@ public class PinMessageModel {
     private String msgId;
     private String message;
     private Object pinTime;
+    private String pinByWho;
 
     public PinMessageModel() {
     }
 
-    public PinMessageModel(String msgId, String message, Object pinTime) {
+    public PinMessageModel(String msgId, String message, Object pinTime, String pinByWho) {
         this.msgId = msgId;
         this.message = message;
         this.pinTime = pinTime;
+        this.pinByWho = pinByWho;
     }
 
     public String getMsgId() {

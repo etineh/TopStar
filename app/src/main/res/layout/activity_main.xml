@@ -2115,7 +2115,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintNextTop9">
@@ -2124,6 +2123,7 @@
             android:id="@+id/openPinMsg_Constr"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
@@ -2139,6 +2139,7 @@
                 android:text="@string/newMsg"
                 android:textColor="@color/white"
                 android:textSize="8dp"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toTopOf="@id/pinsPublic_IV"
                 app:layout_constraintLeft_toLeftOf="@id/pinsPublic_IV"
                 app:layout_constraintRight_toRightOf="@id/pinsPublic_IV" />
@@ -2190,6 +2191,7 @@
                 android:layout_width="2dp"
                 android:layout_height="30dp"
                 android:background="@color/cool_orange"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

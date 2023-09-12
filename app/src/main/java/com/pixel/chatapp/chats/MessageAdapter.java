@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -137,23 +136,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position_) {
 
         holder.setIsRecyclable(false);      // stop position from repeating itself
 
-        int pos = position;     //   to get the position of each msg
-        holder.cardViewChatBox.setTag(pos);        //     to get cardView position
-        MessageModel modelUser = modelList.get(pos);
+        int chatPosition = position_;     //   to get the position of each msg
+        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
+        MessageModel modelUser = modelList.get(chatPosition);    // get the model position of each chat
 
-        long convert = (long) modelList.get(position).getTimeSent();
+        long convert = (long) modelUser.getTimeSent();
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
         DateFormat formatter = new SimpleDateFormat("h:mm a");
         String time = formatter.format(d);
 
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
-        holder.textViewShowMsg.setText(modelList.get(pos).getMessage());    //  Show messages
-        holder.editNotify.setText(modelList.get(pos).getEdit());    // notify user when msg is edited
+        holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
+        holder.editNotify.setText(modelUser.getEdit());    // notify user when msg is edited
 //notifyDataSetChanged();
 
         // ----------------- Voice Note setting
@@ -162,13 +161,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         // ----------------- reply msg setting
-        int intValue = (int) modelList.get(pos).getVisibility();
+        int intValue = (int) modelUser.getVisibility();
         holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
-        holder.senderNameTV.setText(modelList.get(pos).getReplyFrom());  //  set the username for reply msg
-        holder.textViewReplyMsg.setText(modelList.get(pos).getReplyMsg());     //   set the reply text on top msg
+        holder.senderNameTV.setText(modelUser.getReplyFrom());  //  set the username for reply msg
+        holder.textViewReplyMsg.setText(modelUser.getReplyMsg());     //   set the reply text on top msg
 
         // set unsent and sent msg... delivery and seen settings-- msg status tick
-        int intMsg = modelList.get(pos).getMsgStatus();
+        int intMsg = modelUser.getMsgStatus();
         int numMsg = R.drawable.baseline_grade_24;
 
         // 700024 --- tick one msg  // 700016 -- send msg   // 700033 -- load
@@ -188,19 +187,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // reply option
         holder.imageViewReply.setOnClickListener(view -> {
 
-            if(modelList.get(pos).getMsgStatus() == 700033){
+            if(modelUser.getMsgStatus() == 700033){
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
             }
             else {
 
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
                 // call method in MainActivity and set up the details
-                fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"reply", modelList.get(pos).getIdKey(),
-                        modelList.get(pos).getRandomID(), "replying...", R.drawable.reply, modelList.get(pos).getFrom(), 1);
+                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"reply", modelUser.getIdKey(),
+                        modelUser.getRandomID(), "replying...", R.drawable.reply, modelUser.getFrom(), 1);
                 //  1 is visible, 4 is invisible, 8 is Gone
             }
             // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
+            if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -210,8 +209,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // edit option
         holder.imageViewEdit.setOnClickListener(view -> {
 
-            int deliveryStatus = modelList.get(pos).getMsgStatus();
-            int positionCheck = modelList.size() - pos;    // 1000 - 960 => 40
+            int deliveryStatus = modelUser.getMsgStatus();
+            int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
 
             if(deliveryStatus == 700033){
                 Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
@@ -221,11 +220,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
-                fragmentListener.onEditOrReplyMessage(modelList.get(pos).getMessage(),"edit", modelList.get(pos).getIdKey(),
+                // send data to MainActivity via interface listener
+                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"edit", modelUser.getIdKey(),
                       modelUser.getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
             }
             // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
+            if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -259,7 +259,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // copy option
         holder.imageViewCopy.setOnClickListener(view -> {
 
-            String selectedText = modelList.get(pos).getMessage();
+            String selectedText = modelUser.getMessage();
             ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("label", selectedText);
 
@@ -275,7 +275,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                    return;
 //                }
             // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
+            if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -288,14 +288,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // show pin option
             MainActivity.pinOptionBox.setVisibility(View.VISIBLE);
 
-            // send pin data
-            fragmentListener.sendPinData(modelUser.getIdKey(),
-                    modelUser.getMessage(), ServerValue.TIMESTAMP);
+            // send pin chat data to MainActivity
+            fragmentListener.sendPinData(modelUser.getIdKey(), modelUser.getMessage(),
+                    ServerValue.TIMESTAMP, userName);
 
             holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
 
             // reverse arrow
-            if(modelList.get(pos).getFrom().equals(userName)){
+            if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -311,7 +311,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 lastOpenViewHolder.constraintChatTop.setVisibility(View.GONE);
 
                 // reverse the image resource to it's original imageView
-                if(modelList.get(pos).getFrom().equals(userName)){
+                if(modelUser.getFrom().equals(userName)){
                     lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_left);
                 } else{
                     lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -324,7 +324,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.constraintChatTop.setVisibility(View.VISIBLE);
 
                 // indicate sign that msg can't be edited
-                if(modelList.size() - pos > 100){
+                if(modelList.size() - chatPosition > 100){
                     int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
                     holder.imageViewEdit.setColorFilter(fadedOrangeColor);
                 }
@@ -333,27 +333,49 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 // change the pin icon to unpin/view
                 boolean check = false;
+                boolean checkPublic = false;
                 for (PinMessageModel pinMes :
-                        MainActivity.pinPrivateMessageMap.get(MainActivity.otherUserName)) {
+                        MainActivity.pinPrivateChatMap.get(MainActivity.otherUserName)) {
 
                     if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
                         check = true;
+                        break;
                     }
+                }
+                for (PinMessageModel pinChatEveryone :
+                        MainActivity.pinPublicChatMap.get(MainActivity.otherUserName)) {
 
+                    if (pinChatEveryone.getMsgId().equals(modelUser.getIdKey())) {
+                        checkPublic = true;
+                        break;
+                    }
+                }
+                if(check && checkPublic){
+
+                    holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
+                    MainActivity.pinMineTV.setText("Unpin for me");
+                    MainActivity.pinEveryoneTV.setText("Unpin for everyone");
+
+                }else {
                     if(check){
                         holder.imageViewPin.setImageResource(R.drawable.baseline_private_connectivity_24);
                         MainActivity.pinMineTV.setText("Unpin for me");
-                    }else {
+                        MainActivity.pinEveryoneTV.setText("Pin for everyone");
+                    } else if (checkPublic) {
+                        holder.imageViewPin.setImageResource(R.drawable.baseline_public_24);
+                        MainActivity.pinEveryoneTV.setText("Unpin for everyone");
+                        MainActivity.pinMineTV.setText("Pin for me only");
+                    } else {
                         holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
                         MainActivity.pinMineTV.setText("Pin for me only");
+                        MainActivity.pinEveryoneTV.setText("Pin for everyone");
                     }
-
                 }
 
             } else{ // hide if it's visible and return arrow image
                 holder.constraintChatTop.setVisibility(View.GONE);
                 // reverse the image resource to it's original imageView
-                if(modelList.get(pos).getFrom().equals(userName)){
+                if(modelUser.getFrom().equals(userName)){
                     holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
                 } else{
                     holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -374,7 +396,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
                 holder.constraintChatTop.setVisibility(View.GONE);
             }
-            if(modelList.get(pos).getFrom().equals(userName)){
+            if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
             } else{
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
@@ -389,9 +411,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             // Scroll to the original message's position
             if (originalPosition != RecyclerView.NO_POSITION) {
-                // pos is the item number clicked, originalPosition is the item number found.
+                // position is the item number clicked, originalPosition is the item number found.
                 // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
-                int positionCount = pos - originalPosition;
+                int positionCount = chatPosition - originalPosition;
 
                 if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
                     MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
@@ -409,13 +431,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 // when the down-arrow button on MainActivity(444) is clicked, it should check first if
                 // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
                 MainActivity.goToLastMessage = true;
-                MainActivity.goToNum = pos;
+                MainActivity.goToNum = chatPosition;
 
             }
         });
 
         // Apply highlighting if the current position is in the set of highlighted positions
-        if (highlightedPositions.contains(position)) {
+        if (highlightedPositions.contains(chatPosition)) {
             // Apply highlighting to the view
             holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent_orangeLow));
         } else {
@@ -429,7 +451,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.progressBar.setVisibility(View.VISIBLE);     // change later
             holder.progressBar.incrementProgressBy(40);     // change later
 
-            downloadVoiceNote(pos, holder);
+            downloadVoiceNote(chatPosition, holder);
 
         });
 
