@@ -7,6 +7,18 @@
     android:layout_height="match_parent">
 
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/openContactList"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/msg_count"
+        android:elevation="3dp"
+        android:padding="7dp"
+        android:src="@drawable/baseline_group_add_white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChatList"
@@ -19,17 +31,5 @@
         tools:listitem="@layout/users_card">
 
     </androidx.recyclerview.widget.RecyclerView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="29dp"
-        android:layout_marginBottom="24dp"
-        android:backgroundTint="@color/orange"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/baseline_send_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

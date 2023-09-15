@@ -28,6 +28,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -50,8 +51,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
+import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
@@ -99,17 +102,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
 
     // -----------      pin declares
-    private ConstraintLayout pinIconsContainer, pinMsgBox_Constr;
+    private ConstraintLayout pinIconsContainer, pinMsgBox_Constr, chatContainer;
     public static ConstraintLayout pinMsgContainer, pinOptionBox, line;
-    private ImageView hidePinMsg_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;;
-    private int pinNextPublic, pinNextPrivate;
-    private String msgId, message, pinByWho, pinStatus;
+    private ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
+    private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
+    private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
     private final String PRIVATE = "private";
     private final String PUBLIC = "public";
     private Object timeStamp;
     private ImageView arrowUp, arrowDown, cancelPinOption;
     private TextView totalPinPrivate_TV, pinCount_TV, pinMsg_TV, totalPinPublic_TV, newPinIndicator_TV;
-    public static TextView pinMineTV, pinEveryoneTV;
+    public static TextView pinMineTV, pinEveryoneTV, pinByTV;
+
+
+    //  ---------       Forward chat declares
+    private ConstraintLayout forwardTopContainer, forwardDownContainer;
+    private ImageView cancleForward_IV, searchUserForward_IV;
+    private TextView totalUser_TV;
+    private CircleImageView circleForwardSend;
+    public static boolean onForward;
+    //  ----------------
+
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private EditText editTextMessage;
     private CircleImageView circleSendMessage;
@@ -178,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         conTopUserDetails = findViewById(R.id.contraintTop9);
         conUserClick = findViewById(R.id.constraintNextTop9);
+        chatContainer = findViewById(R.id.constraintContainer9);
         recyclerContainer = findViewById(R.id.constraintRecyler);
         imageViewCalls = findViewById(R.id.imageViewCalls9);
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
@@ -217,12 +231,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         pinLockPublic_IV = findViewById(R.id.public_IV);
         line = findViewById(R.id.line_);
         newPinIndicator_TV = findViewById(R.id.newPinIndicator_TV);
+        pinClose_IV = findViewById(R.id.pinClose_IV);
+        pinByTV = findViewById(R.id.pinByWho_TV);
 
         // pin option (only me or everyone)
         pinOptionBox = findViewById(R.id.pinOptionBoxConstr);
         pinMineTV = findViewById(R.id.textViewPinMine);
         pinEveryoneTV = findViewById(R.id.textViewPinEveryone);
         cancelPinOption = findViewById(R.id.imageViewCancelPin);
+
+        // Forward chat ids
+        forwardTopContainer = findViewById(R.id.forwardConstraint);
+        forwardDownContainer = findViewById(R.id.forwardLastConstr);
+        cancleForward_IV = findViewById(R.id.forwardCancel_IV);
+        searchUserForward_IV = findViewById(R.id.forwardSearchIV);
+        totalUser_TV = findViewById(R.id.userSelectedCount_TV);
+        circleForwardSend = findViewById(R.id.circleForwardSend);
 
         // reply and edit settings
         cardViewReplyOrEdit = findViewById(R.id.cardViewReply9);
@@ -281,6 +305,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // pins
         pinNextPublic = 1;
         pinNextPrivate = 1;
+        pinScrollPrivate = 0;
+        pinScrollPublic = 0;
 
 
         // -------------    msg id ends     ------------------------------
@@ -300,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         mainViewConstraint = findViewById(R.id.mainViewConstraint);
         darkMoodSwitch = findViewById(R.id.switch1);
         textLightAndDay = findViewById(R.id.textView13);
-        topMainContainer = findViewById(R.id.constraintMsgContainer);
+        topMainContainer = findViewById(R.id.HomeTopConstr);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
         new CountDownTimer(25000, 1000){
@@ -385,6 +411,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             textLightAndDay.setText("Dark");
         };
 
+        //  set clickable to true so that items on the background won't be clickable when open
+        chatContainer.setClickable(true);   
+        conTopUserDetails.setClickable(true);
+        conUserClick.setClickable(true);
 
         //  Return back, close msg container
         imageViewBack.setOnClickListener(view -> {
@@ -603,26 +633,67 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         });
 
         // hide pin message view
-        hidePinMsg_IV.setOnClickListener(view -> {  // personalise later
+        View.OnClickListener closePinBox = view -> {  // personalise later
             pinIconsContainer.setVisibility(View.VISIBLE);
             pinMsgBox_Constr.setVisibility(View.INVISIBLE);
             pinMsgContainer.setClickable(false);    //  allow item on the background clickable
-        });
+
+            // hide public pin icons if map is empty
+            if(pinPublicChatMap.get(otherUserName).size() < 1 ){
+                pinPublicIcon_IV.setVisibility(View.GONE);
+                pinLockPublic_IV.setVisibility(View.GONE);
+                totalPinPublic_TV.setVisibility(View.GONE);
+                newPinIndicator_TV.setVisibility(View.GONE);
+            } else {
+                pinPublicIcon_IV.setVisibility(View.VISIBLE);
+                pinLockPublic_IV.setVisibility(View.VISIBLE);
+                totalPinPublic_TV.setVisibility(View.VISIBLE);
+            }
+
+            if(!chatNotFoundID.equals("null")){
+                if(pinStatus.equals(PUBLIC)){
+                    refPublicPinChat.child(user.getUid()).child(otherUserUid).child(chatNotFoundID).removeValue();
+                    if(pinNextPublic > 1)   pinNextPublic-=1;
+                } else {
+                    refPrivatePinChat.child(user.getUid()).child(otherUserUid).child(chatNotFoundID).removeValue();
+                    if(pinNextPrivate > 1)   pinNextPrivate-=1;
+                    // remove from local list
+                    pinPrivateChatMap.get(otherUserName).removeIf(pinMessageModel ->
+                            pinMessageModel.getMsgId().equals(chatNotFoundID));
+                    totalPinPrivate_TV.setText("" + pinPrivateChatMap.get(otherUserName).size());
+                }
+                
+                chatNotFoundID = "null";    // return back to default null
+            }
+            pinStatus = "null";
+
+        };
+        hidePinMsg_IV.setOnClickListener(closePinBox);
+        pinClose_IV.setOnClickListener(closePinBox);
 
         // open private pin message box
         View.OnClickListener openPrivatePinMsg = view -> { // personalise later
             pinIconsContainer.setVisibility(View.GONE);
             pinMsgBox_Constr.setVisibility(View.VISIBLE);
             pinStatus = PRIVATE;      // indicate to show private pins
-            hidePinMsg_IV.setImageResource(R.drawable.lock);  // indicate public icon
+            hidePinMsg_IV.setImageResource(R.drawable.lock);  // indicate private icon
             pinMsgContainer.setClickable(true);   //  stop item on the background clickable
 
             // show current pin message and total pin number
             int pinNum = pinPrivateChatMap.get(otherUserName).size();
             pinCount_TV.setText("(" + pinNextPrivate + "/" + (pinNum) + ")");
             int currentPinNumber = pinNum - pinNextPrivate;
-            String getChat = pinPrivateChatMap.get(otherUserName).get(currentPinNumber).getMessage();
+            String getChat;
+            try{
+                getChat = pinPrivateChatMap.get(otherUserName).get(currentPinNumber).getMessage();
+            } catch (Exception e){
+                getChat = pinPrivateChatMap.get(otherUserName).get(pinNum-1).getMessage();
+            }
             pinMsg_TV.setText(getChat);
+            // hide pinByWho visibility
+            pinByTV.setVisibility(View.GONE);
+            pinClose_IV.setVisibility(View.GONE);
+
         };
         pinPrivateIcon_IV.setOnClickListener(openPrivatePinMsg);
         totalPinPrivate_TV.setOnClickListener(openPrivatePinMsg);
@@ -639,10 +710,24 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             int pinNum = pinPublicChatMap.get(otherUserName).size();
             pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
             int currentPinNumber = pinNum - pinNextPublic;
-            String getChat = pinPublicChatMap.get(otherUserName).get(currentPinNumber).getMessage();
+            String getChat, getPinBy;
+            try{
+                getChat = pinPublicChatMap.get(otherUserName).get(currentPinNumber).getMessage();
+                getPinBy = pinPublicChatMap.get(otherUserName).get(currentPinNumber).getPinByWho();
+            } catch (Exception e){
+                getChat = pinPublicChatMap.get(otherUserName).get(pinNum-1).getMessage();
+                getPinBy = pinPublicChatMap.get(otherUserName).get(pinNum -1).getPinByWho();
+            }
+            // display pin chat and pinByWho on the UI
             pinMsg_TV.setTypeface(null);
             pinMsg_TV.setText(getChat);
-            newPinIndicator_TV.setVisibility(View.INVISIBLE);
+            pinByTV.setText(getPinBy);
+            newPinIndicator_TV.setVisibility(View.GONE);
+
+            // make pinByWho visible and close pin box option
+            pinByTV.setVisibility(View.VISIBLE);
+            pinClose_IV.setVisibility(View.VISIBLE);
+
         };
         pinPublicIcon_IV.setOnClickListener(openPublicPinMsg);
         totalPinPublic_TV.setOnClickListener(openPublicPinMsg);
@@ -651,8 +736,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         View.OnClickListener closePinOption = view -> {
             pinOptionBox.setVisibility(View.GONE);
         };
-        cancelPinOption.setOnClickListener(closePinOption);
-        pinOptionBox.setOnClickListener(closePinOption);
+        cancelPinOption.setOnClickListener(closePinOption); // close when the cancel pin is click
+        pinOptionBox.setOnClickListener(closePinOption);    // close when the background is click
 
         // pin message for only me -- private
         pinMineTV.setOnClickListener(view -> pinAndUnpinChatPrivately());
@@ -665,40 +750,62 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // arrow up, scroll to upper previous pins
         arrowUp.setOnClickListener(view -> {    // go to next upper pin message
 
-            if(pinStatus.equals("private")){    // show private pins
+            if(pinStatus.equals(PRIVATE)){    // show private pins
                 pinNextPrivate += 1;
+                pinScrollPrivate += 1;
                 int pinNum = pinPrivateChatMap.get(otherUserName).size();
                 int reduceNumber = pinNum - pinNextPrivate;
+                int scrollPosition = pinNum - pinScrollPrivate;
 
-                if(reduceNumber >= 0){  // only scroll when pin is between 0 to pinNum
+                // only scroll when pin is between 0 to pinNum
+                if(scrollPosition >= 0) {
+                    scrollToPinMessage(scrollPosition); // call method to scroll to message
+                } else {
+                    pinScrollPrivate -= 1;
+                    Toast.makeText(this, "No more pin message! Scroll down!", Toast.LENGTH_SHORT).show();
+                }
 
+                // only update UI when pin is between 0 to pinNum
+                if(reduceNumber >= 0){
                     pinCount_TV.setText("(" + pinNextPrivate + "/" + (pinNum) + ")");
                     pinMsg_TV.setText(pinPrivateChatMap.get(otherUserName).get(reduceNumber).getMessage());
-
-                    scrollToPinMessage(reduceNumber); // call method to scroll to message
-
                 } else{
                     pinNextPrivate -= 1;
-                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
                 }
+
             } else {        // show public pins
                 pinNextPublic += 1;
+                pinScrollPublic += 1;
                 int pinNum = pinPublicChatMap.get(otherUserName).size();
                 int reduceNumber = pinNum - pinNextPublic;
+                int scrollPosition = pinNum - pinScrollPublic;
+                String getChat, getPinByWho;
+                try{
+                    getChat = pinPublicChatMap.get(otherUserName).get(reduceNumber).getMessage();
+                    getPinByWho = pinPublicChatMap.get(otherUserName).get(reduceNumber).getPinByWho();
+                } catch (Exception e ){
+                    getChat = pinPublicChatMap.get(otherUserName).get(pinNum - 1).getMessage();
+                    getPinByWho = pinPublicChatMap.get(otherUserName).get(pinNum - 1).getPinByWho();
+                }
 
-                if(reduceNumber >= 0){  // only scroll when pin is between 0 to pinNum
+                if(scrollPosition >= 0) {   // only scroll when pin is between 0 to pinNum
+                    scrollToPinMessage(scrollPosition); // call method to scroll to message
+                } else {
+                    pinScrollPublic -= 1;
+                    pinMsg_TV.setText("...");
+                    pinByTV.setText("");
+//                    Toast.makeText(this, "No more pin message! Scroll down!", Toast.LENGTH_SHORT).show();
+                }
 
+                if(reduceNumber >= 0){  // only update UI when pin is between 0 to pinNum
                     pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
-                    pinMsg_TV.setText(pinPublicChatMap.get(otherUserName).get(reduceNumber).getMessage());
-
-                    scrollToPinMessage(reduceNumber); // call method to scroll to message
-
+                    pinMsg_TV.setText(getChat);
+                    pinByTV.setText("Pin by " + getPinByWho);
                 } else{
                     pinNextPublic -= 1;
-                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
                 }
             }
-
 
         });
 
@@ -707,39 +814,74 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             if(pinStatus.equals(PRIVATE)){
                 pinNextPrivate -= 1;
+                pinScrollPrivate -= 1;
                 int pinNum = pinPrivateChatMap.get(otherUserName).size();
                 int increaseNumber = pinNum - pinNextPrivate;
+                int scrollPosition = pinNum - pinScrollPrivate;
 
-                if (increaseNumber < pinNum){
-
-                    pinCount_TV.setText("(" + pinNextPrivate + "/" + (pinNum) + ")");
-                    pinMsg_TV.setText(pinPrivateChatMap.get(otherUserName).get(increaseNumber).getMessage());
-
+                if(scrollPosition < pinNum){
                     scrollToPinMessage(increaseNumber); // call method to scroll to message
-
                 } else {
-                    pinNextPrivate += 1; // to enable it stop decreasing
+                    pinScrollPrivate += 1; // to enable it stop decreasing
                     Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                pinNextPublic -= 1;
-                int pinNum = pinPublicChatMap.get(otherUserName).size();
-                int increaseNumber = pinNum - pinNextPublic;
 
                 if (increaseNumber < pinNum){
+                    pinCount_TV.setText("(" + pinNextPrivate + "/" + (pinNum) + ")");
+                    pinMsg_TV.setText(pinPrivateChatMap.get(otherUserName).get(increaseNumber).getMessage());
+                } else {
+                    pinNextPrivate += 1; // to enable it stop decreasing
+                }
 
+            } else {
+                pinNextPublic -= 1;
+                pinScrollPublic -= 1;
+                int pinNum = pinPublicChatMap.get(otherUserName).size();
+                int increaseNumber = pinNum - pinNextPublic;
+                int scrollPosition = pinNum - pinScrollPublic;
+                String getChat, getPinByWho;
+                try{
+                    getChat = pinPublicChatMap.get(otherUserName).get(increaseNumber).getMessage();
+                    getPinByWho = pinPublicChatMap.get(otherUserName).get(increaseNumber).getPinByWho();
+                }catch (Exception e){
+                    getChat = pinPublicChatMap.get(otherUserName).get(pinNum - 1).getMessage();
+                    getPinByWho = pinPublicChatMap.get(otherUserName).get(pinNum - 1).getPinByWho();
+                }
+
+                // only scroll when pin is between 0 to pinNum
+                if (scrollPosition < pinNum ) {
+                    scrollToPinMessage(scrollPosition); // call method to scroll to message
+                } else {
+                    pinScrollPublic += 1;
+                    Toast.makeText(this, "Scroll up for more pin chats!", Toast.LENGTH_SHORT).show();
+                }
+
+                // only update UI when pin is between 0 to pinNum
+                if (increaseNumber < pinNum){
                     pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
-                    pinMsg_TV.setText(pinPublicChatMap.get(otherUserName).get(increaseNumber).getMessage());
-
-                    scrollToPinMessage(increaseNumber); // call method to scroll to message
-
+                    pinMsg_TV.setText(getChat);
+                    pinByTV.setText("Pin by " + getPinByWho);
                 } else {
                     pinNextPublic += 1; // to enable it stop decreasing
-                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
                 }
             }
 
         });
+
+        // cancel forward option
+        cancleForward_IV.setOnClickListener(view -> {
+            pinMsgContainer.setVisibility(View.VISIBLE);
+            conTopUserDetails.setVisibility(View.VISIBLE);
+            conUserClick.setVisibility(View.VISIBLE);
+            constraintMsgBody.setVisibility(View.VISIBLE);
+            tabLayoutGeneral.setVisibility(View.VISIBLE);
+
+            forwardTopContainer.setVisibility(View.INVISIBLE);
+            forwardDownContainer.setVisibility(View.INVISIBLE);
+
+            onForward = false;
+        });
+
 
         // Delay 5 seconds to load message
         new CountDownTimer(5000, 1000){
@@ -758,6 +900,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
+
+
     //  --------------- methods && interface --------------------
 
 
@@ -769,7 +913,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         getPreviousCounts();
         convertUnreadToReadMessage(otherName, userName, uID);
         pinIconsVisibility(otherName);
-
     }
 
     @Override
@@ -968,6 +1111,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 nameReply.setText(replyFrom);
             }
         }
+
+    }
+
+    @Override
+    public void onForwardChat() {
+        pinMsgContainer.setVisibility(View.GONE);
+        conTopUserDetails.setVisibility(View.INVISIBLE);
+        conUserClick.setVisibility(View.INVISIBLE);
+        constraintMsgBody.setVisibility(View.INVISIBLE);
+
+        tabLayoutGeneral.setVisibility(View.GONE);
+        forwardTopContainer.setVisibility(View.VISIBLE);
+        forwardDownContainer.setVisibility(View.VISIBLE);
+        forwardTopContainer.setClickable(true);
+        forwardDownContainer.setClickable(true);
+
+        onForward = true;
+
+//        ChatListAdapter.getInstance().forwardCheckBoxVisibility(ChatListAdapter.holder_);
+        ChatListAdapter.getInstance().noty();
 
     }
 
@@ -1805,10 +1968,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         List<PinMessageModel> pinPrivateList = new ArrayList<>();
         List<PinMessageModel> pinEveryoneList = new ArrayList<>();
 
+        // get private pin chats
         refPrivatePinChat.child(myID).child(otherID).orderByChild("pinTime").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
+                // read only once
                 if(readDatabase == 0){
                     pinPrivateList.clear();
 
@@ -1828,21 +1992,51 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         });
 
+        // get and updates new pin chats
         refPublicPinChat.child(myID).child(otherID).orderByChild("pinTime").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(readDatabase == 0){
-                    pinEveryoneList.clear();
+                pinEveryoneList.clear();
 
-                    for (DataSnapshot snapshotPin : snapshot.getChildren()) {
-                        // check if pin message still exist
-                        if(snapshotPin.child("msgId").exists()){
-                            PinMessageModel pinMsgModel = snapshotPin.getValue(PinMessageModel.class);
-                            pinEveryoneList.add(pinMsgModel);
-                        }
+                for (DataSnapshot snapshotPin : snapshot.getChildren()) {
+                    // check if pin message still exist
+                    if(snapshotPin.child("msgId").exists()){
+                        PinMessageModel pinMsgModel = snapshotPin.getValue(PinMessageModel.class);
+                        pinEveryoneList.add(pinMsgModel);
                     }
                 }
+
+                int newCount = pinEveryoneList.size();
+                totalPinPublic_TV.setText("" + newCount);
+
+                System.out.println("M1843 - I was added " + pinEveryoneList.size());
+                pinPublicChatMap.put(otherName, pinEveryoneList);   // keep updating the map
+
+                // trigger pinIcon visible if pinMsgBox is invisible
+                if(pinStatus.equals("null")){
+                    // shows icon if pin container in invisible and pin size is greater than 1
+                    if(pinMsgBox_Constr.getVisibility() != View.VISIBLE && pinEveryoneList.size() > 0){
+                        pinPublicIcon_IV.setVisibility(View.VISIBLE);
+                        pinLockPublic_IV.setVisibility(View.VISIBLE);
+                        totalPinPublic_TV.setVisibility(View.VISIBLE);
+
+                    } else {
+                        //  hide pin_icon if pin map is empty
+                        pinPublicIcon_IV.setVisibility(View.GONE);
+                        pinLockPublic_IV.setVisibility(View.GONE);
+                        totalPinPublic_TV.setVisibility(View.GONE);
+                        newPinIndicator_TV.setVisibility(View.GONE);
+                    }
+
+                } else if(pinStatus.equals(PUBLIC)){    // update UI
+//                    pinMsg_TV.setText("" + pinEveryoneList.get(pinEveryoneList.size()-1).getMessage());
+                    pinCount_TV.setText("(" + pinNextPublic + "/" + newCount + ")");
+//                    pinNextPublic = 1;    // return to default, 1
+                    newPinIndicator_TV.setVisibility(View.VISIBLE);
+                    pinMsg_TV.setTypeface(null);
+                }
+
             }
 
             @Override
@@ -1857,6 +2051,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     private void pinAndUnpinChatForEveryone(){
+
+        pinStatus = PUBLIC;      // indicate to show public pins
 
         //  hide pin_icon if pin map is empty
         if(pinPublicChatMap.get(otherUserName).size() <= 1){
@@ -1909,6 +2105,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText("Chat unpin...");
                 pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
             }
+            Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
         } else {
             // Add the new pin message to the local map
@@ -1930,25 +2127,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText(message);
                 pinCount_TV.setText("(1/" + newCount + ")");
                 pinNextPublic = 1;    // return to default, 1
+                pinScrollPublic = 0;    // return to default, 0
             }
 
-            // trigger pinIcon visible if pinMsgBox is invisible
             if(pinMsgBox_Constr.getVisibility() != View.VISIBLE){
                 pinPublicIcon_IV.setVisibility(View.VISIBLE);
                 pinLockPublic_IV.setVisibility(View.VISIBLE);
                 totalPinPublic_TV.setVisibility(View.VISIBLE);
             }
-            newPinIndicator_TV.setVisibility(View.VISIBLE);
-            pinMsg_TV.setTypeface(null);
+            Toast.makeText(this, "Chat pin!", Toast.LENGTH_SHORT).show();
 
         }
 
         // close the pin box option
         pinOptionBox.setVisibility(View.GONE);
+        pinStatus = "null";      // indicate to show public pins
 
     }
 
     private void pinAndUnpinChatPrivately(){
+
+        pinStatus = PRIVATE;      // indicate to show public pins
 
         //  hide pin_icon if pin map is empty
         if(pinPrivateChatMap.get(otherUserName).size() <= 1){
@@ -1999,6 +2198,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText("Chat unpin...");
                 pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
             }
+            Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
         } else {
             // Add the new pin message to the local map
@@ -2018,6 +2218,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText(message);
                 pinCount_TV.setText("(1/" + newCount + ")");
                 pinNextPrivate = 1;    // return to default, 1
+                pinScrollPrivate = 0;    // return to default, 1
             }
 
             // trigger pinIcon visible if pinMsgBox is invisible
@@ -2027,11 +2228,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 totalPinPrivate_TV.setVisibility(View.VISIBLE);
             }
             pinMsg_TV.setTypeface(null);
-
+            Toast.makeText(this, "Chat pin!", Toast.LENGTH_SHORT).show();
         }
 
         // close the pin box option
         pinOptionBox.setVisibility(View.GONE);
+        pinStatus = "null";      // indicate to show public pins
 
     }
 
@@ -2062,6 +2264,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             adapterMap.get(otherUserName).highlightedPositions.clear();
             adapterMap.get(otherUserName).highlightedPositions.add(position);  // add to color list
 
+        } else {
+            Toast.makeText(this, "Chat not found", Toast.LENGTH_SHORT).show();
+            chatNotFoundID = findMsgId;
         }
     }
 
@@ -2552,8 +2757,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             totalPinPublic_TV.setText(""); // make pin count null
             pinNextPrivate = 1;  // return pinNumber to default
             pinNextPublic = 1;  // return public pinNumber to default
+            pinScrollPublic = 0;
+            pinScrollPrivate = 0;
             pinOptionBox.setVisibility(View.GONE);  // close the option box
             line.setVisibility(View.GONE);
+            pinStatus = "null";
 
             // highlight send message and new receive message indicator
             receiveIndicator.setVisibility(View.GONE);

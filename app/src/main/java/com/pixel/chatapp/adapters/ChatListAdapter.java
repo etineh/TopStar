@@ -14,6 +14,7 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,6 +69,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
+    public static ChatViewHolder holder_;
     boolean loadMsg = true;
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -119,6 +121,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         int pos = position;
         String myUsersId = otherUsersId.get(pos);
+        holder_ = holder;
 
         new Thread(() -> {
             // set user "typing" to be false when I disconnect
@@ -196,21 +199,30 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 // -------- send adapter to MainActivity
                 holder.constraintLast.setOnClickListener(view -> {
 
-                        listener.msgBodyVisibility(otherName, imageUrl, userName, myUsersId);
-                    try {
+                    if(MainActivity.onForward){
+                        holder.checkBoxContainer.setVisibility(View.VISIBLE);
+                        holder.checkBoxToWho.setChecked(true);
+//                        holder.textViewDay.setVisibility(View.INVISIBLE);
+//                        holder.imageViewMenu.setVisibility(View.INVISIBLE);
+//                        holder.textViewTime.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+                        try {
 
+                            listener.msgBodyVisibility(otherName, imageUrl, userName, myUsersId);
 
-                        listener.getLastSeenAndOnline(myUsersId);
+                            listener.getLastSeenAndOnline(myUsersId);
 
-                        listener.msgBackgroundActivities(myUsersId);
+                            listener.msgBackgroundActivities(myUsersId);
 
-                        listener.callAllMethods(otherName, userName, myUsersId);
+                            listener.callAllMethods(otherName, userName, myUsersId);
 
-                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+                            holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
-                    } catch (Exception e){
-                        Toast.makeText(mContext, "Send your first message here...!", Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur (ChatListAdapter L218)" + e.getMessage());
+                        } catch (Exception e){
+                            Toast.makeText(mContext, "Send your first message here...!", Toast.LENGTH_SHORT).show();
+                            System.out.println("Error occur (ChatListAdapter L218)" + e.getMessage());
+                        }
                     }
 
                 });
@@ -289,9 +301,41 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             }
         });
 
+        if(MainActivity.onForward){
+            holder.checkBoxContainer.setVisibility(View.VISIBLE);
+            holder.checkBoxToWho.setChecked(true);
+//                        holder.textViewDay.setVisibility(View.INVISIBLE);
+//                        holder.imageViewMenu.setVisibility(View.INVISIBLE);
+//                        holder.textViewTime.setVisibility(View.INVISIBLE);
+        }
+
+        // forward option
+        View.OnClickListener toggleCheckBox = view -> {
+            CheckBox checkBox = holder.checkBoxToWho;
+            checkBox.setChecked(!checkBox.isChecked()); // Toggle the checked state
+//            if(chec)
+
+//            holder.textViewDay.setVisibility(View.INVISIBLE);
+
+        };
+
+        holder.checkBoxContainer.setOnClickListener(toggleCheckBox);
+
     }
 
     //      --------- methods -----------
+
+    public void noty(){
+        notifyDataSetChanged();
+    }
+    public void forwardCheckBoxVisibility(ChatViewHolder holder){
+
+//        notifyDataSetChanged();
+        holder.textViewDay.setVisibility(View.INVISIBLE);
+        holder.imageViewMenu.setVisibility(View.INVISIBLE);
+        holder.textViewTime.setVisibility(View.INVISIBLE);
+        System.out.println("Check if it works");
+    }
 
     // get lastMessage, and Date/Time sent, and set delivery msg status
     private void getLastMsg_TimeSent_MsgDeliveryVisible(ChatViewHolder holder, String myUsersId){
@@ -517,7 +561,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         private TextView textViewDay;
         private CardView cardView;
         RecyclerView recyclerChat;
-        int listCount;
+
+        // forward declares
+        public ConstraintLayout checkBoxContainer;
+        public CheckBox checkBoxToWho;
 
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -539,6 +586,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
             constraintTop = itemView.findViewById(R.id.constraintTop);
             constraintLast = itemView.findViewById(R.id.constrainLast);
+            checkBoxToWho = itemView.findViewById(R.id.checkBoxForward);
+            checkBoxContainer = itemView.findViewById(R.id.checkBoxContainer);
+
 //
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
             recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));

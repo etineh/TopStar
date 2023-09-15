@@ -1,20 +1,11 @@
 package com.pixel.chatapp.home.fragments;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.RelativeDateTimeFormatter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,6 +29,8 @@ import com.pixel.chatapp.model.ChatListModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ChatsListFragment extends Fragment {
 
     public static ChatsListFragment newInstance(){
@@ -50,8 +42,8 @@ public class ChatsListFragment extends Fragment {
     DatabaseReference fReference, refChecks;
 
     String userName;
-    ChatListAdapter adapter;
-    FloatingActionButton fab;
+    static ChatListAdapter adapter;
+    CircleImageView openContactList;
 
     private List<ChatListModel> chatListID;
     private List<String> mUsersID;
@@ -64,7 +56,7 @@ public class ChatsListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.chats_list_fragment, container, false);
 
-        fab = view.findViewById(R.id.floatingActionButton);
+        openContactList = view.findViewById(R.id.openContactList);
         recyclerView = view.findViewById(R.id.recyclerViewChatList);
 
         recyclerView.setHasFixedSize(true);
@@ -76,7 +68,7 @@ public class ChatsListFragment extends Fragment {
 //        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         // Go to contact
-        fab.setOnClickListener(new View.OnClickListener() {
+        openContactList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -130,6 +122,7 @@ public class ChatsListFragment extends Fragment {
             }
         });
 
+
         chatList();
 //        System.out.println("Hello world two");
 
@@ -139,6 +132,10 @@ public class ChatsListFragment extends Fragment {
 
     //  ---------------  All   methods     -----------------
 
+    public static void onit(){
+//        adapter.helo();
+
+    }
     private void chatList(){
 
         mUsersID = new ArrayList<>();

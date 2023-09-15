@@ -183,6 +183,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         //   get the number of new message I have
 //        newMsgNumber(holder, pos);
 
+        // forward option
+        holder.imageViewForward.setOnClickListener(view -> {
+            fragmentListener.onForwardChat();
+        });
 
         // reply option
         holder.imageViewReply.setOnClickListener(view -> {

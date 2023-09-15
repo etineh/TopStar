@@ -32,4 +32,12 @@ public class PinMessageModel {
     public void setPinTime(long pinTime) {
         this.pinTime = pinTime;
     }
+
+    public String getPinByWho() {
+        return pinByWho;
+    }
+
+    public void setPinByWho(String pinByWho) {
+        this.pinByWho = pinByWho;
+    }
 }

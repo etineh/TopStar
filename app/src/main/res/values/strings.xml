@@ -12,6 +12,7 @@
     <string name="disappear_msg">Set disappear message</string>
     <string name="search">Search</string>
     <string name="join_tour">Join Tournament</string>
+    <string name="forward">Forward to...</string>
     <string name="file">File</string>
     <string name="chat">Chat...</string>
     <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
