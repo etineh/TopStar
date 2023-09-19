@@ -339,17 +339,19 @@
                     app:layout_constraintEnd_toStartOf="@id/textViewChatTime"
                     app:tint="@color/orange" />
 
-                <TextView
-                    android:id="@+id/textViewEditSender"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/editedSender_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="1dp"
                     android:textSize="11sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/imageViewSeen"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/baseline_mode_edit_24" />
 
                 <TextView
                     android:id="@+id/textViewChatTime"

@@ -332,15 +332,17 @@
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/arrow_right_" />
 
-                <TextView
-                    android:id="@+id/textViewEditedReceiver"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/editedReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
                     android:layout_marginStart="5dp"
                     android:layout_marginBottom="1dp"
                     android:textSize="11sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/textViewChatTime2" />
+                    app:layout_constraintStart_toEndOf="@+id/textViewChatTime2"
+                    app:srcCompat="@drawable/baseline_mode_edit_24" />
 
                 <TextView
                     android:id="@+id/textViewChatTime2"
@@ -348,6 +350,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="-10dp"
                     android:layout_marginBottom="1dp"
+                    android:text="234 pm"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageViewOptions2" />

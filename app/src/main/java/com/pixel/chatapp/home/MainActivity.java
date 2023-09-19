@@ -118,9 +118,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     //  ---------       Forward chat declares
     private ConstraintLayout forwardTopContainer, forwardDownContainer;
     private ImageView cancleForward_IV, searchUserForward_IV;
-    private TextView totalUser_TV;
-    private CircleImageView circleForwardSend;
+    public static TextView totalUser_TV;
+    public static int selectCount;
+    public static CircleImageView circleForwardSend;
     public static boolean onForward;
+    public static List<ChatListAdapter.ChatViewHolder> myHolder_;
+    List<ChatListAdapter.ChatViewHolder> myHolderNew;
+    public static List <String> selectedUsernames;
+    public static Map<String, Object> forwardMessageMap;
+    private int forwardType;
+    private long forwardRandomID;
+    private String forwardChat;
+
     //  ----------------
 
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
@@ -302,12 +311,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherNameList = new ArrayList<>();
         otherUidList = new ArrayList<>();
         readDatabase = 0;  // 0 is read, 1 is no_read
+
         // pins
         pinNextPublic = 1;
         pinNextPrivate = 1;
         pinScrollPrivate = 0;
         pinScrollPublic = 0;
 
+        //  forward
+        myHolderNew = new ArrayList<>();
+        selectedUsernames = new ArrayList<>();
+        forwardMessageMap = new HashMap<>();
+        selectCount = 0;
 
         // -------------    msg id ends     ------------------------------
 
@@ -869,17 +884,57 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         });
 
         // cancel forward option
-        cancleForward_IV.setOnClickListener(view -> {
-            pinMsgContainer.setVisibility(View.VISIBLE);
-            conTopUserDetails.setVisibility(View.VISIBLE);
-            conUserClick.setVisibility(View.VISIBLE);
-            constraintMsgBody.setVisibility(View.VISIBLE);
-            tabLayoutGeneral.setVisibility(View.VISIBLE);
+        cancleForward_IV.setOnClickListener(view -> cancelForwardSettings() );
 
-            forwardTopContainer.setVisibility(View.INVISIBLE);
-            forwardDownContainer.setVisibility(View.INVISIBLE);
+        // send forward message
+        circleForwardSend.setOnClickListener(view -> {
 
-            onForward = false;
+            for (String userDetails : selectedUsernames ) {
+
+                // split the user details to get each user name and uid
+                String[] eachUser = userDetails.split(" ");
+                String otherName = eachUser[0];
+                String otherUid = eachUser[1];
+
+                // save to local list for fast update
+                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", "",
+                        8, "", 700033, forwardType, forwardRandomID, idKey, false, true);
+
+                MessageAdapter adapter = adapterMap.get(otherName);
+                adapter.addNewMessageDB(messageModel);
+
+                // scroll to new position only if scrollCheck int is < 20
+                int scrollCheck = 0;
+                try{
+                    scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherName);
+                } catch (Exception e) {
+                    scrollCheck = adapter.getItemCount();
+                }
+                int lastPosition = adapterMap.get(otherName).getItemCount()-1;
+                if(scrollCheck < 20){    // scroll to last position on new message update.
+                    recyclerMap.get(otherName).scrollToPosition(lastPosition);
+                }   // else don't scroll.
+
+
+                String key = refMsgFast.child(myUserName).child(otherName).push().getKey();  // create an id for each message
+
+                // save to new message db for fast response
+                refMsgFast.child(myUserName).child(otherName).child(key).setValue(forwardMessageMap);
+                refMsgFast.child(otherName).child(myUserName).child(key).setValue(forwardMessageMap);
+
+                // save to main message
+                refMessages.child(myUserName).child(otherName).child(key).setValue(forwardMessageMap);
+                refMessages.child(otherName).child(myUserName).child(key).setValue(forwardMessageMap);
+
+                // save last msg for outside chat display
+                refLastDetails.child(user.getUid()).child(otherUid).setValue(forwardMessageMap);
+                refLastDetails.child(otherUid).child(user.getUid()).setValue(forwardMessageMap);
+
+            }
+
+            cancelForwardSettings();
+            Toast.makeText(this, "Chat forwarded", Toast.LENGTH_SHORT).show();
+
         });
 
 
@@ -903,7 +958,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 
     //  --------------- methods && interface --------------------
-
 
     //  ----------   interface    ---------------------
     @Override
@@ -1115,7 +1169,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void onForwardChat() {
+    public void onForwardChat(int forwardType_, long forwardRandomID_, String chat) {
+
         pinMsgContainer.setVisibility(View.GONE);
         conTopUserDetails.setVisibility(View.INVISIBLE);
         conUserClick.setVisibility(View.INVISIBLE);
@@ -1129,8 +1184,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         onForward = true;
 
-//        ChatListAdapter.getInstance().forwardCheckBoxVisibility(ChatListAdapter.holder_);
-        ChatListAdapter.getInstance().noty();
+        forwardType = forwardType_;
+        forwardRandomID = forwardRandomID_;
+        forwardChat = chat;
+
+//        List<ChatListAdapter.ChatViewHolder> myHolderNew = new ArrayList<>();
+        myHolderNew.addAll(myHolder_);  // add all users holder that was gotten from chatListAdapter
+
+        // call forward setting method
+        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
 
     }
 
@@ -1329,7 +1391,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         Map<String, Object> messageMap = new HashMap<>();
 
         messageMap.put("from", myUserName);
-        messageMap.put("type", type);
+        messageMap.put("type", type);            // 0 is for text while 1 is for voice note
         messageMap.put("randomID", randomID);
         messageMap.put("message", message);
 //            messageMap.put("voicenote", vn);
@@ -1339,6 +1401,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         messageMap.put("visibility", replyVisibility);
         messageMap.put("replyID", idKey);
         messageMap.put("replyMsg", replyText);
+        messageMap.put("isChatPin", false);
+        messageMap.put("isChatForward", false);
 
         return messageMap;
     }
@@ -1361,8 +1425,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             long randomID = (long)(Math.random() * 1_010_001);
 
             // save to local list for fast update
-            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "",
-                    "", replyVisibility, replyText, 700033, type, randomID, idKey);
+            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "", "",
+                    replyVisibility, replyText, 700033, type, randomID, idKey, false, false);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
             adapter.addNewMessageDB(messageModel);
@@ -1384,7 +1448,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             if(scrollCheck < 20){    // scroll to last position on new message update.
                 recyclerMap.get(otherUserName).scrollToPosition(lastPosition);
             }   // else don't scroll.
-
 
             String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
 
@@ -2010,7 +2073,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 int newCount = pinEveryoneList.size();
                 totalPinPublic_TV.setText("" + newCount);
 
-                System.out.println("M1843 - I was added " + pinEveryoneList.size());
                 pinPublicChatMap.put(otherName, pinEveryoneList);   // keep updating the map
 
                 // trigger pinIcon visible if pinMsgBox is invisible
@@ -2627,7 +2689,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
     }
 
-        // set user image on settings
+    // cancel the forward checkbox visible and restore the chatList user state
+    public void cancelForwardSettings(){
+
+        onForward = false;
+        selectCount = 0;
+        selectedUsernames.clear();
+
+        pinMsgContainer.setVisibility(View.VISIBLE);
+        conTopUserDetails.setVisibility(View.VISIBLE);
+        conUserClick.setVisibility(View.VISIBLE);
+        constraintMsgBody.setVisibility(View.VISIBLE);
+        tabLayoutGeneral.setVisibility(View.VISIBLE);
+
+        forwardTopContainer.setVisibility(View.INVISIBLE);
+        forwardDownContainer.setVisibility(View.INVISIBLE);
+
+        // call forward setting method
+        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+
+    }
+
+    // set user image on settings
     private void setUserDetails(){
         refUser.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -2797,6 +2880,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             }).start();
 
+        } else if (onForward) {
+            cancelForwardSettings();
         } else {
             super.onBackPressed();
         }

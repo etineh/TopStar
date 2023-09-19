@@ -20,13 +20,16 @@ public class MessageModel implements Serializable {
     private int type;
     private long randomID;
     private String replyID;
+    boolean isChatPin, isChatForward;
+
 //    private String voicenote;
 
     public MessageModel() {
     }
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
-                        int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID) {
+                        int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID,
+                        boolean isChatPin, boolean isChatForward) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -39,6 +42,8 @@ public class MessageModel implements Serializable {
         this.type = type;
         this.randomID = randomID;
         this.replyID = replyID;
+        this.isChatPin = isChatPin;
+        this.isChatForward = isChatForward;
 
 //        this.voicenote = voicenote;
     }
@@ -132,6 +137,22 @@ public class MessageModel implements Serializable {
 
     public void setReplyID(String replyID) {
         this.replyID = replyID;
+    }
+
+    public boolean isChatPin() {
+        return isChatPin;
+    }
+
+    public void setChatPin(boolean chatPin) {
+        isChatPin = chatPin;
+    }
+
+    public boolean isChatForward() {
+        return isChatForward;
+    }
+
+    public void setChatForward(boolean chatForward) {
+        isChatForward = chatForward;
     }
 
     //    public String getVoicenote() {

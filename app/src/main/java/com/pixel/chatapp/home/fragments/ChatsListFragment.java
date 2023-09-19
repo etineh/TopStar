@@ -41,9 +41,9 @@ public class ChatsListFragment extends Fragment {
     FirebaseUser user;
     DatabaseReference fReference, refChecks;
 
-    String userName;
+    String myUserName;
     static ChatListAdapter adapter;
-    CircleImageView openContactList;
+    public static CircleImageView openContactList;
 
     private List<ChatListModel> chatListID;
     private List<String> mUsersID;
@@ -68,13 +68,10 @@ public class ChatsListFragment extends Fragment {
 //        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         // Go to contact
-        openContactList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        openContactList.setOnClickListener(view1 -> {
 
-                Intent intent = new Intent(getContext(), UsersContactActivity.class);
-                startActivity(intent);
-            }
+            Intent intent = new Intent(getContext(), UsersContactActivity.class);
+            startActivity(intent);
         });
 
 
@@ -84,7 +81,7 @@ public class ChatsListFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                userName = snapshot.child(user.getUid()).child("userName").getValue().toString();
+                myUserName = snapshot.child(user.getUid()).child("userName").getValue().toString();
             }
 
             @Override
@@ -109,7 +106,7 @@ public class ChatsListFragment extends Fragment {
                 }
 
                 // changed the adapter from the chatList method to here and it was faster loading
-                adapter = new ChatListAdapter(mUsersID, getContext(), userName);
+                adapter = new ChatListAdapter(mUsersID, getContext(), myUserName);
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
                 recyclerView.setAdapter(adapter);
 
@@ -124,8 +121,6 @@ public class ChatsListFragment extends Fragment {
 
 
         chatList();
-//        System.out.println("Hello world two");
-
 
         return view;
     }

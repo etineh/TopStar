@@ -152,8 +152,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
         holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
-        holder.editNotify.setText(modelUser.getEdit());    // notify user when msg is edited
-//notifyDataSetChanged();
+
+        // notify user when msg is edited
+        if(modelUser.getEdit() != null){
+            holder.editNotify.setVisibility(View.VISIBLE);
+        }
 
         // ----------------- Voice Note setting
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
@@ -185,7 +188,30 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // forward option
         holder.imageViewForward.setOnClickListener(view -> {
-            fragmentListener.onForwardChat();
+
+            long randomID = (long)(Math.random() * 1_010_001);
+
+            MainActivity.forwardMessageMap.put("from", userName);
+            MainActivity.forwardMessageMap.put("type", modelUser.getType());
+            MainActivity.forwardMessageMap.put("randomID", randomID);
+            MainActivity.forwardMessageMap.put("message", modelUser.getMessage());
+            MainActivity.forwardMessageMap.put("msgStatus", 700024);
+            MainActivity.forwardMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
+            MainActivity.forwardMessageMap.put("visibility", 8);
+            MainActivity.forwardMessageMap.put("isChatPin", false);
+            MainActivity.forwardMessageMap.put("isChatForward", true);
+
+
+            fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage());
+
+            holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
         });
 
         // reply option
@@ -701,8 +727,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textViewShowMsg, textViewNewMsg, editNotify;
-        ImageView seenMsg;
+        TextView textViewShowMsg, textViewNewMsg;
+        ImageView seenMsg, editNotify;
         ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
         ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
@@ -731,7 +757,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewReact = itemView.findViewById(R.id.iVReact);
                 imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewDel2);
-                editNotify = itemView.findViewById(R.id.textViewEditSender);
+                editNotify = itemView.findViewById(R.id.editedSender_IV);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg);
                 constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
@@ -760,7 +786,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 imageViewReact = itemView.findViewById(R.id.imageViewReact2);
                 imageViewCopy = itemView.findViewById(R.id.imageViewReceiveCopyText);
                 imageViewDel = itemView.findViewById(R.id.imageViewReceiveDel);
-                editNotify = itemView.findViewById(R.id.textViewEditedReceiver);
+                editNotify = itemView.findViewById(R.id.editedReceiver_IV);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg2);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg2);
                 constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
