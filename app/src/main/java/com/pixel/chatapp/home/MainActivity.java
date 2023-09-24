@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
     private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
     private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
+    private MessageAdapter.MessageViewHolder holderPin;
     private final String PRIVATE = "private";
     private final String PUBLIC = "public";
     private Object timeStamp;
@@ -344,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer = findViewById(R.id.HomeTopConstr);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
-        new CountDownTimer(25000, 1000){
+        new CountDownTimer(30000, 1000){
             @Override
             public void onTick(long l) {
                 readDatabase = 0;   // 0 is read, 1 is stop reading
@@ -897,7 +898,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 String otherUid = eachUser[1];
 
                 // save to local list for fast update
-                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", "",
+                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", null,
                         8, "", 700033, forwardType, forwardRandomID, idKey, false, true);
 
                 MessageAdapter adapter = adapterMap.get(otherName);
@@ -1197,11 +1198,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_) {
+    public void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder) {
         msgId = msgId_;
         message = message_;
         timeStamp = timeStamp_;
         pinByWho = pinByWho_;
+        holderPin = holder;
     }
 
     @Override
@@ -1425,7 +1427,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             long randomID = (long)(Math.random() * 1_010_001);
 
             // save to local list for fast update
-            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "", "",
+            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "", null,
                     replyVisibility, replyText, 700033, type, randomID, idKey, false, false);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
@@ -2138,10 +2140,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         boolean found = false;
         String idFound = null;
         for (PinMessageModel pinMes : pinPublicChatMap.get(otherUserName)) {
-
             if (pinMes.getMsgId().equals(msgId)) {
                 found = true;
                 idFound = pinMes.getMsgId();
+                break;
+            }
+        }
+
+        boolean foundPrivate = false;
+        // check if message has already been pin or not in public pin
+        for (PinMessageModel pinMes : pinPrivateChatMap.get(otherUserName)) {
+            if (pinMes.getMsgId().equals(msgId)) {
+                foundPrivate = true;
                 break;
             }
         }
@@ -2167,6 +2177,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText("Chat unpin...");
                 pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
             }
+
+            // change isChatPin to false in database
+            if(!foundPrivate){
+                refMessages.child(myUserName).child(otherUserName).child(msgId)
+                        .child("isChatPin").setValue(false);
+
+                //  show pin icon on the chat UI
+                adapterMap.get(otherUserName).pinIconHide(holderPin);
+            }
+
             Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
         } else {
@@ -2179,6 +2199,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     .setValue(pinDetails);
             refPublicPinChat.child(otherUserUid).child(user.getUid()).child(msgId)
                     .setValue(pinDetails);
+
+            // change isChatPin to true in database
+            refMessages.child(myUserName).child(otherUserName).child(msgId)
+                    .child("isChatPin").setValue(true);
+            refMessages.child(otherUserName).child(myUserName).child(msgId)
+                    .child("isChatPin").setValue(true);
+
+            //  show pin icon on the chat UI
+            adapterMap.get(otherUserName).pinIconDisplay(holderPin);
 
             //  Increment the count
             int newCount = totalPinMsgCount + 1;
@@ -2240,6 +2269,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
         }
 
+        boolean foundPublic = false;
+        for (PinMessageModel pinMes : pinPublicChatMap.get(otherUserName)) {
+
+            if (pinMes.getMsgId().equals(msgId)) {
+                foundPublic = true;
+                break;
+            }
+        }
+
         if (found) {
             // Delete message from the local map
             pinPrivateChatMap.get(otherUserName)
@@ -2260,6 +2298,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinMsg_TV.setText("Chat unpin...");
                 pinMsg_TV.setTypeface(null, Typeface.BOLD_ITALIC);
             }
+
+                // change isChatPin to false in database
+            if(!foundPublic){
+                refMessages.child(myUserName).child(otherUserName).child(msgId)
+                        .child("isChatPin").setValue(false);
+
+                //  show pin icon on the chat UI
+                adapterMap.get(otherUserName).pinIconHide(holderPin);
+            }
+
             Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
         } else {
@@ -2270,6 +2318,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             // Add the new pin message to firebase database
             refPrivatePinChat.child(user.getUid()).child(otherUserUid).child(msgId)
                     .setValue(pinDetails);
+
+            // change isChatPin to true in database
+            refMessages.child(myUserName).child(otherUserName).child(msgId)
+                    .child("isChatPin").setValue(true);
+
+            //  show pin icon on the chat UI
+            adapterMap.get(otherUserName).pinIconDisplay(holderPin);
 
             //  Increment the count
             int newCount = totalPinMsgCount + 1;
@@ -2694,6 +2749,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         onForward = false;
         selectCount = 0;
+        totalUser_TV.setText("0 selected");
         selectedUsernames.clear();
 
         pinMsgContainer.setVisibility(View.VISIBLE);

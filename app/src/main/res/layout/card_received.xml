@@ -66,6 +66,20 @@
                 app:srcCompat="@drawable/baseline_add_reaction_24" />
 
             <ImageView
+                android:id="@+id/pinALL_R_IV"
+                style="@style/drawableBG"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:layout_marginBottom="10dp"
+                android:elevation="3dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintEnd_toEndOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintStart_toStartOf="@+id/imageViewReceivePinMsg"
+                app:srcCompat="@drawable/baseline_disabled_visible_view_24"
+                app:tint="@color/white" />
+
+            <ImageView
                 android:id="@+id/imageViewForward2"
                 style="@style/BackgroundTintOrange"
                 android:layout_width="20dp"
@@ -244,7 +258,6 @@
                         android:textColorLink="@color/orange"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.0" />
@@ -266,7 +279,6 @@
                         android:visibility="gone"
                         app:enableVisualizer="false"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.0"
@@ -344,13 +356,30 @@
                     app:layout_constraintStart_toEndOf="@+id/textViewChatTime2"
                     app:srcCompat="@drawable/baseline_mode_edit_24" />
 
+                <ImageView
+                    android:id="@+id/forwardR_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/pinReceiver_IV"
+                    app:srcCompat="@drawable/baseline_forward_24" />
+
+                <ImageView
+                    android:id="@+id/pinReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/editedReceiver_IV"
+                    app:srcCompat="@drawable/baseline_push_pin_24" />
+
                 <TextView
                     android:id="@+id/textViewChatTime2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="-10dp"
                     android:layout_marginBottom="1dp"
-                    android:text="234 pm"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageViewOptions2" />

@@ -34,6 +34,7 @@ public interface FragmentListener {
     void onEditOrReplyMessage(String itemList, String editOrReply, String id, long randomID, String status, int icon, String fromWho, int visible);
     void onDeleteMessage(String id, String fromWho, long randomID);
     void onForwardChat(int forwardType_, long forwardRandomID_, String chat);
-    void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho);
+    void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho,
+                     MessageAdapter.MessageViewHolder holder);
 
 }

@@ -153,9 +153,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
 
-        // notify user when msg is edited
+        // set edit icon on chat
         if(modelUser.getEdit() != null){
-            holder.editNotify.setVisibility(View.VISIBLE);
+            if(modelUser.getEdit().equals("edited"))
+                holder.editNotify.setVisibility(View.VISIBLE);
+        }
+
+        // set forward icon on chat
+        if(modelUser.getIsChatForward() != null && modelUser.getIsChatForward()){
+            holder.forwardIcon_IV.setVisibility(View.VISIBLE);
+        }
+
+        // set pin icon on chat
+        if(modelUser.getIsChatPin() != null && modelUser.getIsChatPin()){
+            holder.pinIcon_IV.setVisibility(View.VISIBLE);
         }
 
         // ----------------- Voice Note setting
@@ -214,6 +225,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+
         // reply option
         holder.imageViewReply.setOnClickListener(view -> {
 
@@ -235,6 +247,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
             }
         });
+
 
         // edit option
         holder.imageViewEdit.setOnClickListener(view -> {
@@ -262,6 +275,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+
         // delete option
         holder.imageViewDel.setOnClickListener(view -> {
 
@@ -285,6 +299,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
             }
         });
+
 
         // copy option
         holder.imageViewCopy.setOnClickListener(view -> {
@@ -320,7 +335,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             // send pin chat data to MainActivity
             fragmentListener.sendPinData(modelUser.getIdKey(), modelUser.getMessage(),
-                    ServerValue.TIMESTAMP, userName);
+                    ServerValue.TIMESTAMP, userName, holder);
 
             holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
 
@@ -380,23 +395,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         break;
                     }
                 }
-                if(check && checkPublic){
 
-                    holder.imageViewPin.setImageResource(R.drawable.baseline_disabled_visible_view_24);
+                if(check && checkPublic){
+                    holder.pinALL_IV.setVisibility(View.VISIBLE);
+                    holder.pinALL_IV.setImageResource(R.drawable.baseline_disabled_visible_view_24);
                     MainActivity.pinMineTV.setText("Unpin for me");
                     MainActivity.pinEveryoneTV.setText("Unpin for everyone");
 
                 }else {
                     if(check){
-                        holder.imageViewPin.setImageResource(R.drawable.baseline_private_connectivity_24);
+                        holder.pinALL_IV.setVisibility(View.VISIBLE);
+                        holder.pinALL_IV.setImageResource(R.drawable.lock);
                         MainActivity.pinMineTV.setText("Unpin for me");
                         MainActivity.pinEveryoneTV.setText("Pin for everyone");
                     } else if (checkPublic) {
-                        holder.imageViewPin.setImageResource(R.drawable.baseline_public_24);
+                        holder.pinALL_IV.setVisibility(View.VISIBLE);
+                        holder.pinALL_IV.setImageResource(R.drawable.baseline_public_24);
                         MainActivity.pinEveryoneTV.setText("Unpin for everyone");
                         MainActivity.pinMineTV.setText("Pin for me only");
                     } else {
-                        holder.imageViewPin.setImageResource(R.drawable.baseline_push_pin_24);
+                        holder.pinALL_IV.setVisibility(View.GONE);
                         MainActivity.pinMineTV.setText("Pin for me only");
                         MainActivity.pinEveryoneTV.setText("Pin for everyone");
                     }
@@ -544,6 +562,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     // ---------------------- methods ---------------------------
 
+    public void pinIconDisplay(MessageViewHolder holder_){
+        holder_.pinIcon_IV.setVisibility(View.VISIBLE);
+    }
+    public void pinIconHide(MessageViewHolder holder_){
+        holder_.pinIcon_IV.setVisibility(View.GONE);
+    }
     public int findMessagePositionById(String messageId) {
         for (int i = modelList.size()-1; i >= 0; i--) {
             if (modelList.get(i).getIdKey().equals(messageId)) {
@@ -727,19 +751,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textViewShowMsg, textViewNewMsg;
-        ImageView seenMsg, editNotify;
-        ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
-        ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
-        ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
-        ConstraintLayout constraintReplyCon, constrSlide;
-        TextView textViewReplyMsg, senderNameTV;
-        CircleImageView circleSendMsg, circleDownload;
-        ProgressBar progressBar;
-        EditText editTextMessage;
+        private TextView textViewShowMsg, textViewNewMsg;
+        private ImageView seenMsg, editNotify, pinALL_IV, pinIcon_IV, forwardIcon_IV;
+        private ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
+        private ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
+        private ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
+        private ConstraintLayout constraintReplyCon, constrSlide;
+        private TextView textViewReplyMsg, senderNameTV;
+        private CircleImageView circleSendMsg, circleDownload;
+        private ProgressBar progressBar;
+        private EditText editTextMessage;
         private VoicePlayerView voicePlayerView;
-        TextView timeMsg;
-        CardView cardViewChatBox;
+        private TextView timeMsg;
+        private CardView cardViewChatBox;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -749,6 +773,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 seenMsg = itemView.findViewById(R.id.imageViewSeen);
                 textViewShowMsg = itemView.findViewById(R.id.textViewSend);
                 cardViewChatBox = itemView.findViewById(R.id.cardViewSend);
+
+                pinALL_IV = itemView.findViewById(R.id.pinALL_S_IV);
+                pinIcon_IV = itemView.findViewById(R.id.pinSender_IV);
+                forwardIcon_IV = itemView.findViewById(R.id.forwardS_IV);
 
                 imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg);
                 imageViewEdit = itemView.findViewById(R.id.imageViewEdit);
@@ -778,6 +806,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen2);
                 textViewShowMsg = itemView.findViewById(R.id.textViewReceived);
+
+                pinALL_IV = itemView.findViewById(R.id.pinALL_R_IV);
+                pinIcon_IV = itemView.findViewById(R.id.pinReceiver_IV);
+                forwardIcon_IV = itemView.findViewById(R.id.forwardR_IV);
 
                 imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg2);
                 imageViewEdit = itemView.findViewById(R.id.imageEdit);

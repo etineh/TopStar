@@ -20,7 +20,8 @@ public class MessageModel implements Serializable {
     private int type;
     private long randomID;
     private String replyID;
-    boolean isChatPin, isChatForward;
+    private Boolean isChatPin;
+    private Boolean isChatForward;
 
 //    private String voicenote;
 
@@ -29,7 +30,7 @@ public class MessageModel implements Serializable {
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
                         int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID,
-                        boolean isChatPin, boolean isChatForward) {
+                        Boolean isChatPin, Boolean isChatForward) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -139,7 +140,7 @@ public class MessageModel implements Serializable {
         this.replyID = replyID;
     }
 
-    public boolean isChatPin() {
+    public Boolean getIsChatPin() {
         return isChatPin;
     }
 
@@ -147,7 +148,7 @@ public class MessageModel implements Serializable {
         isChatPin = chatPin;
     }
 
-    public boolean isChatForward() {
+    public Boolean getIsChatForward() {
         return isChatForward;
     }
 

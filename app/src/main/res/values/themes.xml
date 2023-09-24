@@ -98,6 +98,11 @@
         <item name="android:tint">@color/white</item>
     </style>
 
+    <!--    CheckBox Orange and Cool orange -->
+    <style name="checkBoxTint">
+        <item name="android:buttonTint">@color/orange</item>
+    </style>
+
     <style name="BackgroundTintW_B">
         <item name="android:backgroundTint">#FBF9F9</item>
     </style>

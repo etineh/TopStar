@@ -93,6 +93,20 @@
                 app:srcCompat="@drawable/baseline_push_pin_24" />
 
             <ImageView
+                android:id="@+id/pinALL_S_IV"
+                style="@style/drawableBG"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:layout_marginBottom="10dp"
+                android:elevation="3dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/imageViewPinMsg"
+                app:layout_constraintEnd_toEndOf="@+id/imageViewPinMsg"
+                app:layout_constraintStart_toStartOf="@+id/imageViewPinMsg"
+                app:srcCompat="@drawable/baseline_disabled_visible_view_24"
+                app:tint="@color/white" />
+
+            <ImageView
                 android:id="@+id/imageViewCopyText"
                 style="@style/BackgroundTintOrange"
                 android:layout_width="18dp"
@@ -155,6 +169,7 @@
                 style="@style/ChatMsgContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="3dp"
                 android:paddingRight="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -343,15 +358,31 @@
                     android:id="@+id/editedSender_IV"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_marginStart="10dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="1dp"
                     android:textSize="11sp"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/imageViewSeen"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:srcCompat="@drawable/baseline_mode_edit_24" />
+
+                <ImageView
+                    android:id="@+id/forwardS_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/pinSender_IV"
+                    app:srcCompat="@drawable/baseline_forward_24" />
+
+                <ImageView
+                    android:id="@+id/pinSender_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/editedSender_IV"
+                    app:srcCompat="@drawable/baseline_push_pin_24" />
 
                 <TextView
                     android:id="@+id/textViewChatTime"
