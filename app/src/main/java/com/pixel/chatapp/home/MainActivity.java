@@ -404,33 +404,25 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
         nightMood = sharedPreferences.getBoolean("MoodStatus", false);
 
-        darkMoodSwitch.setOnClickListener(view -> {
-            if (nightMood) {
-                sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
-            } else {
-                sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
-            }
-
-            //  initialize UI theme setup manually -- later
-            recreate(); // call automatic UI initialization method
-        });
-
         if(nightMood){
-            // Turn on night mode
-            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            darkMoodSwitch.setChecked(false);
+            darkMoodSwitch.setChecked(true);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             textLightAndDay.setText("Light");
         } else {
-            // Turn off night mode
-            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            darkMoodSwitch.setChecked(true);
             textLightAndDay.setText("Dark");
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         };
 
-        //  set clickable to true so that items on the background won't be clickable when open
-        chatContainer.setClickable(true);   
-        conTopUserDetails.setClickable(true);
-        conUserClick.setClickable(true);
+        darkMoodSwitch.setOnClickListener(view -> {
+            if(nightMood){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                sharedPreferences.edit().putBoolean("MoodStatus", false).apply();
+            } else{
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                sharedPreferences.edit().putBoolean("MoodStatus", true).apply();
+            }
+        });
+
 
         //  Return back, close msg container
         imageViewBack.setOnClickListener(view -> {
