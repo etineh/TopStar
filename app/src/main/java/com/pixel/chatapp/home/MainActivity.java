@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -55,6 +56,7 @@ import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
+import com.pixel.chatapp.model.ChatsViewModel;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public static int goToNum;
     public static Boolean goToLastMessage = false;
 
-    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails,
+    private DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat;
     FirebaseUser user;
     private int scrollNum = 0;
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     RecordView recordView;
     RecordButton recordButton;
 
-    private int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
+    public static int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
     public static Map<String, List<PinMessageModel>> pinPrivateChatMap, pinPublicChatMap;
     private Map<String, Object> editMessageMap;
     private Map<String, Object> deleteMap;
@@ -1053,7 +1055,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         topMainContainer.setVisibility(View.INVISIBLE);
 
-        System.out.println("Total adapter (M750) " + adapterMap.get(otherName).getItemCount());
+//        System.out.println("Total adapter (M750) " + adapterMap.get(otherName).getItemCount());
     }
 
     @Override       // run only once
@@ -1515,7 +1517,37 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
         List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
 
-        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, otherUID, mContext); // initialise adapter
+        List<String> otherNamesList = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
+        List<MessageAdapter> adap = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
+
+// store otherName for looping through load message status and change to delivery status
+        if (!otherNamesList.contains(otherName)) {
+            otherNamesList.add(otherName);
+        }
+
+        ChatsViewModel chatsViewModel = new ViewModelProvider(this).get(ChatsViewModel.class);
+
+        chatsViewModel.getItemsLiveData(userName, otherNamesList, otherUID).observe(this, items -> {
+            MessageAdapter adapter = new MessageAdapter(items, userName, otherUID, mContext); // initialise adapter
+
+            if(!adap.contains(adapter)){
+                adap.add(adapter);
+            }
+            adapter.setFragmentListener((FragmentListener) mContext);
+            System.out.println("what is adapter " + adapter.getItemCount());
+
+            for (String name :
+                    otherNameList) {
+
+            System.out.println("What is the nameOther " + adap.size());
+                adapterMap.put(name, adap.get(0));
+//                adapterMap.get(otherName).
+                recyclerMap.get(name).setAdapter(adapter);
+//                recyclerMap.get(name).scrollToPosition(adapterMap.get(name).getItemCount() - 1);
+
+            }
+        });
+//        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, otherUID, mContext); // initialise adapter
 
         // loop through New Message (MsgFast) and Old Message and compare the "read" status state before proceeding
         new CountDownTimer(1500, 750){
@@ -1525,7 +1557,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 // retrieve the last previous scroll position
                 getLastScrollPosition(otherUID, otherName);
                 // delete from the database when message is read and get the total number of msg not read yet
-                deleteMessageWhenRead(userName, otherName, msgListNotRead);
+//                deleteMessageWhenRead(userName, otherName, msgListNotRead);
 
             }
 
@@ -1534,25 +1566,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             public void onFinish() { // call all methods
 
                 // retrieve all message from the database just once
-                getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter);
+//                getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter);
 
                 // add new message directly to local List and interact with few msg in refMsgFast database
-                newMessageInteraction(userName, otherName, modelListAllMsg, adapter);
+//                newMessageInteraction(userName, otherName, modelListAllMsg, adapter);
 
                 // edit message
-                getEditMessage(userName, otherName, modelListAllMsg, adapter, otherUID);
+//                getEditMessage(userName, otherName, modelListAllMsg, adapter, otherUID);
 
                 // delete local list with idkey
-                getDeleteMsgId(userName, otherName, modelListAllMsg, adapter, otherUID);
+//                getDeleteMsgId(userName, otherName, modelListAllMsg, adapter, otherUID);
 
 //                System.out.println("What is recyler side (M1210)" + recyclerMap.get(otherName).getAdapter().getItemCount());
             }
         }.start();
 
-        adapter.setFragmentListener((FragmentListener) mContext);
+//        adapter.setFragmentListener((FragmentListener) mContext);
+//
+//        adapterMap.put(otherName, adapter); // save each user adapter
+//        recyclerMap.get(otherName).setAdapter(adapter);
 
-        adapterMap.put(otherName, adapter); // save each user adapter
-        recyclerMap.get(otherName).setAdapter(adapter);
+        // testing
+//        recyclerMap.get(otherName).setAdapter();
 
     }
 
@@ -2908,17 +2943,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             new Thread(() -> {
 
-                int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
+//                int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
 
                 Map<String, Object> mapUpdate = new HashMap<>();
                 mapUpdate.put("status", false);
                 mapUpdate.put("newMsgCount", 0);
                 // save scroll to database to recover the recycler position it was
-                mapUpdate.put("scrollPosition", otherUserName+(scroll));
-                refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
+//                mapUpdate.put("scrollPosition", otherUserName+(scroll));
+//                refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
 
-                scrollPositionMap.put(otherUserName, scroll);
-                System.out.println("I have saved it " + scroll);
+//                scrollPositionMap.put(otherUserName, scroll);
+//                System.out.println("I have saved it " + scroll);
 
                 // set responds to pend always      ------- will change later to check condition if user is still an active call
 //                    refChecks.child(user.getUid()).child(otherUserUid).child("vCallResp").setValue("pending");

@@ -203,9 +203,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                    System.out.println("What is the total " +holder_.size());
 
                     if(!MainActivity.onForward){
+                            listener.msgBodyVisibility(otherName, imageUrl, userName, myUsersId);
                         try {
 
-                            listener.msgBodyVisibility(otherName, imageUrl, userName, myUsersId);
 
                             listener.getLastSeenAndOnline(myUsersId);
 
