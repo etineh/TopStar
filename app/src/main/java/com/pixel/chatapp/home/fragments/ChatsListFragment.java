@@ -24,6 +24,7 @@ import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.contacts.UsersContactActivity;;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.ChatListModel;
 
 import java.util.ArrayList;
@@ -49,6 +50,11 @@ public class ChatsListFragment extends Fragment {
     private List<String> mUsersID;
     private FragmentListener fragmentListener;
 
+    private Context mainContext = getContext();
+
+    public Context getMainContext() {
+        return mainContext;
+    }
 
     @Nullable
     @Override
@@ -70,8 +76,11 @@ public class ChatsListFragment extends Fragment {
         // Go to contact
         openContactList.setOnClickListener(view1 -> {
 
+//            MainActivity.constraintMsgBody.setVisibility(View.VISIBLE);
+
             Intent intent = new Intent(getContext(), UsersContactActivity.class);
             startActivity(intent);
+
         });
 
 

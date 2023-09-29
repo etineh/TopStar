@@ -67,9 +67,11 @@
             android:exported="false" />
         <activity
             android:name=".home.MainActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity
             android:name=".signup_login.LoginActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -7,6 +7,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,27 +20,33 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.UsersAdapter;
+import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.model.ContactModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersContactActivity extends AppCompatActivity {
+public class UsersContactActivity extends AppCompatActivity implements UsersAdapter.BackButtonClickListener{
 
     RecyclerView recyclerView;
     FirebaseAuth auth;
     FirebaseUser user;
     FirebaseDatabase database;
-    DatabaseReference dbReference;
+    DatabaseReference refUsers;
 
-    String userName;
-    List<String> list;
+    List<ContactModel> list;
 //    List<String> names;
     UsersAdapter adapter;
 
     ImageView imageViewBack;
     CardView groupAndChannel, addContact, inviteFriends;
+
+    MainActivity mainActivity = new MainActivity();
+    private FragmentListener fragmentListener; // A field to store the listener reference
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,66 +66,54 @@ public class UsersContactActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
-        dbReference = database.getReference();
+        refUsers = database.getReference();
 
-        imageViewBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                onBackPressed();
-                finish();
-            }
-        });
+        imageViewBack.setOnClickListener(view -> finish());
 
-        dbReference.child("Users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userName = snapshot.child("userName").getValue().toString();
-                adapter = new UsersAdapter(list, UsersContactActivity.this, userName);
+        fragmentListener = (FragmentListener) mainActivity.getMainActivityContext();
 
-//                ------- this will make the page load each sent
-//                recyclerView.setAdapter(adapter);
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+        adapter = new UsersAdapter(list, UsersContactActivity.this);
+        adapter.setListener(fragmentListener);
+        adapter.setBackButtonClickListener(UsersContactActivity.this); // "this" refers to the UserContactActivity
 
-            }
-        });
+        recyclerView.setAdapter(adapter);
 
         getUsers();
 
     }
 
+    //  ----------- interface   ------------
+    @Override
+    public void onBackButtonClicked() {
+        // Close the activity
+        finish();
+    }
+
+    // -----------  methods -----------
     public void getUsers(){
 
-        dbReference.child("Users").addChildEventListener(new ChildEventListener() {
+        refUsers.child("Users").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                // to get the position of each user child id
-                String key = snapshot.getKey();
-                if (!key.equals(user.getUid())){// if the key id is not mine, then it should fetch out other user id
-                    list.add(key);
+                list.clear();
+                // get my username
+                String myUserName = snapshot.child(user.getUid()).child("userName").getValue().toString();
+
+                for (DataSnapshot userDetails : snapshot.getChildren()) {
+
+                    // to get the uid all my contact user child
+                    String key = userDetails.getKey();
+
+                    if (!key.equals(user.getUid())){// if the key id is not mine, then it should fetch out other user id
+                        ContactModel contactModel = userDetails.getValue(ContactModel.class);
+                        contactModel.setOtherUid(key);
+                        contactModel.setMyUserName(myUserName);
+                        list.add(contactModel);
+                    }
+
                     adapter.notifyDataSetChanged();
                 }
-
-//               declare the recyclerView here so as to make only the user id to load
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
             }
 
             @Override

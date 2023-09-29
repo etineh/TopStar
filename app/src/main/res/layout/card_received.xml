@@ -49,6 +49,7 @@
             style="@style/card"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
+            android:clickable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/cardViewReceived"
             app:layout_constraintStart_toStartOf="parent"

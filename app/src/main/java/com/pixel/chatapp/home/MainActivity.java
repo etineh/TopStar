@@ -28,7 +28,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -51,15 +50,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.chats.MessageModel;
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
-import com.pixel.chatapp.R;
 import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;
@@ -91,20 +89,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     SharedPreferences sharedPreferences;
     private Boolean nightMood;
 
+    private MainActivity mainActivityContext = MainActivity.this;
 
-    //    ------- message declares
+    public MainActivity getMainActivityContext() {
+        return mainActivityContext;
+    }
+
+    //    ------- message/chat declares
     private ImageView imageViewBack;
-    private CircleImageView circleImageOnline, circleImageLogo;
+    public static CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
-    private ConstraintLayout conTopUserDetails, conUserClick;
+    public static ConstraintLayout conTopUserDetails, conUserClick;
     private ImageView editOrReplyIV, imageViewCalls;
-    private TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
+    public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
     private ConstraintLayout constraintProfileMenu, constraintDelBody;
+    private static ImageView emoji_IV, file_IV, camera_IV;
+    private Context mContext;
 
     // -----------      pin declares
-    private ConstraintLayout pinIconsContainer, pinMsgBox_Constr, chatContainer;
-    public static ConstraintLayout pinMsgContainer, pinOptionBox, line;
-    private ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
+    private static ConstraintLayout pinIconsContainer, pinMsgBox_Constr;
+    public static ConstraintLayout pinMsgContainer, pinOptionBox, line, chatContainer;
+    private static ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
     private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
     private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
     private MessageAdapter.MessageViewHolder holderPin;
@@ -112,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private final String PUBLIC = "public";
     private Object timeStamp;
     private ImageView arrowUp, arrowDown, cancelPinOption;
-    private TextView totalPinPrivate_TV, pinCount_TV, pinMsg_TV, totalPinPublic_TV, newPinIndicator_TV;
+    private static TextView totalPinPrivate_TV, pinCount_TV, pinMsg_TV, totalPinPublic_TV, newPinIndicator_TV;
     public static TextView pinMineTV, pinEveryoneTV, pinByTV;
 
 
@@ -131,15 +136,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private long forwardRandomID;
     private String forwardChat;
 
+    //  ---------   Delete User from ChatList Declares
+    private ConstraintLayout deleteUserContainer;
+    private ImageView cancelUserDelete_IV;
+    private TextView deleteUserForMe_TV, deleteUserForAll_TV, otherUserName_TV;
+    private String myUserName_Del, otherUserName_Del, otherUid_Del;
+
     //  ----------------
 
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
-    private EditText editTextMessage;
-    private CircleImageView circleSendMessage;
+    private static EditText editTextMessage;
+    private static CircleImageView circleSendMessage;
     private CardView cardViewMsg, cardViewReplyOrEdit;
-    private ImageView scrollPositionIV, sendIndicator;
-    private TextView scrollCountTV, receiveIndicator;
-    private ImageView emoji_IV, file_IV, camera_IV;
+    public static ImageView scrollPositionIV, sendIndicator;
+    public static TextView scrollCountTV, receiveIndicator;
+
     // network settings
     private ConstraintLayout constrNetConnect, constrNetork;
     public static String otherUserUid, otherUserName, myUserName, imageUri;
@@ -147,47 +158,46 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public static int goToNum;
     public static Boolean goToLastMessage = false;
 
-    DatabaseReference refMessages, refMsgFast, refChecks, refUsers, refLastDetails,
-            refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat;
-    FirebaseUser user;
-    private int scrollNum = 0;
+    private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks, refUsers,
+            refChatList, refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign;
+    public static FirebaseUser user;
+    public static int scrollNum = 0;
     private long count = 0, newMsgCount = 0;
     private Map<String, Integer> dateNum, dateMonth;
-    private String idKey, listener = "no", replyFrom, replyText, networkListener = "yes", insideChat = "no";
-    private int replyVisibility = 8;    // gone as dafault
+    private static String idKey, listener = "no", replyFrom, replyText, networkListener = "yes", insideChat = "no";
+    private static int replyVisibility = 8;    // gone as dafault
     private long randomKey;     // use to fetch randomID when on edit mode
     private String audioPath;
     private MediaRecorder mediaRecorder;
     private Permission permissions;
     private static final int PAGE_SIZE = 20; // Number of items to fetch per page
     private int currentPage; // Current page number
-    ConstraintLayout constraintMsgBody;
+    public static ConstraintLayout constraintMsgBody;
 
     Handler handler = new Handler(Looper.getMainLooper());
 
-    RecordView recordView;
-    RecordButton recordButton;
+    static RecordView recordView;
+    static RecordButton recordButton;
 
-    private int readDatabase, downMsgCount;  // 0 is read, 1 is no_read
+//    private int readDatabase;  // 0 is read, 1 is no_read
+    public static int downMsgCount, readDatabase;  // 0 is read, 1 is no_read
+    public static boolean loadMsg = true;
+
     public static Map<String, List<PinMessageModel>> pinPrivateChatMap, pinPublicChatMap;
     private Map<String, Object> editMessageMap;
     private Map<String, Object> deleteMap;
     private Map<String, List<MessageModel>> modelListMap;
-    private Map<String, MessageAdapter> adapterMap;
+    public static Map<String, MessageAdapter> adapterMap;
     public static Map<String, RecyclerView> recyclerMap;
-    private List<String> otherNameList, otherUidList;
-    private Map<String, Object> downMsgCountMap, scrollNumMap;
+    private static List<String> otherNameList, otherUidList;
+    public static Map<String, Object> downMsgCountMap, scrollNumMap;
     private Map<String, Object>  notifyCountMap, scrollPositionMap;
 
-    ConstraintLayout recyclerContainer;
+    public static ConstraintLayout recyclerContainer;
 
     NetworkChangeReceiver networkChangeReceiver;
-    Handler handler1;
-    Runnable internetCheckRunnable;
-
-    public interface ChatVisibilityListener {
-        void constraintChatVisibility(int position, int isVisible);
-    }
+    private static Handler handler1;
+    static Runnable internetCheckRunnable;
 
     //  ---------- msg end
 
@@ -279,6 +289,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         file_IV = findViewById(R.id.files_IV);
         camera_IV = findViewById(R.id.camera_IV);
 
+        //  delete user from chat list ids
+        deleteUserContainer = findViewById(R.id.deleteUserContainer);
+        deleteUserForMe_TV = findViewById(R.id.deleteForMe_TV);
+        deleteUserForAll_TV = findViewById(R.id.deleteForEveryone_TV);
+        cancelUserDelete_IV = findViewById(R.id.cancelDelete_IV);
+        otherUserName_TV = findViewById(R.id.otherUserName_TV);
 
         // audio swipe button ids
         recordView = (RecordView) findViewById(R.id.record_view9);
@@ -287,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // database references
         refMessages = FirebaseDatabase.getInstance().getReference("Messages");
+        refChatList = FirebaseDatabase.getInstance().getReference("ChatList");
         refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
         refChecks = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
@@ -295,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refDeleteMsg = FirebaseDatabase.getInstance().getReference("DeleteMessage");
         refPrivatePinChat = FirebaseDatabase.getInstance().getReference("PinChatPrivate");
         refPublicPinChat = FirebaseDatabase.getInstance().getReference("PinChatPublic");
+        refClearSign = FirebaseDatabase.getInstance().getReference("ClearSign");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -345,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer = findViewById(R.id.HomeTopConstr);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
-        new CountDownTimer(30000, 1000){
+        new CountDownTimer(20_000, 1000){
             @Override
             public void onTick(long l) {
                 readDatabase = 0;   // 0 is read, 1 is stop reading
@@ -547,6 +565,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             idKey = null;
         });
 
+        //  ----------  delete message onClicks -------------------------
+
         // Delete for only me
         textViewDelMine.setOnClickListener(view -> {
             // delete from my local list
@@ -618,6 +638,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         });
 
+        //  -------------------------------------------------------------
+
         // scroll to previous position of reply message
         scrollPositionIV.setOnClickListener(view -> {
 
@@ -639,6 +661,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             }
 
         });
+
+
+        //  ----------  pin message onClicks ---------------------------
 
         // hide pin message view
         View.OnClickListener closePinBox = view -> {  // personalise later
@@ -876,6 +901,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         });
 
+        //  -------------------------------------------------------------
+
+        //  ----------  forward message onClicks ---------------------------
+
         // cancel forward option
         cancleForward_IV.setOnClickListener(view -> cancelForwardSettings() );
 
@@ -930,6 +959,62 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         });
 
+        //  -------------------------------------------------------------
+
+
+        //  ----------  delete user from ChatList onClicks ---------------------------
+
+        //  delete user container   -- close the container when click and cancel button click
+        deleteUserContainer.setOnClickListener(view -> cancelUserDeleteOption());
+        cancelUserDelete_IV.setOnClickListener(view -> cancelUserDeleteOption());
+
+        // delete user for only me
+        deleteUserForMe_TV.setOnClickListener(view -> {
+
+            refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
+            refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
+            refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+            refPublicPinChat.child(user.getUid()).child(otherUid_Del).removeValue();
+            refPrivatePinChat.child(user.getUid()).child(otherUid_Del).removeValue();
+
+            refMessages.child(myUserName_Del).child(otherUserName_Del).removeValue();
+            refMsgFast.child(myUserName_Del).child(otherUserName_Del).removeValue();
+
+            adapterMap.get(otherUserName_Del).clearChats(); // delete from chats
+            cancelUserDeleteOption();
+        });
+
+        // delete user for everyone
+        deleteUserForAll_TV.setOnClickListener(view -> {
+            // delete from my database
+            refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
+            refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
+            refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+            refPublicPinChat.child(user.getUid()).child(otherUid_Del).removeValue();
+            refPrivatePinChat.child(user.getUid()).child(otherUid_Del).removeValue();
+
+            refMessages.child(myUserName_Del).child(otherUserName_Del).removeValue();
+            refMsgFast.child(myUserName_Del).child(otherUserName_Del).removeValue();
+
+            //  delete from otherUser database
+            refChatList.child(otherUid_Del).child(user.getUid()).removeValue();
+            refLastDetails.child(otherUid_Del).child(user.getUid()).removeValue();
+            refChecks.child(otherUid_Del).child(user.getUid()).removeValue();
+            refPublicPinChat.child(otherUid_Del).child(user.getUid()).removeValue();
+            refPrivatePinChat.child(otherUid_Del).child(user.getUid()).removeValue();
+
+            refMessages.child(otherUserName_Del).child(myUserName_Del).removeValue();
+            refMsgFast.child(otherUserName_Del).child(myUserName_Del).removeValue();
+
+            refClearSign.child(user.getUid()).child(otherUid_Del).setValue("clear");
+
+            adapterMap.get(otherUserName_Del).clearChats(); // delete chats
+            cancelUserDeleteOption();
+
+        });
+
+        //  -------------------------------------------------------------
+
 
         // Delay 5 seconds to load message
         new CountDownTimer(5000, 1000){
@@ -964,17 +1049,33 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     @Override
     public void firstCallLoadPage(String otherName) {
-        constraintMsgBody.setVisibility(View.INVISIBLE);
-        conTopUserDetails.setVisibility(View.INVISIBLE);
-        conUserClick.setVisibility(View.INVISIBLE);
+//        constraintMsgBody.setVisibility(View.INVISIBLE);
+//        conTopUserDetails.setVisibility(View.INVISIBLE);
+//        conUserClick.setVisibility(View.INVISIBLE);
+        System.out.println("M970, What is name " + recyclerMap.size());
+        recyclerViewChatVisibility(otherName);
+
     }
 
     @Override
-    public void msgBodyVisibility(String otherName, String imageUrl, String userName, String uID) {
+    public void chatBodyVisibility(String otherName, String imageUrl, String userName, String uID, Context mContext_,
+                                  RecyclerView recyclerChat) {
+
+        // make only the active recyclerView to be visible
+        recyclerViewChatVisibility(otherName);
+
+        if(adapterMap.get(otherName) != null){
+            System.out.println("Total adapter (M1070) " + adapterMap.get(otherName).getItemCount());
+            if(adapterMap.get(otherName).getItemCount() == 0){
+                readDatabase = 0;
+                getMessage(userName, otherName, uID, mContext);
+                offMainDatabase();
+                System.out.println("(M1070)  I just reload message for " + otherName);
+            }
+        }
 
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherName).getLayoutManager();
 
-        // get the number of message under
         downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
         scrollCountTV.setText(""+ downMsgCount);           // set down msg count
         downMsgCountMap.put(otherName, downMsgCount);     // set it for "sending message method"
@@ -1035,7 +1136,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
         //  get user image
-        if (imageUrl.equals("null")) {
+        if (imageUrl == null || imageUrl.equals("null")) {
             circleImageLogo.setImageResource(R.drawable.person_round);
         }
         else Picasso.get().load(imageUrl).into(circleImageLogo);
@@ -1043,20 +1144,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         otherUserName = otherName;
         myUserName = userName;
         imageUri = imageUrl;
+        otherUserUid = uID;
 
-        try{    // make only the active recyclerView to be visible
-            recyclerViewChatVisibility(otherName);
-        } catch (Exception e){
-            Toast.makeText(MainActivity.this, "Send your first message here! WC", Toast.LENGTH_SHORT).show();
-            System.out.println("Error occur " + e.getMessage());
-        }
-
-        topMainContainer.setVisibility(View.INVISIBLE);
-
-        System.out.println("Total adapter (M750) " + adapterMap.get(otherName).getItemCount());
     }
 
-    @Override       // run only once
+    @Override       // run only once    -- also store otherName and otherUid on List
     public void sendRecyclerView(RecyclerView recyclerChat, String otherName, String otherUid) {
 
         // first check if recyclerView already exist and skip to the next
@@ -1084,12 +1176,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override       // run only once
-    public void getMessage(String userName, String otherName, String otherUID, Context mContext){
+    public void getMessage(String userName, String otherName, String otherUID, Context mContext_){
 
         retrieveMessages(userName, otherName, otherUID, mContext);
 
         // store myUserName for looping through load message status and change to delivery status
         myUserName = userName;
+
+        mContext = mContext_;
 
         // get pinMessage once
         getPinChats(user.getUid(), otherUID, otherName);
@@ -1208,20 +1302,19 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             statusAndMSgCount.put("status", true);
             statusAndMSgCount.put("unreadMsg", 0);
 
-            refChecks.child(user.getUid()).child(otherUserUid).updateChildren(statusAndMSgCount);
+            this.refChecks.child(this.user.getUid()).child(otherUid).updateChildren(statusAndMSgCount);
 
             // set responds to pend always      ------- will change later to check condition if user is still an active call
-            refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
+            this.refChecks.child(this.user.getUid()).child(otherUid).child("vCallResp").setValue("pending");
 
             insideChat = "yes";
+
         }).start();
     }
 
     // get last seen and set inbox status to be true
     @Override
     public void getLastSeenAndOnline(String otherUid) {
-
-        otherUserUid = otherUid;
 
         // get last seen
         try{
@@ -1370,9 +1463,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }
     }
 
+    @Override
+    public void onUserDelete(String otherName, String myUserName, String otherUid) {
+        otherUserName_TV.setText("@"+otherName);
+        deleteUserContainer.setVisibility(View.VISIBLE);
+        otherUserName_Del = otherName;
+        myUserName_Del = myUserName;
+        otherUid_Del = otherUid;
+    }
+
 
     //  ------------    methods     ---------------
-    private Map<String, Object> setMessage(String message, int type, long randomID){
+    public static Map<String, Object> setMessage(String message, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         int msgStatus = 700024;
@@ -1423,7 +1525,37 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     replyVisibility, replyText, 700033, type, randomID, idKey, false, false);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
-            adapter.addNewMessageDB(messageModel);
+            if(adapter != null){
+                adapter.addNewMessageDB(messageModel);  // add new chat
+
+                // scroll to new position only if scrollCheck int is < 20
+                int scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherUserName);
+                int lastPosition = adapterMap.get(otherUserName).getItemCount()-1;
+                if(scrollCheck < 20){    // scroll to last position on new message update.
+                    recyclerMap.get(otherUserName).scrollToPosition(lastPosition);
+                }   // else don't scroll.
+
+            } else{ // recall getMessage to load if I am send msg for the first time
+
+                List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
+                List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
+
+                MessageAdapter adapter1 = new MessageAdapter(modelListAllMsg, myUserName, otherUserUid, mContext); // initialise adapter
+
+//                adapter.setFragmentListener((FragmentListener) mContext);
+
+                adapterMap.put(otherUserName, adapter1); // save each user adapter
+                adapterMap.get(otherUserName).addNewMessageDB(messageModel);
+                recyclerMap.get(otherUserName).setAdapter(adapter1);
+                System.out.println("M1539 Arrange ");
+
+                readDatabase = 0;
+                getMessage(myUserName, otherUserName, otherUserUid, mContext);
+                System.out.println("M1539 resend message now ");
+//                recyclerMap.get(otherUserName).scrollToPosition(-1);
+                offMainDatabase();
+
+            }
 
             // add one to the dowm message number
             int increaseScroll = (int) downMsgCountMap.get(otherUserName) + 1;
@@ -1436,22 +1568,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 receiveIndicator.setVisibility(View.GONE);
             }
 
-            // scroll to new position only if scrollCheck int is < 20
-            int scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherUserName);
-            int lastPosition = adapterMap.get(otherUserName).getItemCount()-1;
-            if(scrollCheck < 20){    // scroll to last position on new message update.
-                recyclerMap.get(otherUserName).scrollToPosition(lastPosition);
-            }   // else don't scroll.
-
             String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
+
+            // save to main message
+            refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
+            refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
 
             // save to new message db for fast response
             refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
             refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
 
-            // save to main message
-            refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
-            refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
 
             // save last msg for outside chat display
             refLastDetails.child(user.getUid()).child(otherUserUid).setValue(setMessage(message, type, randomID));
@@ -1654,7 +1780,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                     for (DataSnapshot snapshotOld : snapshot.getChildren()){
 
-                        if(snapshotOld.child("from").exists()){
+                        try{
                             MessageModel messageModelOldMsg = snapshotOld.getValue(MessageModel.class);
                             messageModelOldMsg.setIdKey(snapshotOld.getKey());  // set msg keys to the adaptor
                             allMsgList.add(messageModelOldMsg);
@@ -1673,7 +1799,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                 }
                             }
 
-                        } else {
+                        } catch(Exception e) {
+                            System.out.println("Error at M1775 getAllMes() " + e.getMessage());
                             refMessages.child(userName).child(otherName).child(snapshotOld.getKey()).removeValue();
                         }
                     }
@@ -1997,6 +2124,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinLockPrivate_IV.setVisibility(View.INVISIBLE);
                 totalPinPrivate_TV.setVisibility(View.INVISIBLE);
             }
+        } else {    // make invisible if null
+            pinMsgContainer.setVisibility(View.INVISIBLE);
         }
 
         // make public pin details invisible if no pin chat yet
@@ -2012,6 +2141,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 pinLockPublic_IV.setVisibility(View.INVISIBLE);
                 totalPinPublic_TV.setVisibility(View.INVISIBLE);
             }
+        } else {
+            pinMsgContainer.setVisibility(View.INVISIBLE);
         }
 
         pinMsgContainer.setClickable(false);    //  allow item on the background clickable
@@ -2428,15 +2559,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             // change lastMessageDetails too
             refLastDetails.child(otherUid).child(user.getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                public void onDataChange(@NonNull DataSnapshot snapshot) {;
 
-                    try{
+                    if(snapshot.child("msgStatus").getValue() != null){
                         long readStatus = (long) snapshot.child("msgStatus").getValue();
                         if(insideChat == "yes" && readStatus != 700016){
                             refLastDetails.child(otherUid).child(user.getUid()).child("msgStatus").setValue(700016);
                         }
-                    }catch (Exception e){
-                        System.out.println("LastMessageDetails error (M546) " + e.getMessage());
                     }
                 }
 
@@ -2466,7 +2595,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     // add user id to db when user start typing and (reset newMsgCount to 0  --- change later)
     // Alert the DB when I start typing, to notify the receiver     // interact with send and record buttons
     public void tellUserAmTyping_AddUser(){
-        editTextMessage.addTextChangedListener(new TextWatcher() {
+        this.editTextMessage.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -2758,6 +2887,30 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
+    // cancel delete option for user from chat list
+    private void cancelUserDeleteOption(){
+        otherUserName_Del = null;
+        myUserName_Del = null;
+        otherUid_Del = null;
+        otherUserName_TV.setText("");
+        deleteUserContainer.setVisibility(View.GONE);
+    }
+
+    // turn of readDatabase to 1 (non-read)
+    private void offMainDatabase(){
+        new CountDownTimer(3000, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                readDatabase = 1;
+            }
+        }.start();
+    }
+
     // set user image on settings
     private void setUserDetails(){
         refUser.child(user.getUid()).addValueEventListener(new ValueEventListener() {
@@ -2866,6 +3019,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             topMainContainer.setVisibility(View.VISIBLE);
             conTopUserDetails.setVisibility(View.INVISIBLE);
             conUserClick.setVisibility(View.INVISIBLE);
+            readDatabase = 1;
+            System.out.println("M2991 What is database " + readDatabase);
 
             // edit and reply settings
             editTextMessage.setText("");    // clear message not sent
@@ -2900,16 +3055,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             adapterMap.get(otherUserName).highlightedPositions.clear(); // clear the highlight if any
             // Clear previous highlight, if any.
-            for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
-                View itemView = recyclerMap.get(otherUserName).getChildAt(i);
-                itemView.setBackgroundColor(Color.TRANSPARENT);
+            if(recyclerMap.get(otherUserName) != null) {
+                for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+                    View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+                    itemView.setBackgroundColor(Color.TRANSPARENT);
+                }
             }
 
 
             new Thread(() -> {
 
-                int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
-
+                int scroll = 0;
+                if(adapterMap.get(otherUserName) != null){
+                    scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
+                }
                 Map<String, Object> mapUpdate = new HashMap<>();
                 mapUpdate.put("status", false);
                 mapUpdate.put("newMsgCount", 0);
@@ -2918,7 +3077,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
 
                 scrollPositionMap.put(otherUserName, scroll);
-                System.out.println("I have saved it " + scroll);
+                System.out.println("M3052 I have saved scroll " + scroll);
+                System.out.println("Is there adapter num " + adapterMap.get(otherUserName));
 
                 // set responds to pend always      ------- will change later to check condition if user is still an active call
 //                    refChecks.child(user.getUid()).child(otherUserUid).child("vCallResp").setValue("pending");

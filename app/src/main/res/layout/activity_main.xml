@@ -78,6 +78,102 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/deleteUserContainer"
+            style="@style/trans_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="3dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                style="@style/BackgroundW_B"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5">
+
+                <TextView
+                    android:id="@+id/otherUserName_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="20dp"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:lines="1"
+                    android:text="&quot;&quot;"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewDel" />
+
+                <TextView
+                    android:id="@+id/deleteForMe_TV"
+                    style="@style/TV_Orange_CoolOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center_vertical"
+                    android:text="Delete for me"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/otherUserName_TV" />
+
+                <TextView
+                    android:id="@+id/deleteForEveryone_TV"
+                    style="@style/TV_Orange_CoolOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="40dp"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical"
+                    android:text="Delete for everyone"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/deleteForMe_TV" />
+
+                <ImageView
+                    android:id="@+id/imageViewDel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+                <ImageView
+                    android:id="@+id/cancelDelete_IV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="14dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_cancel_24"
+                    app:tint="#DD1212" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/forwardConstraint"
             style="@style/card"
             android:layout_width="match_parent"
@@ -283,7 +379,7 @@
             android:id="@+id/viewPageMain"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout3"
+            app:layout_constraintBottom_toTopOf="@+id/constraintLastLayer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -293,7 +389,7 @@
         </androidx.viewpager2.widget.ViewPager2>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout3"
+            android:id="@+id/constraintLastLayer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -1854,9 +1950,10 @@
                 android:id="@+id/constraintLayout14"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="1000dp"
+                android:layout_marginBottom="500dp"
                 android:background="@color/light_orange"
                 android:elevation="30dp"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
                 app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
                 app:layout_constraintStart_toStartOf="parent"
@@ -1873,7 +1970,7 @@
                 android:id="@+id/constraintRecyler"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginStart="60dp"
+                android:layout_marginStart="6dp"
                 android:layout_marginBottom="7dp"
                 app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -2136,6 +2233,7 @@
                 style="@style/BackgroundW_B"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -2145,6 +2243,7 @@
 
                 <TextView
                     android:id="@+id/textViewDelMine"
+                    style="@style/TV_Orange_CoolOrange"
                     android:layout_width="wrap_content"
                     android:layout_height="35dp"
                     android:layout_marginStart="20dp"
@@ -2159,6 +2258,7 @@
 
                 <TextView
                     android:id="@+id/textViewDelOther"
+                    style="@style/TV_Orange_CoolOrange"
                     android:layout_width="wrap_content"
                     android:layout_height="35dp"
                     android:layout_marginStart="30dp"
@@ -2173,6 +2273,7 @@
 
                 <TextView
                     android:id="@+id/textViewDelEveryone"
+                    style="@style/TV_Orange_CoolOrange"
                     android:layout_width="wrap_content"
                     android:layout_height="35dp"
                     android:layout_marginStart="40dp"

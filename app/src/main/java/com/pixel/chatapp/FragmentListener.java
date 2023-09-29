@@ -17,7 +17,7 @@ public interface FragmentListener {
 //    void logoutOption();
 
     void firstCallLoadPage(String otherName);
-    void msgBodyVisibility(String otherName, String imageUrl, String userName, String uID);
+    void chatBodyVisibility(String otherName, String imageUrl, String userName, String uID, Context mContext_, RecyclerView recyclerChat);
 
     void sendRecyclerView(RecyclerView recyclerChat, String otherName, String otherUid);
 
@@ -37,4 +37,5 @@ public interface FragmentListener {
     void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho,
                      MessageAdapter.MessageViewHolder holder);
 
+    void onUserDelete(String otherName, String myUserName, String otherUid);
 }

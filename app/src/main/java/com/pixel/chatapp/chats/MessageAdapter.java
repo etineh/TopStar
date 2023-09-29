@@ -115,10 +115,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         }
     }
-    public void addNewMessage(List<MessageModel> localMsg) {
 
-        modelList.addAll(localMsg);
-
+    //  delete all chat with user
+    public void clearChats() {
+        modelList.clear();
     }
 
 

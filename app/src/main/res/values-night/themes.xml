@@ -101,6 +101,11 @@
         <item name="android:buttonTint">@color/cool_orange</item>
     </style>
 
+    <!--    TextView Orange and Cool orange -->
+    <style name="TV_Orange_CoolOrange">
+        <item name="android:textColor">@color/cool_orange</item>
+    </style>
+
     <style name="Background">
         <item name="android:background">@color/white</item>
     </style>
