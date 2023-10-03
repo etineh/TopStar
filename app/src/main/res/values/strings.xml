@@ -14,7 +14,7 @@
     <string name="join_tour">Join Tournament</string>
     <string name="forward">Forward to...</string>
     <string name="file">File</string>
-    <string name="chat">Chat...</string>
+    <string name="chat">WinnerChat...</string>
     <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
     <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
 
@@ -26,5 +26,12 @@
     <string name="connect">connecting...</string>
 
     <string name="newMsg">New</string>
+
+<!--    // clear chat history and user delete-->
+    <string name="clear_for_me">Clear for only me</string>
+    <string name="clear_for_everyone">Clear for everyone</string>
+    <string name="delete_for_me">Delete for only me</string>
+    <string name="delete_for_everyone">Delete for everyone</string>
+    <string name="clear_history">[Clear chats history]</string>
 
 </resources>

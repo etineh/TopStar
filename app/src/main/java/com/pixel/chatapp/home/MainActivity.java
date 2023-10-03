@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
@@ -27,6 +28,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -59,6 +61,7 @@ import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.pixel.chatapp.general.ProfileActivity;
 import com.squareup.picasso.Picasso;
+import com.vanniktech.emoji.EmojiPopup;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -68,6 +71,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -79,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     private TabLayout tabLayoutGeneral;
     private ViewPager2 viewPager2General;
-    private ImageView menuOpen, home, menuClose, imageViewLogo, imageViewUserPhoto;
+    private ImageView menuOpen, menuClose, imageViewLogo, imageViewUserPhoto;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     DatabaseReference refUser = FirebaseDatabase.getInstance().getReference("Users");
     ConstraintLayout scrollMenu, topMainContainer, mainViewConstraint;
@@ -99,10 +103,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView imageViewBack;
     public static CircleImageView circleImageOnline, circleImageLogo;
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
-    public static ConstraintLayout conTopUserDetails, conUserClick;
+    public static ConstraintLayout conTopUserDetails, conUserClick, typeMsgContainer;
     private ImageView editOrReplyIV, imageViewCalls;
     public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
-    private ConstraintLayout constraintProfileMenu, constraintDelBody;
+    private ConstraintLayout chatMenuProfile, constraintDelBody;
     private static ImageView emoji_IV, file_IV, camera_IV;
     private Context mContext;
 
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
     private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
     private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
-    private MessageAdapter.MessageViewHolder holderPin;
+    private MessageAdapter.MessageViewHolder holderPin, holderEmoji;
     private final String PRIVATE = "private";
     private final String PUBLIC = "public";
     private Object timeStamp;
@@ -137,15 +141,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private String forwardChat;
 
     //  ---------   Delete User from ChatList Declares
-    private ConstraintLayout deleteUserContainer;
+    private ConstraintLayout deleteUserOrClearChatContainer;
     private ImageView cancelUserDelete_IV;
     private TextView deleteUserForMe_TV, deleteUserForAll_TV, otherUserName_TV;
     private String myUserName_Del, otherUserName_Del, otherUid_Del;
 
+    //  --------    Chat Box Menu Declares
+    private TextView clearChat_TV;
+
     //  ----------------
 
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
-    private static EditText editTextMessage;
+    private static EditText editTextMessage, et_emoji;
     private static CircleImageView circleSendMessage;
     private CardView cardViewMsg, cardViewReplyOrEdit;
     public static ImageView scrollPositionIV, sendIndicator;
@@ -163,28 +170,32 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public static FirebaseUser user;
     public static int scrollNum = 0;
     private long count = 0, newMsgCount = 0;
-    private Map<String, Integer> dateNum, dateMonth;
     private static String idKey, listener = "no", replyFrom, replyText, networkListener = "yes", insideChat = "no";
     private static int replyVisibility = 8;    // gone as dafault
     private long randomKey;     // use to fetch randomID when on edit mode
+
+    //  --------   voice note declares
+
     private String audioPath;
     private MediaRecorder mediaRecorder;
     private Permission permissions;
     private static final int PAGE_SIZE = 20; // Number of items to fetch per page
     private int currentPage; // Current page number
+    static RecordView recordView;
+    static RecordButton recordButton;
     public static ConstraintLayout constraintMsgBody;
 
     Handler handler = new Handler(Looper.getMainLooper());
 
-    static RecordView recordView;
-    static RecordButton recordButton;
-
-//    private int readDatabase;  // 0 is read, 1 is no_read
+    //  checks declares
     public static int downMsgCount, readDatabase;  // 0 is read, 1 is no_read
-    public static boolean loadMsg = true;
+    public static boolean loadMsg = true, isKeyboardVisible = false;
+    private Boolean clearOnlyChatHistory = false, isEmojiVisible = false, clearHighLight = false;
 
+    //  -----------     All Maps declares
     public static Map<String, List<PinMessageModel>> pinPrivateChatMap, pinPublicChatMap;
     private Map<String, Object> editMessageMap;
+    private Map<String, Integer> dateNum, dateMonth;
     private Map<String, Object> deleteMap;
     private Map<String, List<MessageModel>> modelListMap;
     public static Map<String, MessageAdapter> adapterMap;
@@ -199,6 +210,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static Handler handler1;
     static Runnable internetCheckRunnable;
 
+    int currentImageResource = R.drawable.baseline_add_reaction_24; // Initialize with the default image resource
+
+    //  ------- emoji declares
+    private EmojiPopup popup;
+    private Handler handlerEmoji = new Handler();
+    private int clearNumb = 0;
+    private String chatID;
+    private Runnable emojiRunnable;
+    private boolean isChatKeyboardON;
+    private static ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
+
     //  ---------- msg end
 
 
@@ -211,21 +233,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         conTopUserDetails = findViewById(R.id.contraintTop9);
         conUserClick = findViewById(R.id.constraintNextTop9);
-        chatContainer = findViewById(R.id.constraintContainer9);
+        chatContainer = findViewById(R.id.chatBoxContainer);
         recyclerContainer = findViewById(R.id.constraintRecyler);
         imageViewCalls = findViewById(R.id.imageViewCalls9);
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
         imageViewBack = findViewById(R.id.imageViewBackArrow9);
         textViewOtherUser = findViewById(R.id.textViewName9);
         editTextMessage = findViewById(R.id.editTextMessage9);
+        et_emoji = findViewById(R.id.et_emoji);
         circleSendMessage = findViewById(R.id.fab9);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu29);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel9);
-        constraintProfileMenu = findViewById(R.id.constraintProfileMenu9);
+        chatMenuProfile = findViewById(R.id.chatMenuConstraint);
         textViewLastSeen = findViewById(R.id.textViewStatus9);
         textViewMsgTyping = findViewById(R.id.textViewTyping29);
         circleImageOnline = findViewById(R.id.circleImageOnline9);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
+        typeMsgContainer = findViewById(R.id.typeMsgContainer);
 
         // delete ids
         constraintDelBody = findViewById(R.id.constDelBody);
@@ -277,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         replyVisible = findViewById(R.id.textReplying9);
 
         // scroll position and network ids
-        constrNetork = findViewById(R.id.constrNetwork);
+        constrNetork = findViewById(R.id.loadingPageContainer);
         constrNetConnect = findViewById(R.id.constrNetCheck);
         scrollPositionIV = findViewById(R.id.scrollToPositionIV);
         scrollCountTV = findViewById(R.id.scrollCountTV);
@@ -290,13 +314,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         camera_IV = findViewById(R.id.camera_IV);
 
         //  delete user from chat list ids
-        deleteUserContainer = findViewById(R.id.deleteUserContainer);
+        deleteUserOrClearChatContainer = findViewById(R.id.deleteUserOrClearChatContainer);
         deleteUserForMe_TV = findViewById(R.id.deleteForMe_TV);
         deleteUserForAll_TV = findViewById(R.id.deleteForEveryone_TV);
         cancelUserDelete_IV = findViewById(R.id.cancelDelete_IV);
         otherUserName_TV = findViewById(R.id.otherUserName_TV);
 
-        // audio swipe button ids
+        //  Chat Box Menu ids
+        clearChat_TV = findViewById(R.id.clearChat_TV);
+
+        // audio swipe button ids   --  voice note
         recordView = (RecordView) findViewById(R.id.record_view9);
         recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
@@ -349,9 +376,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         tabLayoutGeneral = findViewById(R.id.tabLayerMain);
         viewPager2General = findViewById(R.id.viewPageMain);
         menuOpen = findViewById(R.id.imageViewMenu);
-        home = findViewById(R.id.imageViewHome);
         menuClose = findViewById(R.id.imageViewMenuClose);
-        scrollMenu = findViewById(R.id.constraintMenu);
+        scrollMenu = findViewById(R.id.profileMenuContainer);
         logout = findViewById(R.id.textViewLogOut);
         imageViewLogo = findViewById(R.id.circleUserImage);
         imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
@@ -363,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         topMainContainer = findViewById(R.id.HomeTopConstr);
         cardViewSettings = findViewById(R.id.cardViewSettings);
 
+        hideKeyboard();
         new CountDownTimer(20_000, 1000){
             @Override
             public void onTick(long l) {
@@ -416,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         tabLayoutMediator.attach();
 
         // set my online presence to be true
-        refUser.child(auth.getUid()).child("presence").setValue(1);
+        refUser.child(user.getUid()).child("presence").setValue(1);
 
         // Dark mood setting
         sharedPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
@@ -445,8 +472,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         //  Return back, close msg container
         imageViewBack.setOnClickListener(view -> {
             hideKeyboard();
-            onBackPressed();
             insideChat = "no";
+
+            clearEmojiReactSetting();
+            onBackPressed();
         });
 
         // open the menu option
@@ -492,11 +521,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         cardViewSettings.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, ProfileActivity.class)));
 
         // open user menu
-        imageViewOpenMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.VISIBLE));
+        imageViewOpenMenu.setOnClickListener(view -> chatMenuProfile.setVisibility(View.VISIBLE));
 
         // close user menu
-        imageViewCloseMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
-        constraintProfileMenu.setOnClickListener(view -> constraintProfileMenu.setVisibility(View.GONE));
+        imageViewCloseMenu.setOnClickListener(view -> chatMenuProfile.setVisibility(View.GONE));
+        chatMenuProfile.setOnClickListener(view -> chatMenuProfile.setVisibility(View.GONE));
 
 
         // send message
@@ -524,35 +553,102 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // set camera
         camera_IV.setOnClickListener(view -> {
-            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
         });
 
         // set files(documents)
         file_IV.setOnClickListener(view -> {
-            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
         });
 
-        // set emoji
+
+        // --------- emoji  settings    ----------------------
+
+        popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
+
+        globalLayoutListener = () -> {
+            Rect r = new Rect();
+            emoji_IV.getWindowVisibleDisplayFrame(r);
+            int screenHeight = emoji_IV.getRootView().getHeight();
+
+            // Calculate the height difference between the root view and the visible display frame
+            int keypadHeight = screenHeight - r.bottom;
+            // Check if the keyboard is hidden
+            if (keypadHeight < screenHeight * 0.15) {
+                currentImageResource = R.drawable.baseline_add_reaction_24; // Change to the emoji icon or another image
+                emoji_IV.setImageResource(currentImageResource);
+                isEmojiVisible = false;
+
+                if(!isKeyboardVisible){
+                    typeMsgContainer.setVisibility(View.VISIBLE);
+                    // activate runnable to get the emoji clicked
+                    handlerEmoji.removeCallbacks(emojiRunnable);
+                    holderEmoji = null;
+                }
+
+                if(clearHighLight){
+
+                    if(clearNumb == 2){
+                        for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+                            View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+                            itemView.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                        clearHighLight = false;
+                        isChatKeyboardON = false;
+                        //  close chat keyboard if it's on display
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(editTextMessage.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        editTextMessage.requestFocus();
+                        //  reverse the emoji initialization back to the emoji button icon
+                        popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
+                        System.out.println("check here 1");
+
+                    }
+                    clearNumb+=1;
+
+                }
+                System.out.println("check here 2");
+                isKeyboardVisible = true;
+            } else {
+                isKeyboardVisible = false;
+            }
+
+        };
+
         emoji_IV.setOnClickListener(view -> {
-            Toast.makeText(this, "work in progess", Toast.LENGTH_SHORT).show();
+
+            isChatKeyboardON = true;
+            // toggle keyboard and emoji icons
+            popup.toggle();
+
+            if(!isEmojiVisible){
+                currentImageResource = R.drawable.baseline_keyboard_alt_24;
+                isEmojiVisible = true;
+
+            } else{
+                currentImageResource = R.drawable.baseline_add_reaction_24;
+                isEmojiVisible = false;
+            }
+            emoji_IV.setImageResource(currentImageResource);
+        });
+
+        editTextMessage.setOnClickListener(view -> {
+
+            isChatKeyboardON = true;
+            boolean isEmojiVisible_ = popup.isShowing();
+
+            if(isEmojiVisible_){
+                popup.toggle();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
+            }
+            isEmojiVisible = false;
+            emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
+
         });
 
         // close and cancel reply and edit box
-        replyOrEditCancel_IV.setOnClickListener(view -> {
-
-            nameReply.setVisibility(View.GONE);
-            replyVisible.setVisibility(View.GONE);
-            cardViewReplyOrEdit.setVisibility((int) 8);   // 8 is for GONE
-
-            listener = "no";
-            idKey = null;
-            editTextMessage.setText("");
-            replyText = null;
-            replyFrom = null;
-            idKey = null;
-            replyVisibility = 8;
-            textViewReplyOrEdit.setText("");
-        });
+        replyOrEditCancel_IV.setOnClickListener(view -> cancelEditOrReplySetting());
 
 
         // Close delete message option
@@ -646,13 +742,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             if(goToLastMessage) {
                 recyclerMap.get(otherUserName).scrollToPosition(goToNum - 2);
                 adapterMap.get(otherUserName).highlightItem(goToNum); // notify Colour
-                adapterMap.get(otherUserName).highlightedPositions.add(goToNum);    // change color
+                MessageAdapter.highlightedPositions.add(goToNum);    // change color
 
                 goToLastMessage = false;
             } else {
                 recyclerMap.get(otherUserName).scrollToPosition(adapterMap.get(otherUserName).getItemCount()-1);
                 // clear highlight background if any
-                adapterMap.get(otherUserName).highlightedPositions.clear();
+                MessageAdapter.highlightedPositions.clear();
                 // Clear previous highlight, if any.
                 for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
                     View itemView = recyclerMap.get(otherUserName).getChildAt(i);
@@ -962,18 +1058,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         //  -------------------------------------------------------------
 
 
-        //  ----------  delete user from ChatList onClicks ---------------------------
+        //  ----------  delete user from ChatList  And Clear Chat History onClicks ---------------------------
 
         //  delete user container   -- close the container when click and cancel button click
-        deleteUserContainer.setOnClickListener(view -> cancelUserDeleteOption());
+        deleteUserOrClearChatContainer.setOnClickListener(view -> cancelUserDeleteOption());
         cancelUserDelete_IV.setOnClickListener(view -> cancelUserDeleteOption());
 
         // delete user for only me
         deleteUserForMe_TV.setOnClickListener(view -> {
 
-            refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
-            refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
-            refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+//            refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
+            if(!clearOnlyChatHistory){
+                refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
+                refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+            } else {
+                adapterMap.get(otherUserName_Del).notifyDataSetChanged();
+                refLastDetails.child(user.getUid()).child(otherUid_Del)
+                        .child("message").setValue("...");
+                Toast.makeText(this, "Chats cleared for me!", Toast.LENGTH_SHORT).show();
+            }
+
             refPublicPinChat.child(user.getUid()).child(otherUid_Del).removeValue();
             refPrivatePinChat.child(user.getUid()).child(otherUid_Del).removeValue();
 
@@ -982,27 +1086,40 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             adapterMap.get(otherUserName_Del).clearChats(); // delete from chats
             cancelUserDeleteOption();
+            clearOnlyChatHistory = false;
+
         });
 
-        // delete user for everyone
+        // delete user or clear chat for everyone
         deleteUserForAll_TV.setOnClickListener(view -> {
-            // delete from my database
-            refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
-            refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
-            refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+
+            if(!clearOnlyChatHistory){
+                refChatList.child(user.getUid()).child(otherUid_Del).removeValue();
+                refLastDetails.child(user.getUid()).child(otherUid_Del).removeValue();
+                refChecks.child(user.getUid()).child(otherUid_Del).removeValue();
+                
+                refChatList.child(otherUid_Del).child(user.getUid()).removeValue();
+                refLastDetails.child(otherUid_Del).child(user.getUid()).removeValue();
+                refChecks.child(otherUid_Del).child(user.getUid()).removeValue();
+            } else {
+                refLastDetails.child(user.getUid()).child(otherUid_Del)
+                        .child("message").setValue("...");
+                refLastDetails.child(otherUid_Del).child(user.getUid())
+                        .child("message").setValue("...");
+
+                adapterMap.get(otherUserName_Del).notifyDataSetChanged();
+                Toast.makeText(this, "Chats cleared for everyone!", Toast.LENGTH_SHORT).show();
+            }
+
+            // delete pin message from database
             refPublicPinChat.child(user.getUid()).child(otherUid_Del).removeValue();
             refPrivatePinChat.child(user.getUid()).child(otherUid_Del).removeValue();
-
-            refMessages.child(myUserName_Del).child(otherUserName_Del).removeValue();
-            refMsgFast.child(myUserName_Del).child(otherUserName_Del).removeValue();
-
-            //  delete from otherUser database
-            refChatList.child(otherUid_Del).child(user.getUid()).removeValue();
-            refLastDetails.child(otherUid_Del).child(user.getUid()).removeValue();
-            refChecks.child(otherUid_Del).child(user.getUid()).removeValue();
             refPublicPinChat.child(otherUid_Del).child(user.getUid()).removeValue();
             refPrivatePinChat.child(otherUid_Del).child(user.getUid()).removeValue();
-
+            
+            //  delete chats from  database
+            refMessages.child(myUserName_Del).child(otherUserName_Del).removeValue();
+            refMsgFast.child(myUserName_Del).child(otherUserName_Del).removeValue();
             refMessages.child(otherUserName_Del).child(myUserName_Del).removeValue();
             refMsgFast.child(otherUserName_Del).child(myUserName_Del).removeValue();
 
@@ -1010,11 +1127,32 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             adapterMap.get(otherUserName_Del).clearChats(); // delete chats
             cancelUserDeleteOption();
-
+            clearOnlyChatHistory = false;
         });
 
         //  -------------------------------------------------------------
 
+        //  ----------  chat box user menu options onClicks---------------------------
+        clearChat_TV.setOnClickListener(view -> {
+            
+            if (adapterMap.get(otherUserName) != null && adapterMap.get(otherUserName).getItemCount() > 0){
+                chatMenuProfile.setVisibility(View.GONE);   // hide profile option
+                otherUserName_TV.setText(R.string.clear_history );
+//                otherUserName_TV.append(" \uD83D\uDE01");
+                deleteUserForMe_TV.setText(R.string.clear_for_me);
+                deleteUserForAll_TV.setText(R.string.clear_for_everyone);
+                deleteUserOrClearChatContainer.setVisibility(View.VISIBLE);
+
+                clearOnlyChatHistory = true;
+                otherUserName_Del = otherUserName;
+                myUserName_Del = myUserName;
+                otherUid_Del = otherUserUid;
+
+            } else Toast.makeText(this, "Chat is empty...", Toast.LENGTH_SHORT).show();
+           
+        });
+
+        //  -------------------------------------------------------------
 
         // Delay 5 seconds to load message
         new CountDownTimer(5000, 1000){
@@ -1039,12 +1177,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  ----------   interface    ---------------------
     @Override
-    public void callAllMethods(String otherName, String userName, String uID) {
+    public void callAllMethods(String otherName, String userName, String otherUid) {
         getMyUserTyping();
         tellUserAmTyping_AddUser();
         getPreviousCounts();
-        convertUnreadToReadMessage(otherName, userName, uID);
+        convertUnreadToReadMessage(otherName, userName, otherUid);
         pinIconsVisibility(otherName);
+        checkClearChatsDB(otherName, otherUid);
+
+        popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
+        // activate the listener
+        emoji_IV.getViewTreeObserver().addOnGlobalLayoutListener(globalLayoutListener);
     }
 
     @Override
@@ -1061,12 +1204,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public void chatBodyVisibility(String otherName, String imageUrl, String userName, String uID, Context mContext_,
                                   RecyclerView recyclerChat) {
 
+        editTextMessage.requestFocus();
+
         // make only the active recyclerView to be visible
         recyclerViewChatVisibility(otherName);
 
         if(adapterMap.get(otherName) != null){
             System.out.println("Total adapter (M1070) " + adapterMap.get(otherName).getItemCount());
-            if(adapterMap.get(otherName).getItemCount() == 0){
+            if(Objects.requireNonNull(adapterMap.get(otherName)).getItemCount() == 0){
                 readDatabase = 0;
                 getMessage(userName, otherName, uID, mContext);
                 offMainDatabase();
@@ -1076,8 +1221,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(otherName).getLayoutManager();
 
+        assert layoutManager != null;
         downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
-        scrollCountTV.setText(""+ downMsgCount);           // set down msg count
+        String numb = ""+ downMsgCount;
+        scrollCountTV.setText(numb);           // set down msg count
         downMsgCountMap.put(otherName, downMsgCount);     // set it for "sending message method"
 
         // Get the position of the item for sendMessage() and retrieveMessage()
@@ -1192,6 +1339,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     @Override
     public void onDeleteMessage(String id, String fromWho, long randomID) {
 
+        clearEmojiReactSetting();
+        hideKeyboard();
+
         idKey = id;
         randomKey = randomID;
         constraintDelBody.setVisibility(View.VISIBLE);
@@ -1209,6 +1359,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     public void onEditOrReplyMessage(String message, String editOrReply, String id, long randomID,
                                      String status, int icon, String fromWho, int visible)
     {
+        clearEmojiReactSetting();
+        isChatKeyboardON = true;
+
         // pop up keyboard
         editTextMessage.requestFocus();
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1258,6 +1411,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     @Override
     public void onForwardChat(int forwardType_, long forwardRandomID_, String chat) {
 
+        clearEmojiReactSetting();
+        hideKeyboard();
+
         pinMsgContainer.setVisibility(View.GONE);
         conTopUserDetails.setVisibility(View.INVISIBLE);
         conUserClick.setVisibility(View.INVISIBLE);
@@ -1284,12 +1440,118 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void sendPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder) {
+    public void onPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder) {
+        
+        clearEmojiReactSetting();
+        hideKeyboard();
+
         msgId = msgId_;
         message = message_;
         timeStamp = timeStamp_;
         pinByWho = pinByWho_;
         holderPin = holder;
+        // show pin option
+        pinOptionBox.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onEmojiReact(MessageAdapter.MessageViewHolder holder, String chatID_) {
+
+        if (isKeyboardVisible) {
+            clearNumb = 0;
+            popup.dismiss();
+            popup = EmojiPopup.Builder.fromRootView(recyclerContainer).build(et_emoji);
+            popup.toggle();
+
+            addClickableEmoji();
+
+        } else {
+            if(isChatKeyboardON){
+                boolean isEmojiVisible_ = popup.isShowing();
+                if(!isEmojiVisible_){
+                    popup.toggle();     //  if it's keyboard that's displaying, toggle it to emoji
+                    popup.dismiss();    //  then dismiss it and initialise a new EmojiPopup below
+                } else {
+                    popup.dismiss();
+                }
+
+                popup = EmojiPopup.Builder.fromRootView(recyclerContainer).build(et_emoji);
+                popup.toggle();
+
+                addClickableEmoji();    // trigger runnable to observe
+                isChatKeyboardON = false;
+            }
+            clearNumb = 1;  // make it 1 since the keyboard is already pop up
+        }
+
+
+        holderEmoji = holder;
+        chatID = chatID_;
+
+//        isKeyboardVisible = false;
+        clearHighLight = true;
+        typeMsgContainer.setVisibility(View.GONE);
+        et_emoji.setText("");
+
+    }
+
+    private void addClickableEmoji() {
+
+        handlerEmoji = new Handler();
+        emojiRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                if(et_emoji.length() > 0){
+
+                    String getEmoji = et_emoji.getText().toString();
+
+                    boolean containsEmoji = false;
+
+                    for (int i = 0; i < getEmoji.length(); i++) {
+                        char c = getEmoji.charAt(i);
+                        // Check if the character is within any of the emoji character ranges using Unicode escape sequences
+                        if ((c >= '\uD83C' && c <= '\uDBFF') || (c >= '\uDC00' && c <= '\uDFFF') ||
+                                (c >= '\uD83D' && c <= '\uDE4F') || (c >= '\uD83E' && c <= '\uDEFF') ||
+                                (c >= '\u2700' && c <= '\u27BF')) {
+                            containsEmoji = true;
+                            break;
+                        }
+                    }
+                    if (containsEmoji) {      // add emoji
+                        // add to local list
+                        adapterMap.get(otherUserName).addEmojiReact(holderEmoji, getEmoji);
+                        // add to database so the other user can be notify
+                        refMessages.child(myUserName).child(otherUserName).child(chatID).child("emoji").setValue(getEmoji);
+                        refMessages.child(otherUserName).child(myUserName).child(chatID).child("emoji").setValue(getEmoji);
+
+                    }
+                    et_emoji.setText("");
+                    popup.dismiss();
+                    hideKeyboard();
+                    typeMsgContainer.setVisibility(View.VISIBLE);
+                    editTextMessage.requestFocus();
+                    //  reverse the emoji initialization back to the emoji button icon
+                    popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
+
+                    MessageAdapter.highlightedPositions.clear();
+                    //  remove highlight from selected chat
+                    if(recyclerMap.get(otherUserName) != null) {
+                        for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+                            View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+                            itemView.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                    }   // remove callBack after processing everything
+                    handlerEmoji.removeCallbacks(emojiRunnable);
+                }
+
+System.out.println("M1564 I am running");
+                handlerEmoji.postDelayed(this, 1000); // Re-schedule the runnable
+            }
+        };
+
+        handlerEmoji.post(emojiRunnable);
+
     }
 
     @Override
@@ -1465,8 +1727,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     @Override
     public void onUserDelete(String otherName, String myUserName, String otherUid) {
-        otherUserName_TV.setText("@"+otherName);
-        deleteUserContainer.setVisibility(View.VISIBLE);
+        String name = "@"+otherName;
+        otherUserName_TV.setText(name);
+        deleteUserForMe_TV.setText(R.string.delete_for_me);
+        deleteUserForAll_TV.setText(R.string.delete_for_everyone);
+        deleteUserOrClearChatContainer.setVisibility(View.VISIBLE);
         otherUserName_Del = otherName;
         myUserName_Del = myUserName;
         otherUid_Del = otherUid;
@@ -1534,27 +1799,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 if(scrollCheck < 20){    // scroll to last position on new message update.
                     recyclerMap.get(otherUserName).scrollToPosition(lastPosition);
                 }   // else don't scroll.
-
-            } else{ // recall getMessage to load if I am send msg for the first time
-
-                List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
-                List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
-
-                MessageAdapter adapter1 = new MessageAdapter(modelListAllMsg, myUserName, otherUserUid, mContext); // initialise adapter
-
-//                adapter.setFragmentListener((FragmentListener) mContext);
-
-                adapterMap.put(otherUserName, adapter1); // save each user adapter
-                adapterMap.get(otherUserName).addNewMessageDB(messageModel);
-                recyclerMap.get(otherUserName).setAdapter(adapter1);
-                System.out.println("M1539 Arrange ");
-
-                readDatabase = 0;
-                getMessage(myUserName, otherUserName, otherUserUid, mContext);
-                System.out.println("M1539 resend message now ");
-//                recyclerMap.get(otherUserName).scrollToPosition(-1);
-                offMainDatabase();
-
             }
 
             // add one to the dowm message number
@@ -1860,7 +2104,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     // If there's new message from otherUser, add here
                     if (isNewMessage && messageModel.getFrom().equals(otherName)) {
 
-                        // add the new msg to the modelList method at MessageAdapter (L152)
+                        // add the new msg to the modelList method at MessageAdapter
                         adapter.addNewMessageDB(messageModel);
 
                         // check recycler position before scrolling
@@ -2501,8 +2745,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //            System.out.println("What is position " + scrollNum + " and " + positionDiff);
             // highlight the message found
             adapterMap.get(otherUserName).highlightItem(position);
-            adapterMap.get(otherUserName).highlightedPositions.clear();
-            adapterMap.get(otherUserName).highlightedPositions.add(position);  // add to color list
+            MessageAdapter.highlightedPositions.clear();
+            MessageAdapter.highlightedPositions.add(position);  // add to color list
 
         } else {
             Toast.makeText(this, "Chat not found", Toast.LENGTH_SHORT).show();
@@ -2626,45 +2870,43 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             @Override
             public void afterTextChanged(Editable editable) {
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Adding User to chat fragment: Latest Chats with contacts
-                        final DatabaseReference chatRef = FirebaseDatabase.getInstance()
-                                .getReference("ChatList")
-                                .child(user.getUid()).child(otherUserUid);
+                new Thread(() -> {
+                    // Adding User to chat fragment: Latest Chats with contacts
+                    final DatabaseReference chatRef = FirebaseDatabase.getInstance()
+                            .getReference("ChatList")
+                            .child(user.getUid()).child(otherUserUid);
 
-                        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (!dataSnapshot.exists()){
-                                    chatRef.child("id").setValue(otherUserUid);
-                                }
+                    chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (!dataSnapshot.exists()){
+                                chatRef.child("id").setValue(otherUserUid);
                             }
+                        }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                        }
+                    });
+
+                    final DatabaseReference chatRef2 = FirebaseDatabase.getInstance()
+                            .getReference("ChatList")
+                            .child(otherUserUid).child(user.getUid());
+
+                    chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (!dataSnapshot.exists()){
+                                chatRef2.child("id").setValue(user.getUid());
                             }
-                        });
+                        }
 
-                        final DatabaseReference chatRef2 = FirebaseDatabase.getInstance()
-                                .getReference("ChatList")
-                                .child(otherUserUid).child(user.getUid());
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (!dataSnapshot.exists()){
-                                    chatRef2.child("id").setValue(user.getUid());
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                        }
+                    });
 
 //                        // reset the new msg count
 //                        DatabaseReference statusCheck2 = FirebaseDatabase.getInstance().getReference("Checks");
@@ -2697,7 +2939,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //                            }
 //                        });
 
-                    }
                 }).start();
 
             }
@@ -2800,8 +3041,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                                     System.out.println("Error null (M1273) " + e.getMessage());
                                 }
 
-                            } else {
-                                refLastDetails.child(user.getUid()).child(otherUid).removeValue();
                             }
                         }
 
@@ -2893,7 +3132,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         myUserName_Del = null;
         otherUid_Del = null;
         otherUserName_TV.setText("");
-        deleteUserContainer.setVisibility(View.GONE);
+        deleteUserOrClearChatContainer.setVisibility(View.GONE);
     }
 
     // turn of readDatabase to 1 (non-read)
@@ -2911,6 +3150,62 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         }.start();
     }
 
+    // check if other user deleted me from his chat list, if yes, then clear all the user chat
+    public static void checkClearChatsDB(String otherUid, String otherName){
+        refClearSign.child(otherUid).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")){
+                    if(adapterMap.get(otherName) != null ){
+                        // clear local list -- adapter
+                        adapterMap.get(otherName).clearChats();
+                        adapterMap.get(otherName).notifyDataSetChanged();
+                    }
+                    //delete from DB
+                    refClearSign.child(otherUid).child(user.getUid()).removeValue();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void cancelEditOrReplySetting(){
+        nameReply.setVisibility(View.GONE);
+        replyVisible.setVisibility(View.GONE);
+        cardViewReplyOrEdit.setVisibility((int) 8);   // 8 is for GONE
+
+        listener = "no";
+        idKey = null;
+//        editTextMessage.setText("");
+        replyText = null;
+        replyFrom = null;
+        idKey = null;
+        replyVisibility = 8;
+        textViewReplyOrEdit.setText("");
+    }
+
+    private void clearEmojiReactSetting(){
+        handlerEmoji.removeCallbacks(emojiRunnable);
+        et_emoji.clearFocus();
+        editTextMessage.requestFocus();
+        if(popup != null) popup.dismiss();
+        popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
+        typeMsgContainer.setVisibility(View.VISIBLE);
+
+        // clear highlight
+        MessageAdapter.highlightedPositions.clear();
+        for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
+            View itemView = recyclerMap.get(otherUserName).getChildAt(i);
+            itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+    }
     // set user image on settings
     private void setUserDetails(){
         refUser.child(user.getUid()).addValueEventListener(new ValueEventListener() {
@@ -2962,7 +3257,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     @Override
     protected void onPause() {
-        // turn off my online and set my last seen date/time
+
+        if(popup != null) popup.dismiss();
+        typeMsgContainer.setVisibility(View.VISIBLE);
+        handlerEmoji.removeCallbacks(emojiRunnable);
+        //  hide emoji keyboard
+        et_emoji.clearFocus();
+        editTextMessage.clearFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(et_emoji.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+       // turn off my online and set my last seen date/time
         refUser.child(user.getUid()).child("presence").setValue(ServerValue.TIMESTAMP);
 
         new Thread(()->{
@@ -2993,9 +3298,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     protected void onResume() {
         // change my presence back to "online"
         refUser.child(auth.getUid()).child("presence").setValue(1);
+        //  reverse the emoji initialization back to the emoji button icon
+        popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
 
         if(constraintMsgBody.getVisibility() == View.VISIBLE){
             try{
+                editTextMessage.requestFocus();
 //                Map<String, Object> mapUpdate = new HashMap<>();
 //                mapUpdate.put("status", true);
                 refChecks.child(user.getUid()).child(otherUserUid).child("status").setValue(true);
@@ -3008,85 +3316,89 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         super.onResume();
     }
 
-
     @Override
     public void onBackPressed() {
 
         if(constraintMsgBody.getVisibility() == View.VISIBLE){
 
-            // General settings
-            constraintMsgBody.setVisibility(View.INVISIBLE);
-            topMainContainer.setVisibility(View.VISIBLE);
-            conTopUserDetails.setVisibility(View.INVISIBLE);
-            conUserClick.setVisibility(View.INVISIBLE);
-            readDatabase = 1;
-            System.out.println("M2991 What is database " + readDatabase);
+            boolean isEmojiVisible_ = popup.isShowing();
 
-            // edit and reply settings
-            editTextMessage.setText("");    // clear message not sent
-            replyText = null;
-            replyFrom = null;
-            replyVisibility = 8;
-            idKey = null;
-            textViewReplyOrEdit.setText("");
-            constraintDelBody.setVisibility(View.GONE); // close delete options
-            cardViewReplyOrEdit.setVisibility(View.GONE);
-            textViewLastSeen.setText("");   // clear last seen
-            circleImageOnline.setVisibility(View.INVISIBLE);
-            constraintProfileMenu.setVisibility(View.GONE); // close profile menu
+            if(isEmojiVisible_){
+                popup.dismiss();
+                isEmojiVisible = false;
+                typeMsgContainer.setVisibility(View.VISIBLE);
 
-            // Pin Chat Settings
-            pinIconsContainer.setVisibility(View.GONE);
-            pinMsgBox_Constr.setVisibility(View.GONE);
-            pinMsgContainer.setVisibility(View.GONE);   // hide pin Msg container
-            totalPinPrivate_TV.setText(""); // make pin count null
-            totalPinPublic_TV.setText(""); // make pin count null
-            pinNextPrivate = 1;  // return pinNumber to default
-            pinNextPublic = 1;  // return public pinNumber to default
-            pinScrollPublic = 0;
-            pinScrollPrivate = 0;
-            pinOptionBox.setVisibility(View.GONE);  // close the option box
-            line.setVisibility(View.GONE);
-            pinStatus = "null";
+            } else{
+                emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
+                handlerEmoji.removeCallbacks(emojiRunnable);
+                et_emoji.clearFocus();
+                editTextMessage.clearFocus();
 
-            // highlight send message and new receive message indicator
-            receiveIndicator.setVisibility(View.GONE);
-            sendIndicator.setVisibility(View.GONE);
+                // General settings
+                constraintMsgBody.setVisibility(View.INVISIBLE);
+                topMainContainer.setVisibility(View.VISIBLE);
+                conTopUserDetails.setVisibility(View.INVISIBLE);
+                conUserClick.setVisibility(View.INVISIBLE);
+                emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
+                constraintDelBody.setVisibility(View.GONE); // close delete options
+                textViewLastSeen.setText("");   // clear last seen
+                circleImageOnline.setVisibility(View.INVISIBLE);
+                chatMenuProfile.setVisibility(View.GONE); // close profile menu
+                isEmojiVisible = false;
 
-            adapterMap.get(otherUserName).highlightedPositions.clear(); // clear the highlight if any
-            // Clear previous highlight, if any.
-            if(recyclerMap.get(otherUserName) != null) {
-                for (int i = 0; i < recyclerMap.get(otherUserName).getChildCount(); i++) {
-                    View itemView = recyclerMap.get(otherUserName).getChildAt(i);
-                    itemView.setBackgroundColor(Color.TRANSPARENT);
-                }
-            }
+                // edit and reply settings cancel
+                cancelEditOrReplySetting();
+                // cancel user or clear_chat container if visible
+                cancelUserDeleteOption();
 
 
-            new Thread(() -> {
+                // Pin Chat Settings
+                pinIconsContainer.setVisibility(View.GONE);
+                pinMsgBox_Constr.setVisibility(View.GONE);
+                pinMsgContainer.setVisibility(View.GONE);   // hide pin Msg container
+                totalPinPrivate_TV.setText(""); // make pin count null
+                totalPinPublic_TV.setText(""); // make pin count null
+                pinNextPrivate = 1;  // return pinNumber to default
+                pinNextPublic = 1;  // return public pinNumber to default
+                pinScrollPublic = 0;
+                pinScrollPrivate = 0;
+                pinOptionBox.setVisibility(View.GONE);  // close the option box
+                line.setVisibility(View.GONE);
+                pinStatus = "null";
 
-                int scroll = 0;
-                if(adapterMap.get(otherUserName) != null){
-                    scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
-                }
-                Map<String, Object> mapUpdate = new HashMap<>();
-                mapUpdate.put("status", false);
-                mapUpdate.put("newMsgCount", 0);
-                // save scroll to database to recover the recycler position it was
-                mapUpdate.put("scrollPosition", otherUserName+(scroll));
-                refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
+                // highlight send message and new receive message indicator
+                receiveIndicator.setVisibility(View.GONE);
+                sendIndicator.setVisibility(View.GONE);
 
-                scrollPositionMap.put(otherUserName, scroll);
-                System.out.println("M3052 I have saved scroll " + scroll);
-                System.out.println("Is there adapter num " + adapterMap.get(otherUserName));
+                MessageAdapter.highlightedPositions.clear(); // clear the highlight if any
+                // ClearMessageAdapter
 
-                // set responds to pend always      ------- will change later to check condition if user is still an active call
+                new Thread(() -> {
+
+                    int scroll = 0;
+                    if(adapterMap.get(otherUserName) != null){
+                        scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserName).getItemCount() - 1;
+                    }
+                    Map<String, Object> mapUpdate = new HashMap<>();
+                    mapUpdate.put("status", false);
+                    mapUpdate.put("newMsgCount", 0);
+                    // save scroll to database to recover the recycler position it was
+                    mapUpdate.put("scrollPosition", otherUserName+(scroll));
+                    if(scroll > 5) {
+                        refChecks.child(user.getUid()).child(otherUserUid).updateChildren(mapUpdate);
+
+                        scrollPositionMap.put(otherUserName, scroll);
+                        System.out.println("M3052 I have saved scroll " + scroll);
+                    }
+
+                    // set responds to pend always      ------- will change later to check condition if user is still an active call
 //                    refChecks.child(user.getUid()).child(otherUserUid).child("vCallResp").setValue("pending");
 
-                insideChat = "no";
-                idKey = null;
+                    insideChat = "no";
+                    idKey = null;
 
-            }).start();
+                }).start();
+            }
 
         } else if (onForward) {
             cancelForwardSettings();

@@ -38,6 +38,7 @@ import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.PinMessageModel;
+import com.vanniktech.emoji.EmojiPopup;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,7 +142,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.setIsRecyclable(false);      // stop position from repeating itself
 
         int chatPosition = position_;     //   to get the position of each msg
-        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
+//        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
         MessageModel modelUser = modelList.get(chatPosition);    // get the model position of each chat
 
         long convert = (long) modelUser.getTimeSent();
@@ -149,6 +150,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         DateFormat formatter = new SimpleDateFormat("h:mm a");
         String time = formatter.format(d);
 
+//        if(MainActivity.readDatabase == 0){ //---------
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
         holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
@@ -173,7 +175,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
 //        holder.voicePlayerView.setVisibility(visible);
 
-
         // ----------------- reply msg setting
         int intValue = (int) modelUser.getVisibility();
         holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
@@ -192,6 +193,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick
+
+//        }   //--------------
+        // --------------------------   Settings end   ----------------------------------------------------------------------
 
 
         //   get the number of new message I have
@@ -300,6 +304,32 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
+        // emoji onClick option
+        holder.imageViewReact.setOnClickListener(view -> {
+
+            // Highlight the original message
+            highlightItem(chatPosition);    // use this method as notifyItemChanged();
+
+            // Add the original position to the set of highlighted positions
+            highlightedPositions.clear();
+            highlightedPositions.add(chatPosition);
+
+            try{
+                fragmentListener.onEmojiReact(holder, modelUser.getIdKey());
+            }catch (Exception e){
+                System.out.println("Urgent error at MA320" + e.getMessage());
+//                Toast.makeText(mContext, "Restart app", Toast.LENGTH_SHORT).show();
+            };
+
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+            holder.constraintChatTop.setVisibility(View.GONE);
+
+        });
 
         // copy option
         holder.imageViewCopy.setOnClickListener(view -> {
@@ -330,11 +360,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // pin options -- (for me or everyone)
         holder.imageViewPin.setOnClickListener(view -> {
-            // show pin option
-            MainActivity.pinOptionBox.setVisibility(View.VISIBLE);
 
             // send pin chat data to MainActivity
-            fragmentListener.sendPinData(modelUser.getIdKey(), modelUser.getMessage(),
+            fragmentListener.onPinData(modelUser.getIdKey(), modelUser.getMessage(),
                     ServerValue.TIMESTAMP, userName, holder);
 
             holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
@@ -562,6 +590,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     // ---------------------- methods ---------------------------
 
+    public void addEmojiReact(MessageViewHolder holder, String emoji){
+        holder.react_Constr.setVisibility(View.VISIBLE);
+        holder.react_TV.setText(emoji);
+    }
+
     public void pinIconDisplay(MessageViewHolder holder_){
         holder_.pinIcon_IV.setVisibility(View.VISIBLE);
     }
@@ -756,7 +789,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         private ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         private ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
         private ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
-        private ConstraintLayout constraintReplyCon, constrSlide;
+        private ConstraintLayout constraintReplyCon, constrSlide, react_Constr;
+        private TextView react_TV;
         private TextView textViewReplyMsg, senderNameTV;
         private CircleImageView circleSendMsg, circleDownload;
         private ProgressBar progressBar;
@@ -801,6 +835,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 circleDownload = itemView.findViewById(R.id.cirleDownload);
                 progressBar = itemView.findViewById(R.id.progressBarP6);
 
+                react_Constr = itemView.findViewById(R.id.reactS_Constraint);
+                react_TV = itemView.findViewById(R.id.reactS_TV);
+
             } else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
                 cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
@@ -833,6 +870,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 voicePlayerView = itemView.findViewById(R.id.voicePlayerView2);
                 circleDownload = itemView.findViewById(R.id.circleDownload2);
                 progressBar = itemView.findViewById(R.id.progressBar2);
+
+                react_Constr = itemView.findViewById(R.id.reactR_Constraint);
+                react_TV = itemView.findViewById(R.id.reactR_TV);
 
             }
         }

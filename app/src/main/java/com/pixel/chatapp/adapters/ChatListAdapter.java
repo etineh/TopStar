@@ -219,14 +219,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                             holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
                             Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                            System.out.println("Error occur (ChatListAdapter L222)" + e.getMessage());
+                            System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
                         }
-
-//                        if(MainActivity.adapterMap.get(otherName).getItemCount() == 0){
-//                            MainActivity.readDatabase = 0;
-//                            listener.getMessage(userName, otherName, otherUid, mContext);
-//                            System.out.println("I just reload message for (ChatListAdapter L228)");
-//                        }
 
                     }
 
@@ -668,6 +662,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
             recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+//            recyclerChat.setHasFixedSize(true);
 
 //            recyclerChat = itemView.findViewById(R.id.recyclerChat);
 //

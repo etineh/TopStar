@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="3dp">
+    android:layout_margin="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintNewMsg2"
@@ -389,6 +389,34 @@
 
         </androidx.cardview.widget.CardView>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactR_Constraint"
+        style="@style/drawableBG_WhiteAndBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="-5dp"
+        android:elevation="1dp"
+        android:orientation="horizontal"
+        android:paddingLeft="4dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="1dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintBody">
+
+        <TextView
+            android:id="@+id/reactR_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="1"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

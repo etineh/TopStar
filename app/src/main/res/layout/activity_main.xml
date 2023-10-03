@@ -44,7 +44,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constrNetwork"
+        android:id="@+id/loadingPageContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/trans"
@@ -77,101 +77,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/deleteUserContainer"
-            style="@style/trans_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="3dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <EditText
+            android:id="@+id/et_emoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                style="@style/BackgroundW_B"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5">
-
-                <TextView
-                    android:id="@+id/otherUserName_TV"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="20dp"
-                    android:ellipsize="end"
-                    android:gravity="center_vertical"
-                    android:lines="1"
-                    android:text="&quot;&quot;"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewDel" />
-
-                <TextView
-                    android:id="@+id/deleteForMe_TV"
-                    style="@style/TV_Orange_CoolOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="20dp"
-                    android:gravity="center_vertical"
-                    android:text="Delete for me"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/otherUserName_TV" />
-
-                <TextView
-                    android:id="@+id/deleteForEveryone_TV"
-                    style="@style/TV_Orange_CoolOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="40dp"
-                    android:layout_marginBottom="20dp"
-                    android:gravity="center_vertical"
-                    android:text="Delete for everyone"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/deleteForMe_TV" />
-
-                <ImageView
-                    android:id="@+id/imageViewDel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_delete_forever_24" />
-
-                <ImageView
-                    android:id="@+id/cancelDelete_IV"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="14dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_cancel_24"
-                    app:tint="#DD1212" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/forwardConstraint"
@@ -226,6 +139,7 @@
             style="@style/card"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:clickable="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -642,7 +556,103 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintMenu"
+        android:id="@+id/deleteUserOrClearChatContainer"
+        style="@style/trans_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="1dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            style="@style/BackgroundW_B"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5">
+
+            <TextView
+                android:id="@+id/otherUserName_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="20dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:text="&quot;&quot;"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageViewDel" />
+
+            <TextView
+                android:id="@+id/deleteForMe_TV"
+                style="@style/TV_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center_vertical"
+                android:text="Delete for me"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/otherUserName_TV" />
+
+            <TextView
+                android:id="@+id/deleteForEveryone_TV"
+                style="@style/TV_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_vertical"
+                android:text="Delete for everyone"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/deleteForMe_TV" />
+
+            <ImageView
+                android:id="@+id/imageViewDel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+            <ImageView
+                android:id="@+id/cancelDelete_IV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="14dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_cancel_24"
+                app:tint="#DD1212" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profileMenuContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/trans"
@@ -1407,7 +1417,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintProfileMenu9"
+        android:id="@+id/chatMenuConstraint"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/trans"
@@ -1431,7 +1441,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/textViewClearMsg9"
+                    android:id="@+id/clearChat_TV"
                     style="@style/textColorFullBlack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -1548,7 +1558,7 @@
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewClearMsg9" />
+                    app:layout_constraintTop_toBottomOf="@+id/clearChat_TV" />
 
                 <ImageView
                     android:id="@+id/imageViewCancel9"
@@ -1864,7 +1874,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintContainer9"
+            android:id="@+id/chatBoxContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/trans"
@@ -1897,7 +1907,7 @@
                 android:layout_marginBottom="25dp"
                 android:elevation="5dp"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@id/constraintSendMsgBox9"
+                app:layout_constraintBottom_toTopOf="@id/typeMsgContainer"
                 app:layout_constraintRight_toRightOf="parent"
                 app:srcCompat="@drawable/baseline_arrow_circle_down_24" />
 
@@ -1954,7 +1964,7 @@
                 android:background="@color/light_orange"
                 android:elevation="30dp"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
+                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
                 app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -1972,7 +1982,7 @@
                 android:layout_height="0dp"
                 android:layout_marginStart="6dp"
                 android:layout_marginBottom="7dp"
-                app:layout_constraintBottom_toTopOf="@+id/constraintSendMsgBox9"
+                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout14">
@@ -1980,7 +1990,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintSendMsgBox9"
+                android:id="@+id/typeMsgContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="7dp"
@@ -2005,7 +2015,9 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingTop="2dp">
+                        android:paddingTop="2dp"
+                        app:layout_constraintEnd_toStartOf="@+id/fromTV9"
+                        app:layout_constraintStart_toStartOf="@+id/fromTV9">
 
                         <ImageView
                             android:id="@+id/camera_IV"
@@ -2132,6 +2144,7 @@
                             android:layout_marginEnd="5dp"
                             android:layout_marginBottom="-2dp"
                             android:backgroundTint="@color/orange"
+                            android:focusableInTouchMode="true"
                             android:gravity="start|top"
                             android:hint="@string/chat"
                             android:inputType="textMultiLine"

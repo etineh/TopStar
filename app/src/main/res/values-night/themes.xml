@@ -124,8 +124,14 @@
         <item name="android:background">#301a00</item>
     </style>
 
-    <!--    drawable background-->
+    <!--    drawable background - orange and black-->
     <style name="drawableBG">
+        <item name="android:background">@drawable/black_circle_round</item>
+        <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <!--    drawable background - white and black-->
+    <style name="drawableBG_WhiteAndBlack">
         <item name="android:background">@drawable/black_circle_round</item>
         <!--        <item name="android:background">#fedfb9</item>-->
     </style>

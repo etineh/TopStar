@@ -75,9 +75,6 @@ public class ChatsListFragment extends Fragment {
 
         // Go to contact
         openContactList.setOnClickListener(view1 -> {
-
-//            MainActivity.constraintMsgBody.setVisibility(View.VISIBLE);
-
             Intent intent = new Intent(getContext(), UsersContactActivity.class);
             startActivity(intent);
 
@@ -157,9 +154,9 @@ public class ChatsListFragment extends Fragment {
 
                     // check and fetch out their id each
                     String user = snapshot1.getKey();
-                    for (ChatListModel chatlist : chatListID){
+                    for (ChatListModel chatList : chatListID){
 
-                        if(user.equals(chatlist.getId())){
+                        if(user.equals(chatList.getId())){
                             mUsersID.add(0, user);
                             adapter.notifyDataSetChanged();
                         }

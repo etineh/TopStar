@@ -104,26 +104,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
 
         // check if other user deleted me from his chat list, if yes, then clear all the user chat
-        refClearSign.child(otherUid).child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")){
-                    if(MainActivity.adapterMap.get(otherName) != null ){
-                        MainActivity.adapterMap.get(otherName).clearChats();
-                    }
-                    //delete from DB
-                    refClearSign.child(otherUid).child(user.getUid()).removeValue();
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
+        MainActivity.checkClearChatsDB(otherUid, otherName);
 
         // what happen when the cardView is click
         holder.cardView.setOnClickListener(view -> {
@@ -139,6 +120,12 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             listener.msgBackgroundActivities(otherUid);
 
             listener.callAllMethods(otherName, myUserName, otherUid);
+
+            // activate adapter for user if null
+            if(MainActivity.adapterMap.get(otherName) == null){
+                // call getMessage() to add up new user adapter
+                listener.getMessage(myUserName, otherName, otherUid, chatsListFragment.getMainContext());
+            }
 
         });
 

@@ -131,9 +131,15 @@
 <!--        <item name="android:background">#fedfb9</item>-->
     </style>
 
-    <!--    drawable background-->
+    <!--    drawable background - orange and black -->
     <style name="drawableBG">
         <item name="android:background">@drawable/msg_count</item>
+    </style>
+
+    <!--    drawable background - white and black-->
+    <style name="drawableBG_WhiteAndBlack">
+        <item name="android:background">@drawable/white_circle_bg</item>
+        <!--        <item name="android:background">#fedfb9</item>-->
     </style>
 
     <!--    drawable tint and background-->
