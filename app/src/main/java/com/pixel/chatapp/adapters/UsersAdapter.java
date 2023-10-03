@@ -1,8 +1,6 @@
 package com.pixel.chatapp.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,30 +19,54 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.chats.MessageAdapter;
+import com.pixel.chatapp.chats.MessageModel;
+import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.home.fragments.ChatsListFragment;
+import com.pixel.chatapp.model.ContactModel;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
-    List<String> otherUsersList;
+    MainActivity mainActivity = new MainActivity();
+    List<ContactModel> otherUsersList;
 //    List<String> names;
     Context mContext;
-    String userName;
-    DatabaseReference fbReference;
+    DatabaseReference refUsers, refClearSign;
     FirebaseUser user;
+    ChatsListFragment chatsListFragment = new ChatsListFragment();
 
-    public UsersAdapter(List<String> otherUsersList, Context mContext, String userName) {
+    public interface BackButtonClickListener {
+        void onBackButtonClicked();
+    }
+
+    private BackButtonClickListener backButtonClickListener;
+
+    public void setBackButtonClickListener(BackButtonClickListener listener) {
+        this.backButtonClickListener = listener;
+    }
+
+    private FragmentListener listener;
+
+    public void setListener(FragmentListener listener) {
+        this.listener = listener;
+    }
+
+    public UsersAdapter(List<ContactModel> otherUsersList, Context mContext) {
         this.otherUsersList = otherUsersList;
         this.mContext = mContext;
-        this.userName = userName;
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        fbReference = FirebaseDatabase.getInstance().getReference("Users");
+        refUsers = FirebaseDatabase.getInstance().getReference("Users");
+        refClearSign = FirebaseDatabase.getInstance().getReference("ClearSign");
+
     }
 
     @NonNull
@@ -58,47 +81,56 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
 
         int pos = position;
+        ContactModel contactModel = otherUsersList.get(pos);
 
-//  get all other-user details -----------------------
-        fbReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+        //  get all other-user details -----------------------
+        String otherUid = contactModel.getOtherUid();
+        String otherName = contactModel.getUserName();
+        String myUserName = contactModel.getMyUserName();
+        String imageUrl = contactModel.getImage();
+        String hint = contactModel.getBio();
 
-                String otherName = snapshot.child(otherUsersList.get(pos)).child("userName")
-                        .getValue().toString();           // fetch out all the userName except mine
-//                String lastMsg = snapshot.child(otherUsersList.get(pos)).child(user.getUid())
-//                        .child("lastMsg").getValue().toString();
+        if (imageUrl == null || imageUrl.equals("null")) {      // display user photo
+            holder.imageView.setImageResource(R.drawable.person_round);
+        }
+        else Picasso.get().load(imageUrl).into(holder.imageView);
 
-                String imageUrl = snapshot.child(otherUsersList.get(pos)).child("image").getValue().toString();    // fetch out image
-                if (imageUrl.equals("null")) holder.imageView.setImageResource(R.drawable.person_round);
-                else Picasso.get().load(imageUrl).into(holder.imageView);
+        holder.textViewUser.setText(otherName);                 // display all myUserName
+//        holder.textViewTime.setText(lastTimeSent);              // display last time
+        holder.textViewMsg.setText(hint);                    // display Bio of the user
 
-                holder.textViewUser.setText(otherName);                 // display all username
-//                holder.textViewTime.setText(lastTimeSent);              // display last time
-//                holder.textViewMsg.setText(bio);                    // display Bio of the user
+        // add up user recyclerView that doesn't exist
+        listener.sendRecyclerView(holder.recyclerChat, otherName, otherUid);
 
-                // what happen when the cardView is click
-                holder.cardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(mContext, MessageActivity.class);
-                        // save both userName and otherName and each user UiD to display on the chat box
-                        intent.putExtra("otherName", otherName);
-                        intent.putExtra("userName", userName);
-                        intent.putExtra("Uid", otherUsersList.get(pos));
 
-                        mContext.startActivity(intent);
-                    }
-                });
+        // check if other user deleted me from his chat list, if yes, then clear all the user chat
+        MainActivity.checkClearChatsDB(otherUid, otherName);
+
+        // what happen when the cardView is click
+        holder.cardView.setOnClickListener(view -> {
+
+            if (backButtonClickListener != null) {  // close contact list
+                backButtonClickListener.onBackButtonClicked();
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            listener.chatBodyVisibility(otherName, imageUrl, myUserName, otherUid, chatsListFragment.getMainContext(), holder.recyclerChat);
 
+            listener.getLastSeenAndOnline(otherUid);
+
+            listener.msgBackgroundActivities(otherUid);
+
+            listener.callAllMethods(otherName, myUserName, otherUid);
+
+            // activate adapter for user if null
+            if(MainActivity.adapterMap.get(otherName) == null){
+                // call getMessage() to add up new user adapter
+                listener.getMessage(myUserName, otherName, otherUid, chatsListFragment.getMainContext());
             }
+
         });
 
     }
+
 
     @Override
     public int getItemCount() {
@@ -111,6 +143,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         private ImageView imageViewDeliver;
         private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime;
         private CardView cardView;
+        RecyclerView recyclerChat;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -122,6 +155,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             imageViewDeliver = itemView.findViewById(R.id.imageViewDelivery);
             textViewTime = itemView.findViewById(R.id.textViewTime);
             cardView = itemView.findViewById(R.id.cardView);
+
+            recyclerChat = itemView.findViewById(R.id.recyclerChat);
+            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
 
         }
 

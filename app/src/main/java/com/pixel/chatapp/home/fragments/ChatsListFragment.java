@@ -1,19 +1,11 @@
 package com.pixel.chatapp.home.fragments;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.RelativeDateTimeFormatter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,13 +20,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.contacts.UsersContactActivity;;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.ChatListModel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatsListFragment extends Fragment {
 
@@ -47,12 +42,19 @@ public class ChatsListFragment extends Fragment {
     FirebaseUser user;
     DatabaseReference fReference, refChecks;
 
-    String userName;
-    ChatListAdapter adapter;
-    FloatingActionButton fab;
+    String myUserName;
+    static ChatListAdapter adapter;
+    public static CircleImageView openContactList;
 
     private List<ChatListModel> chatListID;
     private List<String> mUsersID;
+    private FragmentListener fragmentListener;
+
+    private Context mainContext = getContext();
+
+    public Context getMainContext() {
+        return mainContext;
+    }
 
     @Nullable
     @Override
@@ -60,7 +62,7 @@ public class ChatsListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.chats_list_fragment, container, false);
 
-        fab = view.findViewById(R.id.floatingActionButton);
+        openContactList = view.findViewById(R.id.openContactList);
         recyclerView = view.findViewById(R.id.recyclerViewChatList);
 
         recyclerView.setHasFixedSize(true);
@@ -72,13 +74,10 @@ public class ChatsListFragment extends Fragment {
 //        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         // Go to contact
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        openContactList.setOnClickListener(view1 -> {
+            Intent intent = new Intent(getContext(), UsersContactActivity.class);
+            startActivity(intent);
 
-                Intent intent = new Intent(getContext(), UsersContactActivity.class);
-                startActivity(intent);
-            }
         });
 
 
@@ -88,7 +87,7 @@ public class ChatsListFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                userName = snapshot.child(user.getUid()).child("userName").getValue().toString();
+                myUserName = snapshot.child(user.getUid()).child("userName").getValue().toString();
             }
 
             @Override
@@ -113,7 +112,8 @@ public class ChatsListFragment extends Fragment {
                 }
 
                 // changed the adapter from the chatList method to here and it was faster loading
-                adapter = new ChatListAdapter(mUsersID, getContext(), userName);
+                adapter = new ChatListAdapter(mUsersID, getContext(), myUserName);
+                adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
                 recyclerView.setAdapter(adapter);
 
 //                chatList();
@@ -125,11 +125,18 @@ public class ChatsListFragment extends Fragment {
             }
         });
 
+
         chatList();
 
         return view;
     }
 
+    //  ---------------  All   methods     -----------------
+
+    public static void onit(){
+//        adapter.helo();
+
+    }
     private void chatList(){
 
         mUsersID = new ArrayList<>();
@@ -147,9 +154,9 @@ public class ChatsListFragment extends Fragment {
 
                     // check and fetch out their id each
                     String user = snapshot1.getKey();
-                    for (ChatListModel chatlist : chatListID){
+                    for (ChatListModel chatList : chatListID){
 
-                        if(user.equals(chatlist.getId())){
+                        if(user.equals(chatList.getId())){
                             mUsersID.add(0, user);
                             adapter.notifyDataSetChanged();
                         }
@@ -163,6 +170,28 @@ public class ChatsListFragment extends Fragment {
             }
         });
     }
+
+    //   ------------ Message Methods
+
+    public void updateAdapterData(String data) {
+//        if (adapter != null) {
+//            adapter.updateData(newData);
+//        }
+        System.out.println("This is the "+data);
+    }
+
+    // when you want to control your mainActivity from your fragment or fetch a method from your mainActivity, use attach to link up
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        if (context instanceof FragmentListener) {
+            fragmentListener = (FragmentListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement FragmentListener");
+        }
+    }
+
 
 //    @Override
 //    public void onCreate(@Nullable Bundle savedInstanceState) {

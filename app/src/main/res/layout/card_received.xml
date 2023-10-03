@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="3dp">
+    android:layout_margin="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintNewMsg2"
@@ -49,6 +49,7 @@
             style="@style/card"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
+            android:clickable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/cardViewReceived"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,6 +65,20 @@
                 app:layout_constraintStart_toEndOf="@+id/imageViewReplyMsg2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_add_reaction_24" />
+
+            <ImageView
+                android:id="@+id/pinALL_R_IV"
+                style="@style/drawableBG"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:layout_marginBottom="10dp"
+                android:elevation="3dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintEnd_toEndOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintStart_toStartOf="@+id/imageViewReceivePinMsg"
+                app:srcCompat="@drawable/baseline_disabled_visible_view_24"
+                app:tint="@color/white" />
 
             <ImageView
                 android:id="@+id/imageViewForward2"
@@ -138,6 +153,7 @@
             android:id="@+id/cardViewReceived"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -158,7 +174,7 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toTopOf="@id/constraintLayout9"
+                    app:layout_constraintBottom_toTopOf="@id/line2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -217,7 +233,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout9"
+                    android:id="@+id/line2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
@@ -243,7 +259,6 @@
                         android:textColorLink="@color/orange"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.0" />
@@ -265,7 +280,6 @@
                         android:visibility="gone"
                         app:enableVisualizer="false"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.0"
@@ -331,15 +345,35 @@
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/arrow_right_" />
 
-                <TextView
-                    android:id="@+id/textViewEditedReceiver"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/editedReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
                     android:layout_marginStart="5dp"
                     android:layout_marginBottom="1dp"
                     android:textSize="11sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/textViewChatTime2" />
+                    app:layout_constraintStart_toEndOf="@+id/textViewChatTime2"
+                    app:srcCompat="@drawable/baseline_mode_edit_24" />
+
+                <ImageView
+                    android:id="@+id/forwardR_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/pinReceiver_IV"
+                    app:srcCompat="@drawable/baseline_forward_24" />
+
+                <ImageView
+                    android:id="@+id/pinReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/editedReceiver_IV"
+                    app:srcCompat="@drawable/baseline_push_pin_24" />
 
                 <TextView
                     android:id="@+id/textViewChatTime2"
@@ -355,6 +389,34 @@
 
         </androidx.cardview.widget.CardView>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactR_Constraint"
+        style="@style/drawableBG_WhiteAndBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="-5dp"
+        android:elevation="1dp"
+        android:orientation="horizontal"
+        android:paddingLeft="4dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="1dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintBody">
+
+        <TextView
+            android:id="@+id/reactR_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="1"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

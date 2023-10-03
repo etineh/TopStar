@@ -62,11 +62,14 @@ dependencies {
     //  for voice note
     implementation 'com.github.3llomi:RecordView:3.1.3'
 
-    // for sharepreference arraylist storage
+    // for sharePreference arraylist storage with gson
     implementation 'com.google.code.gson:gson:2.10.1'
 
     // bug fix (duplicate merge) ---- add "android.enableJetifier=true" to gradle.property
     implementation 'com.github.JagarYousef:ChatVoicePlayer:1.1.0'
+
+    // for emoji
+    implementation 'com.vanniktech:emoji-google:0.7.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

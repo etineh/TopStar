@@ -11,6 +11,7 @@
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <!-- Customize your theme here. -->
     </style>
 
@@ -24,6 +25,7 @@
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor"></item>
         <!-- Customize your theme here. -->
@@ -91,6 +93,21 @@
         <item name="android:tint">@color/dark_orange2</item>
     </style>
 
+    <!--    background White and Cool orange -->
+    <style name="tintWhiteAndCoolOrange">
+        <item name="android:tint">@color/white</item>
+    </style>
+
+    <!--    CheckBox Orange and Cool orange -->
+    <style name="checkBoxTint">
+        <item name="android:buttonTint">@color/orange</item>
+    </style>
+
+    <!--    TextView Orange and Cool orange -->
+    <style name="TV_Orange_CoolOrange">
+        <item name="android:textColor">@color/orange</item>
+    </style>
+
     <style name="BackgroundTintW_B">
         <item name="android:backgroundTint">#FBF9F9</item>
     </style>
@@ -112,6 +129,28 @@
     <style name="ChatMsgContainer">
         <item name="android:background">@color/light_orange</item>
 <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <!--    drawable background - orange and black -->
+    <style name="drawableBG">
+        <item name="android:background">@drawable/msg_count</item>
+    </style>
+
+    <!--    drawable background - white and black-->
+    <style name="drawableBG_WhiteAndBlack">
+        <item name="android:background">@drawable/white_circle_bg</item>
+        <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <!--    drawable tint and background-->
+    <style name="roundBackgroundAndTint">
+        <item name="android:background">@drawable/msg_count</item>
+        <item name="android:tint">@color/dark_orange2</item>
+    </style>
+
+<!--    transparent background-->
+    <style name="trans_background">
+        <item name="android:background">@color/transparent_orange</item>
     </style>
 
 <!--    Custom TabLayout-->

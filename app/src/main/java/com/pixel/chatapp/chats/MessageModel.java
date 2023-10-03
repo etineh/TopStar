@@ -2,9 +2,11 @@ package com.pixel.chatapp.chats;
 
 import android.view.View;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class MessageModel {
+public class MessageModel implements Serializable {
+//public class MessageModel {
 
     private String message;
     private String from, replyFrom;
@@ -16,13 +18,19 @@ public class MessageModel {
     private  int msgStatus;
 
     private int type;
-    private String voicenote;
+    private long randomID;
+    private String replyID;
+    private Boolean isChatPin;
+    private Boolean isChatForward;
+
+//    private String voicenote;
 
     public MessageModel() {
     }
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
-                        int visibility, String replyMsg, int msgStatus, int type, String voicenote) {
+                        int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID,
+                        Boolean isChatPin, Boolean isChatForward) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -33,7 +41,12 @@ public class MessageModel {
         this.msgStatus = msgStatus;
         this.replyFrom = replyFrom;
         this.type = type;
-        this.voicenote = voicenote;
+        this.randomID = randomID;
+        this.replyID = replyID;
+        this.isChatPin = isChatPin;
+        this.isChatForward = isChatForward;
+
+//        this.voicenote = voicenote;
     }
     public String getMessage() {
         return message;
@@ -115,11 +128,39 @@ public class MessageModel {
         this.type = type;
     }
 
-    public String getVoicenote() {
-        return voicenote;
+    public long getRandomID() {
+        return randomID;
     }
 
-    public void setVoicenote(String voicenote) {
-        this.voicenote = voicenote;
+    public String getReplyID() {
+        return replyID;
     }
+
+    public void setReplyID(String replyID) {
+        this.replyID = replyID;
+    }
+
+    public Boolean getIsChatPin() {
+        return isChatPin;
+    }
+
+    public void setChatPin(boolean chatPin) {
+        isChatPin = chatPin;
+    }
+
+    public Boolean getIsChatForward() {
+        return isChatForward;
+    }
+
+    public void setChatForward(boolean chatForward) {
+        isChatForward = chatForward;
+    }
+
+    //    public String getVoicenote() {
+//        return voicenote;
+//    }
+//
+//    public void setVoicenote(String voicenote) {
+//        this.voicenote = voicenote;
+//    }
 }

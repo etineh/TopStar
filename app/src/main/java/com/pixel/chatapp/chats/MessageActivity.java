@@ -179,6 +179,12 @@ public class MessageActivity extends AppCompatActivity {
         imageUrl = getIntent().getStringExtra("ImageUrl");
         scrollPosition = getIntent().getIntExtra("recyclerScroll", 0);
         insideChat = getIntent().getStringExtra("insideChat");
+        modelList = (List<MessageModel>) getIntent().getSerializableExtra("messageList");
+
+        recyclerViewChat.scrollToPosition(modelList.size() - 1);
+//        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
+//                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
+//        recyclerViewChat.setAdapter(adapter);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
@@ -335,7 +341,9 @@ public class MessageActivity extends AppCompatActivity {
                 }
 
                 // scroll to the new message position number
-                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1);
+//                recyclerViewChat.scrollToPosition(modelList.size() - scrollPosition - 1);
+                recyclerViewChat.scrollToPosition(modelList.size() - 1);
+
             }
 
             @Override
@@ -343,8 +351,8 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, editTextMessage, constraintDelBody, textViewReply,
-                cardViewReply, textViewDelOther, editOrReplyIV, nameReply, replyVisible);
+        recyclerViewChat.scrollToPosition(modelList.size() - 1);
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
         recyclerViewChat.setAdapter(adapter);
 
     }
@@ -366,7 +374,8 @@ public class MessageActivity extends AppCompatActivity {
         refChecks.child(user.getUid()).child(uID).updateChildren(statusAndMSgCount);
     }
 
-    public void sendMessage(String message, int type, String vn){
+    public void sendMessage(String message, int type, String vn)
+    {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
 //        String key = refMessages.child(userName).child(otherName).push().getKey();  // create an id for each message
@@ -403,6 +412,7 @@ public class MessageActivity extends AppCompatActivity {
 //        refMessages.child(otherName).child(userName).child(key).setValue(messageMap);
 
         refMessages.child(userName).child(otherName).push().setValue(messageMap);
+        refMessages.child(otherName).child(userName).push().setValue(messageMap);
 
         // send delivery id to MsgSeen
 //        refMsgSeen.child(uID).child(user.getUid()).push().child("seenKey").setValue(key);
@@ -1182,7 +1192,7 @@ public class MessageActivity extends AppCompatActivity {
         // set responds to pend always      ------- will change later to check condition if user is still an active call
         refChecks.child(user.getUid()).child(uID).child("vCallResp").setValue("pending");
 
-//        setIsOnline();
+        setIsOnline();
         runnerCheck = false;
         insideChat = "yes";
         super.onResume();

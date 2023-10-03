@@ -3,46 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="3dp">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintNewMsg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/textViewNewMsg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/msg_count"
-            android:paddingLeft="15dp"
-            android:paddingTop="3dp"
-            android:paddingRight="15dp"
-            android:paddingBottom="3dp"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint"
+        android:id="@+id/constraintPin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="80dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constraintNewMsg">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintChatTop"
@@ -50,11 +20,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:clickable="true"
-            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/cardViewSend"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/constraint">
+            app:layout_constraintTop_toTopOf="@+id/constraintPin">
 
             <ImageView
                 android:id="@+id/imageViewForward"
@@ -92,20 +60,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
                 app:srcCompat="@drawable/baseline_push_pin_24" />
-
-            <ImageView
-                android:id="@+id/pinALL_S_IV"
-                style="@style/drawableBG"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_marginBottom="10dp"
-                android:elevation="3dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@+id/imageViewPinMsg"
-                app:layout_constraintEnd_toEndOf="@+id/imageViewPinMsg"
-                app:layout_constraintStart_toStartOf="@+id/imageViewPinMsg"
-                app:srcCompat="@drawable/baseline_disabled_visible_view_24"
-                app:tint="@color/white" />
 
             <ImageView
                 android:id="@+id/imageViewCopyText"
@@ -170,7 +124,6 @@
                 style="@style/ChatMsgContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="3dp"
                 android:paddingRight="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -180,7 +133,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
-                    android:visibility="gone"
                     app:layout_constraintBottom_toTopOf="@+id/constraintLayout8"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -355,35 +307,17 @@
                     app:layout_constraintEnd_toStartOf="@id/textViewChatTime"
                     app:tint="@color/orange" />
 
-                <ImageView
-                    android:id="@+id/editedSender_IV"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
+                <TextView
+                    android:id="@+id/textViewEditSender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="1dp"
                     android:textSize="11sp"
-                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/imageViewSeen"
-                    app:srcCompat="@drawable/baseline_mode_edit_24" />
-
-                <ImageView
-                    android:id="@+id/forwardS_IV"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/pinSender_IV"
-                    app:srcCompat="@drawable/baseline_forward_24" />
-
-                <ImageView
-                    android:id="@+id/pinSender_IV"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/editedSender_IV"
-                    app:srcCompat="@drawable/baseline_push_pin_24" />
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/textViewChatTime"
@@ -398,35 +332,6 @@
 
         </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/reactS_Constraint"
-        style="@style/drawableBG_WhiteAndBlack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-5dp"
-        android:layout_marginEnd="70dp"
-        android:elevation="1dp"
-        android:orientation="horizontal"
-        android:paddingLeft="4dp"
-        android:paddingRight="5dp"
-        android:paddingBottom="1dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraint">
-
-        <TextView
-            android:id="@+id/reactS_TV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:ems="1"
-            android:inputType="textPersonName"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
