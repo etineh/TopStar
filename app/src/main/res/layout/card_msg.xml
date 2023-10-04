@@ -294,7 +294,6 @@
                         app:showShareButton="false"
                         app:showTiming="true"
                         app:timingBackgroundColor="@color/cool_orange"
-                        app:viewBackground="@color/amp_transparent"
                         app:viewCornerRadius="100"
                         app:visualizationNotPlayedColor="@color/cool_orange"
                         app:visualizationPlayedColor="#ff7700">

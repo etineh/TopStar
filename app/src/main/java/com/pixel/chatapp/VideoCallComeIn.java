@@ -18,9 +18,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.squareup.picasso.Picasso;
-
-import org.jitsi.meet.sdk.JitsiMeetActivity;
-import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
+//
+//import org.jitsi.meet.sdk.JitsiMeetActivity;
+//import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 
 import java.net.URL;
 
@@ -76,23 +76,23 @@ public class VideoCallComeIn extends AppCompatActivity {
     //      ------------        methods        --------------
 
     //  Join call when I pick
-    private void joinCall()
-    {
-        try {
-            JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
-                    .setServerURL(new URL("https://meet.jit.si"))
-                    .setRoom(otherUid)
-                    .build();
-
-            JitsiMeetActivity.launch(VideoCallComeIn.this, options);
-            finish();
-
-        } catch (Exception e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-//        Toast.makeText(VideoCallComeIn.this, "You have accepted the call", Toast.LENGTH_SHORT).show();
-
-    }
+    private void joinCall(){}
+//    {
+//        try {
+//            JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
+//                    .setServerURL(new URL("https://meet.jit.si"))
+//                    .setRoom(otherUid)
+//                    .build();
+//
+//            JitsiMeetActivity.launch(VideoCallComeIn.this, options);
+//            finish();
+//
+//        } catch (Exception e){
+//            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//        }
+////        Toast.makeText(VideoCallComeIn.this, "You have accepted the call", Toast.LENGTH_SHORT).show();
+//
+//    }
 
     // Check if other user end their call
     public void userEndCall(){

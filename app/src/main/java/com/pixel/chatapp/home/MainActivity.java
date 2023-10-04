@@ -3111,6 +3111,7 @@ System.out.println("M1564 I am running");
         selectCount = 0;
         totalUser_TV.setText("0 selected");
         selectedUsernames.clear();
+        editTextMessage.requestFocus();
 
         pinMsgContainer.setVisibility(View.VISIBLE);
         conTopUserDetails.setVisibility(View.VISIBLE);

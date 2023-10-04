@@ -8,7 +8,7 @@ android {
     compileSdk 33
     defaultConfig {
         applicationId "com.pixel.chatapp"
-        minSdk 24
+        minSdk 23
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -31,19 +31,19 @@ android {
 dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
-
-    def room_version = "2.4.1"
-
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-
-    def lifecycle_version = "2.4.0"
-    // ViewModel
-    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-    // LiveData
-    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
-    // Annotation processor
-    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+//
+//    def room_version = "2.4.1"
+//
+//    implementation "androidx.room:room-runtime:$room_version"
+//    annotationProcessor "androidx.room:room-compiler:$room_version"
+//
+//    def lifecycle_version = "2.4.0"
+//    // ViewModel
+//    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+//    // LiveData
+//    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+//    // Annotation processor
+//    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
@@ -55,7 +55,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     // bug_fix.. change the sdk from + to 8.1.2. And minSDK to 24 above
-    implementation ('org.jitsi.react:jitsi-meet-sdk:8.1.2') { transitive = true }
+//    implementation ('org.jitsi.react:jitsi-meet-sdk:8.1.2') { transitive = true }
 
 //    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
 

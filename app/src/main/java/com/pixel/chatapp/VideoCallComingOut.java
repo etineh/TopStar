@@ -19,8 +19,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.chats.MessageActivity;
 import com.squareup.picasso.Picasso;
 
-import org.jitsi.meet.sdk.JitsiMeetActivity;
-import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
+//import org.jitsi.meet.sdk.JitsiMeetActivity;
+//import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 
 import java.net.URL;
 
@@ -136,24 +136,24 @@ public class VideoCallComingOut extends AppCompatActivity {
 
     }
 
-    private void joinMeeting()
-    {
-        try {
-            JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
-                    .setServerURL(new URL("https://meet.jit.si"))
-                    .setRoom(user.getUid())
-//                    .setAudioMuted(false)
-//                    .setVideoMuted(true)
-//                    .setAudioOnly(true)
-                    .setConfigOverride("requireDisplayName", "Winner")
-                    .build();
-            JitsiMeetActivity.launch(VideoCallComingOut.this, options);
-            finish();
-
-        } catch (Exception e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
+    private void joinMeeting(){}
+//    {
+//        try {
+//            JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
+//                    .setServerURL(new URL("https://meet.jit.si"))
+//                    .setRoom(user.getUid())
+////                    .setAudioMuted(false)
+////                    .setVideoMuted(true)
+////                    .setAudioOnly(true)
+//                    .setConfigOverride("requireDisplayName", "Winner")
+//                    .build();
+//            JitsiMeetActivity.launch(VideoCallComingOut.this, options);
+//            finish();
+//
+//        } catch (Exception e){
+//            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//        }
+//    }
 }
 
 
