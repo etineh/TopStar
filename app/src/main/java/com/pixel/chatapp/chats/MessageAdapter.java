@@ -171,6 +171,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.pinIcon_IV.setVisibility(View.VISIBLE);
         }
 
+        //  set emoji reaction
+        if(modelUser.getEmoji() != null){
+            holder.react_Constr.setVisibility(View.VISIBLE);
+            holder.react_TV.setText(modelUser.getEmoji());
+        }
+
         // ----------------- Voice Note setting
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
 //        holder.voicePlayerView.setVisibility(visible);

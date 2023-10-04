@@ -1015,8 +1015,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 String otherUid = eachUser[1];
 
                 // save to local list for fast update
-                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", null,
-                        8, "", 700033, forwardType, forwardRandomID, idKey, false, true);
+                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", null, 8,
+                        "", 700033, forwardType, forwardRandomID, idKey, false, true, null);
 
                 MessageAdapter adapter = adapterMap.get(otherName);
                 adapter.addNewMessageDB(messageModel);
@@ -1375,6 +1375,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         replyVisible.setText(status);                       // indicating its on edit or reply mood
         nameReply.setVisibility(View.VISIBLE);
         listener = editOrReply;
+        replyFrom =null;
 
         // this id will enable user to click a reply msg and scroll there
         // Edit -- it will replace the message with the id
@@ -1787,7 +1788,7 @@ System.out.println("M1564 I am running");
 
             // save to local list for fast update
             MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "", null,
-                    replyVisibility, replyText, 700033, type, randomID, idKey, false, false);
+                    replyVisibility, replyText, 700033, type, randomID, idKey, false, false, null);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
             if(adapter != null){
@@ -3184,7 +3185,7 @@ System.out.println("M1564 I am running");
 
         listener = "no";
         idKey = null;
-//        editTextMessage.setText("");
+        if(replyFrom == null) editTextMessage.setText("");
         replyText = null;
         replyFrom = null;
         idKey = null;
@@ -3334,6 +3335,7 @@ System.out.println("M1564 I am running");
                 handlerEmoji.removeCallbacks(emojiRunnable);
                 et_emoji.clearFocus();
                 editTextMessage.clearFocus();
+                editTextMessage.setText("");    // store each user unsent typied msg later
 
                 // General settings
                 constraintMsgBody.setVisibility(View.INVISIBLE);

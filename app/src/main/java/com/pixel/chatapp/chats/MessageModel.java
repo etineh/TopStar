@@ -23,6 +23,8 @@ public class MessageModel implements Serializable {
     private Boolean isChatPin;
     private Boolean isChatForward;
 
+    private String emoji;
+
 //    private String voicenote;
 
     public MessageModel() {
@@ -30,7 +32,7 @@ public class MessageModel implements Serializable {
 
     public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
                         int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID,
-                        Boolean isChatPin, Boolean isChatForward) {
+                        Boolean isChatPin, Boolean isChatForward, String emoji) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -45,6 +47,7 @@ public class MessageModel implements Serializable {
         this.replyID = replyID;
         this.isChatPin = isChatPin;
         this.isChatForward = isChatForward;
+        this.emoji = emoji;
 
 //        this.voicenote = voicenote;
     }
@@ -154,6 +157,14 @@ public class MessageModel implements Serializable {
 
     public void setChatForward(boolean chatForward) {
         isChatForward = chatForward;
+    }
+
+    public String getEmoji() {
+        return emoji;
+    }
+
+    public void setEmoji(String emoji) {
+        this.emoji = emoji;
     }
 
     //    public String getVoicenote() {
