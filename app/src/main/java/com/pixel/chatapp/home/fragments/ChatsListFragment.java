@@ -113,6 +113,8 @@ public class ChatsListFragment extends Fragment {
 
                 // changed the adapter from the chatList method to here and it was faster loading
                 adapter = new ChatListAdapter(mUsersID, getContext(), myUserName);
+//                adapter = new ChatListAdapter(mUsersID, MainActivity.this, myUserName);
+
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
                 recyclerView.setAdapter(adapter);
 

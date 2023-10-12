@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,6 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
@@ -66,6 +70,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public  List<MessageModel> modelList;
     public String uId;
     public String userName;
+    private String otherName;
     public  Context mContext;
     Boolean status;
     private int send;
@@ -83,21 +88,41 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.fragmentListener = fragmentListener;
     }
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext) {
+//    private final List<View> viewCacheSendSend; // List to store cached send views
+//    private final List<View> viewCacheSendReceive; // List to store cached receive views
+//    private final LayoutInflater inflater;
+
+    MainActivity mainActivity = new MainActivity();
+    public List<View> viewCacheSend; // List to store views for caching
+    public List<View> viewCacheReceive; // List to store views for caching
+
+    private LayoutInflater inflater;
+    boolean add_ = true;
+    ViewGroup parent;
+    int viewType;
+
+    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, ViewGroup parent, String otherName) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
         this.mContext = mContext;
+        this.parent = parent;
+        this.otherName = otherName;
         handler = new Handler(Looper.getMainLooper());
 
         status = false;
         send = 1;
         receive = 2;
 
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         refCheck = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
 //        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
+
+        this.viewCacheSend = new ArrayList<>();
+        this.viewCacheReceive = new ArrayList<>();
+        this.inflater = LayoutInflater.from(mContext);
 
     }
 
@@ -122,24 +147,97 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         modelList.clear();
     }
 
+    private class PreloadViewsTask extends AsyncTask<Void, Void, Void> {
+        private final int viewTypeSelect;
+        public PreloadViewsTask(int viewTypeSelect) {
+            this.viewTypeSelect = viewTypeSelect;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Preload views in the background and add them to the cache
+            if(viewTypeSelect == send){
+                View itemView = inflater.inflate(R.layout.view_card, parent, false);
+                viewCacheSend.add(itemView);
+                System.out.println("Adding to viewSend" + viewCacheSend.size());
+            } else {
+                View itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
+                viewCacheReceive.add(itemView);
+                System.out.println("Adding to viewReceive" + viewCacheReceive.size());
+            }
+
+            return null;
+        }
+    }
+
+    public void runInBackground() {
+        Executor executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                for (int i = 0; i < 50; i++) {
+
+                    View itemView;
+                    viewType = getItemViewType(i);
+
+                    if(viewType == send){
+                        itemView = inflater.inflate(R.layout.view_card, parent, false);
+                        synchronized (viewCacheSend) {
+                            viewCacheSend.add(itemView);
+                            System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
+                        }
+                    } else{
+                        itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
+                        synchronized (viewCacheSend) {
+                            viewCacheReceive.add(itemView);
+                            System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
+                        }
+                    }
+
+                }
+
+            }
+        });
+    }
+
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view;
-        if(viewType == send){
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_msg, parent, false);
-        } else{
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_received, parent, false);
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_msg, parent, false);
+
+        View itemView;
+        if (viewType == send && !viewCacheSend.isEmpty()) {
+            // Retrieve and remove a cached send view
+            itemView = viewCacheSend.remove(0);
+            new PreloadViewsTask(viewType).execute();   // add a new view
+
+        } else if (viewType == receive && !viewCacheReceive.isEmpty()) {
+            // Retrieve and remove a cached receive view
+            itemView = viewCacheReceive.remove(0);
+            new PreloadViewsTask(viewType).execute();   // add a new view
+
+        } else {
+            // Inflate a new view if the cache is empty or the view type doesn't match
+            itemView = inflater.inflate(
+                    viewType == send ? R.layout.view_card : R.layout.view_card_receiver,
+                    parent,
+                    false
+            );
         }
 
-        return new MessageViewHolder(view);
+        return new MessageViewHolder(itemView);
+
     }
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position_) {
 
         holder.setIsRecyclable(false);      // stop position from repeating itself
+
+        System.out.println("checking total view " + viewCacheSend.size());
+
 
         int chatPosition = position_;     //   to get the position of each msg
 //        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
@@ -172,10 +270,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         //  set emoji reaction
-        if(modelUser.getEmoji() != null){
-            holder.react_Constr.setVisibility(View.VISIBLE);
-            holder.react_TV.setText(modelUser.getEmoji());
-        }
+//        if(modelUser.getEmoji() != null){
+//            holder.react_Constr.setVisibility(View.VISIBLE);
+//            holder.react_TV.setText(modelUser.getEmoji());
+//        }
 
         // ----------------- Voice Note setting
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
@@ -183,7 +281,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // ----------------- reply msg setting
         int intValue = (int) modelUser.getVisibility();
-        holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
+//        holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
         holder.senderNameTV.setText(modelUser.getReplyFrom());  //  set the username for reply msg
         holder.textViewReplyMsg.setText(modelUser.getReplyMsg());     //   set the reply text on top msg
 
@@ -208,178 +306,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        newMsgNumber(holder, pos);
 
         // forward option
-        holder.imageViewForward.setOnClickListener(view -> {
-
-            long randomID = (long)(Math.random() * 1_010_001);
-
-            MainActivity.forwardMessageMap.put("from", userName);
-            MainActivity.forwardMessageMap.put("type", modelUser.getType());
-            MainActivity.forwardMessageMap.put("randomID", randomID);
-            MainActivity.forwardMessageMap.put("message", modelUser.getMessage());
-            MainActivity.forwardMessageMap.put("msgStatus", 700024);
-            MainActivity.forwardMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
-            MainActivity.forwardMessageMap.put("visibility", 8);
-            MainActivity.forwardMessageMap.put("isChatPin", false);
-            MainActivity.forwardMessageMap.put("isChatForward", true);
-
-
-            fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage());
-
-            holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
-
-
-        // reply option
-        holder.imageViewReply.setOnClickListener(view -> {
-
-            if(modelUser.getMsgStatus() == 700033){
-                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-            }
-            else {
-
-                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-                // call method in MainActivity and set up the details
-                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"reply", modelUser.getIdKey(),
-                        modelUser.getRandomID(), "replying...", R.drawable.reply, modelUser.getFrom(), 1);
-                //  1 is visible, 4 is invisible, 8 is Gone
-            }
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
-
-
-        // edit option
-        holder.imageViewEdit.setOnClickListener(view -> {
-
-            int deliveryStatus = modelUser.getMsgStatus();
-            int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
-
-            if(deliveryStatus == 700033){
-                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-            } else if (positionCheck > 100) {
-                Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
-            } else {
-
-                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-
-                // send data to MainActivity via interface listener
-                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"edit", modelUser.getIdKey(),
-                      modelUser.getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
-            }
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
-
-
-        // delete option
-        holder.imageViewDel.setOnClickListener(view -> {
-
-            if(modelUser.getMsgStatus() == 700033){
-                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-            } else {
-
-                holder.constraintChatTop.setVisibility(View.GONE);
-
-                String id = modelUser.getIdKey();
-                String fromWho = modelUser.getFrom();
-                long randomID = modelUser.getRandomID();
-
-                fragmentListener.onDeleteMessage(id, fromWho, randomID);  // call method on MainActivity(L700)
-
-                // reverse arrow
-                if(modelUser.getFrom().equals(userName)){
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-                } else{
-                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-                }
-            }
-        });
-
-        // emoji onClick option
-        holder.imageViewReact.setOnClickListener(view -> {
-
-            // Highlight the original message
-            highlightItem(chatPosition);    // use this method as notifyItemChanged();
-
-            // Add the original position to the set of highlighted positions
-            highlightedPositions.clear();
-            highlightedPositions.add(chatPosition);
-
-            try{
-                fragmentListener.onEmojiReact(holder, modelUser.getIdKey());
-            }catch (Exception e){
-                System.out.println("Urgent error at MA320" + e.getMessage());
-//                Toast.makeText(mContext, "Restart app", Toast.LENGTH_SHORT).show();
-            };
-
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-            holder.constraintChatTop.setVisibility(View.GONE);
-
-        });
-
-        // copy option
-        holder.imageViewCopy.setOnClickListener(view -> {
-
-            String selectedText = modelUser.getMessage();
-            ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("label", selectedText);
-
-            if (clipboard == null || clip == null) return;
-            clipboard.setPrimaryClip(clip);
-
-            Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
-            // for paste code
-//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-//                try {
-//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
-//                } catch (Exception e) {
-//                    return;
-//                }
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-            holder.constraintChatTop.setVisibility(View.GONE);
-        });
-
-        // pin options -- (for me or everyone)
-        holder.imageViewPin.setOnClickListener(view -> {
-
-            // send pin chat data to MainActivity
-            fragmentListener.onPinData(modelUser.getIdKey(), modelUser.getMessage(),
-                    ServerValue.TIMESTAMP, userName, holder);
-
-            holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
-
-            // reverse arrow
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
 
 
         //   show chat selection options
@@ -469,54 +395,54 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         };
 
-        holder.cardViewChatBox.setOnClickListener(optionClickListener);
+//        holder.cardViewChatBox.setOnClickListener(optionClickListener);
         holder.textViewShowMsg.setOnClickListener(optionClickListener);
         holder.imageViewOptions.setOnClickListener(optionClickListener);
 
         // close chat option
-        holder.constraintMsgContainer.setOnClickListener(view -> {
-            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
-                holder.constraintChatTop.setVisibility(View.GONE);
-            }
-            if(modelUser.getFrom().equals(userName)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        });
+//        holder.constraintMsgContainer.setOnClickListener(view -> {
+//            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
+//                holder.constraintChatTop.setVisibility(View.GONE);
+//            }
+//            if(modelUser.getFrom().equals(userName)){
+//                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+//            } else{
+//                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+//            }
+//        });
 
         //  scroll and highlight reply message
-        holder.constraintReplyCon.setOnClickListener(view -> {
-
-            String originalMessageId = modelUser.getReplyID();
-            int originalPosition = findMessagePositionById(originalMessageId);
-
-            // Scroll to the original message's position
-            if (originalPosition != RecyclerView.NO_POSITION) {
-                // position is the item number clicked, originalPosition is the item number found.
-                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
-                int positionCount = chatPosition - originalPosition;
-
-                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
-                } else {    // decrease the number (11-- to shift the highlight msg down)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
-                }
-
-                // Highlight the original message
-                highlightItem(originalPosition);    // use this method as notifyItemChanged();
-
-                // Add the original position to the set of highlighted positions
-                highlightedPositions.clear();
-                highlightedPositions.add(originalPosition);
-
-                // when the down-arrow button on MainActivity(444) is clicked, it should check first if
-                // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
-                MainActivity.goToLastMessage = true;
-                MainActivity.goToNum = chatPosition;
-
-            }
-        });
+//        holder.constraintReplyCon.setOnClickListener(view -> {
+//
+//            String originalMessageId = modelUser.getReplyID();
+//            int originalPosition = findMessagePositionById(originalMessageId);
+//
+//            // Scroll to the original message's position
+//            if (originalPosition != RecyclerView.NO_POSITION) {
+//                // position is the item number clicked, originalPosition is the item number found.
+//                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
+//                int positionCount = chatPosition - originalPosition;
+//
+//                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
+//                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
+//                } else {    // decrease the number (11-- to shift the highlight msg down)
+//                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
+//                }
+//
+//                // Highlight the original message
+//                highlightItem(originalPosition);    // use this method as notifyItemChanged();
+//
+//                // Add the original position to the set of highlighted positions
+//                highlightedPositions.clear();
+//                highlightedPositions.add(originalPosition);
+//
+//                // when the down-arrow button on MainActivity(444) is clicked, it should check first if
+//                // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
+//                MainActivity.goToLastMessage = true;
+//                MainActivity.goToNum = chatPosition;
+//
+//            }
+//        });
 
         // Apply highlighting if the current position is in the set of highlighted positions
         if (highlightedPositions.contains(chatPosition)) {
@@ -832,7 +758,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 constraintMsgContainer = itemView.findViewById(R.id.constraint);
                 circleSendMsg = itemView.findViewById(R.id.fab);
                 editTextMessage = itemView.findViewById(R.id.editTextMessage);
-                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
+//                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply);
                 senderNameTV = itemView.findViewById(R.id.senderNameTV);
                 constrSlide = itemView.findViewById(R.id.constrSlide);
@@ -844,7 +770,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 react_Constr = itemView.findViewById(R.id.reactS_Constraint);
                 react_TV = itemView.findViewById(R.id.reactS_TV);
 
-            } else {
+            }
+            else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
                 cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen2);

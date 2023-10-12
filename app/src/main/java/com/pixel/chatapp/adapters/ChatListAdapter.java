@@ -203,6 +203,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                             holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
+
                         } catch (Exception e){
 
                             listener.sendRecyclerView(holder.recyclerChat, otherName, otherUid);

@@ -352,7 +352,7 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this);
+        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, recyclerViewChat, otherName);
         recyclerViewChat.setAdapter(adapter);
 
     }

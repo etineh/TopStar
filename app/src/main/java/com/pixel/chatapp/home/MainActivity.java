@@ -220,6 +220,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private Runnable emojiRunnable;
     private boolean isChatKeyboardON;
     private static ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
+    int viewNum = 0;
+
 
     //  ---------- msg end
 
@@ -608,6 +610,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 }
                 System.out.println("check here 2");
+//                if(Objects.requireNonNull(adapterMap.get(otherUserName)).viewCache.size() < 20){
+//                    adapterMap.get(otherUserName).runInBackground();
+//                }
                 isKeyboardVisible = true;
             } else {
                 isKeyboardVisible = false;
@@ -1188,6 +1193,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
         // activate the listener
         emoji_IV.getViewTreeObserver().addOnGlobalLayoutListener(globalLayoutListener);
+
     }
 
     @Override
@@ -1209,7 +1215,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // make only the active recyclerView to be visible
         recyclerViewChatVisibility(otherName);
 
-        if(adapterMap.get(otherName) != null){
+        if(adapterMap.get(otherName) != null){  // reload message if empty
             System.out.println("Total adapter (M1070) " + adapterMap.get(otherName).getItemCount());
             if(Objects.requireNonNull(adapterMap.get(otherName)).getItemCount() == 0){
                 readDatabase = 0;
@@ -1241,6 +1247,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             receiveIndicator.setVisibility(View.GONE);
             sendIndicator.setVisibility(View.GONE);
         }
+
+        new CountDownTimer(2000, 1000){
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                if(Objects.requireNonNull(adapterMap.get(otherName)).viewCacheSend.size() < 20
+                    && Objects.requireNonNull(adapterMap.get(otherName)).viewCacheReceive.size() < 20){
+                    adapterMap.get(otherName).runInBackground();
+                    System.out.println("I have run ");
+                }
+            }
+        }.start();
+
+
+
+        System.out.println("total back  " + adapterMap.get(otherName).viewCacheSend.size());
 
         // Add an OnScrollListener to the RecyclerView
         recyclerMap.get(otherName).addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -1325,7 +1351,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     @Override       // run only once
     public void getMessage(String userName, String otherName, String otherUID, Context mContext_){
 
-        retrieveMessages(userName, otherName, otherUID, mContext);
+        retrieveMessages(userName, otherName, otherUID, mContext_);
 
         // store myUserName for looping through load message status and change to delivery status
         myUserName = userName;
@@ -1886,7 +1912,7 @@ System.out.println("M1564 I am running");
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // save all messages (read and unread)
         List<MessageModel> msgListNotRead = new ArrayList<>();      // save all unread messages from refFastMsg db to get total Count
 
-        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, otherUID, mContext); // initialise adapter
+        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, otherUID, mContext, recyclerMap.get(otherName), otherName); // initialise adapter
 
         // loop through New Message (MsgFast) and Old Message and compare the "read" status state before proceeding
         new CountDownTimer(1500, 750){
