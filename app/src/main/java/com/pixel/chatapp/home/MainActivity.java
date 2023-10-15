@@ -1248,25 +1248,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             sendIndicator.setVisibility(View.GONE);
         }
 
-        new CountDownTimer(2000, 1000){
+        CountDownTimer addChatLayoutViews = new CountDownTimer(1500, 750){
             @Override
-            public void onTick(long l) {
-
-            }
+            public void onTick(long l) {}
 
             @Override
             public void onFinish() {
-                if(Objects.requireNonNull(adapterMap.get(otherName)).viewCacheSend.size() < 20
-                    && Objects.requireNonNull(adapterMap.get(otherName)).viewCacheReceive.size() < 20){
-                    adapterMap.get(otherName).runInBackground();
-                    System.out.println("I have run ");
-                }
+                adapterMap.get(otherName).addLayoutViewInBackground();
             }
-        }.start();
+        };
 
+        if(MessageAdapter.viewCacheSend.size() < 30 && MessageAdapter.viewCacheReceive.size() < 30){
+            // add up views
+            addChatLayoutViews.start();
+        }
 
-
-        System.out.println("total back  " + adapterMap.get(otherName).viewCacheSend.size());
+        System.out.println("M1267 total layout views  " + adapterMap.get(otherName).viewCacheSend.size());
 
         // Add an OnScrollListener to the RecyclerView
         recyclerMap.get(otherName).addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -1423,12 +1420,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             replyText = message;
 
             if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
-                replyFrom = "From You." + " (@" +fromWho+")";
+                replyFrom = "From You.";
                 nameReply.setText(replyFrom);
             }
             else {
                 // edit later to username and display name
-                replyFrom = fromWho + " (@" +fromWho+")";
+                replyFrom = fromWho ;
                 nameReply.setText(replyFrom);
             }
         }

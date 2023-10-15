@@ -7,7 +7,6 @@ import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +40,6 @@ import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.PinMessageModel;
-import com.vanniktech.emoji.EmojiPopup;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -88,18 +87,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.fragmentListener = fragmentListener;
     }
 
-//    private final List<View> viewCacheSendSend; // List to store cached send views
-//    private final List<View> viewCacheSendReceive; // List to store cached receive views
-//    private final LayoutInflater inflater;
-
-    MainActivity mainActivity = new MainActivity();
-    public List<View> viewCacheSend; // List to store views for caching
-    public List<View> viewCacheReceive; // List to store views for caching
-
+    // I am using "static" so it add up only once
+    public static List<View> viewCacheSend = new ArrayList<>(); // List to store views for caching
+    public static List<View> viewCacheReceive = new ArrayList<>(); // List to store views for caching
     private LayoutInflater inflater;
-    boolean add_ = true;
-    ViewGroup parent;
-    int viewType;
+    private ViewGroup parent;
 
     public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, ViewGroup parent, String otherName) {
         this.modelList = modelList;
@@ -120,8 +112,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
 //        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
 
-        this.viewCacheSend = new ArrayList<>();
-        this.viewCacheReceive = new ArrayList<>();
         this.inflater = LayoutInflater.from(mContext);
 
     }
@@ -158,46 +148,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(viewTypeSelect == send){
                 View itemView = inflater.inflate(R.layout.view_card, parent, false);
                 viewCacheSend.add(itemView);
-                System.out.println("Adding to viewSend" + viewCacheSend.size());
+                System.out.println("Adding to viewSend " + viewCacheSend.size());
             } else {
                 View itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
                 viewCacheReceive.add(itemView);
-                System.out.println("Adding to viewReceive" + viewCacheReceive.size());
+                System.out.println("Adding to viewReceive " + viewCacheReceive.size());
             }
 
             return null;
         }
     }
 
-    public void runInBackground() {
+    public void addLayoutViewInBackground() {
         Executor executor = Executors.newSingleThreadExecutor();
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
+        executor.execute(() -> {
 
-                for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < 50; i++) {
 
-                    View itemView;
-                    viewType = getItemViewType(i);
+                View itemView;
 
-                    if(viewType == send){
-                        itemView = inflater.inflate(R.layout.view_card, parent, false);
-                        synchronized (viewCacheSend) {
-                            viewCacheSend.add(itemView);
-                            System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
-                        }
-                    } else{
-                        itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
-                        synchronized (viewCacheSend) {
-                            viewCacheReceive.add(itemView);
-                            System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
-                        }
+                if(i % 2 == 0){
+                    itemView = inflater.inflate(R.layout.view_card, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheSend.add(itemView);
+                        System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
                     }
-
+                } else{
+                    itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheReceive.add(itemView);
+                        System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
+                    }
                 }
 
             }
+
         });
     }
 
@@ -236,9 +222,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.setIsRecyclable(false);      // stop position from repeating itself
 
-        System.out.println("checking total view " + viewCacheSend.size());
-
-
         int chatPosition = position_;     //   to get the position of each msg
 //        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
         MessageModel modelUser = modelList.get(chatPosition);    // get the model position of each chat
@@ -247,6 +230,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
         DateFormat formatter = new SimpleDateFormat("h:mm a");
         String time = formatter.format(d);
+
 
 //        if(MainActivity.readDatabase == 0){ //---------
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
@@ -270,10 +254,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         //  set emoji reaction
-//        if(modelUser.getEmoji() != null){
-//            holder.react_Constr.setVisibility(View.VISIBLE);
-//            holder.react_TV.setText(modelUser.getEmoji());
-//        }
+        if(modelUser.getEmoji() != null){
+            holder.react_TV.setVisibility(View.VISIBLE);
+            holder.react_TV.setText(modelUser.getEmoji());
+            // add the total emoji reaction
+            if(holder.react_TV.length() >= 1){
+                holder.totalReact_TV.setVisibility(View.VISIBLE);
+                String count = (modelUser.getEmoji().length()/2) + "";
+                holder.totalReact_TV.setText(count);
+            }
+        }
 
         // ----------------- Voice Note setting
 //        int visible = (int) modelList.get(pos).getType();   //  1 is visible, 4 is invisible, 8 is Gone
@@ -281,7 +271,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // ----------------- reply msg setting
         int intValue = (int) modelUser.getVisibility();
-//        holder.constraintReplyCon.setVisibility(intValue);    // set reply container to visibility
+        holder.linearLayoutReplyBox.setVisibility(intValue);    // set reply container to visibility
         holder.senderNameTV.setText(modelUser.getReplyFrom());  //  set the username for reply msg
         holder.textViewReplyMsg.setText(modelUser.getReplyMsg());     //   set the reply text on top msg
 
@@ -306,7 +296,178 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        newMsgNumber(holder, pos);
 
         // forward option
+        holder.imageViewForward.setOnClickListener(view -> {
 
+            long randomID = (long)(Math.random() * 1_010_001);
+
+            MainActivity.forwardMessageMap.put("from", userName);
+            MainActivity.forwardMessageMap.put("type", modelUser.getType());
+            MainActivity.forwardMessageMap.put("randomID", randomID);
+            MainActivity.forwardMessageMap.put("message", modelUser.getMessage());
+            MainActivity.forwardMessageMap.put("msgStatus", 700024);
+            MainActivity.forwardMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
+            MainActivity.forwardMessageMap.put("visibility", 8);
+            MainActivity.forwardMessageMap.put("isChatPin", false);
+            MainActivity.forwardMessageMap.put("isChatForward", true);
+
+
+            fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage());
+
+            holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
+
+        // reply option
+        holder.imageViewReply.setOnClickListener(view -> {
+
+            if(modelUser.getMsgStatus() == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            }
+            else {
+
+                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+                // call method in MainActivity and set up the details
+                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"reply", modelUser.getIdKey(),
+                        modelUser.getRandomID(), "replying...", R.drawable.reply, modelUser.getFrom(), 1);
+                //  1 is visible, 4 is invisible, 8 is Gone
+            }
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
+
+        // edit option
+        holder.imageViewEdit.setOnClickListener(view -> {
+
+            int deliveryStatus = modelUser.getMsgStatus();
+            int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
+
+            if(deliveryStatus == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            } else if (positionCheck > 100) {
+                Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
+            } else {
+
+                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
+                // send data to MainActivity via interface listener
+                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"edit", modelUser.getIdKey(),
+                        modelUser.getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
+            }
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
+
+
+        // delete option
+        holder.imageViewDel.setOnClickListener(view -> {
+
+            if(modelUser.getMsgStatus() == 700033){
+                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+            } else {
+
+                holder.constraintChatTop.setVisibility(View.GONE);
+
+                String id = modelUser.getIdKey();
+                String fromWho = modelUser.getFrom();
+                long randomID = modelUser.getRandomID();
+
+                fragmentListener.onDeleteMessage(id, fromWho, randomID);  // call method on MainActivity(L700)
+
+                // reverse arrow
+                if(modelUser.getFrom().equals(userName)){
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+                } else{
+                    holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+                }
+            }
+        });
+
+        // emoji onClick option
+        holder.imageViewReact.setOnClickListener(view -> {
+
+            // Highlight the original message
+            highlightItem(chatPosition);    // use this method as notifyItemChanged();
+
+            // Add the original position to the set of highlighted positions
+            highlightedPositions.clear();
+            highlightedPositions.add(chatPosition);
+
+            try{
+                fragmentListener.onEmojiReact(holder, modelUser.getIdKey());
+            }catch (Exception e){
+                System.out.println("Urgent error at MA320" + e.getMessage());
+//                Toast.makeText(mContext, "Restart app", Toast.LENGTH_SHORT).show();
+            };
+
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+            holder.constraintChatTop.setVisibility(View.GONE);
+
+        });
+
+        // copy option
+        holder.imageViewCopy.setOnClickListener(view -> {
+
+            String selectedText = modelUser.getMessage();
+            ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", selectedText);
+
+            if (clipboard == null || clip == null) return;
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
+            // for paste code
+//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+//                try {
+//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+//                } catch (Exception e) {
+//                    return;
+//                }
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+            holder.constraintChatTop.setVisibility(View.GONE);
+        });
+
+        // pin options -- (for me or everyone)
+        holder.imageViewPin.setOnClickListener(view -> {
+
+            // send pin chat data to MainActivity
+            fragmentListener.onPinData(modelUser.getIdKey(), modelUser.getMessage(),
+                    ServerValue.TIMESTAMP, userName, holder);
+
+            holder.constraintChatTop.setVisibility(View.GONE);  // close the option menu
+
+            // reverse arrow
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
 
         //   show chat selection options
         View.OnClickListener optionClickListener = view -> {
@@ -400,49 +561,53 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.imageViewOptions.setOnClickListener(optionClickListener);
 
         // close chat option
-//        holder.constraintMsgContainer.setOnClickListener(view -> {
-//            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
-//                holder.constraintChatTop.setVisibility(View.GONE);
-//            }
-//            if(modelUser.getFrom().equals(userName)){
-//                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-//            } else{
-//                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-//            }
-//        });
+        holder.constraintMsgContainer.setOnClickListener(view -> {
+            if(holder.constraintChatTop.getVisibility() == View.VISIBLE){
+                holder.constraintChatTop.setVisibility(View.GONE);
+            }
+            if(modelUser.getFrom().equals(userName)){
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
+            } else{
+                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
+            }
+        });
 
         //  scroll and highlight reply message
-//        holder.constraintReplyCon.setOnClickListener(view -> {
-//
-//            String originalMessageId = modelUser.getReplyID();
-//            int originalPosition = findMessagePositionById(originalMessageId);
-//
-//            // Scroll to the original message's position
-//            if (originalPosition != RecyclerView.NO_POSITION) {
-//                // position is the item number clicked, originalPosition is the item number found.
-//                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
-//                int positionCount = chatPosition - originalPosition;
-//
-//                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
-//                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
-//                } else {    // decrease the number (11-- to shift the highlight msg down)
-//                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
-//                }
-//
-//                // Highlight the original message
-//                highlightItem(originalPosition);    // use this method as notifyItemChanged();
-//
-//                // Add the original position to the set of highlighted positions
-//                highlightedPositions.clear();
-//                highlightedPositions.add(originalPosition);
-//
-//                // when the down-arrow button on MainActivity(444) is clicked, it should check first if
-//                // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
-//                MainActivity.goToLastMessage = true;
-//                MainActivity.goToNum = chatPosition;
-//
-//            }
-//        });
+        View.OnClickListener scrollToReplyChat = view -> {
+
+            String originalMessageId = modelUser.getReplyID();
+            int originalPosition = findMessagePositionById(originalMessageId);
+
+            // Scroll to the original message's position
+            if (originalPosition != RecyclerView.NO_POSITION) {
+                // position is the item number clicked, originalPosition is the item number found.
+                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
+                int positionCount = chatPosition - originalPosition;
+
+                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
+                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
+                } else {    // decrease the number (11-- to shift the highlight msg down)
+                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
+                }
+
+                // Highlight the original message
+                highlightItem(originalPosition);    // use this method as notifyItemChanged();
+
+                // Add the original position to the set of highlighted positions
+                highlightedPositions.clear();
+                highlightedPositions.add(originalPosition);
+
+                // when the down-arrow button on MainActivity(444) is clicked, it should check first if
+                // goToLastMessage = true; then scroll to the previous message, else scroll down as usual
+                MainActivity.goToLastMessage = true;
+                MainActivity.goToNum = chatPosition;
+
+            }
+        };
+        holder.linearLayoutReplyBox.setOnClickListener(scrollToReplyChat);
+        holder.linearLayoutClick.setOnClickListener(scrollToReplyChat);
+        holder.senderNameTV.setOnClickListener(scrollToReplyChat);
+        holder.textViewReplyMsg.setOnClickListener(scrollToReplyChat);
 
         // Apply highlighting if the current position is in the set of highlighted positions
         if (highlightedPositions.contains(chatPosition)) {
@@ -523,7 +688,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     // ---------------------- methods ---------------------------
 
     public void addEmojiReact(MessageViewHolder holder, String emoji){
-        holder.react_Constr.setVisibility(View.VISIBLE);
+        holder.react_TV.setVisibility(View.VISIBLE);
         holder.react_TV.setText(emoji);
     }
 
@@ -636,7 +801,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                     mapList.add(mapVN);
 
 //                                    modelList.get(pos).setVoicenote(filePath);   // change later
-                                    holder.voicePlayerView.setAudio(filePath);  // put the filePath to the voicePlayer
+//                                    holder.voicePlayerView.setAudio(filePath);  // put the filePath to the voicePlayer
 
                                     save_VN_PathFileToGson(mContext, mapList);    // save to gson sharePre.
 
@@ -721,13 +886,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         private ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         private ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
         private ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
-        private ConstraintLayout constraintReplyCon, constrSlide, react_Constr;
-        private TextView react_TV;
-        private TextView textViewReplyMsg, senderNameTV;
+        private LinearLayout linearLayoutReplyBox, linearLayoutClick;
+        private TextView react_TV, totalReact_TV;
+        private TextView textViewReplyMsg, senderNameTV, otherInfo;
         private CircleImageView circleSendMsg, circleDownload;
         private ProgressBar progressBar;
         private EditText editTextMessage;
-        private VoicePlayerView voicePlayerView;
+//        private VoicePlayerView voicePlayerView;
         private TextView timeMsg;
         private CardView cardViewChatBox;
 
@@ -755,20 +920,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg);
                 constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
-                constraintMsgContainer = itemView.findViewById(R.id.constraint);
+                constraintMsgContainer = itemView.findViewById(R.id.constraintBodySend);
                 circleSendMsg = itemView.findViewById(R.id.fab);
                 editTextMessage = itemView.findViewById(R.id.editTextMessage);
-//                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox);
+                linearLayoutReplyBox = itemView.findViewById(R.id.linearLayoutReplyBox);
+                linearLayoutClick = itemView.findViewById(R.id.linearClickReply1);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply);
                 senderNameTV = itemView.findViewById(R.id.senderNameTV);
-                constrSlide = itemView.findViewById(R.id.constrSlide);
                 imageViewOptions = itemView.findViewById(R.id.imageViewOptions);
-                voicePlayerView = itemView.findViewById(R.id.voicePlayerView);
+//                voicePlayerView = itemView.findViewById(R.id.voicePlayerView);
                 circleDownload = itemView.findViewById(R.id.cirleDownload);
                 progressBar = itemView.findViewById(R.id.progressBarP6);
 
-                react_Constr = itemView.findViewById(R.id.reactS_Constraint);
-                react_TV = itemView.findViewById(R.id.reactS_TV);
+                totalReact_TV = itemView.findViewById(R.id.totalEmoji_TV1);
+                react_TV = itemView.findViewById(R.id.reactSender_TV);
+//                otherInfo = itemView.findViewById(R.id.otherInfo_TV1);
 
             }
             else {
@@ -792,20 +958,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg2);
                 constraintNewMsg = itemView.findViewById(R.id.constraintNewMsg2);
                 constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
-                constraintMsgContainer = itemView.findViewById(R.id.constraintBody);
+                constraintMsgContainer = itemView.findViewById(R.id.constraintBodyReceive);
                 editTextMessage = itemView.findViewById(R.id.editTextMessage);
                 senderNameTV = itemView.findViewById(R.id.senderName2);
-                constrSlide = itemView.findViewById(R.id.constrSlide2);
                 imageViewOptions = itemView.findViewById(R.id.imageViewOptions2);
 
-                constraintReplyCon = itemView.findViewById(R.id.constriantReplyBox2);
+                linearLayoutReplyBox = itemView.findViewById(R.id.linearLayoutReplyBox2);
+                linearLayoutClick = itemView.findViewById(R.id.linearClickReply2);
                 textViewReplyMsg = itemView.findViewById(R.id.textViewReply2);
-                voicePlayerView = itemView.findViewById(R.id.voicePlayerView2);
+//                voicePlayerView = itemView.findViewById(R.id.voicePlayerView2);
                 circleDownload = itemView.findViewById(R.id.circleDownload2);
                 progressBar = itemView.findViewById(R.id.progressBar2);
 
-                react_Constr = itemView.findViewById(R.id.reactR_Constraint);
-                react_TV = itemView.findViewById(R.id.reactR_TV);
+                totalReact_TV = itemView.findViewById(R.id.totalEmoji_TV2);
+                react_TV = itemView.findViewById(R.id.reactReceiver_TV);
+//                otherInfo = itemView.findViewById(R.id.otherInfo_TV2);
 
             }
         }

@@ -2,16 +2,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintBody"
+    android:id="@+id/constraintBodyReceive"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="80dp">
+    android:paddingStart="10dp"
+    android:paddingEnd="60dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintReceiveTop"
         style="@style/card"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:clickable="true"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
@@ -116,66 +118,68 @@
         style="@style/card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginBottom="3dp"
         android:paddingRight="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintReceiveTop">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constriantReplyBox2"
-            style="@style/replyBackgroundRec"
+        <LinearLayout
+            android:id="@+id/linearClickReply2"
+            style="@style/ChatMsgContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="-20dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayoutReplyBox2"
+            app:layout_constraintEnd_toEndOf="@+id/textViewReceived"
+            app:layout_constraintStart_toEndOf="@+id/linearLayoutReplyBox2"
+            app:layout_constraintTop_toTopOf="@+id/linearLayoutReplyBox2"></LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutReplyBox2"
+            style="@style/ChatMsgContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="3dp"
+            android:orientation="vertical"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <LinearLayout
-                android:id="@+id/linearLayout3"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:layout_editor_absoluteY="0dp">
+            <TextView
+                android:id="@+id/senderName2"
+                style="@style/replyName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/senderName2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/textViewReply2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="1dp"
-                    android:ellipsize="end"
-                    android:gravity="start"
-                    android:maxLines="2"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/textViewReply2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/imageViewOptions2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
-            android:layout_marginBottom="10dp"
             android:tint="@color/orange"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/textViewChatTime2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constriantReplyBox2"
-            app:layout_constraintVertical_bias="0.5"
             app:srcCompat="@drawable/arrow_right_" />
 
         <ImageView
@@ -191,16 +195,17 @@
             style="@style/textColorFullBlack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginTop="2dp"
             android:autoLink="web|phone|email"
             android:gravity="start"
-            android:paddingLeft="10dp"
+            android:paddingLeft="30dp"
             android:paddingTop="4dp"
             android:paddingEnd="10dp"
             android:textColorLink="@color/orange"
             android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toTopOf="@id/textViewChatTime2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox2" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/circleDownload2"
@@ -230,11 +235,10 @@
             android:id="@+id/editedReceiver_IV"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginBottom="1dp"
+            android:layout_marginStart="10dp"
             android:textSize="11sp"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime2"
             app:layout_constraintStart_toEndOf="@+id/textViewChatTime2"
             app:srcCompat="@drawable/baseline_mode_edit_24" />
 
@@ -242,8 +246,9 @@
             android:id="@+id/forwardR_IV"
             android:layout_width="15dp"
             android:layout_height="15dp"
+            android:layout_marginStart="10dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime2"
             app:layout_constraintStart_toEndOf="@+id/pinReceiver_IV"
             app:srcCompat="@drawable/baseline_forward_24" />
 
@@ -251,8 +256,9 @@
             android:id="@+id/pinReceiver_IV"
             android:layout_width="15dp"
             android:layout_height="15dp"
+            android:layout_marginStart="10dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime2"
             app:layout_constraintStart_toEndOf="@+id/editedReceiver_IV"
             app:srcCompat="@drawable/baseline_push_pin_24" />
 
@@ -260,11 +266,49 @@
             android:id="@+id/textViewChatTime2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="-10dp"
-            android:layout_marginBottom="1dp"
+            android:layout_marginStart="-8dp"
+            android:layout_marginBottom="3dp"
             android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/reactReceiver_TV"
             app:layout_constraintStart_toEndOf="@+id/imageViewOptions2" />
+
+        <TextView
+            android:id="@+id/totalEmoji_TV2"
+            style="@style/drawableBG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="-5dp"
+            android:elevation="2dp"
+            android:paddingLeft="4dp"
+            android:paddingTop="2dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="2dp"
+            android:text="3"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/reactReceiver_TV"
+            app:layout_constraintEnd_toStartOf="@+id/reactReceiver_TV"
+            app:layout_constraintTop_toTopOf="@+id/reactReceiver_TV" />
+
+        <TextView
+            android:id="@+id/reactReceiver_TV"
+            style="@style/drawableBG_WhiteAndBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginBottom="2dp"
+            android:ellipsize="end"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:paddingLeft="5dp"
+            android:paddingTop="1dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="1dp"
+            android:text="🙃"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

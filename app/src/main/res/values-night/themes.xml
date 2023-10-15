@@ -33,7 +33,7 @@
 
     <style name="card">
 <!--        <item name="android:background">#1E1D1D</item>-->
-        <item name="android:background">#121111</item>
+        <item name="android:background">@drawable/view_card_dark</item>
     </style>
 
     <style name="cardTop">
@@ -51,6 +51,11 @@
 
     <style name="appName">
         <item name="android:textColor">#E6CBB7</item>
+    </style>
+
+    <!--    textColor - cool_orange and black-->
+    <style name="replyName">
+        <item name="android:textColor">@color/cool_orange</item>
     </style>
 
     <!--    reply background receiver-->
@@ -123,7 +128,7 @@
 
     <!--    chat box msg background.  dark orange   #281600-->
     <style name="ChatMsgContainer">
-        <item name="android:background">#301a00</item>
+        <item name="android:background">@drawable/view_card_receive_dark</item>
     </style>
 
     <!--    drawable background - orange and black-->
@@ -136,6 +141,11 @@
     <style name="drawableBG_WhiteAndBlack">
         <item name="android:background">@drawable/black_circle_round</item>
         <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <style name="drawableText">
+        <item name="android:background">@drawable/black_circle_round</item>
+        <item name="android:textColor">@color/cool_orange</item>
     </style>
 
     <!--    drawable tint and background-->
