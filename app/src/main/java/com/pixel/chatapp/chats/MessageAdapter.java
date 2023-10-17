@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -235,7 +236,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        if(MainActivity.readDatabase == 0){ //---------
         holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
 
+//        adjustTextSizeIfOnlyEmojiIsPresent(holder, modelUser.getMessage());
+//        new AdjustTextSizeTask().execute(holder, modelUser.getMessage());
+
         holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
+
+        if(modelUser.getEmojiOnly() != null){
+            holder.emojiOnly_TV.setText(modelUser.getEmojiOnly());
+            holder.emojiOnly_TV.setVisibility(View.VISIBLE);
+        }
 
         // set edit icon on chat
         if(modelUser.getEdit() != null){
@@ -255,14 +264,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         //  set emoji reaction
         if(modelUser.getEmoji() != null){
-            holder.react_TV.setVisibility(View.VISIBLE);
-            holder.react_TV.setText(modelUser.getEmoji());
-            // add the total emoji reaction
-            if(holder.react_TV.length() >= 1){
-                holder.totalReact_TV.setVisibility(View.VISIBLE);
-                String count = (modelUser.getEmoji().length()/2) + "";
-                holder.totalReact_TV.setText(count);
-            }
+            addEmojiReact(holder, modelUser.getEmoji());
         }
 
         // ----------------- Voice Note setting
@@ -311,7 +313,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             MainActivity.forwardMessageMap.put("isChatForward", true);
 
 
-            fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage());
+            fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage(), modelUser.getEmojiOnly());
 
             holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
@@ -682,14 +684,77 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //            }
 //        } else System.out.println("Nothing on the list");
 //getVoiceNote(mContext);
+
     }
 
 
     // ---------------------- methods ---------------------------
 
+//    public static void adjustTextSizeIfOnlyEmojiIsPresent(MessageViewHolder holder, String chat) {
+//        boolean containsText = false;
+//
+//        for (int i = 0; i < chat.length(); i++) {
+//            int type = Character.getType(chat.charAt(i));
+//            if (type != Character.SURROGATE) {
+//                containsText = true;  // Found non-emoji character
+//                break;  // No need to check further
+//            }
+//        }
+//
+//        if (!containsText) {
+//            // Set a larger text size if the text contains only emojis
+//            holder.textViewShowMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
+//        }
+//
+//    }
+
+    public class AdjustTextSizeTask extends AsyncTask<Object, Void, Boolean> {
+        private MessageViewHolder holder;
+        private String chat;
+        @Override
+        protected Boolean doInBackground(Object... params) {
+            if (params.length == 2) {
+                holder = (MessageViewHolder) params[0];
+                chat = (String) params[1];
+                boolean containsText = false;
+
+                for (int i = 0; i < holder.textViewShowMsg.getText().length(); i++) {
+                    int type = Character.getType(holder.textViewShowMsg.getText().charAt(i));
+                    if (type != Character.SURROGATE) {
+                        containsText = true;  // Found non-emoji character
+                        break;  // No need to check further
+                    }
+                }
+                return !containsText;
+            }
+            return false;  // Contains only emojis
+        }
+
+        @Override
+        protected void onPostExecute(Boolean containsOnlyEmojis) {
+            if (holder != null) {
+                if (containsOnlyEmojis) {
+                    // Set a larger text size if the text contains only emojis
+                    if(holder.textViewShowMsg.getText().length() < 5){
+                        holder.textViewShowMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
+                    } else{
+                        holder.textViewShowMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25);
+                    }
+                }
+            }
+        }
+    }
+
+
     public void addEmojiReact(MessageViewHolder holder, String emoji){
         holder.react_TV.setVisibility(View.VISIBLE);
-        holder.react_TV.setText(emoji);
+         // add the total emoji reaction
+        if(holder.react_TV.length() > 1){      // change to 2 later
+            String totalReactAndEmoji = (emoji.length()/2) + " " + emoji;
+            holder.react_TV.setText(totalReactAndEmoji);
+        } else {
+            holder.react_TV.setText(emoji);
+        }
     }
 
     public void pinIconDisplay(MessageViewHolder holder_){
@@ -870,24 +935,24 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public int getItemCount() {
-        List<MessageModel> list = modelList;
-        if(list != null){
-            return list.size();
-        } else {
-            return 0;
-        }
-//        return modelList.size();
+//        List<MessageModel> list = modelList;
+//        if(list != null){
+//            return list.size();
+//        } else {
+//            return 0;
+//        }
+        return modelList.size();
     }
 
     public class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        private TextView textViewShowMsg, textViewNewMsg;
+        private TextView textViewShowMsg, textViewNewMsg, emojiOnly_TV;
         private ImageView seenMsg, editNotify, pinALL_IV, pinIcon_IV, forwardIcon_IV;
         private ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
         private ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
         private ConstraintLayout constraintChatTop, constraintMsgContainer, constraintNewMsg;
         private LinearLayout linearLayoutReplyBox, linearLayoutClick;
-        private TextView react_TV, totalReact_TV;
+        private TextView react_TV;
         private TextView textViewReplyMsg, senderNameTV, otherInfo;
         private CircleImageView circleSendMsg, circleDownload;
         private ProgressBar progressBar;
@@ -903,6 +968,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 timeMsg = itemView.findViewById(R.id.textViewChatTime);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen);
                 textViewShowMsg = itemView.findViewById(R.id.textViewSend);
+                emojiOnly_TV = itemView.findViewById(R.id.textViewSendOnlyEmoji);
                 cardViewChatBox = itemView.findViewById(R.id.cardViewSend);
 
                 pinALL_IV = itemView.findViewById(R.id.pinALL_S_IV);
@@ -932,9 +998,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 circleDownload = itemView.findViewById(R.id.cirleDownload);
                 progressBar = itemView.findViewById(R.id.progressBarP6);
 
-                totalReact_TV = itemView.findViewById(R.id.totalEmoji_TV1);
                 react_TV = itemView.findViewById(R.id.reactSender_TV);
-//                otherInfo = itemView.findViewById(R.id.otherInfo_TV1);
+                otherInfo = itemView.findViewById(R.id.otherInfo_TV1);
 
             }
             else {
@@ -942,6 +1007,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 cardViewChatBox = itemView.findViewById(R.id.cardViewReceived);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen2);
                 textViewShowMsg = itemView.findViewById(R.id.textViewReceived);
+                emojiOnly_TV = itemView.findViewById(R.id.textViewReceivedOnlyEmoji);
 
                 pinALL_IV = itemView.findViewById(R.id.pinALL_R_IV);
                 pinIcon_IV = itemView.findViewById(R.id.pinReceiver_IV);
@@ -970,9 +1036,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 circleDownload = itemView.findViewById(R.id.circleDownload2);
                 progressBar = itemView.findViewById(R.id.progressBar2);
 
-                totalReact_TV = itemView.findViewById(R.id.totalEmoji_TV2);
                 react_TV = itemView.findViewById(R.id.reactReceiver_TV);
-//                otherInfo = itemView.findViewById(R.id.otherInfo_TV2);
+                otherInfo = itemView.findViewById(R.id.otherInfo_TV2);
 
             }
         }

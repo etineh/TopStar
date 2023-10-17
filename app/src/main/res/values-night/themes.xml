@@ -36,6 +36,12 @@
         <item name="android:background">@drawable/view_card_dark</item>
     </style>
 
+    <!--    user chat list contact-->
+    <style name="userCard">
+        <!--        <item name="android:background">#1E1D1D</item>-->
+        <item name="android:background">#121111</item>
+    </style>
+
     <style name="cardTop">
         <item name="android:background">#191818</item>
     </style>

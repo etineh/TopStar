@@ -32,9 +32,14 @@
         <!-- Customize your theme here. -->
     </style>
 
-<!--    partial white-->
+    <!--  chat round background white -->
     <style name="card">
         <item name="android:background">@drawable/view_card_day</item>
+    </style>
+
+    <!--    user chat list contact-->
+    <style name="userCard">
+        <item name="android:background">#FBF9F9</item>
     </style>
 
     <style name="cardTop">
@@ -117,6 +122,7 @@
     <style name="BackgroundTintW_B">
         <item name="android:backgroundTint">#FBF9F9</item>
     </style>
+
 
     <style name="Background">
         <item name="android:background">@color/black</item>

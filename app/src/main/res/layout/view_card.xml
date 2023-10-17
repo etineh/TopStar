@@ -9,15 +9,36 @@
     android:paddingEnd="10dp"
     android:textAlignment="center">
 
+    <TextView
+        android:id="@+id/otherInfo_TV1"
+        style="@style/drawableText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="12dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:paddingStart="10dp"
+        android:paddingTop="3dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="4dp"
+        android:text="today"
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/constraintChatTop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintChatTop"
         style="@style/card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:clickable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/constrSlide"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/imageViewForward"
@@ -127,8 +148,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constraintChatTop">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:id="@+id/linearClickReply1"
@@ -190,6 +210,22 @@
             app:srcCompat="@drawable/arrow_left" />
 
         <TextView
+            android:id="@+id/textViewSendOnlyEmoji"
+            style="@style/textColorFullBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingRight="30dp"
+            android:textColorLink="@color/orange"
+            android:textSize="48sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/textViewChatTime"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
             android:id="@+id/textViewSend"
             style="@style/textColorFullBlack"
             android:layout_width="match_parent"
@@ -198,7 +234,7 @@
             android:autoLink="web|phone|email"
             android:gravity="start"
             android:paddingLeft="10dp"
-            android:paddingTop="2dp"
+            android:paddingTop="4dp"
             android:paddingRight="30dp"
             android:textColorLink="@color/orange"
             android:textSize="16sp"
@@ -282,24 +318,6 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/totalEmoji_TV1"
-            style="@style/drawableBG"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="-5dp"
-            android:elevation="2dp"
-            android:paddingLeft="4dp"
-            android:paddingTop="2dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="2dp"
-            android:text="3"
-            android:textColor="@color/white"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/reactSender_TV"
-            app:layout_constraintEnd_toStartOf="@+id/reactSender_TV"
-            app:layout_constraintTop_toTopOf="@+id/reactSender_TV" />
-
-        <TextView
             android:id="@+id/reactSender_TV"
             style="@style/drawableBG_WhiteAndBlack"
             android:layout_width="match_parent"
@@ -313,7 +331,7 @@
             android:paddingTop="1dp"
             android:paddingRight="5dp"
             android:paddingBottom="1dp"
-            android:text="🙃"
+            android:text="2 🙃"
             android:textSize="18sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

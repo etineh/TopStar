@@ -664,7 +664,7 @@
 
         <ScrollView
             android:id="@+id/scrollView"
-            style="@style/cardTop"
+            style="@style/BackgroundW_B"
             android:layout_width="300dp"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -805,19 +805,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewProfile"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/constraintLayout4">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -853,7 +852,7 @@
                             android:layout_marginStart="10dp"
                             android:ellipsize="end"
                             android:lines="1"
-                            android:text="Game Scores ~ Balance ~ Withdraw..."
+                            android:text="Account ~ Balance ~ Rank ~ Withdraw..."
                             android:textSize="12sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -862,19 +861,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewSettings"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardViewProfile">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -980,19 +978,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewPremium"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="15dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardViewNotification">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -1037,19 +1034,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardAdvert"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardViewPremium">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -1095,19 +1091,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewInvite2"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardAdvert">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -1153,19 +1148,18 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewCustomerCare"
-                    style="@style/card"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardViewInvite2">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        style="@style/card"
+                        style="@style/userCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
@@ -1201,7 +1195,7 @@
                             android:layout_marginStart="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Live chat ~ Office address ~ Contacts..."
+                            android:text="Live chat ~ Community ~ Contacts..."
                             android:textSize="12sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />

@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -284,11 +285,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 lastOpenViewHolder.constraintTop.setVisibility(View.GONE);
             }
 
-            if(holder.constraintTop.getVisibility() == View.GONE){
-                holder.constraintTop.setVisibility(View.VISIBLE);
-            } else {
-                holder.constraintTop.setVisibility(View.GONE);
-            }
+            checkConstraintVisibilityAndToggle(holder);
 
             lastOpenViewHolder = holder;
         });
@@ -304,9 +301,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             listener.onUserDelete(otherName, userName, otherUid);
 
-            //  close option menu
+            //  return height to 2dp
             holder.constraintTop.setVisibility(View.GONE);
-
         });
 
 
@@ -361,6 +357,24 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     //      --------- methods -----------
 
+    private void checkConstraintVisibilityAndToggle(ChatViewHolder holder){
+        // Now you can access the constraint programmatically
+//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.constraintTop.getLayoutParams();
+//        int desiredHeight = (int) mContext.getResources().getDimensionPixelSize(R.dimen.constraint_height);
+//        if(params.height == desiredHeight){
+//            params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
+//            holder.constraintTop.setLayoutParams(params);
+//        } else{
+//            params.height = desiredHeight; // change it back to 2dp
+//            holder.constraintTop.setLayoutParams(params);
+//        }
+
+        if(holder.constraintTop.getVisibility() == View.GONE){
+            holder.constraintTop.setVisibility(View.VISIBLE);
+        } else holder.constraintTop.setVisibility(View.GONE);
+
+    }
+
     public void forwardCheckBoxVisibility(List<ChatViewHolder> holder){
 
         for (int i = 0; i < holder.size(); i++) {
@@ -409,7 +423,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 try{
-                    String lastMsg = snapshot.child(otherUid).child("message").getValue().toString();
+                    String lastMsg;
+                    try{
+                        lastMsg = snapshot.child(otherUid).child("message").getValue().toString();
+                    } catch (Exception e){
+                        lastMsg = snapshot.child(otherUid).child("emojiOnly").getValue().toString();
+                    }
                     long lastTime = (long)  snapshot.child(otherUid).child("timeSent").getValue();
                     String lastSender = snapshot.child(otherUid).child("from").getValue().toString();
 

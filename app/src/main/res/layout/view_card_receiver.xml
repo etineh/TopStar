@@ -8,16 +8,35 @@
     android:paddingStart="10dp"
     android:paddingEnd="60dp">
 
+    <TextView
+        android:id="@+id/otherInfo_TV2"
+        style="@style/drawableText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:paddingStart="10dp"
+        android:paddingTop="3dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="4dp"
+        android:text="godstime added prince_man"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/constraintReceiveTop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintReceiveTop"
         style="@style/card"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:clickable="true"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/constrSlide2"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
             android:id="@+id/imageViewReact2"
@@ -121,8 +140,7 @@
         android:layout_marginBottom="3dp"
         android:paddingRight="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constraintReceiveTop">
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/linearClickReply2"
@@ -189,6 +207,25 @@
             android:visibility="gone"
             app:srcCompat="@drawable/add_contact"
             tools:layout_editor_absoluteX="7dp" />
+
+        <TextView
+            android:id="@+id/textViewReceivedOnlyEmoji"
+            style="@style/textColorFullBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingLeft="30dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="10dp"
+            android:text="hello"
+            android:textColorLink="@color/orange"
+            android:textSize="50sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/textViewChatTime2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox2" />
 
         <TextView
             android:id="@+id/textViewReceived"
@@ -271,24 +308,6 @@
             android:textSize="11sp"
             app:layout_constraintBottom_toTopOf="@+id/reactReceiver_TV"
             app:layout_constraintStart_toEndOf="@+id/imageViewOptions2" />
-
-        <TextView
-            android:id="@+id/totalEmoji_TV2"
-            style="@style/drawableBG"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="-5dp"
-            android:elevation="2dp"
-            android:paddingLeft="4dp"
-            android:paddingTop="2dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="2dp"
-            android:text="3"
-            android:textColor="@color/white"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/reactReceiver_TV"
-            app:layout_constraintEnd_toStartOf="@+id/reactReceiver_TV"
-            app:layout_constraintTop_toTopOf="@+id/reactReceiver_TV" />
 
         <TextView
             android:id="@+id/reactReceiver_TV"

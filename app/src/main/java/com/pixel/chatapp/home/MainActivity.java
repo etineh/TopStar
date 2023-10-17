@@ -20,12 +20,14 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private int forwardType;
     private long forwardRandomID;
     private String forwardChat;
+    private String forwardChatEmojiOnly;
 
     //  ---------   Delete User from ChatList Declares
     private ConstraintLayout deleteUserOrClearChatContainer;
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     private TextView textViewDelMine, textViewDelOther, textViewDelAll;
     private static EditText editTextMessage, et_emoji;
-    private static CircleImageView circleSendMessage;
+    private static CircleImageView sendMessageButton;
     private CardView cardViewMsg, cardViewReplyOrEdit;
     public static ImageView scrollPositionIV, sendIndicator;
     public static TextView scrollCountTV, receiveIndicator;
@@ -243,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         textViewOtherUser = findViewById(R.id.textViewName9);
         editTextMessage = findViewById(R.id.editTextMessage9);
         et_emoji = findViewById(R.id.et_emoji);
-        circleSendMessage = findViewById(R.id.fab9);
+        sendMessageButton = findViewById(R.id.fab9);
         imageViewOpenMenu = findViewById(R.id.imageViewUserMenu29);
         imageViewCloseMenu = findViewById(R.id.imageViewCancel9);
         chatMenuProfile = findViewById(R.id.chatMenuConstraint);
@@ -531,26 +534,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
 
         // send message
-        circleSendMessage.setOnClickListener(view -> {
+        sendMessageButton.setOnClickListener(view -> {
 
             String message = editTextMessage.getText().toString().trim();
-            if (!message.equals("")){
 
-                sendMessage(message, 0);    // 0 is for text while 1 is for voice note
+            if (!message.isEmpty()) {
+                if (containsOnlyEmojis(message)) {
+                    // send as emoji text to increase the size
+                    sendMessage(null, message, 0);
+                } else {
+                    // Handle sending a text message
+                    sendMessage(message, null, 0);
+                }
 
-                editTextMessage.setText("");
-                textViewReplyOrEdit.setText("");
-                listener = "no";
-                replyText = null;
-                replyFrom = null;
-                replyVisibility = 8;
-                idKey = null;
-
-                cardViewReplyOrEdit.setVisibility(View.GONE);
-                nameReply.setVisibility(View.GONE);
-                replyVisible.setVisibility(View.GONE);
-
+                // Clear the input field and reset other variables
+                clearInputFields();
             }
+
         });
 
         // set camera
@@ -1020,14 +1020,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 String otherUid = eachUser[1];
 
                 // save to local list for fast update
-                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "", 0, "", null, 8,
-                        "", 700033, forwardType, forwardRandomID, idKey, false, true, null);
+                MessageModel messageModel = new MessageModel(forwardChat, myUserName, "",
+                        0, "", null, 8, "", 700033,
+                        forwardType, forwardRandomID, idKey, false, true,
+                        null, forwardChatEmojiOnly);
 
                 MessageAdapter adapter = adapterMap.get(otherName);
                 adapter.addNewMessageDB(messageModel);
 
                 // scroll to new position only if scrollCheck int is < 20
-                int scrollCheck = 0;
+                int scrollCheck;
                 try{
                     scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherName);
                 } catch (Exception e) {
@@ -1263,6 +1265,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             addChatLayoutViews.start();
         }
 
+        // scroll to previous position UI of user
+//        try{
+//            scrollToPreviousPosition(otherName, (int) scrollPositionMap.get(otherName));
+//        } catch (Exception e){
+//            scrollToPreviousPosition(otherName, adapterMap.get(otherName).getItemCount() - 1);
+//        }
+
         System.out.println("M1267 total layout views  " + adapterMap.get(otherName).viewCacheSend.size());
 
         // Add an OnScrollListener to the RecyclerView
@@ -1433,7 +1442,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     @Override
-    public void onForwardChat(int forwardType_, long forwardRandomID_, String chat) {
+    public void onForwardChat(int forwardType_, long forwardRandomID_, String chat, String emojiOnly) {
 
         clearEmojiReactSetting();
         hideKeyboard();
@@ -1454,6 +1463,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         forwardType = forwardType_;
         forwardRandomID = forwardRandomID_;
         forwardChat = chat;
+        forwardChatEmojiOnly = emojiOnly;
+
 
 //        List<ChatListAdapter.ChatViewHolder> myHolderNew = new ArrayList<>();
         myHolderNew.addAll(myHolder_);  // add all users holder that was gotten from chatListAdapter
@@ -1763,7 +1774,19 @@ System.out.println("M1564 I am running");
 
 
     //  ------------    methods     ---------------
-    public static Map<String, Object> setMessage(String message, int type, long randomID){
+
+    // Function to check if a string message contains only emojis
+    private boolean containsOnlyEmojis(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            int type = Character.getType(text.charAt(i));
+            if (type != Character.SURROGATE || text.length() > 20) {
+                return false;  // Found non-emoji character
+            }
+        }
+        return true;
+    }
+
+    public static Map<String, Object> setMessage(String text, String emoji, int type, long randomID){
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         int msgStatus = 700024;
@@ -1778,7 +1801,8 @@ System.out.println("M1564 I am running");
         messageMap.put("from", myUserName);
         messageMap.put("type", type);            // 0 is for text while 1 is for voice note
         messageMap.put("randomID", randomID);
-        messageMap.put("message", message);
+        messageMap.put("message", text);
+        messageMap.put("emojiOnly", emoji);
 //            messageMap.put("voicenote", vn);
         messageMap.put("msgStatus", msgStatus);
         messageMap.put( "timeSent", ServerValue.TIMESTAMP);
@@ -1792,12 +1816,13 @@ System.out.println("M1564 I am running");
         return messageMap;
     }
 
-    public void sendMessage(String message, int type) {
+    public void sendMessage(String text, String emoji, int type) {
 
         if(listener == "edit"){ // check if it's on edit mode
 
             editMessageMap.put("from", myUserName);
-            editMessageMap.put("message", message);
+            editMessageMap.put("message", text);
+            editMessageMap.put("emojiOnly", emoji);
             editMessageMap.put("edit", "edited");
             editMessageMap.put("randomID", randomKey);
             editMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
@@ -1810,8 +1835,8 @@ System.out.println("M1564 I am running");
             long randomID = (long)(Math.random() * 1_010_001);
 
             // save to local list for fast update
-            MessageModel messageModel = new MessageModel(message, myUserName, replyFrom, 0, "", null,
-                    replyVisibility, replyText, 700033, type, randomID, idKey, false, false, null);
+            MessageModel messageModel = new MessageModel(text, myUserName, replyFrom, 0, "", null,
+                    replyVisibility, replyText, 700033, type, randomID, idKey, false, false, null, emoji);
 
             MessageAdapter adapter = adapterMap.get(otherUserName);
             if(adapter != null){
@@ -1839,17 +1864,17 @@ System.out.println("M1564 I am running");
             String key = refMsgFast.child(myUserName).child(otherUserName).push().getKey();  // create an id for each message
 
             // save to main message
-            refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
-            refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+            refMessages.child(myUserName).child(otherUserName).child(key).setValue(setMessage(text, emoji, type, randomID));
+            refMessages.child(otherUserName).child(myUserName).child(key).setValue(setMessage(text, emoji, type, randomID));
 
             // save to new message db for fast response
-            refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(message, type, randomID));
-            refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(message, type, randomID));
+            refMsgFast.child(myUserName).child(otherUserName).child(key).setValue(setMessage(text, emoji, type, randomID));
+            refMsgFast.child(otherUserName).child(myUserName).child(key).setValue(setMessage(text, emoji, type, randomID));
 
 
             // save last msg for outside chat display
-            refLastDetails.child(user.getUid()).child(otherUserUid).setValue(setMessage(message, type, randomID));
-            refLastDetails.child(otherUserUid).child(user.getUid()).setValue(setMessage(message, type, randomID));
+            refLastDetails.child(user.getUid()).child(otherUserUid).setValue(setMessage(text, emoji, type, randomID));
+            refLastDetails.child(otherUserUid).child(user.getUid()).setValue(setMessage(text, emoji, type, randomID));
 
             checkAndSaveCounts_SendMsg();   // save the number of new message I am sending
 
@@ -2073,7 +2098,7 @@ System.out.println("M1564 I am running");
                         }
                     }
 
-                    // scroll to previous position UI of user
+//                    // scroll to previous position UI of user
                     try{
                         scrollToPreviousPosition(otherName, (int) scrollPositionMap.get(otherName));
                     } catch (Exception e){
@@ -2159,7 +2184,7 @@ System.out.println("M1564 I am running");
                                     MessageModel msgStatus = allMsgList.get(i);
 
                                     // check if both message and randomID are same
-                                    if (messageModel.getMessage().equals(msgStatus.getMessage())
+                                    if (messageModel.getMessage() != null || messageModel.getEmojiOnly() != null
                                             && messageModel.getRandomID() == msgStatus.getRandomID()) {
 
                                         // set details for unread message found to read status
@@ -2877,13 +2902,13 @@ System.out.println("M1564 I am running");
                     // call handler runnable to check for internet access when typing
                     handler1.post(internetCheckRunnable);
 
-                    circleSendMessage.setVisibility(View.VISIBLE);
+                    sendMessageButton.setVisibility(View.VISIBLE);
                     recordButton.setVisibility(View.INVISIBLE);
                     camera_IV.setVisibility(View.INVISIBLE);
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(1);
 
                 } else {
-                    circleSendMessage.setVisibility(View.INVISIBLE);
+                    sendMessageButton.setVisibility(View.INVISIBLE);
                     recordButton.setVisibility(View.VISIBLE);
                     camera_IV.setVisibility(View.VISIBLE);
                     refChecks.child(otherUserUid).child(user.getUid()).child("typing").setValue(0);
@@ -3231,6 +3256,21 @@ System.out.println("M1564 I am running");
             itemView.setBackgroundColor(Color.TRANSPARENT);
         }
     }
+
+    // clear input fields and reset variables for sendMessageButton
+    private void clearInputFields() {
+        editTextMessage.setText("");
+        textViewReplyOrEdit.setText("");
+        listener = "no";
+        replyText = null;
+        replyFrom = null;
+        replyVisibility = View.GONE;
+        idKey = null;
+        cardViewReplyOrEdit.setVisibility(View.GONE);
+        nameReply.setVisibility(View.GONE);
+        replyVisible.setVisibility(View.GONE);
+    }
+
     // set user image on settings
     private void setUserDetails(){
         refUser.child(user.getUid()).addValueEventListener(new ValueEventListener() {
