@@ -2200,7 +2200,7 @@
                     android:background="@drawable/msg_count"
                     android:padding="7dp"
                     android:src="@drawable/baseline_send_24"
-                    android:visibility="invisible"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 

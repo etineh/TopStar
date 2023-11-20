@@ -1,6 +1,15 @@
 package com.pixel.chatapp.constants;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public interface AllConstants {
+
+    String MYUSERNAME = "MYUSERNAME";
+    String USERNAME = "USERNAME";
+    String SCROLLPOSITION = "lastScrollPosition";
+
+    ExecutorService executors = Executors.newSingleThreadExecutor();
 
     String VERIFICATION_CODE = "code";
     String IMAGE_PATH = "Media/Profile_Image/profile";

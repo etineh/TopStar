@@ -128,6 +128,24 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 //
 //        return false;
 //    }
+
+
+
+//        viewSendPreferences = getSharedPreferences(AllConstants.VIEW_SEND_LAYER, Context.MODE_PRIVATE);
+//        viewReceivePreferences = getSharedPreferences(AllConstants.VIEW_RECEIVE_LAYER, Context.MODE_PRIVATE);
+//
+//        List<View> reusableSenderViews = MessageAdapter.viewCacheSend; // Replace this with your List of views
+//        List<View> reusableReceiverViews = MessageAdapter.viewCacheReceive;
+//
+//        // Serialize the List of views to JSON and save it to SharedPreferences
+//        String viewSendJson = gson.toJson(viewCacheSend2);
+//        String viewReceiveJson = gson.toJson(MessageAdapter.viewCacheReceive);
+//
+//        //  save the convert gson view to SharedPreferences
+//        viewSendPreferences.edit().putString(AllConstants.VIEW_FOR_SENDER, viewSendJson).apply();
+//        viewReceivePreferences.edit().putString(AllConstants.VIEW_FOR_RECEIVER, viewReceiveJson).apply();
+//        System.out.println("I have save the views");
+
 }
 
 

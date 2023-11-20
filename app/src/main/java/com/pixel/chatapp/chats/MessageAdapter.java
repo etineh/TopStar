@@ -39,7 +39,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 
 import java.io.File;
@@ -59,10 +61,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
     // Declare a Set to keep track of highlighted positions
@@ -75,7 +77,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     Boolean status;
     private int send;
     private int receive;
+    private String myId;
     FirebaseUser user;
+    Map<String, Integer> dateMonth = new HashMap<>();
     DatabaseReference refCheck, refUsers, refPinMessages;
     private MessageViewHolder lastOpenViewHolder = null;
     Handler handler;
@@ -90,17 +94,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     // I am using "static" so it add up only once
     public static List<View> viewCacheSend = new ArrayList<>(); // List to store views for caching
+    public static List<View> viewExtraList = new ArrayList<>(); // List to store views for caching
     public static List<View> viewCacheReceive = new ArrayList<>(); // List to store views for caching
     private LayoutInflater inflater;
     private ViewGroup parent;
 
-    public MessageAdapter(List<MessageModel> modelList, String userName, String uId, Context mContext, ViewGroup parent, String otherName) {
+    public MessageAdapter( List<MessageModel> modelList, String userName, String uId,
+                          Context mContext, ViewGroup parent) {
         this.modelList = modelList;
         this.userName = userName;
         this.uId = uId;
         this.mContext = mContext;
         this.parent = parent;
-        this.otherName = otherName;
+//        this.otherName = otherName;
         handler = new Handler(Looper.getMainLooper());
 
         status = false;
@@ -112,14 +118,39 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refCheck = FirebaseDatabase.getInstance().getReference("Checks");
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
 //        refPinMessages = FirebaseDatabase.getInstance().getReference("PinMessages");
-
+        myId = user.getUid();
         this.inflater = LayoutInflater.from(mContext);
 
     }
 
+    public List<MessageModel> getModelList() {
+        return modelList;
+    }
+
+    public void setModelList(List<MessageModel> modelList) {
+        this.modelList = modelList;
+    }
+
     // add new message to list method
     public void addNewMessageDB(MessageModel newMessages) {
-        modelList.add(newMessages);
+//        if(!modelList.contains(newMessages)) {
+//        }
+            modelList.add(newMessages);
+//        Collections.sort(modelList, Comparator.comparingLong(MessageModel::getTimeSent));
+
+    }
+    public void updateMessage(MessageModel chatModel) {
+
+        int numLoop = modelList.size() > 100 ? modelList.size() - 50 : 0;
+        for (int i = modelList.size()-1; i >= numLoop; i--) {
+            String all_IDs = modelList.get(i).getIdKey();
+            if (chatModel.getIdKey().equals(all_IDs)) { // Use equals() for string comparison
+                modelList.remove(i);
+                modelList.add(i, chatModel);
+                notifyItemChanged(i, new Object());
+                break;
+            }
+        }
     }
 
     public void deleteMessage(String id){
@@ -160,12 +191,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    public void addLayoutViewInBackground() {
-        Executor executor = Executors.newSingleThreadExecutor();
-
-        executor.execute(() -> {
-
-            for (int i = 0; i < 50; i++) {
+    // add 10 views on first load
+    public class PreloadTenViewsTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Preload views in the background and add them to the cache
+            for (int i = 0; i < 40; i++) {
 
                 View itemView;
 
@@ -173,6 +204,37 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     itemView = inflater.inflate(R.layout.view_card, parent, false);
                     synchronized (viewCacheSend) {
                         viewCacheSend.add(itemView);
+                        System.out.println("first loading Send: " + viewCacheSend.size());
+                    }
+                } else{
+                    itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheReceive.add(itemView);
+                        System.out.println("first loading Receive: " + viewCacheReceive.size());
+                    }
+                }
+
+            }
+            return null;
+        }
+
+    }
+
+
+    public void addLayoutViewInBackground() {
+        Executor executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(() -> {
+
+            for (int i = 0; i < 20; i++) {
+
+                View itemView;
+
+                if(i % 2 == 0){
+                    itemView = inflater.inflate(R.layout.view_card, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheSend.add(itemView);
+//                        MainActivity.viewCacheSend2.add(itemView);
                         System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
                     }
                 } else{
@@ -213,7 +275,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     false
             );
         }
-
         return new MessageViewHolder(itemView);
 
     }
@@ -227,17 +288,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
         MessageModel modelUser = modelList.get(chatPosition);    // get the model position of each chat
 
-        long convert = (long) modelUser.getTimeSent();
-        Date d = new Date(convert); //complete Data -- Mon 2023 -03 - 06 12.32pm
-        DateFormat formatter = new SimpleDateFormat("h:mm a");
-        String time = formatter.format(d);
 
-
-//        if(MainActivity.readDatabase == 0){ //---------
-        holder.timeMsg.setText(time.toLowerCase());       // show the time each msg was sent
-
-//        adjustTextSizeIfOnlyEmojiIsPresent(holder, modelUser.getMessage());
-//        new AdjustTextSizeTask().execute(holder, modelUser.getMessage());
+        // show the time each msg was sent
+        holder.timeMsg.setText( chatTime(modelUser.getTimeSent()) );
 
         holder.textViewShowMsg.setText(modelUser.getMessage());    //  Show messages
 
@@ -264,7 +317,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         //  set emoji reaction
         if(modelUser.getEmoji() != null){
-            addEmojiReact(holder, modelUser.getEmoji());
+            setEmojiReact(holder, modelUser.getEmoji());
         }
 
         // ----------------- Voice Note setting
@@ -290,7 +343,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.seenMsg.setImageResource(numMsg);     // set msg status tick
 
-//        }   //--------------
+
         // --------------------------   Settings end   ----------------------------------------------------------------------
 
 
@@ -303,6 +356,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             long randomID = (long)(Math.random() * 1_010_001);
 
             MainActivity.forwardMessageMap.put("from", userName);
+            MainActivity.forwardMessageMap.put("fromUid", myId);
             MainActivity.forwardMessageMap.put("type", modelUser.getType());
             MainActivity.forwardMessageMap.put("randomID", randomID);
             MainActivity.forwardMessageMap.put("message", modelUser.getMessage());
@@ -310,7 +364,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             MainActivity.forwardMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
             MainActivity.forwardMessageMap.put("visibility", 8);
             MainActivity.forwardMessageMap.put("isChatPin", false);
-            MainActivity.forwardMessageMap.put("isChatForward", true);
+            if(modelUser.getFromUid().equals(myId)){
+                MainActivity.forwardMessageMap.put("isChatForward", false);
+            } else {
+                MainActivity.forwardMessageMap.put("isChatForward", true);
+            }
 
 
             fragmentListener.onForwardChat(modelUser.getType(), randomID, modelUser.getMessage(), modelUser.getEmojiOnly());
@@ -336,8 +394,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
                 // call method in MainActivity and set up the details
-                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"reply", modelUser.getIdKey(),
-                        modelUser.getRandomID(), "replying...", R.drawable.reply, modelUser.getFrom(), 1);
+                fragmentListener.onEditOrReplyMessage(modelUser, "reply",
+                        "replying...", R.drawable.reply, modelUser.getFrom(), 1);
                 //  1 is visible, 4 is invisible, 8 is Gone
             }
             // reverse arrow
@@ -364,8 +422,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
 
                 // send data to MainActivity via interface listener
-                fragmentListener.onEditOrReplyMessage(modelUser.getMessage(),"edit", modelUser.getIdKey(),
-                        modelUser.getRandomID(), "editing...", android.R.drawable.ic_menu_edit, null, View.GONE);
+                fragmentListener.onEditOrReplyMessage(modelUser,"edit", "editing...",
+                        android.R.drawable.ic_menu_edit, null, View.GONE);
             }
             // reverse arrow
             if(modelUser.getFrom().equals(userName)){
@@ -389,7 +447,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 String fromWho = modelUser.getFrom();
                 long randomID = modelUser.getRandomID();
 
-                fragmentListener.onDeleteMessage(id, fromWho, randomID);  // call method on MainActivity(L700)
+                fragmentListener.onDeleteMessage(modelUser);  // call method on MainActivity(L700)
 
                 // reverse arrow
                 if(modelUser.getFrom().equals(userName)){
@@ -503,7 +561,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 boolean check = false;
                 boolean checkPublic = false;
                 for (PinMessageModel pinMes :
-                        MainActivity.pinPrivateChatMap.get(MainActivity.otherUserName)) {
+                        MainActivity.pinPrivateChatMap.get(MainActivity.otherUserUid)) {
 
                     if (pinMes.getMsgId().equals(modelUser.getIdKey())) {
                         check = true;
@@ -511,7 +569,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     }
                 }
                 for (PinMessageModel pinChatEveryone :
-                        MainActivity.pinPublicChatMap.get(MainActivity.otherUserName)) {
+                        MainActivity.pinPublicChatMap.get(MainActivity.otherUserUid)) {
 
                     if (pinChatEveryone.getMsgId().equals(modelUser.getIdKey())) {
                         checkPublic = true;
@@ -587,9 +645,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 int positionCount = chatPosition - originalPosition;
 
                 if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserName).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
+                    MainActivity.recyclerMap.get(MainActivity.otherUserUid).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
                 } else {    // decrease the number (11-- to shift the highlight msg down)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserName).scrollToPosition(originalPosition-11);
+                    MainActivity.recyclerMap.get(MainActivity.otherUserUid).scrollToPosition(originalPosition-11);
                 }
 
                 // Highlight the original message
@@ -690,23 +748,34 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     // ---------------------- methods ---------------------------
 
-//    public static void adjustTextSizeIfOnlyEmojiIsPresent(MessageViewHolder holder, String chat) {
-//        boolean containsText = false;
-//
-//        for (int i = 0; i < chat.length(); i++) {
-//            int type = Character.getType(chat.charAt(i));
-//            if (type != Character.SURROGATE) {
-//                containsText = true;  // Found non-emoji character
-//                break;  // No need to check further
-//            }
-//        }
-//
-//        if (!containsText) {
-//            // Set a larger text size if the text contains only emojis
-//            holder.textViewShowMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
-//        }
-//
-//    }
+    private String chatTime(long timeDate){
+        Date d = new Date(timeDate); //complete Data -- Mon 2023 -03 - 06 12.32pm
+        DateFormat formatter = new SimpleDateFormat("h:mm a");
+        String time = formatter.format(d);
+        String previousDateString = String.valueOf(d);
+        int dateLast = Integer.parseInt(previousDateString.substring(8, 10));   // 1 - 30 days
+
+             // months
+        dateMonth.put("Jan", 1);
+        dateMonth.put("Feb", 2);
+        dateMonth.put("Mar", 3);
+        dateMonth.put("Apr", 4);
+        dateMonth.put("May", 5);
+        dateMonth.put("Jun", 6);
+        dateMonth.put("Jul", 7);
+        dateMonth.put("Aug", 8);
+        dateMonth.put("Sep", 9);
+        dateMonth.put("Oct", 10);
+        dateMonth.put("Nov", 11);
+        dateMonth.put("Dec", 12);
+
+        int lastMonth = dateMonth.get(previousDateString.substring(4,7));
+//        String lastYear = previousDateString.substring(32, 34);  // year
+
+        String joinTImeAndDate =time.toLowerCase() + " | " +dateLast +"/"+ lastMonth;
+
+        return joinTImeAndDate;
+    }
 
     public class AdjustTextSizeTask extends AsyncTask<Object, Void, Boolean> {
         private MessageViewHolder holder;
@@ -746,40 +815,96 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
 
-    public void addEmojiReact(MessageViewHolder holder, String emoji){
+    public void setEmojiReact(MessageViewHolder holder, String emoji){
         holder.react_TV.setVisibility(View.VISIBLE);
          // add the total emoji reaction
-        if(holder.react_TV.length() > 1){      // change to 2 later
+        if(emoji.length() > 2){
             String totalReactAndEmoji = (emoji.length()/2) + " " + emoji;
             holder.react_TV.setText(totalReactAndEmoji);
         } else {
             holder.react_TV.setText(emoji);
         }
+
+    }
+    public void addEmojiReact(MessageViewHolder holder, String emoji, String chatID, String otherId){
+        int chatPosition = findMessagePositionById(chatID);
+        // concat previous emoji to the new one
+        String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
+                modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
+
+        // update local list
+        setEmojiReact(holder, addEmoji);
+        modelList.get(chatPosition).setEmoji(addEmoji);
+
+        // add to ROOM database
+        MainActivity.chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
+
     }
 
-    public void pinIconDisplay(MessageViewHolder holder_){
+    public void emojiReactSignal(String emoji, String chatID, String otherId){
+        int chatPosition = findMessagePositionById(chatID);
+        // check if the chatPosition exist
+        if(chatPosition != -1){
+            // concat previous emoji to the new one
+            String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
+                    modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
+
+            modelList.get(chatPosition).setEmoji(addEmoji);
+            notifyItemChanged(chatPosition, new Object());
+
+            // add to ROOM database
+            MainActivity.chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
+        }
+
+    }
+
+    public void pinIconDisplay(MessageViewHolder holder_, String messageId, boolean status){
         holder_.pinIcon_IV.setVisibility(View.VISIBLE);
+        updatePinIcon(messageId, status);   //  ROOM DB
     }
-    public void pinIconHide(MessageViewHolder holder_){
+    public void pinIconHide(MessageViewHolder holder_, String messageId, boolean status){
         holder_.pinIcon_IV.setVisibility(View.GONE);
+        updatePinIcon(messageId, status);   //  ROOM DB
     }
+
+    public void updatePinIcon(String messageId, boolean status) {
+        AllConstants.executors.execute(() -> {
+            if(modelList != null){
+                for (int i = modelList.size()-1; i >= 0; i--) {
+                    if (modelList.get(i).getIdKey().equals(messageId)) {
+
+                        modelList.get(i).setChatPin(status);
+                        // update icon on local database
+                        MainActivity.chatViewModel.updateChat(modelList.get(i));
+                    }
+                }
+            }
+        });
+
+    }
+
     public int findMessagePositionById(String messageId) {
-        for (int i = modelList.size()-1; i >= 0; i--) {
-            if (modelList.get(i).getIdKey().equals(messageId)) {
-                return i;
+
+        if(modelList != null){
+            for (int i = modelList.size()-1; i >= 0; i--) {
+                if (modelList.get(i).getIdKey().equals(messageId)) {
+                    return i;
+                }
             }
         }
         return RecyclerView.NO_POSITION;
+
     }
+
     public void highlightItem(int position) {
         // Clear previous highlight, if any.
-        for (int i = 0; i < MainActivity.recyclerMap.get(MainActivity.otherUserName).getChildCount(); i++) {
-            View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserName).getChildAt(i);
+        for (int i = 0; i < MainActivity.recyclerMap.get(MainActivity.otherUserUid).getChildCount(); i++) {
+            View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserUid).getChildAt(i);
             itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
         // Highlight the clicked item
-        View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserName).getLayoutManager().findViewByPosition(position);
+        View itemView = MainActivity.recyclerMap.get(MainActivity.otherUserUid).getLayoutManager().findViewByPosition(position);
         if (itemView != null) {
             itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
         }
@@ -935,13 +1060,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public int getItemCount() {
-//        List<MessageModel> list = modelList;
-//        if(list != null){
-//            return list.size();
-//        } else {
-//            return 0;
-//        }
-        return modelList.size();
+        List<MessageModel> list = modelList;
+        if(list != null){
+            return list.size();
+        } else {
+            return 0;
+        }
+//        return modelList.size();
     }
 
     public class MessageViewHolder extends RecyclerView.ViewHolder{
@@ -1045,7 +1170,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public int getItemViewType(int position) {
-        if(modelList.get(position).getFrom().equals(userName)){
+        if(modelList.get(position).getFromUid().equals(myId)){
             status = true;
             return send;
         } else {

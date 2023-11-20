@@ -309,10 +309,8 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/orange"
-                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/textViewTime"
-                    app:srcCompat="@drawable/sent_pin" />
+                    app:layout_constraintEnd_toStartOf="@id/textViewTime"/>
 
                 <ImageView
                     android:id="@+id/imageViewPin2"
@@ -348,6 +346,7 @@
         android:id="@+id/recyclerChat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

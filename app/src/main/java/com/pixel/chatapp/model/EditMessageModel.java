@@ -8,12 +8,13 @@ public class EditMessageModel {
     private long timeSent;
     private String id;
     private long randomID;
+    private String emojiOnly;
 
     public EditMessageModel(){
 
     }
 
-    public EditMessageModel(String from, String edit, String message, long timeSent, String id, long randomID){
+    public EditMessageModel(String from, String edit, String message, long timeSent, String id, long randomID, String emojiOnly){
 
         this.from = from;
         this.edit = edit;
@@ -21,6 +22,7 @@ public class EditMessageModel {
         this.timeSent = timeSent;
         this.id = id;
         this.randomID = randomID;
+        this.emojiOnly = emojiOnly;
     }
 
     public String getFrom() {
@@ -53,5 +55,13 @@ public class EditMessageModel {
 
     public long getRandomID() {
         return randomID;
+    }
+
+    public String getEmojiOnly() {
+        return emojiOnly;
+    }
+
+    public void setEmojiOnly(String emojiOnly) {
+        this.emojiOnly = emojiOnly;
     }
 }

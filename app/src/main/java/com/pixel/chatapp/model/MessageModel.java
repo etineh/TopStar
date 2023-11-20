@@ -1,39 +1,48 @@
-package com.pixel.chatapp.chats;
+package com.pixel.chatapp.model;
 
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class MessageModel implements Serializable {
-//public class MessageModel {
+@Entity(tableName = "chats", primaryKeys = {"idKey"})
 
+//public class MessageModel implements Serializable {
+public class MessageModel {
+
+    @NonNull
+    private String idKey;
+
+    private String fromUid;
     private String message;
     private String emojiOnly;
     private String from, replyFrom;
-    private String idKey;
     private String edit;
     private String replyMsg;
     private long timeSent;
     private int visibility;
-    private  int msgStatus;
-
+    private int msgStatus;
     private int type;
     private long randomID;
     private String replyID;
-    private Boolean isChatPin;
-    private Boolean isChatForward;
+    private boolean isChatPin;
+    private boolean isChatForward;
 
     private String emoji;
+
+    private String id;      // link id between the user and chat
 
 //    private String voicenote;
 
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, String replyFrom, long timeSent, String idKey, String edit,
-                        int visibility, String replyMsg, int msgStatus, int type, long randomID, String replyID,
-                        Boolean isChatPin, Boolean isChatForward, String emoji, String emojiOnly) {
+    public MessageModel(String message, String from, String fromUid, String replyFrom, long timeSent, String idKey,
+                        String edit, int visibility, String replyMsg, int msgStatus, int type, long randomID,
+                        String replyID, Boolean isChatPin, Boolean isChatForward, String emoji, String emojiOnly) {
         this.message = message;
         this.from = from;
         this.timeSent = timeSent;
@@ -50,6 +59,7 @@ public class MessageModel implements Serializable {
         this.isChatForward = isChatForward;
         this.emoji = emoji;
         this.emojiOnly = emojiOnly;
+        this.fromUid = fromUid;
 
 //        this.voicenote = voicenote;
     }
@@ -79,6 +89,14 @@ public class MessageModel implements Serializable {
 
     public String getIdKey() {
         return idKey;
+    }
+
+    public String getFromUid() {
+        return fromUid;
+    }
+
+    public void setFromUid(String fromUid) {
+        this.fromUid = fromUid;
     }
 
     public void setIdKey(String idKey) {
@@ -137,6 +155,10 @@ public class MessageModel implements Serializable {
         return randomID;
     }
 
+    public void setRandomID(long randomID) {
+        this.randomID = randomID;
+    }
+
     public String getReplyID() {
         return replyID;
     }
@@ -176,6 +198,15 @@ public class MessageModel implements Serializable {
     public void setEmojiOnly(String emojiOnly) {
         this.emojiOnly = emojiOnly;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
     //    public String getVoicenote() {
 //        return voicenote;

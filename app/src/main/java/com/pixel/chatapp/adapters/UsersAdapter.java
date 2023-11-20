@@ -14,21 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.chats.MessageAdapter;
-import com.pixel.chatapp.chats.MessageModel;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.ContactModel;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -38,10 +32,19 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     MainActivity mainActivity = new MainActivity();
     List<ContactModel> otherUsersList;
 //    List<String> names;
-    Context mContext;
     DatabaseReference refUsers, refClearSign;
     FirebaseUser user;
     ChatsListFragment chatsListFragment = new ChatsListFragment();
+
+    public static Context mContext;
+
+    public static Context getmContext() {
+        return mContext;
+    }
+
+    public static void setmContext(Context mContext_) {
+        mContext = mContext_;
+    }
 
     public interface BackButtonClickListener {
         void onBackButtonClicked();
@@ -61,7 +64,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     public UsersAdapter(List<ContactModel> otherUsersList, Context mContext) {
         this.otherUsersList = otherUsersList;
-        this.mContext = mContext;
+//        this.mContext = mContext;
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         refUsers = FirebaseDatabase.getInstance().getReference("Users");
@@ -100,11 +103,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         holder.textViewMsg.setText(hint);                    // display Bio of the user
 
         // add up user recyclerView that doesn't exist
-        listener.sendRecyclerView(holder.recyclerChat, otherName, otherUid);
+        listener.sendRecyclerView(holder.recyclerChat, otherUid);
 
 
         // check if other user deleted me from his chat list, if yes, then clear all the user chat
-        MainActivity.checkClearChatsDB(otherUid, otherName);
+//        MainActivity.checkClearChatsDB(otherUid);
 
         // what happen when the cardView is click
         holder.cardView.setOnClickListener(view -> {
@@ -113,18 +116,19 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
                 backButtonClickListener.onBackButtonClicked();
             }
 
-            listener.chatBodyVisibility(otherName, imageUrl, myUserName, otherUid, chatsListFragment.getMainContext(), holder.recyclerChat);
+            listener.chatBodyVisibility(otherName, imageUrl, myUserName, otherUid, getmContext(), holder.recyclerChat);
 
             listener.getLastSeenAndOnline(otherUid);
 
             listener.msgBackgroundActivities(otherUid);
 
-            listener.callAllMethods(otherName, myUserName, otherUid);
+            listener.callAllMethods(otherUid);
 
             // activate adapter for user if null
             if(MainActivity.adapterMap.get(otherName) == null){
                 // call getMessage() to add up new user adapter
-                listener.getMessage(myUserName, otherName, otherUid, chatsListFragment.getMainContext());
+//                listener.getMessage(myUserName, otherName, otherUid, chatsListFragment.getMainContext());
+                listener.getMessage(myUserName, otherUid, getmContext());
             }
 
         });

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,10 +26,14 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.contacts.UsersContactActivity;;
 import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.model.ChatListModel;
+import com.pixel.chatapp.model.MessageModel;
+import com.pixel.chatapp.model.UserOnChatUI_Model;
+import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,19 +43,22 @@ public class ChatsListFragment extends Fragment {
         return new ChatsListFragment();
     }
 
-    RecyclerView recyclerView;
+    public static RecyclerView recyclerView;
     FirebaseUser user;
-    DatabaseReference fReference, refChecks;
+    DatabaseReference fReference, refChecks, refUsers;
 
     String myUserName;
+    private UserChatViewModel userViewModel;
+    ExecutorService executors = Executors.newSingleThreadExecutor();
+
     static ChatListAdapter adapter;
     public static CircleImageView openContactList;
 
-    private List<ChatListModel> chatListID;
-    private List<String> mUsersID;
+    private List<UserOnChatUI_Model> chatListID;
+    public static List<UserOnChatUI_Model> mUsersID;
     private FragmentListener fragmentListener;
 
-    private Context mainContext = getContext();
+    private Context mainContext;
 
     public Context getMainContext() {
         return mainContext;
@@ -68,63 +76,37 @@ public class ChatsListFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+
+        mainContext = getContext();
         chatListID = new ArrayList<>();
+        mUsersID = new ArrayList<>();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 //        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
+
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserChatViewModel.class);
+
+        // get users from ROOM database
+        executors.execute(() -> {
+            if(userViewModel.getAllUsers() != null){
+                mUsersID = userViewModel.getAllUsers();
+
+                adapter = new ChatListAdapter(mUsersID, getContext(), MainActivity.getMyUserName);
+                adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
+
+                getActivity().runOnUiThread(() -> {
+                    recyclerView.setAdapter(adapter);
+                });
+//                System.out.println("what is total one ada " + adapter.getItemCount());
+            }
+        });
+
 
         // Go to contact
         openContactList.setOnClickListener(view1 -> {
             Intent intent = new Intent(getContext(), UsersContactActivity.class);
             startActivity(intent);
 
-        });
-
-
-        // get my userName
-        fReference = FirebaseDatabase.getInstance().getReference("Users");
-        fReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                myUserName = snapshot.child(user.getUid()).child("userName").getValue().toString();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        // add other users id to the list
-        fReference = FirebaseDatabase.getInstance().getReference("ChatList").child(user.getUid());
-
-        fReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                chatListID.clear();
-
-                for (DataSnapshot snapshot1 : snapshot.getChildren()){
-
-                    ChatListModel idListModel = snapshot1.getValue(ChatListModel.class);
-                    chatListID.add(idListModel);
-                }
-
-                // changed the adapter from the chatList method to here and it was faster loading
-                adapter = new ChatListAdapter(mUsersID, getContext(), myUserName);
-//                adapter = new ChatListAdapter(mUsersID, MainActivity.this, myUserName);
-
-                adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
-                recyclerView.setAdapter(adapter);
-
-//                chatList();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
         });
 
 
@@ -135,35 +117,61 @@ public class ChatsListFragment extends Fragment {
 
     //  ---------------  All   methods     -----------------
 
-    public static void onit(){
-//        adapter.helo();
+    // find user and delete from the ChatList
+    public static void findUserPositionByUID(String userUid) {
+        if (mUsersID != null) {
+            for (int i = mUsersID.size() - 1; i >= 0; i--) {
+                if (mUsersID.get(i).getId().equals(userUid)) {
+                    // Remove the item from its old position.
+                    mUsersID.remove(i);
+                    adapter.notifyItemRemoved(i);
+                    // Exit the loop, as we've found the item and moved it.
+                    break;
+                }
+            }
+        }
+    }
 
+    public static void notifyUserMoved(int i){
+        adapter.notifyItemMoved(i, 0);
+    }
+    public static void notifyItemChanged(int i){
+        adapter.notifyItemChanged(i, new Object());
     }
     private void chatList(){
 
-        mUsersID = new ArrayList<>();
-
         // Getting all recent chats;
-        fReference = FirebaseDatabase.getInstance().getReference("UsersList")
+        refUsers = FirebaseDatabase.getInstance().getReference("UsersList")
                 .child(user.getUid());
-        fReference.orderByChild("timeSent").addValueEventListener(new ValueEventListener() {
+        refUsers.orderByChild("timeSent").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                mUsersID.clear();
-
                 for (DataSnapshot snapshot1 : snapshot.getChildren()){
+                    UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
+                    String userId = snapshot1.getKey();
+                    userModel.setId(userId);
 
-                    // check and fetch out their id each
-                    String user = snapshot1.getKey();
-                    for (ChatListModel chatList : chatListID){
+                    boolean userAlreadyExists = false;
 
-                        if(user.equals(chatList.getId())){
-                            mUsersID.add(0, user);
-                            adapter.notifyDataSetChanged();
+                    for (UserOnChatUI_Model userModelLoop : mUsersID) {
+                        if (userModelLoop.getId().equals(userId)) {
+                            userAlreadyExists = true;
+                            break;
                         }
                     }
+
+                    if (!userAlreadyExists) {
+                        // If the user doesn't exist, add it to the list
+                        mUsersID.add(0, userModel);
+
+                        // add to local database
+                        userViewModel.insertUser(userModel);
+
+                        adapter.notifyDataSetChanged();
+                    }
                 }
+
             }
 
             @Override
@@ -171,6 +179,7 @@ public class ChatsListFragment extends Fragment {
 
             }
         });
+
     }
 
     //   ------------ Message Methods

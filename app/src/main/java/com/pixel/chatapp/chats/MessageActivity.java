@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
@@ -52,12 +51,11 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.VideoCallComeIn;
 import com.pixel.chatapp.VideoCallComingOut;
-import com.pixel.chatapp.constants.AllConstants;
+import com.pixel.chatapp.model.MessageModel;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -70,7 +68,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -352,8 +349,8 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         recyclerViewChat.scrollToPosition(modelList.size() - 1);
-        adapter = new MessageAdapter(modelList, userName, uID, MessageActivity.this, recyclerViewChat, otherName);
-        recyclerViewChat.setAdapter(adapter);
+//        adapter = new MessageAdapter(modelList[], userName, uID, MessageActivity.this, recyclerViewChat, otherName);
+//        recyclerViewChat.setAdapter(adapter);
 
     }
     public boolean checkNetworkConnection()
