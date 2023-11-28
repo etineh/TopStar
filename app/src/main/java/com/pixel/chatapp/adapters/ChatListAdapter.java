@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -160,31 +161,60 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // send all recyclerView to mainActivty just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
 
-            listener.sendRecyclerView(holder.recyclerChat, otherUid);
-            listener.getMessage(userName, otherUid, mContext);
             try{
+                listener.sendRecyclerView(holder.recyclerChat, otherUid);
+                listener.getMessage(userName, otherUid, mContext);
             } catch (Exception e){
                 System.out.println("Error (ChatListAdapter L187)"+ e.getMessage());
             }
 
-            if(position_ == 0){   // add cardView
-                if(MessageAdapter.viewCacheReceive != null || MessageAdapter.viewCacheSend != null
-                        && MessageAdapter.viewCacheReceive.size() < 10 || MessageAdapter.viewCacheSend.size() < 10)
-//                        )
-
-                {
-                    for (Map.Entry<String, MessageAdapter> entry : MainActivity.adapterMap.entrySet()) {
-                        String firstKey = entry.getKey();
-                        MainActivity.adapterMap.get(firstKey).addLayoutViewInBackground();
-                        break;
-                    }
-                }
-
-            }
 
             if(position_ == getItemCount() - 1){
                 MainActivity.loadMsg = false;    // stop the getVIew method from loading at every instance
                 listener.firstCallLoadPage(otherUid);   // call the method to load the all message
+
+                // add cardView after 2 sec to allow chats to load to List
+                new CountDownTimer(2000, 1000){
+                    @Override
+                    public void onTick(long l) {
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+                        if(MessageAdapter.viewCacheReceive != null || MessageAdapter.viewCacheSend != null
+                                && MessageAdapter.viewCacheReceive.size() < 10 || MessageAdapter.viewCacheSend.size() < 10)
+//                        )
+                        {
+                            for (Map.Entry<String, MessageAdapter> entry : MainActivity.adapterMap.entrySet()) {
+                                String firstKey = entry.getKey();
+                                MainActivity.adapterMap.get(firstKey).addLayoutViewInBackground();
+                                MainActivity.loadViewRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        MainActivity.isLoadViewRunnableRunning = true;
+
+                                        if(MainActivity.adapterMap.get(firstKey) != null){
+                                            MainActivity.adapterMap.get(firstKey).addLayoutViewEverySec();
+                                        }
+
+                                        MainActivity.handlerLoadViewLayout.postDelayed(this, 1000); // Re-schedule the runnable
+
+                                        if(MessageAdapter.viewCacheSend.size() > 100 && MessageAdapter.viewCacheReceive.size() > 100){
+                                            MainActivity.handlerLoadViewLayout.removeCallbacks(MainActivity.loadViewRunnable);
+                                            MainActivity.isLoadViewRunnableRunning = false;
+                                        }
+                                    }
+                                };
+
+                                break;
+                            }
+
+                        }
+
+                    }
+                }.start();
+
             }
 
         }
@@ -221,6 +251,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     listener.callAllMethods(otherUid);
 
                     holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+
+                    if (!MainActivity.isLoadViewRunnableRunning) {
+                        MainActivity.handlerLoadViewLayout.post(MainActivity.loadViewRunnable);
+                    }
 
                     MainActivity.offMainDatabase();
                     Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
@@ -364,6 +398,51 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     //      --------- methods -----------
+    public void updateDeliveryStatus(String otherUid){
+        if(otherUsersId != null){
+            for (int i = otherUsersId.size() - 1; i >= 0; i--) {
+                if (otherUsersId.get(i).getId().equals(otherUid)) {
+                    // Store the item in a temporary variable.
+                    UserOnChatUI_Model getUser = otherUsersId.get(i);
+                    // check the delivery status and update
+                    if(getUser.getMsgStatus() == 700033){
+                        getUser.setMsgStatus(700024);
+                        // update the UI
+                        ChatViewHolder userHolder = viewHolderMap.get(otherUid);
+                        userHolder.imageViewDeliver.setImageResource(R.drawable.message_tick_one);
+
+                        // update the firebase
+                        refUsersLast.child(user.getUid()).child(otherUid)
+                                .child("msgStatus").setValue(700024);
+
+                    }
+                }
+            }
+        }
+    }
+    public void updateDeliveryToRead(String otherUid){
+        if(otherUsersId != null){
+            for (int i = otherUsersId.size() - 1; i >= 0; i--) {
+                if (otherUsersId.get(i).getId().equals(otherUid)) {
+                    // Store the item in a temporary variable.
+                    UserOnChatUI_Model getUser = otherUsersId.get(i);
+                    // check the delivery status and update
+                    if(getUser.getMsgStatus() != 700016){
+                        getUser.setMsgStatus(700016);
+                        // update the UI
+                        ChatViewHolder userHolder = viewHolderMap.get(otherUid);
+                        userHolder.imageViewDeliver.setImageResource(R.drawable.read_orange);
+
+                        // update the firebase
+                        refUsersLast.child(user.getUid()).child(otherUid)
+                                .child("msgStatus").setValue(700016);
+
+                    }
+                }
+            }
+        }
+    }
+
     public void findUserPositionByUID(String userUid, String chat, String emojiOnly, int statusNum, long timeSent) {
 
         if (otherUsersId != null) {
@@ -730,7 +809,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             // set user "typing" to be false when I disconnect
             referenceCheck.child(otherUid).child(user.getUid())
                     .child("typing").onDisconnect().setValue(0);
-
+            referenceCheck.child(otherUid).child(user.getUid())
+                    .child("typing").onDisconnect().setValue(0);
             // set my online presence
 //        referenceCheck.child(user.getUid()).child(otherUid).child("presence").setValue(1);
             referenceUsers.child(user.getUid()).child("presence").setValue(1);
@@ -741,6 +821,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             // set offline details automatic
             offlinePresenceAndStatus.put("presence", ServerValue.TIMESTAMP);
             offlinePresenceAndStatus.put("status", false);
+            offlinePresenceAndStatus.put("onChat", false);
             referenceCheck.child(user.getUid()).child(otherUid).onDisconnect()
                     .updateChildren(offlinePresenceAndStatus);
 

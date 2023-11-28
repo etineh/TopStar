@@ -46,6 +46,15 @@ public class UserChatRepository {
         });
     }
 
+    public void updateOutsideDelivery(String otherUid, int statusNum){
+        executors.execute(new Runnable() {
+            @Override
+            public void run() {
+                userChatDao.updateOutsideDelivery(otherUid, statusNum);
+            }
+        });
+    }
+
     public void updateOtherNameAndPhoto(String id, String otherName, String imageUrl){
         executors.execute(new Runnable() {
             @Override
@@ -116,6 +125,17 @@ public class UserChatRepository {
             @Override
             public void run() {
                 userChatDao.updateChatPin(otherId, idKey, status);
+            }
+        });
+
+    }
+
+    public void updateDeliveryStatus(String otherId, String idKey, int deliveryStatus){
+
+        executors.execute(new Runnable() {
+            @Override
+            public void run() {
+                userChatDao.updateDeliveryStatus(otherId, idKey, deliveryStatus);
             }
         });
 

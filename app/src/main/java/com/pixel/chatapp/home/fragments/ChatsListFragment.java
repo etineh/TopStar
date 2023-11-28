@@ -97,7 +97,6 @@ public class ChatsListFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     recyclerView.setAdapter(adapter);
                 });
-//                System.out.println("what is total one ada " + adapter.getItemCount());
             }
         });
 
@@ -139,6 +138,9 @@ public class ChatsListFragment extends Fragment {
         adapter.notifyItemChanged(i, new Object());
     }
     private void chatList(){
+        adapter = new ChatListAdapter(mUsersID, getContext(), MainActivity.getMyUserName);
+        adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
+        recyclerView.setAdapter(adapter);
 
         // Getting all recent chats;
         refUsers = FirebaseDatabase.getInstance().getReference("UsersList")
@@ -153,7 +155,6 @@ public class ChatsListFragment extends Fragment {
                     userModel.setId(userId);
 
                     boolean userAlreadyExists = false;
-
                     for (UserOnChatUI_Model userModelLoop : mUsersID) {
                         if (userModelLoop.getId().equals(userId)) {
                             userAlreadyExists = true;
@@ -179,6 +180,10 @@ public class ChatsListFragment extends Fragment {
 
             }
         });
+
+
+//        getActivity().runOnUiThread(() -> {
+//        });
 
     }
 

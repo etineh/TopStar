@@ -30,6 +30,9 @@ public interface UserChatDao {
     @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly, msgStatus = :statusNum, timeSent = :timeSent WHERE id = :id")
     void updateOutsideChat(String id, String chat, String emojiOnly, int statusNum, long timeSent);
 
+    @Query("UPDATE usersOnChatUI SET msgStatus = :statusNum WHERE id = :otherUid")
+    void updateOutsideDelivery(String otherUid, int statusNum);
+
     @Delete
     void deleteUser(UserOnChatUI_Model userOnChatUIModel);
 
@@ -53,13 +56,18 @@ public interface UserChatDao {
     @Query("UPDATE chats SET emoji = :emoji WHERE id = :otherId AND idKey = :idKey")
     void updateChatEmoji(String otherId, String idKey, String emoji);
 
+    // update delivery status
+    @Query("UPDATE chats SET msgStatus = :msgStatus WHERE id = :otherId AND idKey = :idKey")
+    void updateDeliveryStatus(String otherId, String idKey, int msgStatus);
+
+    // update pin icon
     @Query("UPDATE chats SET isChatPin = :status WHERE id = :otherId AND idKey = :idKey")
     void updateChatPin(String otherId, String idKey, boolean status);
 
     @Delete
     void deleteChat(MessageModel chatModel);
 
-    // Delete a user chat based on the id
+    // Delete a user chats based on the id
     @Query("DELETE FROM chats WHERE id = :id")
     void deleteUserChatsById(String id);
 

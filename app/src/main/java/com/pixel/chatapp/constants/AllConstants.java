@@ -1,5 +1,7 @@
 package com.pixel.chatapp.constants;
 
+import com.google.android.gms.common.data.SingleRefDataBufferIterator;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -8,6 +10,7 @@ public interface AllConstants {
     String MYUSERNAME = "MYUSERNAME";
     String USERNAME = "USERNAME";
     String SCROLLPOSITION = "lastScrollPosition";
+    String OFFLINECHAT = "offlineChat";
 
     ExecutorService executors = Executors.newSingleThreadExecutor();
 

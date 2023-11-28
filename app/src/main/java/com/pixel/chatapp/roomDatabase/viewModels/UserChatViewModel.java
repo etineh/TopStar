@@ -32,6 +32,10 @@ public class UserChatViewModel extends AndroidViewModel {
         repository.updateUser(userOnChat);
     }
 
+    public void updateOutsideDelivery(String otherUid, int statusNum){
+        repository.updateOutsideDelivery(otherUid, statusNum);
+    }
+
     public void updateOtherNameAndPhoto(String id, String otherName, String imageUrl){
         repository.updateOtherNameAndPhoto(id, otherName, imageUrl);
     }
@@ -59,6 +63,10 @@ public class UserChatViewModel extends AndroidViewModel {
 
     public void updateChatEmoji(String otherId, String idKey, String emoji){
         repository.updateChatEmoji(otherId, idKey, emoji);
+    }
+
+    public void updateDeliveryStatus(String otherId, String idKey, int deliveryStatus){
+        repository.updateDeliveryStatus(otherId, idKey, deliveryStatus);
     }
 
     public void updateChatPin(String otherId, String idKey, boolean status){

@@ -1,5 +1,6 @@
 package com.pixel.chatapp.chats;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -220,13 +221,47 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    public void addLayoutViewEverySec() {
+        Executor executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(() -> {
+
+            for (int i = 0; i < 2; i++) {
+
+                View itemView;
+
+                if(i % 2 == 0){
+                    itemView = inflater.inflate(R.layout.view_card, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheSend.add(itemView);
+//                        MainActivity.viewCacheSend2.add(itemView);
+                        System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
+                    }
+                } else{
+                    itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
+                    synchronized (viewCacheSend) {
+                        viewCacheReceive.add(itemView);
+                        System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
+                    }
+                }
+
+            }
+
+        });
+    }
 
     public void addLayoutViewInBackground() {
         Executor executor = Executors.newSingleThreadExecutor();
 
         executor.execute(() -> {
 
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 40; i++) {
+
+                if(i == 39) {
+                    if (!MainActivity.isLoadViewRunnableRunning && viewCacheSend.size() < 100) {
+                        MainActivity.handlerLoadViewLayout.post(MainActivity.loadViewRunnable);
+                    }
+                }
 
                 View itemView;
 
@@ -826,6 +861,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
     }
+
+    // add my own emoji reaction
     public void addEmojiReact(MessageViewHolder holder, String emoji, String chatID, String otherId){
         int chatPosition = findMessagePositionById(chatID);
         // concat previous emoji to the new one
@@ -841,6 +878,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    // get the other user emoji reaction and add
     public void emojiReactSignal(String emoji, String chatID, String otherId){
         int chatPosition = findMessagePositionById(chatID);
         // check if the chatPosition exist
