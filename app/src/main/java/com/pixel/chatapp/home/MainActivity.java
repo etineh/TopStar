@@ -56,6 +56,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pixel.chatapp.FragmentListener;
+import com.pixel.chatapp.Menu;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
@@ -571,15 +572,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             });
 
             // open the menu option
-            menuOpen.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    scrollMenu.setVisibility(View.VISIBLE);
-                    viewPager2General.setVisibility(View.INVISIBLE);
-//                v.setBackgroundColor(getResources().);
-                }
-            });
+            menuOpen.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, Menu.class)));
 
             // open menu option via logo too
             imageViewLogo.setOnClickListener(new View.OnClickListener() {
@@ -599,12 +592,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 }
             });
 
-            // close the open option
-//            menuClose.setOnClickListener(view -> {
-//
-//                viewPager2General.setVisibility(View.VISIBLE);
-//                scrollMenu.setVisibility(View.GONE);
-//            });
 
             //logout
 //            logout.setOnClickListener(view -> logoutOption());

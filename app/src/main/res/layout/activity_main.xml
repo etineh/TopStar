@@ -207,6 +207,21 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/lock" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout14"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/light_orange"
+                android:elevation="30dp"
+                android:visibility="invisible">
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.tabs.TabLayout
@@ -1206,26 +1221,6 @@
                 app:layout_constraintRight_toLeftOf="@id/constraintRecyler"
                 app:layout_constraintTop_toTopOf="parent">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout14"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginBottom="500dp"
-                android:background="@color/light_orange"
-                android:elevation="30dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
-                app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
