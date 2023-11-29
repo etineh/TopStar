@@ -27,7 +27,7 @@
 
     <string name="newMsg">New</string>
 
-<!--    // clear chat history and user delete-->
+    <!--    // clear chat history and user delete-->
     <string name="clear_for_me">Clear for only me</string>
     <string name="clear_for_everyone">Clear for everyone</string>
     <string name="delete_for_me">Delete for only me</string>

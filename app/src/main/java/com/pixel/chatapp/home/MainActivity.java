@@ -281,28 +281,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        darkMoodSwitch = findViewById(R.id.switch1);
-        textLightAndDay = findViewById(R.id.textView13);
 
-        if(nightMood){
-            darkMoodSwitch.setChecked(true);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            textLightAndDay.setText("Light");
-        } else {
-            textLightAndDay.setText("Dark");
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        };
+//        if(nightMood){
+//            darkMoodSwitch.setChecked(true);
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//            textLightAndDay.setText("Light");
+//        } else {
+//            textLightAndDay.setText("Dark");
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//        };
 
-        darkMoodSwitch.setOnClickListener(view -> {
-            if(nightMood){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                moodPreferences.edit().putBoolean("MoodStatus", false).apply();
-            } else{
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                moodPreferences.edit().putBoolean("MoodStatus", true).apply();
-            }
-            recreate();
-        });
+//        darkMoodSwitch.setOnClickListener(view -> {
+//            if(nightMood){
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//                moodPreferences.edit().putBoolean("MoodStatus", false).apply();
+//            } else{
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//                moodPreferences.edit().putBoolean("MoodStatus", true).apply();
+//            }
+//            recreate();
+//        });
 
         //      --------- message ids starts        ------------------------
 
@@ -376,7 +374,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         replyVisible = findViewById(R.id.textReplying9);
 
         // scroll position and network ids
-        constrNetork = findViewById(R.id.loadingPageContainer);
         constrNetConnect = findViewById(R.id.constrNetCheck);
         scrollPositionIV = findViewById(R.id.scrollToPositionIV);
         scrollCountTV = findViewById(R.id.scrollCountTV);
@@ -457,16 +454,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         tabLayoutGeneral = findViewById(R.id.tabLayerMain);
         viewPager2General = findViewById(R.id.viewPageMain);
         menuOpen = findViewById(R.id.imageViewMenu);
-        menuClose = findViewById(R.id.imageViewMenuClose);
-        scrollMenu = findViewById(R.id.profileMenuContainer);
-        logout = findViewById(R.id.textViewLogOut);
         imageViewLogo = findViewById(R.id.circleUserImage);
-        imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
-        textViewDisplayName = findViewById(R.id.textViewDisplayName2);
-        textViewUserName = findViewById(R.id.textViewUserName2);
         mainViewConstraint = findViewById(R.id.mainViewConstraint);
         topMainContainer = findViewById(R.id.HomeTopConstr);
-        cardViewSettings = findViewById(R.id.cardViewSettings);
 
         hideKeyboard();
         if(user == null){
@@ -610,17 +600,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             });
 
             // close the open option
-            menuClose.setOnClickListener(view -> {
-
-                viewPager2General.setVisibility(View.VISIBLE);
-                scrollMenu.setVisibility(View.GONE);
-            });
+//            menuClose.setOnClickListener(view -> {
+//
+//                viewPager2General.setVisibility(View.VISIBLE);
+//                scrollMenu.setVisibility(View.GONE);
+//            });
 
             //logout
-            logout.setOnClickListener(view -> logoutOption());
+//            logout.setOnClickListener(view -> logoutOption());
 
             // settings
-            cardViewSettings.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, ProfileActivity.class)));
+//            cardViewSettings.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, ProfileActivity.class)));
 
             // open user menu
             imageViewOpenMenu.setOnClickListener(view -> chatMenuProfile.setVisibility(View.VISIBLE));
@@ -1283,7 +1273,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //            }
 //        }.start();
 
-            setUserDetails();
+//            setUserDetails();
             fiveSecondsDelay();
         }
 
