@@ -1137,26 +1137,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout14"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginBottom="500dp"
-                android:background="@color/light_orange"
-                android:elevation="30dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
-                app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
             <ImageView
                 android:id="@+id/sendIndicatorIV"
                 style="@style/drawableBG"
@@ -1185,6 +1165,22 @@
                 app:srcCompat="@drawable/baseline_arrow_circle_down_24" />
 
             <TextView
+                android:id="@+id/scrollCountTV"
+                style="@style/drawableBG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-3dp"
+                android:elevation="5dp"
+                android:paddingStart="3sp"
+                android:paddingEnd="3dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/scrollToPositionIV"
+                app:layout_constraintEnd_toEndOf="@+id/scrollToPositionIV"
+                app:layout_constraintStart_toStartOf="@+id/scrollToPositionIV" />
+
+            <TextView
                 android:id="@+id/receiveIndicatorTV"
                 style="@style/drawableBG"
                 android:layout_width="wrap_content"
@@ -1201,19 +1197,6 @@
                 app:layout_constraintRight_toRightOf="@id/scrollToPositionIV"
                 app:layout_constraintTop_toBottomOf="@id/scrollToPositionIV" />
 
-            <TextView
-                android:id="@+id/scrollCountTV"
-                style="@style/drawableBG"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:elevation="5dp"
-                android:paddingStart="3sp"
-                android:paddingEnd="3dp"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:visibility="gone"
-                tools:layout_editor_absoluteX="6dp" />
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/lineDepartConstr"
                 android:layout_width="2dp"
@@ -1227,15 +1210,28 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayoutAdjust"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="800dp"
+                android:background="@color/light_orange"
+                android:elevation="30dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
+                app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintRecyler"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginStart="6dp"
-                android:layout_marginTop="95dp"
-                app:layout_constraintBottom_toBottomOf="@id/typeMsgContainer"
+                android:layout_marginBottom="7dp"
+                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayoutAdjust">
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

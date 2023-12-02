@@ -58,7 +58,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     private static Context mContext;
     private static String userName;
-    private String otherName, imageUrl;
 
     private DatabaseReference referenceUsers, refUsersLast, referenceCheck, refChatList, refChat,
             refMsgFast, refPinPublic, refPinPrivate;
@@ -123,8 +122,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         String otherUid = otherUsersId.get(position_).getId();
         String emojiOnly = otherUsersId.get(position_).getEmojiOnly();
         String message = otherUsersId.get(position_).getMessage();
+        String otherUserName = otherUsersId.get(position_).getOtherUserName();
+        String imageLink = otherUsersId.get(position_).getImageUrl();
+
         int msgStatus = otherUsersId.get(position_).getMsgStatus();
         long timeSent = otherUsersId.get(position_).getTimeSent();
+
+//        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/chatapp-9b7ce.appspot.com/o/images%2Fcd89b442-735a-4cae-8da0-2b7f36817e17.jpg?alt=media&token=21b05768-df6e-4be1-b9a2-12d5f944c641";
 
         // save user holders in List to MainActivity for forward chat
         if(!MainActivity.myHolder_.contains(holder)){
@@ -134,6 +138,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         if(!viewHolderMap.containsKey(otherUid)){
             viewHolderMap.put(otherUid, holder);
         }
+
+        holder.textViewUser.setText(otherUserName);     //set users display name
+
+        if (imageLink == null) {
+            holder.imageView.setImageResource(R.drawable.person_round);
+        }
+        else Picasso.get().load(imageLink).into(holder.imageView);
 
         // set last message
         if(message != null){
@@ -156,7 +167,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
         holder.imageViewDeliver.setImageResource(deliveryIcon);
 
-        holder.textViewUser.setText(otherUid);     //set users display name
 
         // send all recyclerView to mainActivty just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
@@ -173,8 +183,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 MainActivity.loadMsg = false;    // stop the getVIew method from loading at every instance
                 listener.firstCallLoadPage(otherUid);   // call the method to load the all message
 
-                // add cardView after 2 sec to allow chats to load to List
-                new CountDownTimer(2000, 1000){
+                // add cardView after 3 sec to allow chats to load to List
+                new CountDownTimer(3000, 1000){
                     @Override
                     public void onTick(long l) {
                     }
@@ -226,7 +236,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                 try {
 
-                    listener.chatBodyVisibility(otherName, imageUrl, userName, otherUid, mContext, holder.recyclerChat);
+                    listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
                     listener.getLastSeenAndOnline(otherUid);
 
@@ -242,7 +252,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     listener.sendRecyclerView(holder.recyclerChat, otherUid);
                     listener.getMessage(userName, otherUid, mContext);
 
-                    listener.chatBodyVisibility(otherName, imageUrl, userName, otherUid, mContext, holder.recyclerChat);
+                    listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
                     listener.getLastSeenAndOnline(otherUid);
 
@@ -275,23 +285,25 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         getTypingState(holder, otherUid);      // show when other user is typing
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
-//        referenceUsers.keepSynced(true);
+        referenceUsers.keepSynced(true);
         referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 // Will later change it to Display Names
-//                String otherName = snapshot.child(otherUid).child("userName")
-//                        .getValue().toString();
+                String otherName = snapshot.child(otherUid).child("userName")
+                        .getValue().toString();
+
+                holder.textViewUser.setText(otherName);     //set users display name
 
                 // set users image
-                imageUrl = snapshot.child(otherUid).child("image").getValue().toString();
+                String imageUrl = snapshot.child(otherUid).child("image").getValue().toString();
                 if (imageUrl.equals("null")) {
                     holder.imageView.setImageResource(R.drawable.person_round);
                 }
                 else Picasso.get().load(imageUrl).into(holder.imageView);
 
-
+                MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherName, imageUrl);
             }
 
             @Override

@@ -8,10 +8,12 @@ import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,9 +32,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.BounceInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -237,11 +241,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static List<String> otherNameList, otherUidList;
     public static Map<String, Object> downMsgCountMap, scrollNumMap;
     private Map<String, Object>  notifyCountMap;
-    private Map<String, Boolean> insideChatMap;
+    private static Map<String, Boolean> insideChatMap;
 
     public static ConstraintLayout recyclerContainer;
+    private ConstraintLayout constraintLayoutAdjust;
 
-    NetworkChangeReceiver networkChangeReceiver;
+    private NetworkChangeReceiver networkChangeReceiver;
     private String chatKey;
     int currentImageResource = R.drawable.baseline_add_reaction_24; // Initialize with the default image resource
 
@@ -259,6 +264,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     private boolean isChatKeyboardON;
     private static ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
+
+    private ItemTouchHelper itemTouchSwipe;
     int viewNum = 0;
 
     private static String myId;
@@ -279,9 +286,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         };
 
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
 
 //        if(nightMood){
@@ -310,6 +317,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         conUserClick = findViewById(R.id.constraintNextTop9);
         chatContainer = findViewById(R.id.chatBoxContainer);
         recyclerContainer = findViewById(R.id.constraintRecyler);
+        constraintLayoutAdjust = findViewById(R.id.constraintLayoutAdjust);
         imageViewCalls = findViewById(R.id.imageViewCalls9);
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
         imageViewBack = findViewById(R.id.imageViewBackArrow9);
@@ -460,7 +468,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         mainViewConstraint = findViewById(R.id.mainViewConstraint);
         topMainContainer = findViewById(R.id.HomeTopConstr);
 
+        adjustConstraintToPhoneScreen();
+
         hideKeyboard();
+
         if(user == null){
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
@@ -513,6 +524,44 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             // manually call and check for the network
 //            handlerInternet = new Handler();   // used lamda for the runnable
+
+            itemTouchSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                    // Called when an item is moved
+                    int fromPosition = viewHolder.getAdapterPosition();
+                    int toPosition = target.getAdapterPosition();
+
+                    // Perform your action here after the item is moved to a new position
+                    // For example, update your dataset, perform an action, etc.
+                    // Here, we'll just show a Toast as an example
+                    Toast.makeText(mainActivityContext, "Item moved from " + fromPosition + " to " + toPosition, Toast.LENGTH_SHORT).show();
+
+                    // Notify the adapter that an item has been moved
+//                    mAdapter.notifyItemMoved(fromPosition, toPosition);
+//
+                    return true; // Item moved
+                }
+
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                    // Handle swipe actions if needed
+                    int position = viewHolder.getAdapterPosition();
+                    Toast.makeText(mainActivityContext, "Checking pos swipe " + position, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+                    super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+                    Toast.makeText(mainActivityContext, "New move here", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public boolean isItemViewSwipeEnabled() {
+                    return true; // Disable swiping
+                }
+            });
 
             internetCheckRunnable = () -> {
                 networkChangeReceiver.onReceive(MainActivity.this,
@@ -1266,6 +1315,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             fiveSecondsDelay();
         }
 
+
+    }
+
+    private void adjustConstraintToPhoneScreen(){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int screenHeight = displayMetrics.heightPixels;
+
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) constraintLayoutAdjust.getLayoutParams();
+        layoutParams.bottomToTop = R.id.typeMsgContainer; // Replace with the actual ID
+
+        layoutParams.bottomMargin = screenHeight-285;
+        // Apply the changes
+        constraintLayoutAdjust.setLayoutParams(layoutParams);
+
+        Toast.makeText(mainActivityContext, "adjusting constraint", Toast.LENGTH_SHORT).show();
     }
 
     //  --------------- methods && interface --------------------
@@ -1408,6 +1474,10 @@ scNum = 20;
         imageUri = imageUrl;
         otherUserUid = uID;
 
+        if(recyclerMap.get(uID) != null){
+            // Attach the ItemTouchHelper to your RecyclerView
+            itemTouchSwipe.attachToRecyclerView(recyclerMap.get(uID));
+        }
     }
 
 //    private boolean isLastPage() {

@@ -42,6 +42,7 @@ import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.home.OnGestureRegisterListener;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 
@@ -269,8 +270,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     itemView = inflater.inflate(R.layout.view_card, parent, false);
                     synchronized (viewCacheSend) {
                         viewCacheSend.add(itemView);
+
+                        ((Activity) mContext).runOnUiThread(()->{
+//                            Toast.makeText(mContext, "first 20 view add ", Toast.LENGTH_SHORT).show();
+                        });
+
 //                        MainActivity.viewCacheSend2.add(itemView);
-                        System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
+                        System.out.println("Added to viewCacheSend:  " + viewCacheSend.size());
                     }
                 } else{
                     itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
@@ -296,11 +302,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // Retrieve and remove a cached send view
             itemView = viewCacheSend.remove(0);
             new PreloadViewsTask(viewType).execute();   // add a new view
+//            Toast.makeText(mContext, "adding view 1", Toast.LENGTH_SHORT).show();
 
         } else if (viewType == receive && !viewCacheReceive.isEmpty()) {
             // Retrieve and remove a cached receive view
             itemView = viewCacheReceive.remove(0);
             new PreloadViewsTask(viewType).execute();   // add a new view
+//            Toast.makeText(mContext, "adding view 2", Toast.LENGTH_SHORT).show();
 
         } else {
             // Inflate a new view if the cache is empty or the view type doesn't match
@@ -309,6 +317,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     parent,
                     false
             );
+//            Toast.makeText(mContext, "no view added", Toast.LENGTH_SHORT).show();
+
         }
         return new MessageViewHolder(itemView);
 
@@ -675,15 +685,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             // Scroll to the original message's position
             if (originalPosition != RecyclerView.NO_POSITION) {
-                // position is the item number clicked, originalPosition is the item number found.
-                // so if item click has number of 3010, and the item found has a number of 3002, i.e 3010 - 3002 = 8
-                int positionCount = chatPosition - originalPosition;
 
-                if( positionCount < 15 ){   // increase the number (9++ to shift the highlight msg up)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserUid).smoothScrollToPosition(originalPosition-7); // change later to 7 or 9
-                } else {    // decrease the number (11-- to shift the highlight msg down)
-                    MainActivity.recyclerMap.get(MainActivity.otherUserUid).scrollToPosition(originalPosition-11);
-                }
+                MainActivity.recyclerMap.get(MainActivity.otherUserUid).scrollToPosition(originalPosition-2);
 
                 // Highlight the original message
                 highlightItem(originalPosition);    // use this method as notifyItemChanged();
@@ -713,6 +716,44 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
+        // swipe method for reply
+//        OnGestureRegisterListener onGestureRegisterListener = new OnGestureRegisterListener(mContext) {
+//            public void onSwipeRight(View view) {
+//                if(modelList.get(chatPosition).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+//                    // call method in MainActivity and set up the details
+//                    fragmentListener.onEditOrReplyMessage(modelUser, "reply",
+//                            "replying...", R.drawable.reply, modelUser.getFrom(), 1);
+//
+//                }
+//            }
+//            public void onSwipeLeft(View view) {
+//                if(modelList.get(chatPosition).getMsgStatus() == 700033){
+//                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//                }
+//                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+//                // call method in MainActivity and set up the details
+//                fragmentListener.onEditOrReplyMessage(modelUser, "reply",
+//                        "replying...", R.drawable.reply, modelUser.getFrom(), 1);
+//            }
+//
+//
+//            public void onClick(View view) {
+//
+//            }
+//            public boolean onLongClick(View view) {
+//                // Do something
+//                return true;
+//            }
+//        };
+//
+//        holder.imageViewOptions.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.textViewShowMsg.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.constraintMsgContainer.setOnTouchListener(onGestureRegisterListener);   // swipe position
+//        holder.linearLayoutReplyBox.setOnTouchListener(onGestureRegisterListener);
 
         // download voice
         holder.circleDownload.setOnClickListener(view -> {
