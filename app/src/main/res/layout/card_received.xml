@@ -271,36 +271,6 @@
                         app:srcCompat="@drawable/add_contact"
                         tools:layout_editor_absoluteX="2dp" />
 
-                    <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
-                        android:id="@+id/voicePlayerView2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="25dp"
-                        android:layout_marginTop="5dp"
-                        android:visibility="gone"
-                        app:enableVisualizer="false"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.0"
-                        app:playPauseBackgroundColor="#ff7700"
-                        app:playPauseCornerRadius="100"
-                        app:playProgressbarColor="#ff7700"
-                        app:progressTimeColor="#000"
-                        app:seekBarProgressColor="@color/orange"
-                        app:seekBarThumbColor="#FFC107"
-                        app:shareBackgroundColor="#ff7700"
-                        app:shareCornerRadius="100"
-                        app:shareText="SHARE ME"
-                        app:showShareButton="false"
-                        app:showTiming="true"
-                        app:timingBackgroundColor="@color/cool_orange"
-                        app:viewCornerRadius="100"
-                        app:visualizationNotPlayedColor="#727171"
-                        app:visualizationPlayedColor="#ff7700">
-
-                    </me.jagar.chatvoiceplayerlibrary.VoicePlayerView>
-
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/circleDownload2"
                         android:layout_width="wrap_content"
@@ -324,10 +294,7 @@
                         android:max="100"
                         android:progress="0"
                         android:progressDrawable="@drawable/circular_progress_bar"
-                        android:visibility="invisible"
-                        app:layout_constraintBottom_toBottomOf="@id/voicePlayerView2"
-                        app:layout_constraintStart_toStartOf="@id/voicePlayerView2"
-                        app:layout_constraintTop_toTopOf="@id/voicePlayerView2" />
+                        android:visibility="invisible"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

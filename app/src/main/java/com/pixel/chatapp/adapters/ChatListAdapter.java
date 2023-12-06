@@ -2,6 +2,7 @@ package com.pixel.chatapp.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.FragmentListener;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.VIewImage;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
@@ -329,6 +331,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
+        });
+
+        // view image
+        holder.imageView.setOnClickListener(view -> {
+            Intent i = new Intent(mContext, VIewImage.class);
+            i.putExtra("otherName", otherUserName);
+            i.putExtra("imageLink", imageLink);
+            mContext.startActivity(i);
         });
 
         //  open option menu

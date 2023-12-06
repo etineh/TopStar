@@ -219,39 +219,6 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
-                        android:id="@+id/voicePlayerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginEnd="30dp"
-                        android:visibility="gone"
-                        app:enableVisualizer="false"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="1.0"
-                        app:playPauseBackgroundColor="#ff7700"
-                        app:playPauseCornerRadius="100"
-                        app:playProgressbarColor="#ff7700"
-                        app:progressTimeColor="#000"
-                        app:seekBarProgressColor="@color/white"
-                        app:seekBarThumbColor="#FFC107"
-                        app:shareBackgroundColor="#ff7700"
-                        app:shareCornerRadius="100"
-                        app:shareText="SHARE ME"
-                        app:showShareButton="false"
-                        app:showTiming="true"
-                        app:timingBackgroundColor="@color/cool_orange"
-                        app:viewCornerRadius="100"
-                        app:visualizationNotPlayedColor="@color/cool_orange"
-                        app:visualizationPlayedColor="#ff7700">
-
-                    </me.jagar.chatvoiceplayerlibrary.VoicePlayerView>
-
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/cirleDownload"
                         android:layout_width="wrap_content"
@@ -275,10 +242,7 @@
                         android:max="100"
                         android:progress="0"
                         android:progressDrawable="@drawable/circular_progress_bar"
-                        android:visibility="invisible"
-                        app:layout_constraintBottom_toBottomOf="@id/voicePlayerView"
-                        app:layout_constraintStart_toStartOf="@id/voicePlayerView"
-                        app:layout_constraintTop_toTopOf="@id/voicePlayerView" />
+                        android:visibility="invisible" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

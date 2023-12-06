@@ -432,17 +432,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // reply option
         holder.imageViewReply.setOnClickListener(view -> {
 
-            if(modelUser.getMsgStatus() == 700033){
-                Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            replyChat(modelUser);
 
-                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-                // call method in MainActivity and set up the details
-                fragmentListener.onEditOrReplyMessage(modelUser, "reply",
-                        "replying...", R.drawable.reply, modelUser.getFrom(), 1);
-                //  1 is visible, 4 is invisible, 8 is Gone
-            }
+            holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
+
             // reverse arrow
             if(modelUser.getFrom().equals(userName)){
                 holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
@@ -987,6 +980,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if (itemView != null) {
             itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
         }
+    }
+
+    public void replyChat(MessageModel messageModel){
+
+        // call method in MainActivity and set up the details
+        fragmentListener.onEditOrReplyMessage(messageModel, "reply",
+                "replying...", R.drawable.reply, messageModel.getFrom(), 1);
+
+        //        if(messageModel.getMsgStatus() == 700033){
+//            Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+//        }
+//        else {
+//
+//        }
     }
 
     // save voice note to local storage sharePreference & json

@@ -65,11 +65,15 @@ dependencies {
     // for sharePreference arraylist storage with gson
     implementation 'com.google.code.gson:gson:2.10.1'
 
+    // for
     // bug fix (duplicate merge) ---- add "android.enableJetifier=true" to gradle.property
-    implementation 'com.github.JagarYousef:ChatVoicePlayer:1.1.0'
+//    implementation 'com.github.JagarYousef:ChatVoicePlayer:1.1.0'
 
     // for emoji
     implementation 'com.vanniktech:emoji-google:0.7.0'
+
+    // for zooming image
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

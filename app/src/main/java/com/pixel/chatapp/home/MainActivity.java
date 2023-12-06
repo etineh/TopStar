@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -33,6 +36,8 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -47,6 +52,7 @@ import android.widget.Toast;
 
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -266,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
 
     private ItemTouchHelper itemTouchSwipe;
+
     int viewNum = 0;
 
     private static String myId;
@@ -468,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         mainViewConstraint = findViewById(R.id.mainViewConstraint);
         topMainContainer = findViewById(R.id.HomeTopConstr);
 
-        adjustConstraintToPhoneScreen();
+        adjustRecyclerViewToPhoneScreen();
 
         hideKeyboard();
 
@@ -524,45 +531,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             // manually call and check for the network
 //            handlerInternet = new Handler();   // used lamda for the runnable
-
-            itemTouchSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
-                @Override
-                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                    // Called when an item is moved
-                    int fromPosition = viewHolder.getAdapterPosition();
-                    int toPosition = target.getAdapterPosition();
-
-                    // Perform your action here after the item is moved to a new position
-                    // For example, update your dataset, perform an action, etc.
-                    // Here, we'll just show a Toast as an example
-                    Toast.makeText(mainActivityContext, "Item moved from " + fromPosition + " to " + toPosition, Toast.LENGTH_SHORT).show();
-
-                    // Notify the adapter that an item has been moved
-//                    mAdapter.notifyItemMoved(fromPosition, toPosition);
-//
-                    return true; // Item moved
-                }
-
-                @Override
-                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                    // Handle swipe actions if needed
-                    int position = viewHolder.getAdapterPosition();
-                    Toast.makeText(mainActivityContext, "Checking pos swipe " + position, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
-                    super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
-                    Toast.makeText(mainActivityContext, "New move here", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public boolean isItemViewSwipeEnabled() {
-                    return true; // Disable swiping
-                }
-            });
-
             internetCheckRunnable = () -> {
                 networkChangeReceiver.onReceive(MainActivity.this,
                         new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -870,7 +838,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             scrollPositionIV.setOnClickListener(view -> {
 
                 if(goToLastMessage) {
-                    recyclerMap.get(otherUserUid).scrollToPosition(goToNum - 2);
+
+                    if(adapterMap.get(otherUserUid).getItemCount() - goToNum > 3){
+                        recyclerMap.get(otherUserUid).scrollToPosition(goToNum + 2);
+                    } else {
+                        //scroll to last position
+                        recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount() - 1);
+                    }
+
                     adapterMap.get(otherUserUid).highlightItem(goToNum); // notify Colour
                     MessageAdapter.highlightedPositions.add(goToNum);    // change color
 
@@ -1312,26 +1287,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 //        }.start();
 
 //            setUserDetails();
+
             fiveSecondsDelay();
+            swipeReply();
+
         }
 
 
-    }
-
-    private void adjustConstraintToPhoneScreen(){
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-        int screenHeight = displayMetrics.heightPixels;
-
-        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) constraintLayoutAdjust.getLayoutParams();
-        layoutParams.bottomToTop = R.id.typeMsgContainer; // Replace with the actual ID
-
-        layoutParams.bottomMargin = screenHeight-285;
-        // Apply the changes
-        constraintLayoutAdjust.setLayoutParams(layoutParams);
-
-        Toast.makeText(mainActivityContext, "adjusting constraint", Toast.LENGTH_SHORT).show();
     }
 
     //  --------------- methods && interface --------------------
@@ -3112,6 +3074,83 @@ scNum = 20;
 
     }
 
+    private void swipeReply(){
+        itemTouchSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
+                        .get(viewHolder.getAdapterPosition());
+
+                adapterMap.get(otherUserUid).replyChat(modelChats);
+                // notify it to reset the adapter in case onSwipe was called
+                adapterMap.get(otherUserUid).notifyDataSetChanged();
+            }
+
+
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                int screenWidth = recyclerView.getWidth();
+                float quarterScreen = screenWidth * 0.2f;
+
+                // Check if the item is beyond the quarter of the screen and Return 0 to disable both dragging and swiping
+                if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
+
+                    MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
+                            .get(viewHolder.getAdapterPosition());
+
+                    adapterMap.get(otherUserUid).replyChat(modelChats);
+
+                    return 0;
+                } else {
+                    // Allow normal movement
+                    return super.getMovementFlags(recyclerView, viewHolder);
+                }
+            }
+
+//                @Override
+//                public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+//                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+//
+//                    // Get the width of the screen
+//                    int screenWidth = recyclerView.getWidth();
+//
+//                    // Calculate the quarter of the screen
+//                    float quarterScreen = screenWidth * 0.2f;
+//
+//                    // Check if the item is beyond the quarter of the screen
+//                    if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
+//                        // Perform your real-time feedback action here
+//                        // For example, change the background color or add an indicator
+//                        Toast.makeText(mainActivityContext, "active", Toast.LENGTH_SHORT).show();
+//
+//                        viewHolder.itemView.setBackgroundColor(Color.RED);
+//
+//                        itemTouchSwipe.startDrag(viewHolder);
+//// Return the item to its original position
+//                        viewHolder.itemView.setTranslationX(0);
+//
+//
+//                        quarterScreen = 0;
+//                        // Notify the adapter that the item has moved back to its original position
+//                        adapterMap.get(otherUserUid).notifyItemMoved(viewHolder.getAdapterPosition(), new Object());
+//
+//                    } else {
+//                        // Reset the background color or remove the indicator
+//                        viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+//                    }
+//                }
+
+        });
+
+    }
+
     private void scrollToPinMessage(int i){
         pinMsg_TV.setTypeface(null);    // remove italic style if any
 
@@ -3124,16 +3163,8 @@ scNum = 20;
 
         if(position != RecyclerView.NO_POSITION){
 
-            int positionDiff = scrollNum - position;
+            recyclerMap.get(otherUserUid).scrollToPosition(position - 2);
 
-            // scroll to position of the msgId that's found
-            if(positionDiff >= 0 ) {
-                recyclerMap.get(otherUserUid).scrollToPosition(position - 14);
-            } else {
-                recyclerMap.get(otherUserUid).scrollToPosition(position - 2);
-            }
-
-//            System.out.println("What is position " + scrollNum + " and " + positionDiff);
             // highlight the message found
             adapterMap.get(otherUserUid).highlightItem(position);
             MessageAdapter.highlightedPositions.clear();
@@ -3439,6 +3470,21 @@ scNum = 20;
         }.start();
     }
 
+    private void adjustRecyclerViewToPhoneScreen(){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int screenHeight = displayMetrics.heightPixels;
+
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) constraintLayoutAdjust.getLayoutParams();
+        layoutParams.bottomToTop = R.id.typeMsgContainer; // Replace with the actual ID
+
+        layoutParams.bottomMargin = screenHeight-285;
+        // Apply the changes
+        constraintLayoutAdjust.setLayoutParams(layoutParams);
+
+        Toast.makeText(mainActivityContext, "adjusting constraint", Toast.LENGTH_SHORT).show();
+    }
 
     // check if other user deleted me from his chat list, if yes, then clear all the user chat
     public void checkClearChatsDB(String otherUid){
