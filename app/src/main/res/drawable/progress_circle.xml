@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background circle -->
+    <item>
+        <shape
+            android:shape="oval">
+            <solid android:color="@color/orange" />
+        </shape>
+    </item>
+
+    <!-- Foreground ring (progress) with tint -->
+    <item>
+        <shape
+            android:innerRadiusRatio="3"
+            android:shape="ring"
+            android:thickness="2dp"
+            android:tint="@color/light_orange"
+            android:useLevel="false">
+        </shape>
+    </item>
+
+</layer-list>
+
+

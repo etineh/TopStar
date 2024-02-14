@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintBodySend"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="60dp"
+    android:paddingEnd="10dp"
+    android:textAlignment="center">
+
+    <TextView
+        android:id="@+id/otherInfo_TV1"
+        style="@style/drawableText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="12dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:paddingStart="10dp"
+        android:paddingTop="3dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="4dp"
+        android:text="today"
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/constraintChatTop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintChatTop"
+        style="@style/card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/chatContainerS"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/imageViewForward"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewCopyText"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_forward_24" />
+
+        <ImageView
+            android:id="@+id/imageViewDel2"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="20dp"
+            android:tint="#D61515"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+        <ImageView
+            android:id="@+id/imageViewPinMsg"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewForward"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:srcCompat="@drawable/baseline_push_pin_24" />
+
+        <ImageView
+            android:id="@+id/pinALL_S_IV"
+            style="@style/drawableBG"
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            android:layout_marginBottom="10dp"
+            android:elevation="3dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewPinMsg"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewPinMsg"
+            app:layout_constraintStart_toStartOf="@+id/imageViewPinMsg"
+            app:srcCompat="@drawable/baseline_disabled_visible_view_24"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/imageViewCopyText"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewDel2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/copy" />
+
+        <ImageView
+            android:id="@+id/imageViewReplyMsg"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            app:layout_constraintEnd_toStartOf="@+id/iVReact"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/reply" />
+
+        <ImageView
+            android:id="@+id/iVReact"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewEdit"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_add_reaction_24" />
+
+        <ImageView
+            android:id="@+id/imageViewEdit"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="13dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewPinMsg"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_mode_edit_24" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainerS"
+        style="@style/ChatMsgContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/linearClickReply1"
+            style="@style/card"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayoutReplyBox"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/senderChat_TV"
+            app:layout_constraintTop_toTopOf="@+id/linearLayoutReplyBox"></LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutReplyBox"
+            style="@style/card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_default="percent">
+
+            <TextView
+                android:id="@+id/senderNameTV"
+                style="@style/appName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textViewReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="2dp"
+                android:text="No doubt at laa"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageViewOptions"
+            style="@style/BackColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:elevation="5dp"
+            app:layout_constraintBottom_toTopOf="@id/textViewChatTime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/arrow_left" />
+
+        <TextView
+            android:id="@+id/textViewSendOnlyEmoji"
+            style="@style/textColorFullBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingRight="30dp"
+            android:textColorLink="@color/orange"
+            android:textSize="48sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/textViewChatTime"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/senderChat_TV"
+            style="@style/textColorFullBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingLeft="10dp"
+            android:paddingTop="4dp"
+            android:paddingRight="30dp"
+            android:textColorLink="@color/orange"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/textViewChatTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox" />
+
+
+        <SeekBar
+            android:id="@+id/seekBarMusicProgress"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:enabled="true"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:progressTint="@color/orange"
+            android:thumbTint="@color/orange"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/imageViewSeen"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewOptions"
+            app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox" />
+
+        <TextView
+            android:id="@+id/speedTV_S"
+            style="@style/roundBackgroundAndTint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="3dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="3dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+            android:text="1.5x"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/cirleDownload"
+            app:layout_constraintEnd_toStartOf="@id/pauseAndPlay_IV"
+            app:layout_constraintTop_toTopOf="@+id/cirleDownload" />
+
+        <ProgressBar
+            android:id="@+id/progressBarS"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/progress_circle"
+            android:clickable="true"
+            android:elevation="3dp"
+            android:indeterminateTint="@color/white"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/circular_progress_bar"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/cirleDownload"
+            app:layout_constraintEnd_toEndOf="@+id/cirleDownload"
+            app:layout_constraintStart_toStartOf="@+id/cirleDownload"
+            app:layout_constraintTop_toTopOf="@+id/cirleDownload" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/cirleDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/msg_count"
+            android:elevation="2dp"
+            android:padding="8dp"
+            android:src="@drawable/baseline_download_24"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/pauseAndPlay_IV"
+            app:layout_constraintEnd_toStartOf="@+id/pauseAndPlay_IV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/pauseAndPlay_IV" />
+
+        <ImageView
+            android:id="@+id/pauseAndPlay_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/seekBarMusicProgress"
+            app:layout_constraintEnd_toStartOf="@+id/seekBarMusicProgress"
+            app:layout_constraintTop_toTopOf="@+id/seekBarMusicProgress"
+            app:srcCompat="@drawable/baseline_play_arrow_24" />
+
+        <TextView
+            android:id="@+id/minuteTV"
+            android:layout_width="wrap_content"
+            android:layout_height="15dp"
+            android:layout_marginBottom="-15dp"
+            android:text="03-20"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/seekBarMusicProgress"
+            app:layout_constraintEnd_toEndOf="@+id/seekBarMusicProgress"
+            app:layout_constraintStart_toStartOf="@+id/seekBarMusicProgress" />
+
+        <ImageView
+            android:id="@+id/imageViewSeen"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="7dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime"
+            app:layout_constraintEnd_toStartOf="@id/textViewChatTime"
+            app:tint="@color/orange" />
+
+        <ImageView
+            android:id="@+id/editedSender_IV"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="5dp"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime"
+            app:layout_constraintEnd_toStartOf="@id/imageViewSeen"
+            app:srcCompat="@drawable/baseline_mode_edit_24" />
+
+        <ImageView
+            android:id="@+id/forwardS_IV"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime"
+            app:layout_constraintEnd_toStartOf="@+id/pinSender_IV"
+            app:srcCompat="@drawable/baseline_forward_24" />
+
+        <ImageView
+            android:id="@+id/pinSender_IV"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewChatTime"
+            app:layout_constraintEnd_toStartOf="@+id/editedSender_IV"
+            app:srcCompat="@drawable/baseline_push_pin_24" />
+
+        <TextView
+            android:id="@+id/textViewChatTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="3dp"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toTopOf="@id/reactSender_TV"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/reactSender_TV"
+            style="@style/drawableBG_WhiteAndBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="2dp"
+            android:ellipsize="middle"
+            android:inputType="textPersonName"
+            android:maxLines="2"
+            android:paddingLeft="5dp"
+            android:paddingTop="1dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="1dp"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

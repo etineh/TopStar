@@ -1,0 +1,38 @@
+/build
+*.apk
+*.ap_
+
+# IDE-specific files
+.idea/
+.classpath
+.project
+
+# Compiled files
+target/
+bin/
+build/
+*.class
+*.jar
+*.war
+
+# Dependency management
+*.iml
+*.ipr
+*.iws
+build.gradle.user
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Editor configuration
+.editorconfig
+
+# Operating system and IDE files
+.DS_Store
+Thumbs.db
+
+# User-specific files
+*.swp
+.gradle/
+

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/senderLayerContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="2dp"
+    android:paddingTop="2dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/ChatMsgContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:padding="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutReplyBox_PS"
+            style="@style/card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/senderNameTV_PS"
+                style="@style/appName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textViewReply_PS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="2dp"
+                android:text="No doubt at laa"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView2"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:elevation="0dp"
+            app:cardBackgroundColor="#00FFFFFF"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayoutReplyBox_PS">
+
+            <ImageView
+                android:id="@+id/photoCardSender"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="3dp"
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/photoChatSender_TV"
+            style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="4dp"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:text="Okay na"
+            android:textColorLink="@color/orange"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView2" />
+
+        <TextView
+            android:id="@+id/photoChatTimeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="10dp"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV" />
+
+        <ImageView
+            android:id="@+id/photoSeen_IV"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="7dp"
+            app:layout_constraintEnd_toStartOf="@+id/photoChatTimeTV"
+            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV" />
+
+        <ImageView
+            android:id="@+id/pinPhotoSender_IV"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/photoSeen_IV"
+            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV"
+            app:srcCompat="@drawable/baseline_push_pin_24" />
+
+        <ImageView
+            android:id="@+id/forwardPhotoSender_IV"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/pinPhotoSender_IV"
+            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV"
+            app:srcCompat="@drawable/baseline_forward_24" />
+
+        <ProgressBar
+            android:id="@+id/progressBarLoad1"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="59dp"
+            android:layout_height="57dp"
+            android:background="@drawable/msg_count"
+            android:elevation="3dp"
+            android:indeterminateTint="@color/orange"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/cardView2"
+            app:layout_constraintEnd_toEndOf="@+id/cardView2"
+            app:layout_constraintStart_toStartOf="@+id/cardView2"
+            app:layout_constraintTop_toTopOf="@id/cardView2" />
+
+        <TextView
+            android:id="@+id/loadPhotoProgressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
+            android:padding="10dp"
+            android:text="100%"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBarLoad1"
+            app:layout_constraintEnd_toEndOf="@+id/progressBarLoad1"
+            app:layout_constraintHorizontal_bias="0.493"
+            app:layout_constraintStart_toStartOf="@+id/progressBarLoad1"
+            app:layout_constraintTop_toTopOf="@+id/progressBarLoad1"
+            app:layout_constraintVertical_bias="0.497" />
+
+        <TextView
+            android:id="@+id/reactSender_TV"
+            style="@style/drawableBG_WhiteAndBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:ellipsize="middle"
+            android:inputType="textPersonName"
+            android:maxLines="2"
+            android:paddingLeft="5dp"
+            android:paddingTop="1dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="1dp"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/cardView2"
+            app:layout_constraintTop_toBottomOf="@+id/photoChatTimeTV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

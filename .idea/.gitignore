@@ -1,0 +1,28 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+*.class
+*.jar
+*.war
+
+# Dependency management
+*.iml
+*.ipr
+*.iws
+build.gradle.user
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Editor configuration
+.editorconfig
+
+# Operating system and IDE files
+.DS_Store
+Thumbs.db
+
+# User-specific files
+*.swp
+.gradle/

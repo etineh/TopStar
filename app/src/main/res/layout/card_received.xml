@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintNewMsg2"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textViewNewMsg2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/msg_count"
+            android:paddingLeft="15dp"
+            android:paddingTop="3dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="3dp"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintBodyReceive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintNewMsg2">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintReceiveTop"
+            style="@style/card"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/cardViewReceived"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imageViewReact2"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintStart_toEndOf="@+id/imageViewReplyMsg2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_add_reaction_24" />
+
+            <ImageView
+                android:id="@+id/pinALL_R_IV"
+                style="@style/drawableBG"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:layout_marginBottom="10dp"
+                android:elevation="3dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintEnd_toEndOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintStart_toStartOf="@+id/imageViewReceivePinMsg"
+                app:srcCompat="@drawable/baseline_disabled_visible_view_24"
+                app:tint="@color/white" />
+
+            <ImageView
+                android:id="@+id/imageViewForward2"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintStart_toEndOf="@+id/imageViewReceivePinMsg"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_forward_24" />
+
+            <ImageView
+                android:id="@+id/imageViewReceiveDel"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:tint="#D61515"
+                app:layout_constraintStart_toEndOf="@+id/imageViewReceiveCopyText"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+            <ImageView
+                android:id="@+id/imageViewReceivePinMsg"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageViewReact2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
+                app:srcCompat="@drawable/baseline_push_pin_24" />
+
+            <ImageView
+                android:id="@+id/imageViewReceiveCopyText"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintStart_toEndOf="@+id/imageViewForward2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/copy" />
+
+            <ImageView
+                android:id="@+id/imageViewReplyMsg2"
+                style="@style/BackgroundTintOrange"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/reply" />
+
+            <ImageView
+                android:id="@+id/imageEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:srcCompat="@drawable/baseline_mode_edit_24"
+                tools:layout_editor_absoluteX="86dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chatContainerR"
+                style="@style/card"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingRight="5dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constriantReplyBox2"
+                    style="@style/replyBackgroundRec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="5dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@id/line2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="2dp"
+                        android:layout_height="0dp"
+                        android:background="@color/orange"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.5">
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraintLayout10"
+                        android:layout_width="2dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linearLayoutReplyBox2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:layout_editor_absoluteY="0dp">
+
+                        <TextView
+                            android:id="@+id/senderName2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/textViewReply2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="1dp"
+                            android:ellipsize="end"
+                            android:gravity="start"
+                            android:maxLines="2"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/line2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="-2dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="5dp"
+                    app:layout_constraintBottom_toTopOf="@+id/textViewChatTime2"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewOptions2">
+
+                    <TextView
+                        android:id="@+id/receiverChat_TV"
+                        style="@style/textColorFullBlack"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="2dp"
+                        android:autoLink="web|phone|email"
+                        android:gravity="start"
+                        android:paddingLeft="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="10dp"
+                        android:textColorLink="@color/orange"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0" />
+
+                    <ImageView
+                        android:id="@+id/imageViewSeen2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:srcCompat="@drawable/add_contact"
+                        tools:layout_editor_absoluteX="2dp" />
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/circleDownload2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/msg_count"
+                        android:padding="3dp"
+                        android:src="@drawable/baseline_download_24"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@id/progressBar2"
+                        app:layout_constraintEnd_toEndOf="@+id/progressBar2"
+                        app:layout_constraintStart_toStartOf="@id/progressBar2"
+                        app:layout_constraintTop_toTopOf="@id/progressBar2"
+                        app:layout_constraintVertical_bias="0.5" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar2"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="55dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/progress_circle"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:visibility="invisible"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <ImageView
+                    android:id="@+id/imageViewOptions2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/orange"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/constriantReplyBox2"
+                    app:layout_constraintVertical_bias="0.5"
+                    app:srcCompat="@drawable/arrow_right_" />
+
+                <ImageView
+                    android:id="@+id/editedReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="1dp"
+                    android:textSize="11sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/textViewChatTime2"
+                    app:srcCompat="@drawable/baseline_mode_edit_24" />
+
+                <ImageView
+                    android:id="@+id/forwardR_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/pinReceiver_IV"
+                    app:srcCompat="@drawable/baseline_forward_24" />
+
+                <ImageView
+                    android:id="@+id/pinReceiver_IV"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/editedReceiver_IV"
+                    app:srcCompat="@drawable/baseline_push_pin_24" />
+
+                <TextView
+                    android:id="@+id/textViewChatTime2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-10dp"
+                    android:layout_marginBottom="1dp"
+                    android:textSize="11sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewOptions2" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactR_Constraint"
+        style="@style/drawableBG_WhiteAndBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="-5dp"
+        android:elevation="1dp"
+        android:orientation="horizontal"
+        android:paddingLeft="4dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="1dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintBodyReceive">
+
+        <TextView
+            android:id="@+id/reactR_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

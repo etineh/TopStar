@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Topper</string>
+    <string name="pin">Pin</string>
+    <string name="delete">Del.</string>
+    <string name="move">Move</string>
+    <string name="mute">Mute</string>
+    <string name="Copy">Copy</string>
+    <string name="blockAndReport">Block &amp; report</string>
+    <string name="lastSeen">Online</string>
+    <string name="typing">Typing...</string>
+    <string name="clear_chats">Clear Chats</string>
+    <string name="disappear_msg">Set disappear message</string>
+    <string name="search">Search</string>
+    <string name="join_tour">Join Tournament</string>
+    <string name="forward">Forward to...</string>
+    <string name="file">File</string>
+    <string name="chat">Topper...</string>
+    <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
+    <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
+    <string name="add_message">Add message</string>
+    <string name="online">Online</string>
+
+
+    <string name="meet">Meet</string>
+    <string name="tour">Tour.</string>
+    <string name="gift">Gift</string>
+    <string name="host">Host</string>
+
+    <string name="connect">connecting...</string>
+
+    <string name="newMsg">New</string>
+
+    <!--    // clear chat history and user delete-->
+    <string name="clear_for_me">Clear for only me</string>
+    <string name="clear_for_everyone">Clear for everyone</string>
+    <string name="delete_for_me">Delete for only me</string>
+    <string name="delete_for_everyone">Delete for everyone</string>
+    <string name="clear_history">[Clear chats history]</string>
+
+<!--    others-->
+    <string name="reset">Reset</string>
+
+
+</resources>

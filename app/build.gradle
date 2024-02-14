@@ -1,0 +1,97 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'com.pixel.chatapp'
+    compileSdk 33
+    defaultConfig {
+        applicationId "com.pixel.chatapp"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+//
+    def room_version = "2.4.1"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    def lifecycle_version = "2.4.0"
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    // LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+    // Annotation processor
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // for video call meeting
+    // bug_fix.. change the sdk from + to 8.1.2. And minSDK to 24 above
+//    implementation ('org.jitsi.react:jitsi-meet-sdk:8.1.2') { transitive = true }
+
+//    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
+
+    //  for voice note
+    implementation 'com.github.3llomi:RecordView:3.1.3'
+
+    // for sharePreference arraylist storage with gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // for emoji
+    implementation 'com.vanniktech:emoji-google:0.7.0'
+
+    // for zooming image
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    // blur image
+    implementation 'jp.wasabeef:blurry:4.0.1'
+
+    //  for cropping image
+//    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+//    implementation 'com.github.yalantis:ucrop:2.2.8'
+    implementation 'com.github.krokyze:ucropnedit:2.2.6-2'
+
+    // display paint colour picker
+//    implementation 'com.github.yukuku:ambilwarna:2.0.1'
+
+    // glide for displaying photo
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.squareup.picasso:picasso:2.8'
+
+
+}
