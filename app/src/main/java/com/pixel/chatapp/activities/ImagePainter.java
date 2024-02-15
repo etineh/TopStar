@@ -1,5 +1,7 @@
 package com.pixel.chatapp.activities;
 
+import static com.pixel.chatapp.home.MainActivity.unusedPhotoShareRef;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -7,16 +9,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageView;
 
+import androidx.core.content.ContextCompat;
+
+import com.google.gson.Gson;
+import com.pixel.chatapp.R;
 import com.pixel.chatapp.SendImageActivity;
+import com.pixel.chatapp.constants.AllConstants;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,12 +34,10 @@ public class ImagePainter {
     private static Paint paint;
     private static Path path;
     private float lastTouchX, lastTouchY;
-    private static List<Path> paths;
     private static List<Bitmap> bitmapList;
-
-    private List<List<PointF>> pointsList;
+    private boolean isFirstPaint = true;
     Context context;
-
+    Gson gson = new Gson();
     public ImagePainter(Bitmap bitmap, Context context) {
         this.bitmap = bitmap;
         this.context = context;
@@ -50,8 +51,6 @@ public class ImagePainter {
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(10); // Default brush size
         path = new Path();
-        paths = new ArrayList<>();
-        pointsList = new ArrayList<>();
         bitmapList = new ArrayList<>();
     }
 
@@ -75,22 +74,29 @@ public class ImagePainter {
     private void touchStart(float x, float y) {
         path.reset();
         path.moveTo(x, y);
-        paths.add(new Path(path));
 
-        Uri uri = SendImageActivity.savePaintPhotoUri(context, SendImageActivity.paintedBitmap);
-        Bitmap uriToBitmap;
-        try {
-            uriToBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-            bitmapList.add(uriToBitmap);
-            SendImageActivity.tempUri.add(uri);
-            System.out.println("what is: " + path + " and " + bitmap);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if(!isFirstPaint){   // don't add bitmap to list and don't save image when user draw first time
+            Uri uri = SendImageActivity.savePaintPhotoUri(context, SendImageActivity.paintedBitmap);
+            Bitmap uriToBitmap;
+            try {
+                uriToBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+                bitmapList.add(uriToBitmap);    // to enable displaying the the previous image/bitmap when user undo
+                SendImageActivity.tempUri.add(uri.toString()); // to enable deleting from app memory when done painting
+                SendImageActivity.allOldUriList.add(uri.toString());    // for sharePreference deleting in case goes offline
+                SendImageActivity.undoPaint_IV.setColorFilter(0);
+
+                // save edited photo uri to sharePref via gson to enable app first launch onCreate to delete the photos in case photo was not deleted
+                String json = gson.toJson(SendImageActivity.allOldUriList);
+                unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, json).apply();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        isFirstPaint = false;
 
         List<PointF> points = new ArrayList<>();
         points.add(new PointF(x, y));
-        pointsList.add(points);
         lastTouchX = x;
         lastTouchY = y;
     }
@@ -102,7 +108,6 @@ public class ImagePainter {
             float cx = (x + lastTouchX) / 2;
             float cy = (y + lastTouchY) / 2;
             path.quadTo(lastTouchX, lastTouchY, cx, cy);
-            pointsList.get(pointsList.size() - 1).add(new PointF(x, y));
             lastTouchX = x;
             lastTouchY = y;
             canvas.drawPath(path, paint);
@@ -123,30 +128,31 @@ public class ImagePainter {
         paint.setStrokeWidth(size);
     }
 
-    public void undo(ImageView view, Bitmap bitmap) {
-        if (!paths.isEmpty()) {
-            // Redraw the bitmap
-//            canvas.drawBitmap(bitmap, 0, 0, paint);
-            // Remove the last drawn path
-            bitmapList.remove(bitmapList.size() - 1);
-////            pointsList.remove(pointsList.size() - 1);
-            bitmap = bitmapList.get(bitmapList.size() - 1);
-            canvas.drawBitmap(bitmap, 0, 0, paint);
-            System.out.println("what is b: " + bitmap);
-            // Redraw the remaining paths
-//            for (Bitmap previousBitmap : bitmapList) {
-////                canvas.drawPath(p, paint);
-//                view.setImageBitmap(bitmap);
-//            }
-            // Invalidate the view to trigger redraw
-            view.invalidate();
+    public void undo(ImageView view, Bitmap currentBitmap) {
+        if (!bitmapList.isEmpty()) {
+
+            Bitmap bitmap = bitmapList.get(bitmapList.size() - 1);  // get the last edited photo
+            bitmapList.remove(bitmapList.size() - 1);            // remove it from the bitmap list
+
+            canvas.drawBitmap(bitmap, 0, 0, paint);       // display the last phone on the imageView
+
+        } else {
+            // change the undo button color
+            int fadedOrangeColor = ContextCompat.getColor(context, R.color.transparent_orange);
+            SendImageActivity.undoPaint_IV.setColorFilter(fadedOrangeColor);
+            // reset the image
+            canvas.drawBitmap(currentBitmap, 0, 0, paint);
         }
+        // Invalidate the view to trigger redraw
+        view.invalidate();
     }
 
     public void reset(ImageView imageView, Bitmap currentBitmap) {
         canvas.drawBitmap(currentBitmap, 0, 0, paint);
+        bitmapList.clear();
         imageView.invalidate();
     }
+
 }
 
 

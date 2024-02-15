@@ -67,6 +67,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
-            offlineChat, photoIdShareRef, voiceNoteIdShareRef;
+            offlineChat, photoIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef;
     public static String getMyUserName;
     private Boolean nightMood;
 
@@ -196,9 +197,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     public static Handler handlerInternet = new Handler(), handlerTyping = new Handler();
     public static Runnable internetCheckRunnable, runnableTyping;
-
-//    public static String goToLastMessage;
-//List<MessageModel> allMsgList5 = new ArrayList<>();
 
     public static int goToNum;
     public static Boolean goToLastMessage = false;
@@ -1394,11 +1392,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 if(MainActivity.sharingPhotoActivated) {
                     sharing = true;
-                    // open send_image activity and prepare the
+                    // open send_image activity and prepare the photo
                     startActivity(new Intent(this, SendImageActivity.class));
                 } else {
                     // send forward or share chat
-                    view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() -> {
+                    view.animate().scaleX(1.2f).scaleY(1.2f)
+                            .setDuration(50).withEndAction(() -> {
 
                         sendSharedChat(this);
 
@@ -1516,6 +1515,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             fiveSecondsDelay();
             swipeReply();
+            deleteUnusedPhotoFromSharePrefsAndAppMemory(this);
 
             // call the method last so as to give room for all user list to finish load
             if(sharingPhotoActivated){
@@ -2364,7 +2364,7 @@ scNum = 20;
             for (int j = 0; j < chatSize; j++){
                 MessageModel chatModel = chatModelList.get(j);
 
-                // assign local list variables
+                // get the local list variables
                 int forwardType = chatModel.getType();
                 String forwardChat = chatModel.getMessage();
                 String forwardChatEmojiOnly = chatModel.getEmojiOnly();
@@ -4195,16 +4195,9 @@ scNum = 20;
 
         // delete low photo from app storage if user cancel the sending
         if(sharingPhotoActivated) {
-            for (int i = 0; i < chatModelList.size(); i++) {
-
-                MessageModel chatModel = chatModelList.get(i);
-                deleteFileFromPhoneStorage(chatModel);  // call method to delete file
-
-                if(i == chatModelList.size()-1) {
-                    sharingPhotoActivated = false;
-                    chatModelList.clear();
-                }
-            }
+            deleteUnusedPhotoFromSharePrefsAndAppMemory(this);  // call method to delete file
+            sharingPhotoActivated = false;
+            chatModelList.clear();
         } else chatModelList.clear();
 
         viewPager2General.setUserInputEnabled(true);    // enable the swiping
@@ -4316,6 +4309,38 @@ scNum = 20;
 
     }
 
+    // clear old photo from app memory
+    public static boolean deleteOldUriFromAppMemory(List<String> uriToDelete){   // the list contain both low and hugh quality uri path
+        for (int i = 0; i < uriToDelete.size(); i++) {
+            Uri uriPhoto = Uri.parse(uriToDelete.get(i));
+            File searchPhotoPath = new File(uriPhoto.getPath());
+
+            if(searchPhotoPath.exists()) {
+                searchPhotoPath.delete();
+            }
+            
+            // notify that there's uri list on sharePreference so as to clear the sharePref when done
+            if(i == uriToDelete.size()-1){
+                return true;
+            }
+        }
+        return false;
+    }
+    public static void deleteUnusedPhotoFromSharePrefsAndAppMemory(Context context){
+        //  store each photo cropping or painting uri to enable delete from onCreate when app is onDestroy
+        unusedPhotoShareRef = context.getSharedPreferences(AllConstants.URI_PREF, Context.MODE_PRIVATE);
+
+        // delete the uri photo from app memory
+        String json = unusedPhotoShareRef.getString(AllConstants.OLD_URI_LIST, null);
+        Gson gson = new Gson();
+        List<String> uriList = gson.fromJson(json, List.class);
+
+        boolean isDoneDeleting = uriList != null && deleteOldUriFromAppMemory(uriList);
+        if(isDoneDeleting){
+            unusedPhotoShareRef.edit().remove(AllConstants.OLD_URI_LIST).apply();
+        }
+    }
+    
     // check if other user deleted me from his chat list, if yes, then clear all the user chat
     public void checkClearChatsDB(String otherUid){
 

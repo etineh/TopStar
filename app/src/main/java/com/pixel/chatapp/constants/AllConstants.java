@@ -29,6 +29,9 @@ public interface AllConstants {
     String PIN_ICON = "\uD83D\uDCCC  ";
     String EDIT_ICON = "✏\uFE0F  ";
 
+    String URI_PREF = "UriPrefs";
+    String OLD_URI_LIST = "oldPhotoEditedUri";
+
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
 //    String FIREBASE_PHOTO_LOCATION = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();

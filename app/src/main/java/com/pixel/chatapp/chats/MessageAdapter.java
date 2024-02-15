@@ -1,5 +1,6 @@
 package com.pixel.chatapp.chats;
 
+import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.clearAllHighlights;
 import static com.pixel.chatapp.home.MainActivity.formatDuration;
@@ -37,12 +38,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,9 +61,11 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.pixel.chatapp.SendImageActivity;
 import com.pixel.chatapp.ZoomImage;
 import com.pixel.chatapp.activities.ViewImageActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.adapters.SendImageAdapter;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.listeners.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
@@ -580,11 +586,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
             }
 
+            // display the low quality image
             Uri imageUri_ = Uri.parse(modelChats.getPhotoUriPath());
             Glide.with(mContext).load(imageUri_).into(holder.showImage);
 
 //            Picasso.get().load( imageUri_ ).into(holder.showImage);
             holder.loadProgressTV.setText(modelChats.getImageSize());
+
+            // download the image low quality auto from firebase
+            downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
+
 
 //            Picasso.get().load(imageUri_).into(new Target() {
 //                @Override
@@ -887,7 +898,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 if(deliveryStatus == 700033){
                     Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-                } else if (positionCheck > 100) {
+                } else if (positionCheck > 100)
+                {
                     Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
                 } else if(modelChats.getType() == 1){
                     Toast.makeText(mContext, "Voice note can't be edited for now!", Toast.LENGTH_SHORT).show();
@@ -1602,7 +1614,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
 
             // to display the photo on Gallery
-//            MediaStore.Images.Media.insertImage(mContext.getContentResolver(), saveImageToPhoneUri.getAbsolutePath(), fileName, null);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -1615,36 +1626,47 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 e.printStackTrace();
             }
         }
+//            MediaStore.Images.Media.insertImage(mContext.getContentResolver(), saveImageToPhoneUri.getAbsolutePath(), fileName, null);
 
         return saveImageToPhoneUri;
     }
 
 
 
-    private void downloadLowImageFrom_FB_Storage( MessageModel modelChats, Bitmap bitmap){
+    private void downloadLowImageFrom_FB_Storage( MessageModel modelChats, Uri imageUri_){
         if(!modelChats.getFromUid().equals(myId)){
-            // check if the photo uri path is internet link
+            // check if the low quality photo uri path is internet link
             if(modelChats.getPhotoUriPath().toLowerCase().startsWith("http://")
                     || modelChats.getPhotoUriPath().toLowerCase().startsWith("https://")){
 
-                // split the original and low image uri location on firebase storage
-                String[] splitPath = modelChats.getPhotoUriOriginal().split(AllConstants.JOIN);
-                String originalUri = splitPath[0];
-                String lowUri = splitPath[1];  //  for deleting from firebase storage
+                Glide.with(mContext)
+                        .asBitmap()
+                        .load(imageUri_)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 
-                // save to phone storage if it's internet uri
-                File downloadImageToPhone = saveImageToPhone(bitmap, 100, mContext);
-                String phoneImagePath = Uri.fromFile( downloadImageToPhone ).toString();
+                                // split the original and low image uri location on firebase storage
+                                String[] splitPath = modelChats.getPhotoUriOriginal().split(AllConstants.JOIN);
+                                String originalUri = splitPath[0];
+                                String lowUri = splitPath[1];  //  for deleting from firebase storage
 
-                // update room and chat list from uri to phone storage path
-                modelChats.setPhotoUriPath(phoneImagePath);
-                modelChats.setPhotoUriOriginal(originalUri);
-                chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
-                        otherUserUid, phoneImagePath, originalUri,
-                        modelChats.getImageSize(), 0);
+                                // save to phone storage if it's internet uri
+                                File downloadImageToPhone = saveImageToPhone(resource, 100, mContext);
+                                String phoneImagePath = Uri.fromFile( downloadImageToPhone ).toString();
 
-                // delete the blur image from firebase storage database
-                deletePathRef.child(lowUri).delete();
+                                // update room and chat list from uri to phone storage path
+                                modelChats.setPhotoUriPath(phoneImagePath);
+                                modelChats.setPhotoUriOriginal(originalUri);
+                                chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
+                                        otherUserUid, phoneImagePath, originalUri,
+                                        modelChats.getImageSize(), 0);
+
+                                // delete the blur image from firebase storage database -- ignore the originalUri till user download it
+                                deletePathRef.child(lowUri).delete();
+
+                            }
+                        });
 
             }
         }

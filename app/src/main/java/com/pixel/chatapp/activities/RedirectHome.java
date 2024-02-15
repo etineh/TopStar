@@ -6,7 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +20,9 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
@@ -37,11 +42,22 @@ public class RedirectHome extends AppCompatActivity {
 
     MainActivity mainActivity = new MainActivity();
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private DatabaseReference refMsgFast;
+
+    private SharedPreferences photoShareRef;
+    private Gson gson;
+    List<String> photoUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.redirect_home);
+
+        refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
+        photoShareRef = getSharedPreferences(AllConstants.URI_PREF, Context.MODE_PRIVATE);
+        gson = new Gson();
+        photoUri = new ArrayList<>();  // save the uri to SharePref to enable delete in case user didn't send the image
 
         MainActivity.sharingPhotoActivated = true;
 
@@ -71,6 +87,8 @@ public class RedirectHome extends AppCompatActivity {
     {
         if ((Objects.requireNonNull(intent.getType())).contains("image")) {
 
+            String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+
             if (MainActivity.chatModelList != null) MainActivity.chatModelList.clear();
 
             Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -85,9 +103,11 @@ public class RedirectHome extends AppCompatActivity {
                 Uri lowImage = reduceImageSize(null, imageUri, 400);
 
                 MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                        System.currentTimeMillis(), null, null, 8, null,
+                        System.currentTimeMillis(), chatId, null, 8, null,
                         700033, 0, size, null, false, false,
                         null, null, null, null, lowImage.toString(), imageUri.toString());
+
+                addPhotoUriToSharePref(lowImage.toString(), imageUri.toString());
 
                 if (MainActivity.chatModelList != null)     // call MainActivity
                     MainActivity.chatModelList.add(messageModel);
@@ -111,9 +131,11 @@ public class RedirectHome extends AppCompatActivity {
 
                                 assert imageUri2 != null;
                                 MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                                        System.currentTimeMillis(), null, null, 8, null,
+                                        System.currentTimeMillis(), chatId, null, 8, null,
                                         700033, 0, size, null, false, false,
                                         null, null, null, null, lowImage.toString(), imageUri2.toString());
+
+                                addPhotoUriToSharePref(lowImage.toString(), imageUri2.toString());
 
                                 if (MainActivity.chatModelList != null) MainActivity.chatModelList.add(messageModel);
 
@@ -136,7 +158,7 @@ public class RedirectHome extends AppCompatActivity {
         if (MainActivity.chatModelList != null) MainActivity.chatModelList.clear();
 
         // loop through the photos
-        for (int i = 0; i < imageUrisList.size(); i++) {
+        for (int i = 0; i < imageUrisList.size(); i++) {    // might from this part later because multiple image only comes from phone Gallery
             Uri eachUri = imageUrisList.get(i);
             // save the original image to app directory if it is shared from external app like telegram of whatsapp
             if(!eachUri.toString().startsWith("content://media")){
@@ -145,10 +167,14 @@ public class RedirectHome extends AppCompatActivity {
                 // no need to rotate photo since it's coming from other app. Everything must have been done there.
                 Uri lowImage = reduceImageSize(null, eachUri, 400);
 
+                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+
                 MessageModel messageModel = new MessageModel(null, user.getUid(), null, null,
-                        System.currentTimeMillis(), null, null, 8,
+                        System.currentTimeMillis(), chatId, null, 8,
                         null, 700033, 0, size, null, false, false,
                         null, null, null, null, lowImage.toString(), eachUri.toString());
+
+                addPhotoUriToSharePref(lowImage.toString(), eachUri.toString());
 
                 if (MainActivity.chatModelList != null)     // call MainActivity
                     MainActivity.chatModelList.add(messageModel);
@@ -158,6 +184,7 @@ public class RedirectHome extends AppCompatActivity {
                 finishMultiplePhoto(i, imageUrisList, getUriList);
 
             } else {    // it it coming from phone storage
+
                 int position = i;
                 Uri eachUri2 = imageUrisList.get(position);
                 Glide.with(this).load(eachUri2); // to save the memory first
@@ -171,10 +198,14 @@ public class RedirectHome extends AppCompatActivity {
                                 String size = getImageSize(eachUri2);   // get the size of the image
                                 Uri lowImage = reduceImageSize(resource, null, 500);    // convert it to low quality
 
+                                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+
                                 MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                        System.currentTimeMillis(), null, null, 8,
+                                        System.currentTimeMillis(), chatId, null, 8,
                                         null, 700033, 0, size, null, false, false,
                                         null, null, null, null, lowImage.toString(), eachUri2.toString());
+
+                                addPhotoUriToSharePref(lowImage.toString(), eachUri2.toString());
 
                                 if (MainActivity.chatModelList != null) MainActivity.chatModelList.add(messageModel);
 
@@ -186,6 +217,14 @@ public class RedirectHome extends AppCompatActivity {
             }
 
         }
+    }
+
+    // save each uri to sharePref via gson
+    private void addPhotoUriToSharePref(String lowerUri, String highUri){
+        photoUri.add(lowerUri);
+        photoUri.add(highUri);
+        String uriToJson = gson.toJson(photoUri);
+        photoShareRef.edit().putString(AllConstants.OLD_URI_LIST, uriToJson).apply();
     }
 
     private void finishSinglePhoto(List<MessageModel> getUriList){
@@ -209,8 +248,9 @@ public class RedirectHome extends AppCompatActivity {
                 if (MainActivity.chatModelList == null){    // app is lunching first time
                     onAppFirstLaunch(getUriList);
                 } else {
-                    // user is not on main activity
+                    // user is not on main activity, save the activity class it is and bring mainActivity to front,
                     if (!AppLifecycleHandler.isActivityInForeground(MainActivity.class, RedirectHome.class, RedirectHome.this)) {
+                    // then return back to the activity when done sending the images
                         bringMainActivityToFront();
                     }
                 }
