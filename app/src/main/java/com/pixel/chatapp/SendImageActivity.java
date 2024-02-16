@@ -653,7 +653,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                                         .into(new SimpleTarget<Bitmap>() {
                                             @Override
                                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                String size = MainActivity.getImageSize(eachUri, SendImageActivity.this);   // get the size of the image
+
+                                                String size = MainActivity.getFileSize(eachUri, SendImageActivity.this);   // get the size of the image
                                                 Uri lowImage = reduceImageSize(resource, null, 500);    // convert it to low quality
 
                                                 String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
@@ -714,12 +715,12 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         photoUriToDelete.add(previousModel.getPhotoUriOriginal());
         photoUriToDelete.add(previousModel.getPhotoUriPath());
 
-        allOldUriList.addAll(photoUriToDelete);
         // save edited photo uri to sharePref via gson to enable app first launch onCreate to delete the photos in case photo was not deleted
+        allOldUriList.addAll(photoUriToDelete);
         String json = gson.toJson(allOldUriList);
         unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, json).apply();
 
-        String imageSize = MainActivity.getImageSize(newPhotoUri, this);
+        String imageSize = MainActivity.getFileSize(newPhotoUri, this);
         // first check for bitmap image to convert, if not available, then convert the uri
         Uri lowQualityUri = bitmapImage != null ? reduceImageSize(bitmapImage, null, 500) :
                 reduceImageSize(null, newPhotoUri, 500);    // save the low quality

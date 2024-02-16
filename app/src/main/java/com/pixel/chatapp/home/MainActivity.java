@@ -1,5 +1,8 @@
 package com.pixel.chatapp.home;
 
+import static com.pixel.chatapp.constants.AllConstants.ACCEPTED_MIME_TYPES;
+import static com.pixel.chatapp.constants.AllConstants.REQUEST_PICK_PDF_FILE;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -9,11 +12,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.pdf.PdfRenderer;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
@@ -23,8 +29,10 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -39,6 +47,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -301,6 +312,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  ---------- msg end
 
+    private ActivityResultLauncher<String[]> pickPdfLauncher;
+
+    ImageView imageView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -344,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         //      --------- message ids starts        ------------------------
-
+imageView = findViewById(R.id.imageView3);
         conTopUserDetails = findViewById(R.id.firstTopContainer);
         chatContainer = findViewById(R.id.chatBoxContainer);
         recyclerContainer = findViewById(R.id.constraintRecyler);
@@ -851,21 +866,39 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             //  ================      Documents and camera onClick Settings      ===================
 
-            camera_IV.setOnClickListener(view -> {
+            activityPdfLauncher();
 
+            camera_IV.setOnClickListener(view -> {
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                {
+                    isSendingFile = true;
+                    selectedUserNames.add(otherUserName);
+                    forwardChatUserId.add(otherUserUid);
+                    Intent i = new Intent(this, SendImageActivity.class);
+                    startActivity(i);
+
+                    // call runnable to check for network
+                    handlerTyping.post(runnableTyping);
+
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 500);
+                });
             });
 
             // set files(documents) -> camera - photo - documents
             file_IV.setOnClickListener(view -> {
-                isSendingFile = true;
-                selectedUserNames.add(otherUserName);
-                forwardChatUserId.add(otherUserUid);
-                Intent i = new Intent(this, SendImageActivity.class);
-                startActivity(i);
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                {
 
-                // call runnable to check for network
-                handlerTyping.post(runnableTyping);
-                
+                    pickPdfLauncher.launch(ACCEPTED_MIME_TYPES);
+
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 500);
+                });
             });
 
             // send message
@@ -1495,21 +1528,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 clearOnlyChatHistory = false;
             });
 
-
-            //  -------------------------------------------------------------
-
-            // Delay 5 seconds to load message
-//        new CountDownTimer(5000, 1000){
-//            @Override
-//            public void onTick(long l) {
-//                constrNetork.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                constrNetork.setVisibility(View.GONE);
-//            }
-//        }.start();
 
             setUserDetails();
 
@@ -2386,7 +2404,7 @@ scNum = 20;
                     photoIdShareRef.edit().putString(chatId, otherUid + AllConstants.JOIN + "yes").apply();
                     delivery = 700033;
                     if(imageSize_ == null)
-                        imageSize_ = getImageSize(Uri.parse(photoOriginal), this);
+                        imageSize_ = getFileSize(Uri.parse(photoOriginal), this);
                 }
 
                 // save to local list for fast update
@@ -3158,7 +3176,7 @@ scNum = 20;
 
     }
 
-    public static String getImageSize(Uri imageUri, Context context){
+    public static String getFileSize(Uri imageUri, Context context){
         try {   // get the total image length
             InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
             if (inputStream != null) {
@@ -3175,9 +3193,9 @@ scNum = 20;
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur MA470: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error Occur MA3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        return ""; // Return an empty string or another appropriate default value in case of an error
+        return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
     }
 
@@ -4141,6 +4159,102 @@ scNum = 20;
         });
 
         thread.start();
+    }
+
+    //      ================      pdf methods           ========================
+    private void activityPdfLauncher(){
+        pickPdfLauncher = registerForActivityResult(new ActivityResultContracts.OpenMultipleDocuments(),
+                new ActivityResultCallback<List<Uri>>() {
+                    @Override
+                    public void onActivityResult(List<Uri> results) {
+                        if (results != null && !results.isEmpty()) {
+                            for (Uri result : results) {
+
+                                String pdfName = getFileName(result);
+                                String pdfSize = getFileSize(result, MainActivity.this);
+                                Bitmap bitmap = getThumbnailFromPdfUri(result);
+
+                                if(isPdfFile(result)){
+                                    System.out.println("what is pdf " + pdfName + pdfSize);
+
+                                } else if (isMsWordFile(result)){
+                                    // image is sent
+                                    System.out.println("what is msWord " + pdfName + pdfSize);
+
+                                } else if (isPhotoFile(result)){
+                                    // image is sent
+                                    System.out.println("what is photo " + pdfName + pdfSize);
+                                }
+
+                                imageView.setImageBitmap(bitmap);
+                                // Now you have the URI of each selected PDF file
+                                // Get additional information
+//                                Bitmap pdfThumbnail = getThumbnailFromPdfUri(result);
+//
+//                                // Now you can proceed with sending each file and additional information to another user
+//                                sendPdfFile(result, pdfName, pdfSize, pdfThumbnail);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private String getFileName(Uri uri) {
+        String displayName = getString(R.string.app_name);
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index != -1) {
+                        displayName = cursor.getString(index);
+                    }
+                }
+            }
+        } else if (uri.getScheme().equals("file")) {
+            displayName = uri.getLastPathSegment();
+        }
+        return displayName;
+    }
+
+    private Bitmap getThumbnailFromPdfUri(Uri uri) {
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(uri, "r");
+            if (parcelFileDescriptor != null) {
+                PdfRenderer renderer = new PdfRenderer(parcelFileDescriptor);
+                PdfRenderer.Page page = renderer.openPage(0);
+
+                // Generate thumbnail from the first page
+                Bitmap thumbnail = Bitmap.createBitmap(page.getWidth(), page.getHeight(), Bitmap.Config.ARGB_8888);
+                page.render(thumbnail, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                // Close the page and renderer
+                page.close();
+                renderer.close();
+                parcelFileDescriptor.close();
+
+                return thumbnail;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private boolean isPdfFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("application/pdf");
+    }
+
+    private boolean isMsWordFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("application/msword")
+                || mimeType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    private boolean isPhotoFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("image/jpeg") || mimeType.equals("image/png");
     }
 
     // Method to hide the soft keyboard when needed

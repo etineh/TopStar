@@ -42,14 +42,24 @@ public interface AllConstants {
     String VERIFICATION_CODE = "code";
     String IMAGE_PATH = "Media/Profile_Image/profile";
     String GROUP_IMAGE = "/Media/Profile/profile.jpg";
-    String GROUP_IMAGE_MESSAGE = "/Media/Images/";
+    String GROUP_IMAGE_MESSAGE =  "/Media/Images/";
     String VOICE_NOTE_PATH = "/Media/VoiceNote/";
     int STORAGE_REQUEST_CODE = 1000;
-    int USERNAME_CODE = 1;
+//    int USERNAME_CODE = 1;
     int CONTACTS_REQUEST_CODE = 2000;
     int RECORDING_REQUEST_CODE = 200;
     String CHANNEL_ID = "1000";
     int NOTIFICATION_ID = 100;
+    int REQUEST_PICK_PDF_FILE = 1;
+
+    String[] ACCEPTED_MIME_TYPES = {
+            "application/pdf",   // PDF
+            "image/jpeg",        // JPEG
+            "image/png",        // JPEG
+            "application/cdr",   // CDR (CorelDRAW)
+            "application/msword", // .doc
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // .docx
+    };
 
     String NOTIFICATION_URL = "https://fcm.googleapis.com/fcm/send";
     String SERVER_KEY = "AAAApFehDUk:APA91bGNxMHslZsMLBQhfkIstegapDflh0czl7p_uLQD7dVnHqgq6hlWpKHjH1Eajr7vtRU0_2pjLzr_gL6ageC3twrkejOB1PzDpJdYPwPFCfvzG5CyIJ8CBjyE_yqjpJAhN9ZAMR6q";
