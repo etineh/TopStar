@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
@@ -50,14 +51,14 @@ public class SendImageAdapter extends RecyclerView.Adapter<SendImageAdapter.Imag
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         int getPosition = position;
-        String imageUri = modelList.get(getPosition).getPhotoUriPath();
         MessageModel chatModel = modelList.get(getPosition);
+        String imageUri = chatModel.getPhotoUriPath();
 
         if(!viewList.contains(holder.itemView)) viewList.add(holder.itemView);
 
         // highlight the first photo position
         if(firstRun && position == 0){
-            holder.itemView.setBackgroundColor(context.getResources().getColor(R.color.orange));
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.orange));
             lastView = holder.itemView;
             firstRun = false;
         }
@@ -66,7 +67,7 @@ public class SendImageAdapter extends RecyclerView.Adapter<SendImageAdapter.Imag
 
             if(lastView != null ) lastView.setBackgroundColor(0);
 
-            view.setBackgroundColor(context.getResources().getColor(R.color.orange));
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.orange));
 
             imageListener.getCurrentModelChat(chatModel, getPosition);
 
@@ -74,16 +75,23 @@ public class SendImageAdapter extends RecyclerView.Adapter<SendImageAdapter.Imag
         });
 
         // display the photos
-        Picasso.get().load(imageUri).into(holder.showImage_IV);
+        if(chatModel.getPhotoUriPath() != null){    // 1 is voice note, 2 is photo, 3 is document, 4 is audio
+            Picasso.get().load(imageUri).into(holder.showImage_IV);
+        } else if (chatModel.getType() == 3 && chatModel.getPhotoUriPath() == null) {
+            // change icon if it's docx since no photo or thumbnail for docx
+            holder.showImage_IV.setImageResource(R.drawable.baseline_document_scanner_24);
+        } else if (chatModel.getType() == 4) {  // 1 is voice note, 2 is photo, 3 is document, 4 is audio
+            holder.showImage_IV.setImageResource(R.drawable.baseline_audio_file_24);
+        }
 
     }
 
     public void highLightView(int photoPosition){
         try{
             View view = viewList.get(photoPosition);
-            if(lastView != null ) lastView.setBackgroundColor(0);
+            if(lastView != null ) lastView.setBackgroundColor(ContextCompat.getColor(context, R.color.cool_orange));
 
-            view.setBackgroundColor(context.getResources().getColor(R.color.orange));
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.orange));
 
             lastView = view;
         } catch (Exception e){

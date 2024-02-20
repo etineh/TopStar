@@ -29,6 +29,7 @@ public interface AllConstants {
     String PIN_ICON = "\uD83D\uDCCC  ";
     String EDIT_ICON = "✏\uFE0F  ";
 
+    String DOCUMENT_ICON = "\uD83D\uDCDC";
     String URI_PREF = "UriPrefs";
     String OLD_URI_LIST = "oldPhotoEditedUri";
 
@@ -39,6 +40,13 @@ public interface AllConstants {
     String JOIN = "winnerChatJoinPaths";
 
     String ALL_PHOTOS = "/Media/Photos/";
+    String ALL_DOCUMENTS = "/Media/Documents/";
+    String ALL_AUDIO = "/Media/Audio/";
+    String ALL_VOICENOTE = "/Media/Voice_Note/";
+
+    String ALL_THUMBNAIL = "/Media/Thumbnail/";
+
+
     String VERIFICATION_CODE = "code";
     String IMAGE_PATH = "Media/Profile_Image/profile";
     String GROUP_IMAGE = "/Media/Profile/profile.jpg";
@@ -55,11 +63,17 @@ public interface AllConstants {
     String[] ACCEPTED_MIME_TYPES = {
             "application/pdf",   // PDF
             "image/jpeg",        // JPEG
-            "image/png",        // JPEG
+            "image/png",         // PNG
             "application/cdr",   // CDR (CorelDRAW)
             "application/msword", // .doc
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // .docx
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+            "image/vnd.adobe.photoshop", // Photoshop (PSD)
+            "audio/*",           // All audio formats
+            "video/*",           // All video formats
+            "application/vnd.android.package-archive" // APK
     };
+
+
 
     String NOTIFICATION_URL = "https://fcm.googleapis.com/fcm/send";
     String SERVER_KEY = "AAAApFehDUk:APA91bGNxMHslZsMLBQhfkIstegapDflh0czl7p_uLQD7dVnHqgq6hlWpKHjH1Eajr7vtRU0_2pjLzr_gL6ageC3twrkejOB1PzDpJdYPwPFCfvzG5CyIJ8CBjyE_yqjpJAhN9ZAMR6q";

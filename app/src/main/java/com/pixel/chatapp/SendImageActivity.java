@@ -1,13 +1,14 @@
 package com.pixel.chatapp;
 
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
-import static com.pixel.chatapp.home.MainActivity.conTopUserDetails;
 import static com.pixel.chatapp.home.MainActivity.deleteOldUriFromAppMemory;
 import static com.pixel.chatapp.home.MainActivity.deleteUnusedPhotoFromSharePrefsAndAppMemory;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.handlerTyping;
+import static com.pixel.chatapp.home.MainActivity.isSharingDocument;
 import static com.pixel.chatapp.home.MainActivity.runnableTyping;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
+import static com.pixel.chatapp.home.MainActivity.sharingPhotoActivated;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -136,6 +137,10 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     Gson gson = new Gson();
     private boolean isSendingPause;
 
+    ConstraintLayout fileDetailsContainer;
+    TextView fileName_TV, fileNameAtTop_TV;
+    ImageView fileIcon_IV;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -173,6 +178,12 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         resetPaint_IV = findViewById(R.id.resetPaint_IV);
         undoPaint_IV = findViewById(R.id.undoPaint_IV);
 
+        // document details id
+        fileDetailsContainer = findViewById(R.id.fileDetailsContainer);
+        fileName_TV = findViewById(R.id.fileName_TV);
+        fileIcon_IV = findViewById(R.id.fileIcon_IV);
+        fileNameAtTop_TV = findViewById(R.id.fileNameAtTop_TV);
+
         firstModelMap = new HashMap<>();
         secondModelMap = new HashMap<>();
         photoUriToDelete = new ArrayList<>();
@@ -195,33 +206,37 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         registerActivityForSelectImage();
         
         // pick image from gallery
-        if(!MainActivity.sharingPhotoActivated) selectImageFromGallery();
+        if(!sharingPhotoActivated) selectImageFromGallery();
 
         //  send the image to the firebase and home adapter UI
         buttonSend.setOnClickListener(view -> {
 
-            isSendingPause = true; // Prevent present model photo uri adding to the delete sharePrefs
+            if(chatModelList.size() >= 1){
+                isSendingPause = true; // Prevent present model photo uri adding to the delete sharePrefs
 
-            MainActivity.sharingPhotoActivated = false; // make it false so as to send the chat
+                sharingPhotoActivated = false; // make it false so as to send the chat
 
-            if(message_ET.length() > 0 && previousModel != null) {
-                previousModel.setMessage(message_ET.getText().toString());
-            }   // update the model list
+                if(message_ET.length() > 0 && previousModel != null) {
+                    previousModel.setMessage(message_ET.getText().toString());
+                }   // update the model list
 
-            mainActivity.sendSharedChat(this);  // send the chat
+                mainActivity.sendSharedChat(this);  // send the chat
 
-            handlerTyping.removeCallbacks(runnableTyping); // remove the network checking runnable
+                handlerTyping.removeCallbacks(runnableTyping); // remove the network checking runnable
 
-            finish();
+                finish();
 
-            MainActivity.isSendingFile = false;
+                MainActivity.isSendingFile = false;
 
-            deleteUnusedPhotoFromSharePrefsAndAppMemory(this);
+                deleteUnusedPhotoFromSharePrefsAndAppMemory(this);
+            } else {
+                Toast.makeText(this, getString(R.string.empty), Toast.LENGTH_SHORT).show();
+            }
 
         });
 
-        // activate when user is sharing photo from other app or when app is onPause or not active.
-        if(MainActivity.sharingPhotoActivated){
+        // initialise adapter when user is sharing photo from other app or when app is onPause or not active.
+        if(sharingPhotoActivated){
             // activate adapter to the recycler view
             adapterRecycler = new SendImageAdapter(this, chatModelList);
             adapterRecycler.setImageListener(this);
@@ -325,6 +340,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             // make the recycler visible only when the photo on the list is above 1
             if(chatModelList.size() > 1) {
                 recyclerPhoto.setVisibility(View.VISIBLE);
+            } else if (chatModelList.size() == 0) {
+                finish();
             } else {
                 recyclerPhoto.setVisibility(View.GONE);
             }
@@ -340,7 +357,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         resetPaint_IV.setOnClickListener(view -> {
             view.animate().setDuration(30).scaleX(1.2f).scaleY(1.2f).withEndAction(()->{
                 imagePainter.reset(imageView, currentBitmap);
-                deleteOldUriFromAppMemory(tempUri); // for reset
+                deleteOldUriFromAppMemory(tempUri, this); // for reset
                 new Handler().postDelayed(()->{
                     view.setScaleX(1.0f);
                     view.setScaleY(1.0f);
@@ -446,7 +463,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 recyclerPhoto.setVisibility(View.VISIBLE);
             }
 
-            deleteOldUriFromAppMemory(tempUri); // for saving
+            deleteOldUriFromAppMemory(tempUri, this); // for saving
 
             //  delete previous photo from phone app storage
             mainActivity.deleteFileFromPhoneStorage(previousModel);
@@ -481,15 +498,11 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     public void getCurrentModelChat(MessageModel messageModel, int position) {
         viewPager.setCurrentItem(position); // set the current position photo if recycler adapter is click
 
-        adapterRecycler.highLightView(position);
-        recyclerPhoto.scrollToPosition(position);
-
         // update the model list
         if(message_ET.length() > 0 && previousModel != null) {
             previousModel.setMessage(message_ET.getText().toString());
         }
         message_ET.setText(null);
-
         // get the text if not null
         if(messageModel.getMessage() != null) message_ET.setText(messageModel.getMessage());
         // set the censor at the end of the text
@@ -500,6 +513,48 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             firstModelMap.put(messageModel.getIdKey(), messageModel.getPhotoUriOriginal());
             secondModelMap.put(messageModel.getIdKey(), messageModel.getPhotoUriOriginal());
         }
+
+        if(messageModel.getType() != 2){    // it's not photo
+            String[] onlyFileName = messageModel.getEmojiOnly().split("\n");
+            fileNameAtTop_TV.setVisibility(View.VISIBLE);
+            fileNameAtTop_TV.setText(onlyFileName[0]);
+
+            if(messageModel.getType() == 4)  { // audio
+                fileDetailsContainer.setVisibility(View.VISIBLE);
+                fileIcon_IV.setImageResource(R.drawable.baseline_audio_file_24);
+                fileName_TV.setText(messageModel.getEmojiOnly());   // I saved the file name at emojiOnly
+                message_ET.setVisibility(View.INVISIBLE);
+                emoji_IV.setVisibility(View.INVISIBLE);
+            } else {
+                message_ET.setVisibility(View.VISIBLE);
+                emoji_IV.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(() -> message_ET.requestFocus(), 1000);
+                fileDetailsContainer.setVisibility(View.GONE);
+                fileName_TV.setText("");
+                if (messageModel.getPhotoUriPath() == null) {   // for docx, cdr or photoshop
+                    fileIcon_IV.setImageResource(R.drawable.baseline_document_scanner_24);
+                    fileDetailsContainer.setVisibility(View.VISIBLE);
+                    fileName_TV.setText(messageModel.getEmojiOnly());   // I saved the file name at emojiOnly
+                }
+            }
+
+            cropper.setVisibility(View.GONE);
+            reset_IV.setVisibility(View.GONE);
+            paintBrush_IV.setVisibility(View.GONE);
+            addPhoto_IV.setVisibility(View.GONE);
+        } else {
+            cropper.setVisibility(View.VISIBLE);
+            reset_IV.setVisibility(View.VISIBLE);
+            paintBrush_IV.setVisibility(View.VISIBLE);
+            fileDetailsContainer.setVisibility(View.GONE);
+            fileNameAtTop_TV.setVisibility(View.GONE);
+            message_ET.setVisibility(View.VISIBLE);
+            emoji_IV.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(() -> message_ET.requestFocus(), 1000);
+        }
+
+        adapterRecycler.highLightView(position);
+        recyclerPhoto.scrollToPosition(position);
 
         // save this current model as the previous in case user scroll to another photo model
         previousModel = messageModel;
@@ -616,7 +671,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         {
             // delete the uri from app memory if user doesn't perform any action on the photo
             tempUri.add(tempCropUri.toString());
-            deleteOldUriFromAppMemory(tempUri);     //  for cropping
+            deleteOldUriFromAppMemory(tempUri, this);     //  for cropping
 
             allOldUriList.remove(tempCropUri.toString());
             // remove the uri from gson - sharePref, since user perform action on the photo
@@ -661,7 +716,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
 
                                                 MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
                                                         System.currentTimeMillis(), chatId, null, 8,
-                                                        null, 700033, 0, size, null, false, false,
+                                                        null, 700033, 2, size, null, false, false,
                                                         null, null, null, null, lowImage.toString(), eachUri.toString());
 
                                                 if (MainActivity.chatModelList != null) {
@@ -786,6 +841,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 });
     }
 
+    // crop photo and save the thumbnail to app storage
     public Uri reduceImageSize(Bitmap bitmapImage, Uri originalImageUri, int maxSize) {
         try {
             // Get the original bitmap from the Uri
@@ -818,8 +874,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             Bitmap croppedBitmap = Bitmap.createBitmap(reduceSize, centerX - (lowDimension / 2),
                     centerY - (lowDimension / 2), lowDimension, lowDimension);
 
-            // save the photo to phone app memory
-            File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(this), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
+            // save the low photo or thumbnail to phone app memory
+            File saveImageToPhoneUri = new File(MainActivity.getThumbnailFolder(this), getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg");
             OutputStream outputStream;
             try {
                 outputStream = new FileOutputStream(saveImageToPhoneUri);
@@ -899,7 +955,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
 
     @Override
     public void onBackPressed() {
-        if(brushContainer.getVisibility() == View.VISIBLE){
+        if(brushContainer.getVisibility() == View.VISIBLE){ // it's on painting mood
 
             brushContainer.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
@@ -914,14 +970,23 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 recyclerPhoto.setVisibility(View.VISIBLE);
             }
 
-            deleteOldUriFromAppMemory(tempUri); //  for onBackPress
+            deleteOldUriFromAppMemory(tempUri, this); //  for onBackPress
 
             new Handler().postDelayed(() -> message_ET.requestFocus(), 300);
 
         } else {
-            if(MainActivity.sharingPhotoActivated){
+            if(sharingPhotoActivated){ // it's on sharing mood (photo or document)
+                if(isSharingDocument){
+                    forwardChatUserId.clear();
+                    selectedUserNames.clear();
+                    chatModelList.clear();
+                    sharingPhotoActivated = false;
+                    isSharingDocument = false;
+                }
+
                 finish();
 //            super.onBackPressed();
+
             } else {
                 deleteFile();   // for onBackPress
                 deleteUnusedPhotoFromSharePrefsAndAppMemory(this);    // for onBackPress
@@ -943,8 +1008,12 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         if(!isSendingPause){
             for (MessageModel modelChats : chatModelList) {
                 try {
-                    allOldUriList.add(modelChats.getPhotoUriOriginal());
-                    allOldUriList.add(modelChats.getPhotoUriPath());
+                    if (modelChats.getPhotoUriOriginal() != null) allOldUriList.add(modelChats.getPhotoUriOriginal());
+                    if(modelChats.getPhotoUriPath() != null) allOldUriList.add(modelChats.getPhotoUriPath());
+                    if (modelChats.getVoiceNote() != null) {
+//                        Toast.makeText(this, "Adding voice", Toast.LENGTH_SHORT).show();
+                        allOldUriList.add(modelChats.getVoiceNote());
+                    }
                     // update the sharePrefs list
                     String convertListToJson = gson.toJson(allOldUriList);
                     unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, convertListToJson).apply();
@@ -961,8 +1030,11 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         if(!isSendingPause){
             for (MessageModel modelChats : chatModelList) {
                 try{
-                    allOldUriList.remove(modelChats.getPhotoUriOriginal());
-                    allOldUriList.remove(modelChats.getPhotoUriPath());
+                    if (modelChats.getPhotoUriOriginal() != null) allOldUriList.remove(modelChats.getPhotoUriOriginal());
+                    if(modelChats.getPhotoUriPath() != null) allOldUriList.remove(modelChats.getPhotoUriPath());
+                    if (modelChats.getVoiceNote() != null) {
+//                        Toast.makeText(this, "Removing voice", Toast.LENGTH_SHORT).show();
+                    }
                     // update the sharePrefs list
                     String convertListToJson = gson.toJson(allOldUriList);
                     unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, convertListToJson).apply();

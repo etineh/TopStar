@@ -41,13 +41,16 @@ public class ViewImageAdapter extends PagerAdapter {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(R.layout.view_all_photos, container, false);
+        MessageModel model = messageModelList.get(position);
+        PhotoView photoView = itemView.findViewById(R.id.zoomPhoto_PView);
 
-        String photoUri = messageModelList.get(position).getPhotoUriOriginal();
         // load the photo the photoView via Picasso
-        if(!photoUri.startsWith("media/photos")){
-            PhotoView photoView = itemView.findViewById(R.id.zoomPhoto_PView);
+        if(model.getPhotoUriOriginal() != null && model.getType() != 3){
+            String photoUri = messageModelList.get(position).getPhotoUriOriginal();
+
+            if(!photoUri.startsWith("media/photos")){
 //            Picasso.get().load(photoUri).into(photoView);
-            Glide.with(context).load(photoUri).into(photoView);
+                Glide.with(context).load(photoUri).into(photoView);
 
 //            Glide.with(context).asBitmap().load(photoUri).into(new SimpleTarget<Bitmap>() {
 //                @Override
@@ -55,6 +58,17 @@ public class ViewImageAdapter extends PagerAdapter {
 //                    photoView.setImage(ImageSource.bitmap(resource));
 //                }
 //            });
+            }
+        } else if (messageModelList.get(position).getPhotoUriPath() != null) {
+
+            String photoUri = messageModelList.get(position).getPhotoUriPath();
+            if (!photoUri.startsWith("media/photos")) {
+                Glide.with(context).load(photoUri).into(photoView);
+            }
+            System.out.println("what is pho: " + photoUri);
+        } else {
+//            Glide.with(context).load(photoUri).into(photoView);
+            photoView.setImageResource(0);
         }
 
         container.addView(itemView);

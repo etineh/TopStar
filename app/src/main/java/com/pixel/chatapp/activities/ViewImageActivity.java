@@ -1,6 +1,7 @@
 package com.pixel.chatapp.activities;
 
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
+import static com.pixel.chatapp.home.MainActivity.uniqueUriForSharingPhotoOrDoc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -98,20 +99,8 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         {
                 System.out.println("what is path : " + currentModelChat.getPhotoUriOriginal());
             if (currentModelChat != null && currentModelChat.getPhotoUriOriginal() != null) {
-                // send app logo in case any error getting the photo uri path
-                Uri photoUri = Uri.parse("android.resource://" + this.getPackageName() + "/" + R.drawable.logo);
 
-                if(currentModelChat.getPhotoUriOriginal().startsWith("file:/")) {
-                    try {
-                        File file = new File(new URI( currentModelChat.getPhotoUriOriginal() ));
-                        photoUri = FileProvider.getUriForFile(this, "com.pixel.chatapp.fileprovider", file);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                } else if (currentModelChat.getPhotoUriOriginal().startsWith("content:/")) {
-                    photoUri = Uri.parse(currentModelChat.getPhotoUriOriginal());
-                }
+                Uri photoUri = uniqueUriForSharingPhotoOrDoc(currentModelChat, this);
 
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("image/*");

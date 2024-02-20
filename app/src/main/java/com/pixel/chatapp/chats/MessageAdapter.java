@@ -1,32 +1,35 @@
 package com.pixel.chatapp.chats;
 
-import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.clearAllHighlights;
+import static com.pixel.chatapp.home.MainActivity.firstTopUserDetailsContainer;
 import static com.pixel.chatapp.home.MainActivity.formatDuration;
-import static com.pixel.chatapp.home.MainActivity.getRecordFilePath;
+import static com.pixel.chatapp.home.MainActivity.getAudioFolder;
+import static com.pixel.chatapp.home.MainActivity.getDocumentFolder;
+import static com.pixel.chatapp.home.MainActivity.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.networkOk;
 import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.parseDuration;
 import static com.pixel.chatapp.home.MainActivity.recyclerMap;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
+import android.os.StrictMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +44,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.PagerAdapter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -59,14 +62,8 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.pixel.chatapp.SendImageActivity;
-import com.pixel.chatapp.ZoomImage;
 import com.pixel.chatapp.activities.ViewImageActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
-import com.pixel.chatapp.adapters.SendImageAdapter;
-import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.listeners.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
@@ -74,8 +71,6 @@ import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -83,9 +78,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -486,11 +480,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.seekBarProgress.setProgress(0);
             holder.totalMinute_TV.setText("");
         }
-        // reset image tools
+        // reset image and document tools
         if(holder.loadProgressTV != null){
             holder.loadProgressTV.setVisibility(View.GONE); // hide image loading progress bar
             holder.progressBarLoad.setVisibility(View.GONE); // hide image loading progress bar
             holder.photoChatTV.setVisibility(View.GONE);
+            holder.documentContainer.setVisibility(View.GONE);
+            holder.document_IV.setVisibility(View.GONE);
+            holder.documentDetails_TV.setText("");
+            holder.showImage.setVisibility(View.VISIBLE);
+            holder.showImage.setImageURI(null);
         }
         // reset photo chat textView
 
@@ -517,7 +516,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         }
 
-        if(modelChats.getEmojiOnly() != null){
+        if(modelChats.getEmojiOnly() != null && modelChats.getType() == 0){
             holder.emojiOnly_TV.setText(modelChats.getEmojiOnly());
             holder.emojiOnly_TV.setVisibility(View.VISIBLE);
         }
@@ -567,34 +566,76 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.seenMsg.setImageResource(numMsg);     // set msg status tick
         }
 
-        //   set image
-        if(modelChats.getPhotoUriPath() != null){
+
+        // set load image progress bar
+        if(holder.loadProgressTV != null){
+            if(!modelChats.getFromUid().equals(myId) &&
+                    ( modelChats.getPhotoUriOriginal().startsWith("media/photo") || modelChats.getPhotoUriOriginal().startsWith("media/document") )
+                    || modelChats.getMsgStatus() == 700033){
+
+                if(uploadTaskMap.get(modelChats.getIdKey()) != null){
+                    uploadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot ->{
+                        holder.progressBarLoad.setVisibility(View.VISIBLE);
+                        holder.loadProgressTV.setVisibility(View.VISIBLE);
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        trackLoadProgress(progress, holder, modelChats);
+                    });
+
+                } else if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
+                    fileDownloadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot -> {
+                        holder.progressBarLoad.setVisibility(View.VISIBLE);
+                        holder.loadProgressTV.setVisibility(View.VISIBLE);
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        trackLoadProgress(progress, holder, modelChats);
+                    });
+                }else {
+                    loadBarVisibility(holder, modelChats);
+                }
+
+            }
+        }
+
+        // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+        if(modelChats.getPhotoUriPath() != null || modelChats.getType() == 3){
 
             // activate my auto image sending  ------ change later to auto download other user photo that he sent according to his settings
             if(modelChats.getFromUid().equals(myId) && modelChats.getMsgStatus() == 700033){
                 if(networkOk){
                     // get the photo uid owner and the sending state
-                    String photoCheck = MainActivity.photoIdShareRef.getString(modelChats.getIdKey(), "");
+                    String photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "");
                     String[] splitX = photoCheck.split(AllConstants.JOIN);
                     // check if the ref is not empty
                     if(splitX.length > 1){
                         String otherId = splitX[0];
                         String isSending = splitX[1];
-                        if(isSending.equals("yes"))
-                            loadMyPhoto(modelChats, holder, chatPosition, otherId);
+                        if(isSending.equals("yes")){
+
+                            loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
+                        }
                     }
                 }
             }
 
-            // display the low quality image
-            Uri imageUri_ = Uri.parse(modelChats.getPhotoUriPath());
-            Glide.with(mContext).load(imageUri_).into(holder.showImage);
+            // display or download the low quality image or document thumbnail  (if not downloaded yet)
+            if (modelChats.getPhotoUriPath() != null){
+                Uri imageUri_ = Uri.parse(modelChats.getPhotoUriPath());
+                displayLowImageOrDocumentThumbnail(imageUri_, holder, modelChats);
+
+                // download the low quality photo or doc thumbnail auto from firebase (if not downloaded yet)
+                downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
+            } else {
+                holder.showImage.setVisibility(View.GONE);
+                holder.documentContainer.setVisibility(View.VISIBLE);
+                holder.documentDetails_TV.setText(modelChats.getEmojiOnly());   // I used document details to replace emojiOnly
+                if(holder.loadProgressTV.getVisibility() == View.VISIBLE){
+                    holder.document_IV.setVisibility(View.VISIBLE);
+                } else {
+                    holder.document_IV.setVisibility(View.GONE);
+                }
+            }
 
 //            Picasso.get().load( imageUri_ ).into(holder.showImage);
             holder.loadProgressTV.setText(modelChats.getImageSize());
-
-            // download the image low quality auto from firebase
-            downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
 
 
 //            Picasso.get().load(imageUri_).into(new Target() {
@@ -623,42 +664,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //    working ->  holder.showImage.setImageURI(Uri.parse("content://media/external/images/media/1000124641"));
         }
 
-        // set load image progress bar
-        if(holder.loadProgressTV != null){
-            if(!modelChats.getFromUid().equals(myId) && modelChats.getPhotoUriOriginal().startsWith("media/photo")
-                    || modelChats.getMsgStatus() == 700033){
-
-                if(uploadTaskMap.get(modelChats.getIdKey()) != null){
-                    uploadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot ->{
-                        holder.progressBarLoad.setVisibility(View.VISIBLE);
-                        holder.loadProgressTV.setVisibility(View.VISIBLE);
-                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                        trackLoadProgress(progress, holder, modelChats);
-                    });
-
-                } else if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
-                    fileDownloadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot -> {
-                        holder.progressBarLoad.setVisibility(View.VISIBLE);
-                        holder.loadProgressTV.setVisibility(View.VISIBLE);
-                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                        trackLoadProgress(progress, holder, modelChats);
-                    });
-                }else {
-                    loadBarVisibility(holder, modelChats);
-                }
-
-            }
-        }
-
 
         // ----- Voice Note setting
         int visible = (int) modelChats.getType();   //  1 is visible, 4 is invisible, 8 is Gone
-        if(holder.seekBarProgress != null && visible == 1){
+        if( holder.seekBarProgress != null && (visible == 1 || visible == 4) ){
             // display the view setting
-            holder.seekBarProgress.setVisibility(visible);
-            holder.totalMinute_TV.setVisibility(visible);
+            holder.seekBarProgress.setVisibility(View.VISIBLE);
+            holder.totalMinute_TV.setVisibility(View.VISIBLE);
             holder.totalMinute_TV.setText(modelChats.getVnDuration()); // set the time duration
-            holder.pauseAndPlay_IV.setVisibility(visible);
+            holder.pauseAndPlay_IV.setVisibility(View.VISIBLE);
             holder.speedTV.setVisibility(View.VISIBLE);
 
             // check if my voice note sending is downloading and display the progress
@@ -683,7 +697,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 if(networkOk){
                     // check if download is already in progress and if voice note duration is less than 1MB
                     if(fileDownloadTaskMap.get(modelChats.getIdKey()) == null && holder.circleDownload.getVisibility() == View.VISIBLE
-                            && !modelChats.getVnDuration().contains("~") ){
+                            && !modelChats.getVnDuration().contains("~") && !modelChats.getVnDuration().contains("Audio") ){
 
                         downloadOtherUserVoiceNote(modelChats, holder, position_);  // settings
 
@@ -756,16 +770,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // for long press
             holder.loadProgressTV.setOnLongClickListener(longClick);
             holder.showImage.setOnLongClickListener(longClick);
+            holder.documentContainer.setOnLongClickListener(longClick);
 
-
-            // for single onClick
-            holder.showImage.setOnClickListener(view -> {
+            // for single onClick =>    type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+            View.OnClickListener imageOrDocOnClick = view -> {
                 // check if longPress is activated yet or not
                 if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
                     // open image if I was the one that sent them photo
-                    if(modelChats.getFromUid().equals(myId) || !modelChats.getPhotoUriOriginal().startsWith("media/photo"))
+                    if(modelChats.getFromUid().equals(myId) ||
+                            (!modelChats.getFromUid().equals(myId) && holder.progressBarLoad.getVisibility() == View.GONE) )
                     {
-                        openPhoto(modelChats, holder);  // swipe to view all photo
+                        if(modelChats.getType() == 2 && !modelChats.getPhotoUriOriginal().startsWith("media/photo"))
+                        {
+                            openPhoto(modelChats, holder);  // swipe to view all photo
+                        } else if (modelChats.getType() == 3 /* || modelChats.getMsgStatus() != 700033 */)
+                        {
+                            // open document
+                            try {
+                                openDocumentFromUrl(modelChats.getPhotoUriOriginal());
+                            } catch (URISyntaxException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                         // Close the previously open chat options
                         closePreviousChatOption(modelChats, holder);
 
@@ -776,9 +802,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 loadBarVisibility(holder, modelChats);
                                 notifyItemChanged(chatPosition);
                             } else
-                                downloadPhotoSentByOtherUser(modelChats, holder, chatPosition);
+                                downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                         }else
-                            downloadPhotoSentByOtherUser(modelChats, holder, chatPosition);
+                            downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                     }
 
                 } else {
@@ -786,14 +812,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     addOrRemoveChatFromList(modelChats, chatPosition);
                 }
 
-            });
+            };
+            holder.showImage.setOnClickListener(imageOrDocOnClick);
+            holder.documentContainer.setOnClickListener(imageOrDocOnClick);
 
             holder.loadProgressTV.setOnClickListener(view -> {
 
                 if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
                     if(modelChats.getFromUid().equals(myId)){
                         if(networkOk)
-                            sendMyPhoto(modelChats, holder, chatPosition);
+                            sendMyPhotoOrDocument(modelChats, holder, chatPosition);
                         else Toast.makeText(mContext, "Ooops! No internet connection", Toast.LENGTH_SHORT).show();
                     } else {
                         if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
@@ -802,9 +830,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 loadBarVisibility(holder, modelChats);
                                 notifyItemChanged(chatPosition);
                             } else
-                                downloadPhotoSentByOtherUser(modelChats, holder, chatPosition);
+                                downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                         }else
-                            downloadPhotoSentByOtherUser(modelChats, holder, chatPosition);
+                            downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                     }
 
                 } else {
@@ -837,7 +865,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             handler1.removeCallbacks(runnable);
 
                             // change back to the total time duration
-                            String timeLabel = formatDuration(mediaPlayer.getDuration());
+                            String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(mediaPlayer.getDuration()) +  " ~ Audio"
+                                    : formatDuration(mediaPlayer.getDuration());
                             lastHolder_.totalMinute_TV.setText(timeLabel);
 
                             // stop media player and create new instance
@@ -901,8 +930,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 } else if (positionCheck > 100)
                 {
                     Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
-                } else if(modelChats.getType() == 1){
-                    Toast.makeText(mContext, "Voice note can't be edited for now!", Toast.LENGTH_SHORT).show();
+                } else if(modelChats.getType() == 1 || modelChats.getType() == 4){
+                    Toast.makeText(mContext, "This chat can't be edited for now!", Toast.LENGTH_SHORT).show();
                 }else {
                     // send data to MainActivity via interface listener
                     fragmentListener.onEditOrReplyMessage(modelChats,"edit", "editing...",
@@ -1233,66 +1262,68 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     //  =============== on Long Click methods
 
     private void activateOnLongClick(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
-        // send the chats details
-        MainActivity.modelChatsOption = modelChats;
-        MainActivity.chatPosition = chatPosition;
-        MainActivity.chatHolder = holder;
+//        if(modelChats.getMsgStatus() != 700033){
+            // send the chats details
+            MainActivity.modelChatsOption = modelChats;
+            MainActivity.chatPosition = chatPosition;
+            MainActivity.chatHolder = holder;
 
-        // clear all list first
-        MainActivity.chatModelList.clear();
-        chatPositionList.clear();
+            // clear all list first
+            MainActivity.chatModelList.clear();
+            chatPositionList.clear();
 
-        // clear previous highlight
-        MainActivity.clearAllHighlights();
+            // clear previous highlight
+            MainActivity.clearAllHighlights();
 
-        // add chat to list
-        MainActivity.chatModelList.add(modelChats);
-        // add position to list to enable correct item background display
-        chatPositionList.add(chatPosition); // highlight item on the list
+            // add chat to list
+            MainActivity.chatModelList.add(modelChats);
+            // add position to list to enable correct item background display
+            chatPositionList.add(chatPosition); // highlight item on the list
 
-        MainActivity.chatSelected_TV.setText("1");
+            MainActivity.chatSelected_TV.setText("1");
 
-        int deliveryStatus = modelChats.getMsgStatus();
-        int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
+            int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
 
-        if(deliveryStatus == 700033){
-            Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
-        }   // hide edit icon it's voice note or photo
+            if (positionCheck > 100 || modelChats.getType() != 0 || !modelChats.getFromUid().equals(myId) )
+            {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+                if(modelChats.getType() != 0 && modelChats.getType() != 1){
+                    MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
+                    if (modelChats.getType() == 2)MainActivity.onPhoto = true;
+                    else if (modelChats.getType() == 3 || modelChats.getType() == 4) MainActivity.onDocument = true;
 
-        if (positionCheck > 100 || modelChats.getType() == 1 || !modelChats.getFromUid().equals(myId)
-                || modelChats.getPhotoUriPath() != null)
-        {
-            if(modelChats.getPhotoUriPath() != null){
-                MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
-            } else
-                MainActivity.editChatOption_IV.setVisibility(View.GONE);
+                } else
+                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
 
-        } else {
-            MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
-            MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
-        }
+            } else {
+                MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
+                MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
+            }
 
-        // display pin icon, is it private or public
-        pinStatusIcon(null, modelChats);
+            // display pin icon, is it private or public
+            pinStatusIcon(null, modelChats);
 
-        // make the menu option visible
-        MainActivity.chatOptionsConstraints.setVisibility(View.VISIBLE);
+            firstTopUserDetailsContainer.setVisibility(View.GONE);
+            // make the menu option visible
+            MainActivity.chatOptionsConstraints.setVisibility(View.VISIBLE);
 
-        MainActivity.pinMsgContainer.setVisibility(View.GONE);
-        // Close the previously open chat options
-        closePreviousChatOption(modelChats, holder);
-        // close mine chatTop Constraint
-        closeMyOwnOption( modelChats, holder );
+            MainActivity.pinMsgContainer.setVisibility(View.GONE);
+            // Close the previously open chat options
+            closePreviousChatOption(modelChats, holder);
+            // close mine chatTop Constraint
+            closeMyOwnOption( modelChats, holder );
 
-        // Highlight the clicked item
-        View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
-        itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
+            // Highlight the clicked item
+            View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
+            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
 
-        // remove previous highlight is any
-        if(chatPosition != lastPosition) clearHighlight();
+            // remove previous highlight is any
+            if(chatPosition != lastPosition) clearHighlight();
 
-        // activate the highlight checker
-        isOnlongPress = true;
+            // activate the highlight checker
+            isOnlongPress = true;
+
+//        } else Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
+
     }
 
     // if onLongPress mood is activated, add or remove chat from list when user click a chat
@@ -1311,26 +1342,31 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // only add chat to list when it less than 10 chats on the list
             if(MainActivity.chatModelList.size() < 10){
 
-                MainActivity.chatModelList.add(modelChats);
+                if(modelChats.getMsgStatus() != 700033){
+                    MainActivity.chatModelList.add(modelChats);
 
-                // make icon invisible
-                if(MainActivity.chatModelList.size() > 1){
-                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
-                    MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                    MainActivity.emojiChatOption_IV.setVisibility(View.GONE);
-                    MainActivity.pinChatOption_IV.setVisibility(View.GONE);
-                    MainActivity.pinAllIndicator.setVisibility(View.GONE);
+                    // make icon invisible
+                    if(MainActivity.chatModelList.size() > 1){
+                        MainActivity.editChatOption_IV.setVisibility(View.GONE);
+                        MainActivity.replyChatOption_IV.setVisibility(View.GONE);
+                        MainActivity.emojiChatOption_IV.setVisibility(View.GONE);
+                        MainActivity.pinChatOption_IV.setVisibility(View.GONE);
+                        MainActivity.pinAllIndicator.setVisibility(View.GONE);
+                    }
+
+                    // add position to list to help retain the background color when user scroll
+                    chatPositionList.add(chatPosition);
+
+                    // Set the background color to the highlighted color
+                    if (currentColor != highlightedColor)
+                        itemView.setBackgroundColor(highlightedColor);
+
+                } else {
+                    Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
                 }
 
-                // add position to list to help retain the background color when user scroll
-                chatPositionList.add(chatPosition);
-
-                // Set the background color to the highlighted color
-                if (currentColor != highlightedColor)
-                    itemView.setBackgroundColor(highlightedColor);
-
             } else {
-                Toast.makeText(mContext, "Subscribe to Premium to enjoy high features", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mContext.getString(R.string.subscribe), Toast.LENGTH_SHORT).show();
             }
 
         } else {
@@ -1363,13 +1399,25 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // toggle edit icon
         for(MessageModel model : MainActivity.chatModelList){
-            if (model.getType() == 1 || !model.getFromUid().equals(myId)
-                    || model.getPhotoUriPath() != null) {
-                if(model.getPhotoUriPath() != null){
+            if ( (model.getType() != 0 && model.getType() != 1) || !model.getFromUid().equals(myId))
+            {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+                if(model.getType() == 2 || model.getType() == 3){
                     MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
+                    if (modelChats.getType() == 2){
+                        MainActivity.onPhoto = false;
+                        MainActivity.onDocument = true;
+//                        Log.d("what is type next ", ""+model.getType() + " " + MainActivity.onPhoto + MainActivity.onDocument);
+                    }
+                    else if (modelChats.getType() == 3 || modelChats.getType() == 4) {
+                        MainActivity.onPhoto = true;
+                        MainActivity.onDocument = false;
+//                        Log.d("what is type ", ""+model.getType() + " " + MainActivity.onPhoto + MainActivity.onDocument);
+                    }
+
                 } else
                     MainActivity.editChatOption_IV.setVisibility(View.GONE);
             }
+            MainActivity.modelChatsOption = model;  // assign the last model
         }
 
         // display the total number of chat selected in the List
@@ -1379,10 +1427,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
 
-    //  =============== sending image methods
-    private void sendMyPhoto(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
+    //  =============== sending image or document methods
+    private void sendMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
         // get the photo uid owner and the sending state
-        String[] photoCheck = MainActivity.photoIdShareRef.getString(modelChats.getIdKey(), "")
+        String[] photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "")
                 .split(AllConstants.JOIN);
         if(photoCheck.length > 1){
             String otherId = photoCheck[0];
@@ -1394,17 +1442,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         loadBarVisibility(holder, modelChats);
                         // change sending to hold, to enable user resend again only when click
                         notifyItemChanged(chatPosition, new Object());
-                        MainActivity.photoIdShareRef.edit()
+                        MainActivity.documentIdShareRef.edit()
                                 .putString(modelChats.getIdKey(), otherId + AllConstants.JOIN + "hold").apply();
                     }
-                } else {    // sendPhoto incase map is empty and on "hold"
-                    loadMyPhoto(modelChats, holder, chatPosition, otherId);
+                } else {    // sendPhoto or Document in case map is empty and on "hold"
+                    loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
                 }
             } else {
                 // load image again
                 if(uploadTaskMap.get(modelChats.getIdKey()) != null) {
                     if(uploadTaskMap.get(modelChats.getIdKey()).cancel()){
-                        loadMyPhoto(modelChats, holder, chatPosition, otherId);
+                        loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
                     } else {
                         uploadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot ->{
                             double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
@@ -1412,26 +1460,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         });
                     }
                 } else {
-                    loadMyPhoto(modelChats, holder, chatPosition, otherId);
+                    loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
                 }
             }
 
-        } else Toast.makeText(mContext, "Delete and resend \uD83D\uDE4C", Toast.LENGTH_SHORT).show();
+        } else Toast.makeText(mContext, mContext.getString(R.string.resend), Toast.LENGTH_SHORT).show();
 
     }
-    private void loadMyPhoto(MessageModel modelChats, MessageViewHolder holder, int chatPosition, String otherUid){
+
+    private void loadMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition, String otherUid)
+    {
         // it's loading now, don't repeat.
-        MainActivity.photoIdShareRef.edit()
+        MainActivity.documentIdShareRef.edit()
                 .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "no").apply();
 
         // Close the previously open chat options
         closePreviousChatOption(modelChats, holder);
+        String originalUriPath = modelChats.getPhotoUriOriginal();
 
         // create the path where it should save to firebase storage
-        final String PHOTO_LOCATION_ORIGINAL_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
+        String photo_location_original_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
+        if(modelChats.getType() == 3) {
+            photo_location_original_DB = "media/documents/" + user.getUid() + "/" + System.currentTimeMillis();
+            // save to app memory to enable user open the doc via phone default pdf viewer
+            if(originalUriPath.startsWith("content://com.android")) originalUriPath = saveDocFromContentUriToAppStorage(modelChats);
+
+        } else if (modelChats.getType() == 4) {
+            photo_location_original_DB = "media/audio/" + user.getUid() + "/" + System.currentTimeMillis();
+        }
+
+        // if pdf/document, download it to app memory and update list
+        String finalOriginalUriPath = originalUriPath;
+        modelChats.setPhotoUriOriginal(finalOriginalUriPath);
+
         //  create the path - storage preference
         StorageReference originalPhotoRef = FirebaseStorage.getInstance()
-                .getReference(PHOTO_LOCATION_ORIGINAL_DB);
+                .getReference(photo_location_original_DB);
         // save the original quality image to firebase
         UploadTask uploadTaskFile_ = originalPhotoRef.putFile(Uri.parse(modelChats.getPhotoUriOriginal()));
 
@@ -1439,61 +1503,64 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
 
         // send the compressed blur to database if the original image is successful
+        String finalPhoto_location_original_DB = photo_location_original_DB;
+        // track the original photo or doc upload progress
         uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
 
-            //  create the path for the low image - storage preference
-            final String PHOTO_LOCATION_LOW = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
-            // link the path to the firebase storage instance
-            StorageReference LowPhotoRef = FirebaseStorage.getInstance()
-                    .getReference(PHOTO_LOCATION_LOW);
-            // upload the low quality image to firebase
-            UploadTask uploadTaskLow = LowPhotoRef.putFile(Uri.parse(modelChats.getPhotoUriPath()));
-            // track upload progress
-            uploadTaskLow.addOnSuccessListener(taskSnapshot1 -> {
-                // get the low quality image uri path link and send to other user
-                LowPhotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    // send the low image uri link to enable other user piccaso to auto download it quickly on first arrival
-                    String imageLinkToFBStorage = uri.toString();
-                    // get the image size and send to user before it turns null for me
-                    String getImageSize = modelChats.getImageSize();
-                    // update the local chat list
-                    modelChats.setImageSize(null);
-                    modelChats.setMsgStatus(700024);
-                    // hide the progressBar
-                    holder.progressBarLoad.setVisibility(View.GONE);
-                    notifyItemChanged(chatPosition, new Object());
+            if(modelChats.getPhotoUriPath() != null){   // sending photo or pdf
 
-                    Map imageMap = sendMap(modelChats, PHOTO_LOCATION_ORIGINAL_DB,
-                            PHOTO_LOCATION_LOW, getImageSize, imageLinkToFBStorage, null);
+                //  create the path for the low image - storage preference
+                String photo_location_low_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
+                if(modelChats.getType() == 3) {
+                    photo_location_low_DB = "media/documents/" + user.getUid() + "/" + System.currentTimeMillis();
+                }
+                // link the path to the firebase storage instance
+                StorageReference LowPhotoRef = FirebaseStorage.getInstance()
+                        .getReference(photo_location_low_DB);
+                // upload the low quality image to firebase
+                UploadTask uploadTaskLow = LowPhotoRef.putFile(Uri.parse(modelChats.getPhotoUriPath()));
+                String lowPhotoOrDocLocationOn_DB = photo_location_low_DB;
 
-                    // send image to database and update ROOM DB
-                    sendToDatabaseAndRoom(modelChats, imageMap, otherUid);  // send my photo
+                // track upload progress for low quality image or doc thumbnail
+                uploadTaskLow.addOnSuccessListener(taskSnapshot1 -> {
+                    // get the low quality image uri path link and send to other user
+                    LowPhotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        // send the low image uri link to enable other user picasso to auto download it quickly on first arrival
+                        String imageLinkToFBStorage = uri.toString();
 
-                    // delete key from Share preference, chat is already successfully sent
-                    MainActivity.photoIdShareRef.edit().remove(modelChats.getIdKey()).apply();
-                    uploadTaskMap.remove(modelChats.getIdKey());    // remove the upLoad monitor from map
+                        onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
+                                lowPhotoOrDocLocationOn_DB, otherUid, imageLinkToFBStorage);
 
-                }).addOnFailureListener(e -> {
+                    }).addOnFailureListener(e -> {
+                        loadBarVisibility(holder, modelChats);
+                        Toast.makeText(mContext, "Upload failed_", Toast.LENGTH_SHORT).show();
+                        MainActivity.documentIdShareRef.edit()
+                                .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+                    });
+
+                }).addOnFailureListener(exception -> {
+                    // Handle unsuccessful uploads
                     loadBarVisibility(holder, modelChats);
-                    Toast.makeText(mContext, "Upload failed_", Toast.LENGTH_SHORT).show();
-                    MainActivity.photoIdShareRef.edit()
+                    Toast.makeText(mContext, "Upload failed__", Toast.LENGTH_SHORT).show();
+                    MainActivity.documentIdShareRef.edit()
                             .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+                    // delete the path from the app memory
+                    MainActivity.deleteSingleUriFromAppMemory(finalOriginalUriPath);
                 });
 
-            }).addOnFailureListener(exception -> {
-                // Handle unsuccessful uploads
-                loadBarVisibility(holder, modelChats);
-                Toast.makeText(mContext, "Upload failed__", Toast.LENGTH_SHORT).show();
-                MainActivity.photoIdShareRef.edit()
-                        .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
-            });
+            } else { // sending docx, cdr, psd, apk etc
+                onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
+                        null, otherUid, null);
+            }
 
         }).addOnFailureListener(exception -> {
             // Handle unsuccessful uploads
-            Toast.makeText(mContext, "Upload failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
             loadBarVisibility(holder, modelChats);
-            MainActivity.photoIdShareRef.edit()
+            MainActivity.documentIdShareRef.edit()
                     .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+            // delete the path from the app memory
+            MainActivity.deleteSingleUriFromAppMemory(finalOriginalUriPath);
         }).addOnProgressListener(taskSnapshot -> {
             // Calculate progress percentage
             double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
@@ -1502,14 +1569,24 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    private void downloadPhotoSentByOtherUser(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
+    private void downloadPhotoOrDocSentByOtherUser(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
     {
+        //media/documents/AZkfy6uZunMfMUxR7HIol4rPZBq2/1708199920604winnerChatJoinPathsnull
+        String pathToFirebase = modelChats.getPhotoUriOriginal();
+        if(pathToFirebase.contains(AllConstants.JOIN)){ // split in case the null was not removed
+            String splitPath[] = pathToFirebase.split(AllConstants.JOIN);
+            pathToFirebase = splitPath[0];
+        }
+        Log.d("Checking the name", pathToFirebase);
         // get the path of the original image on the firebase storage
         StorageReference storageRef = FirebaseStorage.getInstance()
-                .getReference(modelChats.getPhotoUriOriginal());
+                .getReference(pathToFirebase);
 
         // create the path where you want to download the image on phone storage
-        File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(mContext), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
+        File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(mContext), mContext.getString(R.string.app_name) + System.currentTimeMillis() + ".jpg");
+        if(modelChats.getType() == 3){
+            saveImageToPhoneUri = new File(getDocumentFolder(mContext), mContext.getString(R.string.app_name) + "_" + modelChats.getMessage() );
+        }
         Uri savePath = Uri.fromFile(saveImageToPhoneUri);
 
         // download the image from database into the part
@@ -1599,11 +1676,40 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         });
 
     }
+
+    private void openDocumentFromUrl(String documentUri) throws URISyntaxException {
+        if(permissions.isStorageOk(mContext)){
+            if(documentUri.startsWith("file:/")) {
+                File docFile = new File(new URI(documentUri));   // starts with file/
+                Uri docContentUri = FileProvider.getUriForFile(mContext, "com.pixel.chatapp.fileprovider", docFile);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String mimeType = mContext.getContentResolver().getType(docContentUri); // get the type -> pdf, docx jpeg etc
+                intent.setDataAndType(docContentUri, mimeType);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                try {
+//                    mContext.startActivity(Intent.createChooser(intent, "Open Document with"));
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    // Handle no PDF viewer installed case
+                    Toast.makeText(mContext, "No document viewer installed", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(mContext, mContext.getString(R.string.permission), Toast.LENGTH_SHORT).show();
+//            permissions.requestStorage();
+        }
+
+    }
+
+    // save small image (thumbnail) to phone
     public static File saveImageToPhone(Bitmap bitmap, int quality, Context mContext){
 
-        String fileName = "WinnerChat_" + System.currentTimeMillis() + ".jpg";
+        String fileName = mContext.getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg";
         // create the path where you want to save the image on phone storage
-        File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(mContext), fileName);
+        File saveImageToPhoneUri = new File(MainActivity.getThumbnailFolder(mContext), fileName);
 
         // download the blur thump image to phone
         OutputStream outputStream = null;
@@ -1631,14 +1737,57 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return saveImageToPhoneUri;
     }
 
+    private void onSendingSuccessful(MessageModel modelChats, int chatPosition, MessageViewHolder holder,
+                                     String finalPhoto_location_original_DB, String lowPhotoOrDocLocationOn_DB,
+                                     String otherUid, String imageLinkToFBStorage)
+    {
+        // get the image size and send to user before it turns null for me
+        String getImageSize = modelChats.getImageSize();
+        // update the local chat list
+        modelChats.setImageSize(null);
+        modelChats.setMsgStatus(700024);
+        // hide the progressBar
+        holder.progressBarLoad.setVisibility(View.GONE);
+        notifyItemChanged(chatPosition, new Object());
 
+        Map imageMap = sendMap(modelChats, finalPhoto_location_original_DB,
+                lowPhotoOrDocLocationOn_DB, getImageSize, imageLinkToFBStorage, null);
+
+        // send image to database and update ROOM DB
+        sendToDatabaseAndRoom(modelChats, imageMap, otherUid);  // send my photo
+
+        // delete key from Share preference, chat is already successfully sent
+        MainActivity.documentIdShareRef.edit().remove(modelChats.getIdKey()).apply();
+        uploadTaskMap.remove(modelChats.getIdKey());    // remove the upLoad monitor from map
+
+    }
+
+    private void displayLowImageOrDocumentThumbnail(Uri imageUri_, MessageViewHolder holder, MessageModel modelChats){
+        if(modelChats.getType() == 2){
+            holder.documentContainer.setVisibility(View.GONE);
+            holder.showImage.setVisibility(View.VISIBLE);
+            Glide.with(mContext).load(imageUri_).into(holder.showImage);
+
+        } else if (modelChats.getType() == 3) {
+            holder.showImage.setVisibility(View.GONE);
+            holder.documentContainer.setVisibility(View.VISIBLE);   // make the document container visible
+            holder.documentDetails_TV.setText(modelChats.getEmojiOnly());   // I used document details to replace emojiOnly
+            holder.document_IV.setVisibility(View.VISIBLE);
+            Glide.with(mContext).load(imageUri_).into(holder.document_IV);  // display the document thumbnail
+
+        } else {    // remove later
+            holder.showImage.setVisibility(View.VISIBLE);
+            Glide.with(mContext).load(imageUri_).into(holder.showImage);
+        }
+
+    }
 
     private void downloadLowImageFrom_FB_Storage( MessageModel modelChats, Uri imageUri_){
         if(!modelChats.getFromUid().equals(myId)){
             // check if the low quality photo uri path is internet link
             if(modelChats.getPhotoUriPath().toLowerCase().startsWith("http://")
-                    || modelChats.getPhotoUriPath().toLowerCase().startsWith("https://")){
-
+                    || modelChats.getPhotoUriPath().toLowerCase().startsWith("https://"))
+            {
                 Glide.with(mContext)
                         .asBitmap()
                         .load(imageUri_)
@@ -1672,6 +1821,44 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
+    private String saveDocFromContentUriToAppStorage(MessageModel modelChats) {
+            // Get the content resolver
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        // Open an input stream for the content URI
+        try {
+            // Open an input stream for the content URI
+            InputStream inputStream = contentResolver.openInputStream(Uri.parse(modelChats.getPhotoUriOriginal()));
+
+            String[] fileName = modelChats.getEmojiOnly().split("\n");
+
+            // Create a file in your app's internal storage directory
+            File pdfFile = new File(getDocumentFolder(mContext), mContext.getString(R.string.app_name) + "_" + fileName[0] );
+
+            // Copy the content from the input stream to the file
+            OutputStream outputStream = new FileOutputStream(pdfFile);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Close streams
+            outputStream.close();
+            inputStream.close();
+
+//            return pdfFile.getPath();
+            Uri uri = Uri.fromFile(pdfFile);
+            return uri.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle errors
+        }
+
+        return null;
+    }
+
 
     //  =============== voice note methods
 
@@ -1685,7 +1872,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             mapLastDuration.put(modelChats.getIdKey(), mediaPlayer.getCurrentPosition());
             handler1.removeCallbacks(runnable);
             // change back to the total time duration
-            String timeLabel = formatDuration(mediaPlayer.getDuration());
+            String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(mediaPlayer.getDuration()) +  " ~ Audio"
+                    : formatDuration(mediaPlayer.getDuration());
             holder.totalMinute_TV.setText(timeLabel);
             // stop and recreate media player instance
             mediaPlayer.release();
@@ -1697,7 +1885,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.pauseAndPlay_IV.setImageResource(R.drawable.baseline_pause_24);
             try {
                 // sent the path to the media player to source for the voice note
-                mediaPlayer.setDataSource(modelChats.getVoiceNote());
+                if(modelChats.getVoiceNote().equals("content://media")) {
+                    Uri uri = Uri.parse(modelChats.getVoiceNote());
+                    mediaPlayer.setDataSource(mContext, uri);
+                } else {
+                    mediaPlayer.setDataSource(modelChats.getVoiceNote()); // path is file:/ or /storage  -> save to my app memory
+                }
                 mediaPlayer.prepare();
 
                 // check if vn has been played before and get the last saved seekProgress position
@@ -1715,7 +1908,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.pauseAndPlay_IV.setImageResource(R.drawable.baseline_play_arrow_24);
                 mediaPlayer.release(); // Release the MediaPlayer in case of an exception
                 mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
-                Toast.makeText(mContext, "Voice note doesn't exist", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mContext.getString(R.string.notFound), Toast.LENGTH_SHORT).show();
+                System.out.println("what is get error " + e.getMessage());
+
             }
         }
         // Reset the MediaPlayer when playback is complete
@@ -1733,7 +1928,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.seekBarProgress.setProgress(currentPosition);
 
                 // set the time progress as it's playing
-                String timeLabel = formatDuration(currentPosition);
+                String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(currentPosition) + " ~ Audio"
+                        : formatDuration(currentPosition);
                 holder.totalMinute_TV.setText(timeLabel);
 
                 // save currentPosition as the lastPosition
@@ -1781,7 +1977,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             }
 
                             // set the time progress as it's playing
-                            String timeLabel = formatDuration(progress);
+                            String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(progress) + " ~ Audio"
+                                    : formatDuration(progress);
                             holder.totalMinute_TV.setText(timeLabel);
 
                         } else{ // lastId is not the current id
@@ -1803,7 +2000,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             mapLastDuration.put(modelChats.getIdKey(), progress);
 
                             // set the time progress to the new selected progress textView
-                            String timeLabel = formatDuration(progress);
+                            String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(progress) + " ~ Audio"
+                                    : formatDuration(progress);
                             holder.totalMinute_TV.setText(timeLabel);
 
                             lastHolder_ = holder;
@@ -1840,13 +2038,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         autoRunnableProgress(modelChats, holder); // on click
 
         // send voice note
-        final String VN_PATH_TO_FB_STORAGE = "media/voice_note/" + user.getUid() +  "/" + System.currentTimeMillis();
+        String VN_OR_AUDIO_PATH_TO_FB_STORAGE = "media/voice_note/" + user.getUid() +  "/" + System.currentTimeMillis();
+        if(modelChats.getVnDuration().contains("Audio")){
+            VN_OR_AUDIO_PATH_TO_FB_STORAGE = "media/audio/" + user.getUid() +  "/" + System.currentTimeMillis();
+        }
+
+        final String VN_PATH_TO_FB_STORAGE = VN_OR_AUDIO_PATH_TO_FB_STORAGE; // get the final path to firebase
         //  create the path - storage preference
         StorageReference voiceNoteRef = FirebaseStorage.getInstance()
                 .getReference(VN_PATH_TO_FB_STORAGE);
-
+System.out.println("what is path + " + modelChats.getVoiceNote());
         //  get the uri file from phone path
-        Uri audioFile = Uri.fromFile(new File(modelChats.getVoiceNote()));
+        Uri audioFile = Uri.fromFile(new File(modelChats.getVoiceNote()));  // path begins with /storage:
+        // convert uri to new URI if path starts with
+        if(modelChats.getVoiceNote().equals("content://media")) audioFile = Uri.parse(modelChats.getVoiceNote());
 
         // save to firebase storage
         UploadTask uploadVoiceNote = voiceNoteRef.putFile(audioFile);
@@ -1874,11 +2079,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }).addOnFailureListener(e -> {
             holder.circleDownload.setVisibility(View.VISIBLE);
             holder.progressBar.setVisibility(View.GONE);
-            Toast.makeText(mContext, "Voice note failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.notFound), Toast.LENGTH_SHORT).show();
             uploadTaskMap.remove(modelChats.getIdKey());    // remove the upLoad monitor from map
             progressMap.remove(modelChats.getIdKey());
             notifyItemChanged(chatPosition, new Object());
-
+            System.out.println("what is voice note fail " + e.getMessage());
+// An unknown error occurred, please check the HTTP result code and inner exception for server response.
         }).addOnProgressListener(taskSnapshot -> {
             // Calculate progress percentage
             double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
@@ -1901,7 +2107,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 .getReference(modelChats.getVoiceNote());
 
         // create the path to download the voice note to
-        File voiceNoteSavingPath = new File(getRecordFilePath(mContext));
+        File voiceNoteSavingPath;
+        if ( modelChats.getVoiceNote().contains("Audio") ) {
+            voiceNoteSavingPath = new File(getAudioFolder(mContext), "Audio_" + System.currentTimeMillis() + ".3gp");
+        } else {
+            voiceNoteSavingPath = new File(getVoiceNoteFolder(mContext), "voice_note_" + System.currentTimeMillis() + ".3gp");
+        }
         FileDownloadTask fileDownloadTask = voiceNoteRef.getFile(voiceNoteSavingPath);  // download
 
         // save to map to track the progress in case user scroll back to the position
@@ -1958,8 +2169,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             @Override
             public void run() {
                 // Increment progress by 5
+                int rate = modelChats.getType() == 1 ? 3 : 1;
                 int currentProgress = holder.progressBar.getProgress();
-                holder.progressBar.setProgress(currentProgress + 3);
+                holder.progressBar.setProgress(currentProgress + rate);
                 progressMap.put(modelChats.getIdKey(), currentProgress);
 
                 // Check if progress is 80, and remove callbacks to stop updates
@@ -1993,7 +2205,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             } else {    // send the last seekBar progress and time
                 holder.totalMinute_TV.setText(modelChats.getVnDuration());
-                holder.seekBarProgress.setMax(parseDuration(modelChats.getVnDuration()));
+                String dur = modelChats.getVnDuration();
+                if(modelChats.getVnDuration().contains("Audio")){
+                    String sp[] = modelChats.getVnDuration().split("Audio");
+                    dur = sp[0];
+                }
+                holder.seekBarProgress.setMax(parseDuration(dur)); // done
                 if(mapLastDuration.get(modelChats.getIdKey()) != null){
                     holder.seekBarProgress.setProgress( mapLastDuration.get(modelChats.getIdKey()) );
                 }
@@ -2140,7 +2357,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private void trackLoadProgress(double progress, MessageViewHolder holder, MessageModel modelChats)
     {
         // for image
-        if(holder.progressBarLoad != null){
+        if(holder.progressBarLoad != null){     // for image or document
             int whiteColor = ContextCompat.getColor(mContext, R.color.white);
             // Set the indeterminate tint color for the ProgressBar to white
             holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(whiteColor));
@@ -2376,6 +2593,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         public ImageView showImage;
         TextView loadProgressTV;
 
+        // document display
+        private ConstraintLayout documentContainer;
+        private ImageView document_IV;
+        private TextView documentDetails_TV;
+
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -2424,6 +2646,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 speedTV = itemView.findViewById(R.id.speedTV_S);
 
             } else if (status == sendPhoto || status == receivePhoto) {
+
                 constraintMsgContainer = itemView.findViewById(R.id.senderLayerContainer);
                 // photo and progress bar
                 showImage = itemView.findViewById(R.id.photoCardSender);
@@ -2442,6 +2665,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 linearLayoutReplyBox = itemView.findViewById(R.id.linearLayoutReplyBox_PS);
                 replyChat_TV = itemView.findViewById(R.id.textViewReply_PS);
                 senderNameTV = itemView.findViewById(R.id.senderNameTV_PS);
+
+                // document
+                documentContainer = itemView.findViewById(R.id.documentContainer);
+                document_IV = itemView.findViewById(R.id.document_IV);
+                documentDetails_TV = itemView.findViewById(R.id.documentDetails_TV);
 
             }  else {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
@@ -2496,10 +2724,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public int getItemViewType(int position) {
+
+        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+
         MessageModel chat = modelList.get(position);
         // check if the chat is from me via my uid
         if(chat.getFromUid().equals(myId)){
-            if(chat.getPhotoUriPath() != null){
+            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3){
                 status = sendPhoto;
                 return sendPhoto;
             } else {
@@ -2507,7 +2738,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 return send;
             }
         } else {    //  chat is from other user
-            if(chat.getPhotoUriPath() != null){
+            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3){
                 status = receivePhoto;
                 return receivePhoto;
             } else {

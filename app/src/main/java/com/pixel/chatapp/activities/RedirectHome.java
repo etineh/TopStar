@@ -1,19 +1,28 @@
 package com.pixel.chatapp.activities;
 
 import static com.pixel.chatapp.home.MainActivity.appActivity;
+import static com.pixel.chatapp.home.MainActivity.getDocumentFolder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.pdf.PdfRenderer;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -61,8 +70,16 @@ public class RedirectHome extends AppCompatActivity {
 
         MainActivity.sharingPhotoActivated = true;
 
-        new Handler().postDelayed(()-> getIntentPhoto(getIntent()), 50);
+//        for image and video and pdf selected > "*/*"
+        // for image/s selected > "image/*" or "image/jpeg" or "image/png"
+        // for video/s selected > "video/*" or "video/mp4"
+        // for audio selected > "audio/*" or "audio/mpeg"
+        // for msWord/s elected > "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        // for pdf/s selected > "application/pdf"
+        // for doc and pdf > "application/*"
 
+        new Handler().postDelayed(()-> getIntentPhoto(getIntent()), 50);
+System.out.println("what is type " + getIntent().getParcelableExtra(Intent.EXTRA_STREAM));
     }
 
     //  ======  image methods ====================
@@ -73,161 +90,220 @@ public class RedirectHome extends AppCompatActivity {
 
             // check if it contain single image or multiple images
         if (Intent.ACTION_SEND.equals(intent.getAction()) && intent.getType() != null) {    // if single image
-            onlyOnePhotoShared(intent, getUriList);
+            onlyOneFileShared(intent, getUriList);
 
         } else if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction()) && intent.hasExtra(Intent.EXTRA_STREAM))
         {
             // it contain multiple image below
-            containMultiplePhoto(intent, getUriList);
+            containMultipleFiles(intent, getUriList);
         }
 
     }
 
-    private void onlyOnePhotoShared(Intent intent, List<MessageModel> getUriList)
+    private void onlyOneFileShared(Intent intent, List<MessageModel> getUriList)
     {
-        if ((Objects.requireNonNull(intent.getType())).contains("image")) {
+        Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+        if (MainActivity.chatModelList != null) MainActivity.chatModelList.clear();
+        String getText = intent.getStringExtra(Intent.EXTRA_TEXT);
 
-            String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+        if (isPhotoFile(fileUri))   // check link if it contains only photo
+        {
+            containSinglePhoto(getUriList, chatId, getText, fileUri, true);
 
-            if (MainActivity.chatModelList != null) MainActivity.chatModelList.clear();
+        } else if (isAudioFile(fileUri))
+        {
+            containSingleAudio(getUriList, chatId, getText, fileUri, true); // for only Audio
 
-            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-            String getText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        } else if (isVideoFile(fileUri))
+        {
 
-            // save the original image to app directory if it is shared from external app like telegram of whatsapp
-            assert imageUri != null;
-            if(!imageUri.toString().startsWith("content://media")){
-                imageUri = saveHighQualityImageToStorage(null, imageUri, 50);
-                String size = getImageSize(imageUri);
-                // no need to rotate photo since it's coming from other app. Everything must have been done there.
-                Uri lowImage = reduceImageSize(null, imageUri, 400);
-
-                MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                        System.currentTimeMillis(), chatId, null, 8, null,
-                        700033, 0, size, null, false, false,
-                        null, null, null, null, lowImage.toString(), imageUri.toString());
-
-                addPhotoUriToSharePref(lowImage.toString(), imageUri.toString());
-
-                if (MainActivity.chatModelList != null)     // call MainActivity
-                    MainActivity.chatModelList.add(messageModel);
-
-                getUriList.add(messageModel);  // this is when the app launch the first time
-                finishSinglePhoto(getUriList);
-
-            } else // it's coming from phone storage
-            {
-                Glide.with(this).load(imageUri);
-                // save low image via Glide to correct rotation
-                Glide.with(this)
-                        .asBitmap()
-                        .load(imageUri)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                Uri imageUri2 = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                                String size = getImageSize(imageUri2);
-                                Uri lowImage = reduceImageSize(resource, null, 500);
-
-                                assert imageUri2 != null;
-                                MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                                        System.currentTimeMillis(), chatId, null, 8, null,
-                                        700033, 0, size, null, false, false,
-                                        null, null, null, null, lowImage.toString(), imageUri2.toString());
-
-                                addPhotoUriToSharePref(lowImage.toString(), imageUri2.toString());
-
-                                if (MainActivity.chatModelList != null) MainActivity.chatModelList.add(messageModel);
-
-                                getUriList.add(messageModel);  // this is when the app launch the first time
-
-                                finishSinglePhoto(getUriList);
-                            }
-
-                        });
-            }
+        } else
+        {   // pdf, msWord, Cdr, photoshop
+            containSingleDocument(getUriList, chatId, getText, fileUri, true);
 
         }
 
     }
 
-    private void containMultiplePhoto(Intent intent, List<MessageModel> getUriList)
+    private void containMultipleFiles(Intent intent, List<MessageModel> getUriList)
     {
-        List<Uri> imageUrisList = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);  // get the images
+        List<Uri> fileUrisList = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);  // get the images
+        String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+
         // check if MainActivity is already activity to avoid null error
         if (MainActivity.chatModelList != null) MainActivity.chatModelList.clear();
 
         // loop through the photos
-        for (int i = 0; i < imageUrisList.size(); i++) {    // might from this part later because multiple image only comes from phone Gallery
-            Uri eachUri = imageUrisList.get(i);
-            // save the original image to app directory if it is shared from external app like telegram of whatsapp
-            if(!eachUri.toString().startsWith("content://media")){
-                eachUri = saveHighQualityImageToStorage(null, eachUri, 50);
-                String size = getImageSize(eachUri);
-                // no need to rotate photo since it's coming from other app. Everything must have been done there.
-                Uri lowImage = reduceImageSize(null, eachUri, 400);
+        for (int i = 0; i < fileUrisList.size(); i++) {    // might from this part later because multiple image only comes from phone Gallery
+            int position = i;
+            Uri fileUri = fileUrisList.get(position);
 
-                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+            if (isPhotoFile(fileUri))   // check link if it contains only photo
+            {
+                containSinglePhoto(getUriList, chatId, null, fileUri, false);
 
-                MessageModel messageModel = new MessageModel(null, user.getUid(), null, null,
-                        System.currentTimeMillis(), chatId, null, 8,
-                        null, 700033, 0, size, null, false, false,
-                        null, null, null, null, lowImage.toString(), eachUri.toString());
+            } else if (isAudioFile(fileUri))
+            {
+                containSingleAudio(getUriList, chatId, null, fileUri, false);
 
-                addPhotoUriToSharePref(lowImage.toString(), eachUri.toString());
+            } else if (isVideoFile(fileUri))
+            {
 
-                if (MainActivity.chatModelList != null)     // call MainActivity
-                    MainActivity.chatModelList.add(messageModel);
-
-                getUriList.add(messageModel);  // this is when the app launch the first time
-
-                finishMultiplePhoto(i, imageUrisList, getUriList);
-
-            } else {    // it it coming from phone storage
-
-                int position = i;
-                Uri eachUri2 = imageUrisList.get(position);
-                Glide.with(this).load(eachUri2); // to save the memory first
-                // save low image via Glide to correct rotation
-                Glide.with(this)
-                        .asBitmap()
-                        .load(eachUri2)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                String size = getImageSize(eachUri2);   // get the size of the image
-                                Uri lowImage = reduceImageSize(resource, null, 500);    // convert it to low quality
-
-                                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
-
-                                MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                        System.currentTimeMillis(), chatId, null, 8,
-                                        null, 700033, 0, size, null, false, false,
-                                        null, null, null, null, lowImage.toString(), eachUri2.toString());
-
-                                addPhotoUriToSharePref(lowImage.toString(), eachUri2.toString());
-
-                                if (MainActivity.chatModelList != null) MainActivity.chatModelList.add(messageModel);
-
-                                getUriList.add(messageModel);  // this is when the app launch the first time
-
-                                finishMultiplePhoto(position, imageUrisList, getUriList);
-                            }
-                        });
+            } else {
+                // pdf, msWord, Cdr, photoshop, apk
+                containSingleDocument(getUriList, chatId, null, fileUri, false);    // for multiple
             }
 
+            new Handler().postDelayed(()->{
+                finishMultiplePhoto(position, fileUrisList, getUriList);
+            }, 1000);
         }
+    }
+
+    private void containSinglePhoto(List<MessageModel> getUriList, String chatId, String getText, Uri fileUri, boolean isSingle)
+    {
+        // save the original image to app directory if it is shared from external app like telegram of whatsapp
+        if(!fileUri.toString().startsWith("content://media")){
+            fileUri = saveHighQualityImageToStorage(null, fileUri, 50);
+            String size = getImageSize(fileUri);
+            // no need to rotate photo since it's coming from other app. Everything must have been done there.
+            Uri lowImage = reduceImageSize(null, fileUri, 400);
+
+            MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
+                    System.currentTimeMillis(), chatId, null, 8, null,
+                    700033, 2, size, null, false, false,
+                    null, null, null, null, lowImage.toString(), fileUri.toString());
+
+            addPhotoUriToSharePref(lowImage.toString(), fileUri.toString());   // to enable delete if user didn't send again or app went onDestroy()
+
+            if (MainActivity.chatModelList != null)     // call MainActivity
+                MainActivity.chatModelList.add(messageModel);
+
+            getUriList.add(messageModel);  // this is when the app launch the first time
+            if (isSingle) {
+                finishSingleFile(getUriList);
+            }
+
+        } else // it's coming from phone storage
+        {
+            Uri fileUri2 = fileUri;
+            String size = getImageSize(fileUri2);
+
+            Glide.with(this).load(fileUri);
+            // save low image via Glide to correct rotation
+            Glide.with(this)
+                    .asBitmap()
+                    .load(fileUri2)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//                            Uri imageUri2 = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                            Uri lowImage = reduceImageSize(resource, null, 500);
+                            // 1 is voice note, 2 is photo, 3 is document, 4 is audio
+                            MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
+                                    System.currentTimeMillis(), chatId, null, 8, null,
+                                    700033, 2, size, null, false, false,
+                                    null, null, null, null, lowImage.toString(), fileUri2.toString());
+
+                            addPhotoUriToSharePref(lowImage.toString(), fileUri2.toString());
+
+                            if (MainActivity.chatModelList != null) MainActivity.chatModelList.add(messageModel);
+
+                            getUriList.add(messageModel);  // this is when the app launch the first time
+
+                            if (isSingle) {
+                                finishSingleFile(getUriList);
+                            }
+                        }
+
+                    });
+        }
+    }
+
+    private void containSingleAudio(List<MessageModel> getUriList, String chatId, String getText, Uri fileUri, boolean isSingle)
+    {
+        String fileUriString = fileUri.toString();
+        // save the original audio to app directory if it is shared from external app like telegram of whatsapp
+        if(!fileUri.toString().startsWith("file:/")){
+            fileUriString = saveFileFromContentUriToAppStorage(fileUri); // copy to app memory
+//            Toast.makeText(this, "preparing audio", Toast.LENGTH_SHORT).show();
+        }
+
+        // Convert file size to kilobytes (KB) and megabytes (MB)
+        int fileSizeKB = (int) getAudioFileSize(fileUri) / 1024; // Size in kilobytes
+        int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
+
+        String fileName = getFileName(fileUri) + "\n\n" + fileSizeMB + " MB";
+
+        String formattedDuration = formatDuration((int) getAudioDuration(fileUri));   // don't auto download for other user if size is greater than 500kb
+        String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
+
+        MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
+                System.currentTimeMillis(), chatId, null, 8, null,
+                700033, 4, null, null, false, false,
+                null, fileName, fileUriString, sizeOrDuration, null, null);
+
+        addPhotoUriToSharePref(null, fileUriString);   // to enable delete if user didn't send again or app went onDestroy()
+
+        if (MainActivity.chatModelList != null)     // call MainActivity
+            MainActivity.chatModelList.add(messageModel);
+
+        getUriList.add(messageModel);  // this is when the app launch the first time
+
+        if (isSingle) {
+            finishSingleFile(getUriList);
+        }
+
+    }
+
+    // for pdf, docx, corel draw, apk, photoshop, etc
+    private void containSingleDocument(List<MessageModel> getUriList, String chatId, String getText, Uri fileUri, boolean isSingle)
+    {
+        String fileUriString = fileUri.toString();
+        // save the original audio to app directory if it is shared from external app like telegram of whatsapp
+        if(!fileUri.toString().startsWith("file:/")){
+            fileUriString = saveFileFromContentUriToAppStorage(fileUri); // copy to app memory
+//            Toast.makeText(this, "preparing pdf", Toast.LENGTH_SHORT).show();
+        }
+
+        String pdfSize = getFileSize(fileUri);  // kb or mb
+        String numberOfPages = "";
+        String lowUri = null;
+        if (isPdfFile(fileUri)) {
+            numberOfPages = getNumberOfPdfPages(fileUri) + " " + getString(R.string.page) + " ~ ";
+            lowUri = getThumbnailFromPdfUri(fileUri).toString();
+        }
+        String pdfDetails = getFileName(fileUri) + "\n" + numberOfPages + pdfSize + " ~ document";
+
+
+        MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
+                System.currentTimeMillis(), chatId, null, 8, null,
+                700033, 3, pdfSize, null, false, false,
+                null, pdfDetails, null, null, lowUri, fileUriString); // I used emojiOnly for the pdfDetails
+
+        addPhotoUriToSharePref(null, fileUriString);   // to enable delete if user didn't send again or app went onDestroy()
+
+        if (MainActivity.chatModelList != null)     // call MainActivity
+            MainActivity.chatModelList.add(messageModel);
+
+        getUriList.add(messageModel);  // this is when the app launch the first time
+
+        if (isSingle) {
+            finishSingleFile(getUriList);
+        }
+
     }
 
     // save each uri to sharePref via gson
     private void addPhotoUriToSharePref(String lowerUri, String highUri){
-        photoUri.add(lowerUri);
-        photoUri.add(highUri);
+        if(lowerUri != null)photoUri.add(lowerUri);
+        if(highUri != null) photoUri.add(highUri);
         String uriToJson = gson.toJson(photoUri);
         photoShareRef.edit().putString(AllConstants.OLD_URI_LIST, uriToJson).apply();
     }
 
-    private void finishSinglePhoto(List<MessageModel> getUriList){
+    private void finishSingleFile(List<MessageModel> getUriList){
         new Handler().postDelayed(() -> {
             if (MainActivity.chatModelList == null){    // app is launching first time
                 onAppFirstLaunch(getUriList);
@@ -259,7 +335,43 @@ public class RedirectHome extends AppCompatActivity {
             }, 300);
         }
     }
-    
+
+
+    private String formatDuration(int durationInMillis) {
+        int seconds = durationInMillis / 1000;
+        int minutes = seconds / 60;
+        seconds = seconds % 60;
+
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    private long getAudioFileSize(Uri audioUri) {
+        ContentResolver contentResolver = getContentResolver();
+        Cursor cursor = contentResolver.query(audioUri, null, null, null, null);
+        long size = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            if (sizeIndex != -1) {
+                size = cursor.getLong(sizeIndex); // Size in bytes
+            }
+            cursor.close();
+        }
+        return size;
+    }
+
+    private long getAudioDuration(Uri audioUri) {
+        try {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(getApplicationContext(), audioUri);
+            String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            long duration = Long.parseLong(durationStr); // Duration in milliseconds
+            retriever.release();
+            return duration;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Uri reduceImageSize(Bitmap bitmapImage, Uri originalImageUri, int maxSize) {
         try {
             // Get the original bitmap from the Uri
@@ -293,7 +405,7 @@ public class RedirectHome extends AppCompatActivity {
                     centerY - (lowDimension / 2), lowDimension, lowDimension);
 
             // save the photo to phone app memory
-            File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(this), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
+            File saveImageToPhoneUri = new File(getThumbnailFolder(), getString(R.string.app_name) + System.currentTimeMillis() + "_.jpg");
             OutputStream outputStream;
             try {
                 outputStream = new FileOutputStream(saveImageToPhoneUri);
@@ -313,10 +425,8 @@ public class RedirectHome extends AppCompatActivity {
     }
 
     private Uri saveHighQualityImageToStorage(Bitmap bitmapImage, Uri imageUri, int compressionPercentage) {
-
-        String fileName = "WinnerChat_" + System.currentTimeMillis() + ".jpg";
         // create the path where you want to save the image on phone storage
-        File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(this), fileName);
+        File saveImageToPhoneUri = new File(getPhotoFolder(), getString(R.string.app_name) + System.currentTimeMillis() + getFileName(imageUri));
 
         // download the blur thump image to phone
         OutputStream outputStream;
@@ -377,8 +487,32 @@ public class RedirectHome extends AppCompatActivity {
         startActivity(mainActivityIntent);
     }
 
-    public File getPhotoFolder(){
+    private File getPhotoFolder(){
         File appSpecificFolder = new File(getExternalFilesDir(null), AllConstants.ALL_PHOTOS);
+        if (!appSpecificFolder.exists()) {
+            appSpecificFolder.mkdirs();
+        }
+        return appSpecificFolder;
+    }
+
+    private File getThumbnailFolder(){
+        File appSpecificFolder = new File(getExternalFilesDir(null), AllConstants.ALL_THUMBNAIL);
+        if (!appSpecificFolder.exists()) {
+            appSpecificFolder.mkdirs();
+        }
+        return appSpecificFolder;
+    }
+
+    private File getDocumentFolder(){
+        File appSpecificFolder = new File(getExternalFilesDir(null), AllConstants.ALL_DOCUMENTS);
+        if (!appSpecificFolder.exists()) {
+            appSpecificFolder.mkdirs();
+        }
+        return appSpecificFolder;
+    }
+
+    private File getAudioFolder(){
+        File appSpecificFolder = new File(getExternalFilesDir(null), AllConstants.ALL_AUDIO);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -394,6 +528,183 @@ public class RedirectHome extends AppCompatActivity {
 
     }
 
+    private Uri getThumbnailFromPdfUri(Uri uri) {
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(uri, "r");
+            if (parcelFileDescriptor != null) {
+                PdfRenderer renderer = new PdfRenderer(parcelFileDescriptor);
+                PdfRenderer.Page page = renderer.openPage(0);
+
+                // Generate thumbnail from the first page
+                Bitmap thumbnail = Bitmap.createBitmap(page.getWidth(), page.getHeight(), Bitmap.Config.ARGB_8888);
+                page.render(thumbnail, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                // Close the page and renderer
+                page.close();
+                renderer.close();
+                parcelFileDescriptor.close();
+
+                // save the photo to phone app memory
+                File saveImageToPhoneUri = new File(getThumbnailFolder(), getString(R.string.app_name) + System.currentTimeMillis() + "_jpg");
+
+                OutputStream outputStream;
+                try {
+                    outputStream = new FileOutputStream(saveImageToPhoneUri);
+                    // save the image to the phone
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                return Uri.fromFile(saveImageToPhoneUri);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private boolean isPdfFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("application/pdf");
+    }
+
+    private boolean isMsWordFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("application/msword")
+                || mimeType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    private boolean isPhotoFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("image/jpeg") || mimeType.equals("image/png") || mimeType.equals("image/*");
+    }
+
+    private boolean isAudioFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("audio/mpeg") || mimeType.equals("audio/mp3") || mimeType.equals("audio/*");
+    }
+
+    private boolean isVideoFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("video/mp4") || mimeType.equals("video/*");
+    }
+
+    private boolean isCdrFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("application/cdr") || mimeType.equals("image/cdr");
+    }
+
+    private boolean isPhotoshopFile(Uri uri) {
+        String mimeType = getContentResolver().getType(uri);
+        return mimeType != null && mimeType.equals("image/vnd.adobe.photoshop");
+    }
+
+    private String getFileName(Uri uri) {
+        String displayName = getString(R.string.app_name);
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index != -1) {
+                        displayName = cursor.getString(index);
+                    }
+                }
+            }
+        } else if (uri.getScheme().equals("file")) {
+            displayName = uri.getLastPathSegment();
+        }
+        return displayName;
+    }
+
+    private int getNumberOfPdfPages(Uri pdfUri) {
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(pdfUri, "r");
+            if (parcelFileDescriptor != null) {
+                PdfRenderer renderer = new PdfRenderer(parcelFileDescriptor);
+                int pageCount = renderer.getPageCount();
+                renderer.close();
+                parcelFileDescriptor.close();
+                return pageCount;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // get the total file length in kb or mb
+    private String getFileSize(Uri fileUri){
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(fileUri);
+            if (inputStream != null) {
+                int fileSizeBytes = inputStream.available();
+                int fileSizeKB = fileSizeBytes / 1024; // Size in kilobytes
+                int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
+
+                String sizeString = fileSizeKB < 1000.0 ? Math.round(fileSizeKB) + "kB" : Math.round(fileSizeMB) + "MB";
+
+                inputStream.close();
+
+                return sizeString;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+//            Toast.makeText(this, "Error Occur MA3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
+
+    }
+
+    //  copy the file from phone storage ("content/com.provider") to app storage ("file://"). This is to enable user share the file to other app
+    private String saveFileFromContentUriToAppStorage(Uri uriFile) {
+        // Get the content resolver
+        ContentResolver contentResolver = this.getContentResolver();
+
+        // Open an input stream for the content URI
+        try {
+            InputStream inputStream = contentResolver.openInputStream(uriFile);
+
+            // Create a file in your app's internal storage directory
+            File file;
+
+            if(isAudioFile(uriFile)){
+                file = new File(getAudioFolder(), getString(R.string.app_name) + "_" + getFileName(uriFile) );
+            } else {
+                file = new File(getDocumentFolder(), getString(R.string.app_name) + "_" + getFileName(uriFile) );
+//                file = new File(getPhotoFolder(), getString(R.string.app_name) + "_" + getFileName(uriFile) );
+            }
+
+            // Copy the content from the input stream to the file
+            OutputStream outputStream = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Close streams
+            outputStream.close();
+            inputStream.close();
+
+            Uri uri = Uri.fromFile(file);
+
+            if(isAudioFile(uriFile)) return file.getPath(); // audio needs storage/
+
+            return uri.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle errors
+        }
+
+        return null;
+    }
 
     //  ======  multiple image methods ====================
 

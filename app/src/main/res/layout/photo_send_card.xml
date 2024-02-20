@@ -61,10 +61,12 @@
             android:id="@+id/cardView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
             android:elevation="0dp"
             app:cardBackgroundColor="#00FFFFFF"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/photoChatSender_TV"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayoutReplyBox_PS">
 
@@ -75,14 +77,65 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="3dp"
                 android:scaleType="centerCrop" />
+
         </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/documentContainer"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:background="@color/dark_orange2"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/photoChatSender_TV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/document_IV"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginBottom="1dp"
+                android:scaleType="center"
+                app:layout_constraintBottom_toTopOf="@id/documentDetails_TV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/light" />
+
+            <TextView
+                android:id="@+id/documentDetails_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="1dp"
+                android:ellipsize="end"
+                android:maxLines="4"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="@color/cool_orange"
+                android:textSize="13sp"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView10" />
+
+            <ImageView
+                android:id="@+id/imageView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="1dp"
+                android:padding="5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/documentDetails_TV"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/documentDetails_TV"
+                app:srcCompat="@drawable/baseline_document_scanner_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/photoChatSender_TV"
             style="@style/textColorFullBlack"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:layout_marginEnd="4dp"
             android:autoLink="web|phone|email"
             android:gravity="start"
@@ -92,9 +145,9 @@
             android:textColorLink="@color/orange"
             android:textSize="16sp"
             android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/photoChatTimeTV"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView2" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/photoChatTimeTV"
@@ -146,10 +199,11 @@
             android:elevation="3dp"
             android:indeterminateTint="@color/orange"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/cardView2"
-            app:layout_constraintEnd_toEndOf="@+id/cardView2"
-            app:layout_constraintStart_toStartOf="@+id/cardView2"
-            app:layout_constraintTop_toTopOf="@id/cardView2" />
+            app:layout_constraintBottom_toTopOf="@+id/photoChatSender_TV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.42000002" />
 
         <TextView
             android:id="@+id/loadPhotoProgressTV"

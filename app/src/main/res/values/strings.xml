@@ -20,13 +20,25 @@
     <string name="add_message">Add message</string>
     <string name="online">Online</string>
 
+    <string name="page">pages</string>
+    <string name="photo">photo</string>
+    <string name="sending">Sending…</string>
+
+    <string name="subscribe">Subscribe to Premium to enjoy high features</string>
+    <string name="isNetwork">No network connectivity</string>
+    <string name="notSentYet">File not sent yet.</string>
+    <string name="resend">Delete and resend 🙌</string>
+    <string name="empty">Can not send empty file 🙌</string>
+    <string name="notFound">file not found…</string>
+    <string name="permission">Go to setting and grant storage permission</string>
+
 
     <string name="meet">Meet</string>
     <string name="tour">Tour.</string>
     <string name="gift">Gift</string>
     <string name="host">Host</string>
 
-    <string name="connect">connecting...</string>
+    <string name="connect">connecting…</string>
 
     <string name="newMsg">New</string>
 
@@ -37,7 +49,7 @@
     <string name="delete_for_everyone">Delete for everyone</string>
     <string name="clear_history">[Clear chats history]</string>
 
-<!--    others-->
+    <!--    others-->
     <string name="reset">Reset</string>
 
 
