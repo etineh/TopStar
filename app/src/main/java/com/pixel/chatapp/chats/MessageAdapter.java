@@ -1,35 +1,41 @@
 package com.pixel.chatapp.chats;
 
+import static com.pixel.chatapp.all_utils.FileUtils.compressVideo;
+import static com.pixel.chatapp.all_utils.FileUtils.createVideoThumbnail;
+import static com.pixel.chatapp.all_utils.FileUtils.downloadThumbnailFile;
+import static com.pixel.chatapp.all_utils.FileUtils.formatDuration;
+import static com.pixel.chatapp.all_utils.FileUtils.isFileLessThan150Kb;
+import static com.pixel.chatapp.all_utils.FileUtils.parseDuration;
+import static com.pixel.chatapp.all_utils.FileUtils.replaceSnapPhotoWithCompressFile;
+import static com.pixel.chatapp.all_utils.FileUtils.saveFileFromContentUriToAppStorage;
+import static com.pixel.chatapp.all_utils.FolderUtils.getAudioFolder;
+import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
+import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.clearAllHighlights;
 import static com.pixel.chatapp.home.MainActivity.firstTopUserDetailsContainer;
-import static com.pixel.chatapp.home.MainActivity.formatDuration;
-import static com.pixel.chatapp.home.MainActivity.getAudioFolder;
-import static com.pixel.chatapp.home.MainActivity.getDocumentFolder;
-import static com.pixel.chatapp.home.MainActivity.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.networkOk;
 import static com.pixel.chatapp.home.MainActivity.otherUserUid;
-import static com.pixel.chatapp.home.MainActivity.parseDuration;
 import static com.pixel.chatapp.home.MainActivity.recyclerMap;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.StrictMode;
-import android.util.Log;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,8 +68,11 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.pixel.chatapp.activities.CameraActivity;
 import com.pixel.chatapp.activities.ViewImageActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.all_utils.FolderUtils;
 import com.pixel.chatapp.listeners.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
@@ -72,11 +81,11 @@ import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -85,8 +94,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -96,12 +107,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public  List<MessageModel> modelList;
 
+    // Define a HashSet to store unique message IDs
+    private Set<String> messageIdSet = new HashSet<>(); // to avoid duplicate adding chat, store each id chat here
+
     public static int lastPosition = 0;
     public static List<Integer> chatPositionList = new ArrayList<>();
     public String uId;
     public String userName;
     private String otherName;
     public  Context mContext;
+
     private int status;
     private int send;
     private int sendPhoto;
@@ -140,6 +155,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private final Map<String, Integer> mapLastDuration = new HashMap<>();
     private final Map<String, MediaPlayer> mediaPlayerMap = new HashMap<>();
     private final Map<String, Integer> progressMap = new HashMap<>(); // hide download icon
+
 
     // =========    send image
     Map<String, UploadTask> uploadTaskMap = new HashMap<>();
@@ -185,17 +201,39 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     public void setModelList(List<MessageModel> modelList) {
+        // Clear the existing message ID set before adding new message IDs
+        messageIdSet.clear();
+
+        // Iterate through the modelList to extract message IDs and add them to the messageIdSet
+        for (MessageModel message : modelList) {
+            messageIdSet.add(message.getIdKey());
+        }
+
+        // Set the new modelList
         this.modelList = modelList;
+
     }
 
     // add new message to list method
-    public void addNewMessageDB(MessageModel newMessages) {
-//        if(!modelList.contains(newMessages)) {
-//        }
-            modelList.add(newMessages);
-//        Toast.makeText(mContext, "id " + newMessages.getIdKey() + "\n" + newMessages.getPhotoUriPath(), Toast.LENGTH_SHORT).show();
-//        Collections.sort(modelList, Comparator.comparingLong(MessageModel::getTimeSent));
+    public void addNewMessageDB(MessageModel newMessage) {
 
+        // Check if the message ID is already present in the HashSet
+        if (!messageIdSet.contains(newMessage.getIdKey())) {
+            // Add the new message ID to the HashSet
+            messageIdSet.add(newMessage.getIdKey());
+
+            // Add the new message to the list
+            modelList.add(newMessage);
+        } else {
+            // Display a toast message to indicate that the chat message already exists
+            Toast.makeText(mContext, "Chat message already exists", Toast.LENGTH_SHORT).show();
+        }
+
+//        if(!modelList.contains(newMessage)) {
+//            modelList.add(newMessage);
+//        } else {
+//            Toast.makeText(mContext, "Chat can't duplicate", Toast.LENGTH_SHORT).show();
+//        }
     }
 
     public void updateMessage(MessageModel chatModel, MessageViewHolder replyHolder) {
@@ -446,6 +484,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position_) {
 
+        int chatPosition = position_;     //   to get the position of each chat
+        MessageModel modelChats = modelList.get(chatPosition);    // get the model position of each chat
+
         // reset all data to default
         holder.pinIcon_IV.setVisibility(View.GONE);         // pin icon reset
         holder.forwardIcon_IV.setVisibility(View.GONE);     // forward icon reset
@@ -488,8 +529,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.documentContainer.setVisibility(View.GONE);
             holder.document_IV.setVisibility(View.GONE);
             holder.documentDetails_TV.setText("");
+            holder.loadProgressTV.setText("1 %");
             holder.showImage.setVisibility(View.VISIBLE);
             holder.showImage.setImageURI(null);
+            int orangeColor = ContextCompat.getColor(mContext, R.color.white);
+            holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(orangeColor));
+
         }
         // reset photo chat textView
 
@@ -498,14 +543,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         //  ==============    input the real data to their positions after resetting    ============
 
-        int chatPosition = position_;     //   to get the position of each chat
-//        holder.cardViewChatBox.setTag(chatPosition);        //     to get cardView position
-        MessageModel modelChats = modelList.get(chatPosition);    // get the model position of each chat
 
-        // show the time each msg was sent
-        holder.timeMsg.setText( chatTime(modelChats.getTimeSent()) );
+        holder.timeMsg.setText( chatTime(modelChats.getTimeSent()) ); // show the time each msg was sent
 
-        //  Show messages
         if(modelChats.getMessage() != null){
             if(holder.textViewShowMsg != null)
                 holder.textViewShowMsg.setText(modelChats.getMessage() + chatPosition);
@@ -514,7 +554,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.photoChatTV.setVisibility(View.VISIBLE);
                 holder.photoChatTV.setText(modelChats.getMessage());
             }
-        }
+        }   //  Show messages
 
         if(modelChats.getEmojiOnly() != null && modelChats.getType() == 0){
             holder.emojiOnly_TV.setText(modelChats.getEmojiOnly());
@@ -573,7 +613,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     ( modelChats.getPhotoUriOriginal().startsWith("media/photo") || modelChats.getPhotoUriOriginal().startsWith("media/document") )
                     || modelChats.getMsgStatus() == 700033){
 
-                if(uploadTaskMap.get(modelChats.getIdKey()) != null){
+                if(uploadTaskMap.get(modelChats.getIdKey()) != null)
+                {
                     uploadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot ->{
                         holder.progressBarLoad.setVisibility(View.VISIBLE);
                         holder.loadProgressTV.setVisibility(View.VISIBLE);
@@ -581,7 +622,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         trackLoadProgress(progress, holder, modelChats);
                     });
 
-                } else if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
+                } else if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null)
+                {
                     fileDownloadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot -> {
                         holder.progressBarLoad.setVisibility(View.VISIBLE);
                         holder.loadProgressTV.setVisibility(View.VISIBLE);
@@ -599,21 +641,30 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(modelChats.getPhotoUriPath() != null || modelChats.getType() == 3){
 
             // activate my auto image sending  ------ change later to auto download other user photo that he sent according to his settings
-            if(modelChats.getFromUid().equals(myId) && modelChats.getMsgStatus() == 700033){
-                if(networkOk){
-                    // get the photo uid owner and the sending state
-                    String photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "");
-                    String[] splitX = photoCheck.split(AllConstants.JOIN);
-                    // check if the ref is not empty
-                    if(splitX.length > 1){
-                        String otherId = splitX[0];
-                        String isSending = splitX[1];
-                        if(isSending.equals("yes")){
-
+            if( modelChats.getFromUid().equals(myId) && modelChats.getMsgStatus() == 700033
+                    && modelChats.getPhotoUriOriginal() != null ){
+                // get the photo uid owner and the sending state
+                String photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "");
+                String[] splitX = photoCheck.split(AllConstants.JOIN);
+                // check if the ref is not empty
+                if(splitX.length > 1){
+                    String otherId = splitX[0];
+                    String isSending = splitX[1];
+                    if(isSending.equals("yes")){
+                        if(networkOk){
+                            int orangeColor = ContextCompat.getColor(mContext, R.color.white);
+                            holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(orangeColor));
+                            holder.loadProgressTV.setText("2 %");
                             loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
+                        } else {
+                            // add to sharePreference to load later
                         }
                     }
+                    // it's loading now, don't repeat.
+                    MainActivity.documentIdShareRef.edit()
+                            .putString(modelChats.getIdKey(), otherId + AllConstants.JOIN + "no").apply();
                 }
+
             }
 
             // display or download the low quality image or document thumbnail  (if not downloaded yet)
@@ -622,7 +673,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 displayLowImageOrDocumentThumbnail(imageUri_, holder, modelChats);
 
                 // download the low quality photo or doc thumbnail auto from firebase (if not downloaded yet)
-                downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
+                AllConstants.executors.execute(() -> {
+                    downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
+                });
+
             } else {
                 holder.showImage.setVisibility(View.GONE);
                 holder.documentContainer.setVisibility(View.VISIBLE);
@@ -633,10 +687,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     holder.document_IV.setVisibility(View.GONE);
                 }
             }
-
-//            Picasso.get().load( imageUri_ ).into(holder.showImage);
-            holder.loadProgressTV.setText(modelChats.getImageSize());
-
 
 //            Picasso.get().load(imageUri_).into(new Target() {
 //                @Override
@@ -665,7 +715,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
 
-        // ----- Voice Note setting
+        // ----- Voice Note and Audio setting
         int visible = (int) modelChats.getType();   //  1 is visible, 4 is invisible, 8 is Gone
         if( holder.seekBarProgress != null && (visible == 1 || visible == 4) ){
             // display the view setting
@@ -686,8 +736,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
 
             // download other user voice note automatic
-            if(modelChats.getVoiceNote().startsWith("media/voice_note") && !modelChats.getFromUid().equals(myId)) {
-
+            if(modelChats.getVoiceNote().startsWith("media/voice_note")
+                    || modelChats.getVoiceNote().startsWith("media/audio") && !modelChats.getFromUid().equals(myId))
+            {
                 holder.pauseAndPlay_IV.setVisibility(View.INVISIBLE);
                 holder.circleDownload.setVisibility(View.VISIBLE);
                 if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
@@ -764,7 +815,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(holder.photoChatTV != null ) holder.photoChatTV.setOnLongClickListener(longClick);
         if(holder.textViewShowMsg != null ) holder.textViewShowMsg.setOnLongClickListener(longClick);
 
-        //  image and load bar onClick settings
+        //  image and progressLoad bar onClick settings
         if(holder.showImage != null){
 
             // for long press
@@ -776,11 +827,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             View.OnClickListener imageOrDocOnClick = view -> {
                 // check if longPress is activated yet or not
                 if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+
                     // open image if I was the one that sent them photo
                     if(modelChats.getFromUid().equals(myId) ||
                             (!modelChats.getFromUid().equals(myId) && holder.progressBarLoad.getVisibility() == View.GONE) )
                     {
-                        if(modelChats.getType() == 2 && !modelChats.getPhotoUriOriginal().startsWith("media/photo"))
+                        if((modelChats.getType() == 2 || modelChats.getType() == 5) // it is photo or video
+                                && !modelChats.getPhotoUriOriginal().startsWith("media/photo"))
                         {
                             openPhoto(modelChats, holder);  // swipe to view all photo
                         } else if (modelChats.getType() == 3 /* || modelChats.getMsgStatus() != 700033 */)
@@ -791,6 +844,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             } catch (URISyntaxException e) {
                                 throw new RuntimeException(e);
                             }
+                        } else {
+                            Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
                         }
                         // Close the previously open chat options
                         closePreviousChatOption(modelChats, holder);
@@ -799,10 +854,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
                             if(fileDownloadTaskMap.get(modelChats.getIdKey()).isInProgress() ){
                                 fileDownloadTaskMap.get(modelChats.getIdKey()).cancel();
-                                loadBarVisibility(holder, modelChats);
+                                fileDownloadTaskMap.remove(modelChats.getIdKey());  // reset the map for that chat id
                                 notifyItemChanged(chatPosition);
-                            } else
-                                downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
+                                Toast.makeText(mContext, mContext.getString(R.string.dCancel), Toast.LENGTH_SHORT).show();
+                            }
+
                         }else
                             downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                     }
@@ -817,23 +873,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.documentContainer.setOnClickListener(imageOrDocOnClick);
 
             holder.loadProgressTV.setOnClickListener(view -> {
-
+//System.out.println("what is uri " + modelChats.getPhotoUriOriginal());
                 if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
-                    if(modelChats.getFromUid().equals(myId)){
-                        if(networkOk)
-                            sendMyPhotoOrDocument(modelChats, holder, chatPosition);
-                        else Toast.makeText(mContext, "Ooops! No internet connection", Toast.LENGTH_SHORT).show();
-                    } else {
-                        if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
-                            if(fileDownloadTaskMap.get(modelChats.getIdKey()).isInProgress() ){
-                                fileDownloadTaskMap.get(modelChats.getIdKey()).cancel();
-                                loadBarVisibility(holder, modelChats);
-                                notifyItemChanged(chatPosition);
-                            } else
+
+                    if(modelChats.getPhotoUriOriginal() != null){
+                        if(modelChats.getFromUid().equals(myId)){
+                            if(networkOk)
+                                sendMyPhotoOrDocument(modelChats, holder, chatPosition);
+                            else Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
+                        }  else{ // download the photo other user sent to me
+                            if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
+                                if(fileDownloadTaskMap.get(modelChats.getIdKey()).isInProgress() ){
+                                    fileDownloadTaskMap.get(modelChats.getIdKey()).cancel();
+                                    fileDownloadTaskMap.remove(modelChats.getIdKey());
+                                    notifyItemChanged(chatPosition);
+                                    Toast.makeText(mContext, mContext.getString(R.string.dCancel), Toast.LENGTH_SHORT).show();
+                                }
+
+                            }else
                                 downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
-                        }else
-                            downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
-                    }
+                        }
+                    } else Toast.makeText(mContext, "Resend file boss", Toast.LENGTH_SHORT).show();
 
                 } else {
                     // if onLongPress mood is activated, add or remove chat from list when user click a chat
@@ -1210,10 +1270,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(holder != null){
                 holder.pinALL_IV.setVisibility(View.VISIBLE);
                 holder.pinALL_IV.setImageResource(R.drawable.baseline_disabled_visible_view_24);
-            } else {
-                MainActivity.pinAllIndicator.setVisibility(View.VISIBLE);
-                MainActivity.pinAllIndicator.setImageResource(R.drawable.baseline_disabled_visible_view_24);
             }
+            MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
+
             MainActivity.pinMineTV.setText("Unpin for me");
             MainActivity.pinEveryoneTV.setText("Unpin for everyone");
 
@@ -1222,41 +1281,53 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 if(holder != null) {
                     holder.pinALL_IV.setVisibility(View.VISIBLE);
                     holder.pinALL_IV.setImageResource(R.drawable.lock);
-                }else {
-                    MainActivity.pinAllIndicator.setVisibility(View.VISIBLE);
-                    MainActivity.pinAllIndicator.setImageResource(R.drawable.lock);
                 }
+                MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
+
                 MainActivity.pinMineTV.setText("Unpin for me");
                 MainActivity.pinEveryoneTV.setText("Pin for everyone");
             } else if (isPublicPin) {
                 if(holder != null){
                     holder.pinALL_IV.setVisibility(View.VISIBLE);
                     holder.pinALL_IV.setImageResource(R.drawable.baseline_public_24);
-                } else {
-                    MainActivity.pinAllIndicator.setVisibility(View.VISIBLE);
-                    MainActivity.pinAllIndicator.setImageResource(R.drawable.baseline_public_24);
                 }
+                MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
+
                 MainActivity.pinEveryoneTV.setText("Unpin for everyone");
                 MainActivity.pinMineTV.setText("Pin for me only");
             } else {
                 if(holder != null){
                     holder.pinALL_IV.setVisibility(View.GONE);
-                } else {
-                    MainActivity.pinAllIndicator.setVisibility(View.GONE);
                 }
+                MainActivity.pinTV.setText(mContext.getString(R.string.pin));
+
                 MainActivity.pinMineTV.setText("Pin for me only");
                 MainActivity.pinEveryoneTV.setText("Pin for everyone");
             }
         }
     }
 
+    //  return to previous state of progressLoad Bar when file fails to send
     private void loadBarVisibility(MessageViewHolder holder, MessageModel modelChats){
         holder.loadProgressTV.setVisibility(View.VISIBLE);
         holder.progressBarLoad.setVisibility(View.VISIBLE);
-        holder.loadProgressTV.setText(modelChats.getImageSize());
+        // save the original quality image to firebase
+        Uri uriOnPhone = modelChats.getPhotoUriOriginal().startsWith("/storage/") ? Uri.fromFile(new File(modelChats.getPhotoUriOriginal()))
+                : Uri.parse(modelChats.getPhotoUriOriginal());  // change from /storage to file://
+
+        if( isFileLessThan150Kb(uriOnPhone, mContext) && modelChats.getId().equals(myId) &&
+            !modelChats.getPhotoUriOriginal().startsWith("/storage/") && !modelChats.getPhotoUriOriginal().startsWith("file:/")){
+            String imageSize = modelChats.getImageSize();
+            holder.loadProgressTV.setText(imageSize);
+        } else {
+            String imageSize = FileUtils.getEstimatePhotoSize(uriOnPhone,mContext);
+            holder.loadProgressTV.setText(imageSize);
+        }
+
         // Set the indeterminate tint color for the ProgressBar to white
         int orangeColor = ContextCompat.getColor(mContext, R.color.orange);
         holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(orangeColor));
+
     }
 
     //  =============== on Long Click methods
@@ -1284,19 +1355,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
 
-            if (positionCheck > 100 || modelChats.getType() != 0 || !modelChats.getFromUid().equals(myId) )
-            {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-                if(modelChats.getType() != 0 && modelChats.getType() != 1){
-                    MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
-                    if (modelChats.getType() == 2)MainActivity.onPhoto = true;
-                    else if (modelChats.getType() == 3 || modelChats.getType() == 4) MainActivity.onDocument = true;
-
-                } else
-                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
-
-            } else {
+            MainActivity.onShare = false;
+            if(positionCheck < 100){
                 MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
                 MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
+            }
+            if (modelChats.getType() != 0 || !modelChats.getFromUid().equals(myId) )
+            {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+                MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
+                MainActivity.onShare = true;
+
             }
 
             // display pin icon, is it private or public
@@ -1349,9 +1417,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     if(MainActivity.chatModelList.size() > 1){
                         MainActivity.editChatOption_IV.setVisibility(View.GONE);
                         MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                        MainActivity.emojiChatOption_IV.setVisibility(View.GONE);
-                        MainActivity.pinChatOption_IV.setVisibility(View.GONE);
-                        MainActivity.pinAllIndicator.setVisibility(View.GONE);
+                        MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
                     }
 
                     // add position to list to help retain the background color when user scroll
@@ -1379,16 +1445,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             } else if (MainActivity.chatModelList.size() == 1){
                 MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
                 MainActivity.replyChatOption_IV.setVisibility(View.VISIBLE);
-                MainActivity.emojiChatOption_IV.setVisibility(View.VISIBLE);
-                MainActivity.pinChatOption_IV.setVisibility(View.VISIBLE);
+                MainActivity.moreOption_IV.setVisibility(View.VISIBLE);
                 // show if chat is pin publicly or privately
                 pinStatusIcon(null, MainActivity.chatModelList.get(0));
             } else {
                 MainActivity.editChatOption_IV.setVisibility(View.GONE);
                 MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                MainActivity.emojiChatOption_IV.setVisibility(View.GONE);
-                MainActivity.pinChatOption_IV.setVisibility(View.GONE);
-                MainActivity.pinAllIndicator.setVisibility(View.GONE);
+                MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
             }
 
             // Remove the background color
@@ -1399,24 +1462,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // toggle edit icon
         for(MessageModel model : MainActivity.chatModelList){
-            if ( (model.getType() != 0 && model.getType() != 1) || !model.getFromUid().equals(myId))
+            if ( (model.getType() != 0) || !model.getFromUid().equals(myId))
             {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-                if(model.getType() == 2 || model.getType() == 3){
-                    MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
-                    if (modelChats.getType() == 2){
-                        MainActivity.onPhoto = false;
-                        MainActivity.onDocument = true;
-//                        Log.d("what is type next ", ""+model.getType() + " " + MainActivity.onPhoto + MainActivity.onDocument);
-                    }
-                    else if (modelChats.getType() == 3 || modelChats.getType() == 4) {
-                        MainActivity.onPhoto = true;
-                        MainActivity.onDocument = false;
-//                        Log.d("what is type ", ""+model.getType() + " " + MainActivity.onPhoto + MainActivity.onDocument);
-                    }
-
-                } else
-                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
+                MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
+                MainActivity.onShare = true;
+            } else {
+                MainActivity.onShare = false;
             }
+
             MainActivity.modelChatsOption = model;  // assign the last model
         }
 
@@ -1435,31 +1488,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(photoCheck.length > 1){
             String otherId = photoCheck[0];
             String isSending = photoCheck[1];
-            if (isSending.equals("no")) {
+            if (isSending.equals("no")) {   // it's not on auto sending again
                 // deactivate the sending
                 if(uploadTaskMap.get(modelChats.getIdKey()) != null) {
-                    if(uploadTaskMap.get(modelChats.getIdKey()).cancel()){
-                        loadBarVisibility(holder, modelChats);
-                        // change sending to hold, to enable user resend again only when click
-                        notifyItemChanged(chatPosition, new Object());
-                        MainActivity.documentIdShareRef.edit()
-                                .putString(modelChats.getIdKey(), otherId + AllConstants.JOIN + "hold").apply();
-                    }
+                    uploadTaskMap.get(modelChats.getIdKey()).cancel(); // cancel the loading process to firebase
+                    uploadTaskMap.remove(modelChats.getIdKey());
+                    Toast.makeText(mContext, mContext.getString(R.string.dCancel), Toast.LENGTH_SHORT).show();
+                    notifyItemChanged(chatPosition, new Object());
                 } else {    // sendPhoto or Document in case map is empty and on "hold"
-                    loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
-                }
-            } else {
-                // load image again
-                if(uploadTaskMap.get(modelChats.getIdKey()) != null) {
-                    if(uploadTaskMap.get(modelChats.getIdKey()).cancel()){
-                        loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
-                    } else {
-                        uploadTaskMap.get(modelChats.getIdKey()).addOnProgressListener(taskSnapshot ->{
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                            trackLoadProgress(progress, holder, modelChats);
-                        });
-                    }
-                } else {
                     loadMyPhotoOrDocument(modelChats, holder, chatPosition, otherId);
                 }
             }
@@ -1470,139 +1506,379 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private void loadMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition, String otherUid)
     {
-        // it's loading now, don't repeat.
-        MainActivity.documentIdShareRef.edit()
-                .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "no").apply();
-
         // Close the previously open chat options
         closePreviousChatOption(modelChats, holder);
-        String originalUriPath = modelChats.getPhotoUriOriginal();
 
         // create the path where it should save to firebase storage
         String photo_location_original_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
         if(modelChats.getType() == 3) {
             photo_location_original_DB = "media/documents/" + user.getUid() + "/" + System.currentTimeMillis();
-            // save to app memory to enable user open the doc via phone default pdf viewer
-            if(originalUriPath.startsWith("content://com.android")) originalUriPath = saveDocFromContentUriToAppStorage(modelChats);
-
         } else if (modelChats.getType() == 4) {
             photo_location_original_DB = "media/audio/" + user.getUid() + "/" + System.currentTimeMillis();
         }
 
-        // if pdf/document, download it to app memory and update list
-        String finalOriginalUriPath = originalUriPath;
-        modelChats.setPhotoUriOriginal(finalOriginalUriPath);
-
         //  create the path - storage preference
         StorageReference originalPhotoRef = FirebaseStorage.getInstance()
                 .getReference(photo_location_original_DB);
+
         // save the original quality image to firebase
-        UploadTask uploadTaskFile_ = originalPhotoRef.putFile(Uri.parse(modelChats.getPhotoUriOriginal()));
+        Uri uriOnPhone = modelChats.getPhotoUriOriginal().startsWith("/storage/") ? Uri.fromFile(new File(modelChats.getPhotoUriOriginal()))
+                : Uri.parse(modelChats.getPhotoUriOriginal());  // change from /storage to file://
 
-        // save to map for each photo key
-        uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
-
-        // send the compressed blur to database if the original image is successful
+        // get the path the original final was saved in firebase to enable other user delete the file from fireStore after downloading it
         String finalPhoto_location_original_DB = photo_location_original_DB;
-        // track the original photo or doc upload progress
-        uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
 
-            if(modelChats.getPhotoUriPath() != null){   // sending photo or pdf
+        if(modelChats.getType() == 5) {     //  it is video
+            System.out.println("what is path " + modelChats.getPhotoUriOriginal());
 
-                //  create the path for the low image - storage preference
-                String photo_location_low_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
-                if(modelChats.getType() == 3) {
-                    photo_location_low_DB = "media/documents/" + user.getUid() + "/" + System.currentTimeMillis();
-                }
-                // link the path to the firebase storage instance
-                StorageReference LowPhotoRef = FirebaseStorage.getInstance()
-                        .getReference(photo_location_low_DB);
-                // upload the low quality image to firebase
-                UploadTask uploadTaskLow = LowPhotoRef.putFile(Uri.parse(modelChats.getPhotoUriPath()));
-                String lowPhotoOrDocLocationOn_DB = photo_location_low_DB;
+            if( (!modelChats.getPhotoUriOriginal().startsWith("file:/") && !modelChats.getPhotoUriOriginal().startsWith("/storage"))
+                    && modelChats.getEmojiOnly().equals("record")) {    // user is sending a recording video
+                // compress video and send
+                compressVideo(uriOnPhone, mContext, compressedVideoPath -> {
+                    // Create a Uri object from the compressed video file path
+                    Uri compressedUri = Uri.fromFile(new File(compressedVideoPath));
 
-                // track upload progress for low quality image or doc thumbnail
-                uploadTaskLow.addOnSuccessListener(taskSnapshot1 -> {
-                    // get the low quality image uri path link and send to other user
-                    LowPhotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        // send the low image uri link to enable other user picasso to auto download it quickly on first arrival
-                        String imageLinkToFBStorage = uri.toString();
+                    modelChats.setPhotoUriOriginal(compressedUri.toString());
+                    // update inside chat ROOM DB about the new compress video uri
+                    chatViewModel.updatePhotoUriPath(modelChats.getIdKey(), otherUid,
+                            modelChats.getPhotoUriPath(), modelChats.getPhotoUriOriginal(), null, 700024);
 
-                        onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
-                                lowPhotoOrDocLocationOn_DB, otherUid, imageLinkToFBStorage);
+                    UploadTask uploadTaskFile_ = originalPhotoRef.putFile(compressedUri);  // send video to firebase storage
 
-                    }).addOnFailureListener(e -> {
-                        loadBarVisibility(holder, modelChats);
-                        Toast.makeText(mContext, "Upload failed_", Toast.LENGTH_SHORT).show();
-                        MainActivity.documentIdShareRef.edit()
-                                .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+                    // save to map for each photo key
+                    uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
+
+                    // track the original photo or doc upload progress
+                    uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
+
+                        updateUI_OnSuccess(chatPosition, modelChats, holder);
+
+                        Bitmap bitmapThumbnail = createVideoThumbnail(mContext, uriOnPhone);
+                        Uri getThumbnailUri = FileUtils.getThumbnailUri(bitmapThumbnail, mContext);
+                        // Upload the thumbnail to Firebase Storage
+                        uploadThumbnailToFirebase(getThumbnailUri, modelChats, chatPosition, holder,
+                                finalPhoto_location_original_DB, otherUid);
+
+                    }).addOnFailureListener(exception -> {
+                        // Handle unsuccessful uploads
+                        onSendFailed(holder, modelChats, otherUid);
+                    }).addOnProgressListener(taskSnapshot -> {
+                        // Calculate progress percentage
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        trackLoadProgress(progress, holder, modelChats);
                     });
+
+                });
+
+            } else {    // user is forwarding chats, or sending from phone gallery (imbibe a solution later to compress video from gallery)
+                UploadTask uploadTaskFile_ = originalPhotoRef.putFile(uriOnPhone);  // send photo
+
+                // save to map for each photo key
+                uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
+
+                // track the original photo or doc upload progress
+                uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
+
+                    updateUI_OnSuccess(chatPosition, modelChats, holder);
+
+                    if (modelChats.getPhotoUriOriginal().startsWith("file:/")
+                            || modelChats.getPhotoUriOriginal().startsWith("/storage")){ // already in app memory
+                        uploadThumbnailToFirebase(Uri.parse(modelChats.getPhotoUriPath()), modelChats,
+                                chatPosition, holder, finalPhoto_location_original_DB, otherUid);
+
+                    } else {    // new video from gallery
+                        String savePath = saveFileFromContentUriToAppStorage(uriOnPhone, mContext);
+
+                        modelChats.setPhotoUriOriginal(savePath);
+                        // update inside chat ROOM DB about the new compress video uri
+                        chatViewModel.updatePhotoUriPath(modelChats.getIdKey(), otherUid,
+                                modelChats.getPhotoUriPath(), savePath, null, 700024);
+
+                        Bitmap bitmapThumbnail = createVideoThumbnail(mContext, uriOnPhone);
+                        Uri getThumbnailUri = FileUtils.getThumbnailUri(bitmapThumbnail, mContext);
+                        // Upload the thumbnail to Firebase Storage and send chat to other user
+                        uploadThumbnailToFirebase(getThumbnailUri, modelChats, chatPosition, holder,
+                                finalPhoto_location_original_DB, otherUid);
+                    }
+
 
                 }).addOnFailureListener(exception -> {
                     // Handle unsuccessful uploads
-                    loadBarVisibility(holder, modelChats);
-                    Toast.makeText(mContext, "Upload failed__", Toast.LENGTH_SHORT).show();
-                    MainActivity.documentIdShareRef.edit()
-                            .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
-                    // delete the path from the app memory
-                    MainActivity.deleteSingleUriFromAppMemory(finalOriginalUriPath);
+                    onSendFailed(holder, modelChats, otherUid);
+                }).addOnProgressListener(taskSnapshot -> {
+                    // Calculate progress percentage
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    trackLoadProgress(progress, holder, modelChats);
+                });
+            }
+
+        } else if (modelChats.getType() == 2) { // it is photo
+
+            if(isFileLessThan150Kb(uriOnPhone, mContext)    //
+                    || modelChats.getPhotoUriOriginal().startsWith("file:/")
+                    || modelChats.getPhotoUriOriginal().startsWith("/storage")) {
+
+//                System.out.println("what is lin: " + modelChats.getPhotoUriOriginal());
+                UploadTask uploadTaskFile_ = originalPhotoRef.putFile(uriOnPhone);  // send photo
+
+                // save to map for each photo key
+                uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
+
+                // track the original photo or doc upload progress
+                uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {  // user is forwarding photo. So continue using the file path
+
+                    updateUI_OnSuccess(chatPosition, modelChats, holder);
+
+                    if( modelChats.getPhotoUriOriginal().startsWith("file:/")   // continue to use the app storage file
+                            || modelChats.getPhotoUriOriginal().startsWith("/storage"))
+                    {
+                        uploadThumbnailToFirebase(Uri.parse(modelChats.getPhotoUriPath()), modelChats,
+                                chatPosition, holder, finalPhoto_location_original_DB, otherUid);
+
+                    } else
+                    {   // just generate thumbnail and sent
+                        Glide.with(mContext)
+                                .asBitmap()
+                                .load(uriOnPhone)
+                                .into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                        // Extract a thumbnail
+                                        Bitmap thumbnail = ThumbnailUtils.extractThumbnail(resource, 400, 400);
+
+                                        // Get a URI for the thumbnail
+                                        Uri thumbnailUri = FileUtils.getThumbnailUri(thumbnail, mContext);
+
+                                        // Upload the thumbnail to Firebase Storage
+                                        uploadThumbnailToFirebase(thumbnailUri, modelChats, chatPosition,
+                                                holder, finalPhoto_location_original_DB, otherUid);
+                                    }
+
+                                });
+                    }
+
+
+                }).addOnFailureListener(exception -> {
+                    // Handle unsuccessful uploads
+                    onSendFailed(holder, modelChats, otherUid);
+                }).addOnProgressListener(taskSnapshot -> {
+                    // Calculate progress percentage
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    trackLoadProgress(progress, holder, modelChats);
                 });
 
-            } else { // sending docx, cdr, psd, apk etc
+            } else
+            {    // compress file
+                // I use Glide, so as to correction photo angle degree in case it's from irregular camera
+                Glide.with(mContext)
+                        .asBitmap()
+                        .load(uriOnPhone)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+
+                                // Compress the Bitmap to reduce its size (adjust the quality as needed)
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                resource.compress(Bitmap.CompressFormat.JPEG, 50, outputStream); // 50 is the compression quality (0-100)
+                                byte[] compressedBytes = outputStream.toByteArray();
+
+                                UploadTask uploadTaskFile_ = originalPhotoRef.putBytes(compressedBytes);  // send photo to fireStore
+
+                                // save to map for each photo key
+                                uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
+
+                                // track the original photo or doc upload progress
+                                uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
+                                    //  get the size of the new compressed image
+                                    int fileSizeKB = compressedBytes.length / 1024; // Size in kilobytes
+                                    int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
+                                    String sizeString = fileSizeKB < 1000.0 ? Math.round(fileSizeKB) + " kB" : Math.round(fileSizeMB) + " MB";
+
+                                    // update the local chat list
+                                    modelChats.setImageSize(sizeString);    // set the image size
+                                    updateUI_OnSuccess(chatPosition, modelChats, holder);
+                                    replaceSnapPhotoWithCompressFile(modelChats, compressedBytes);
+
+                                    // generate thumbnail and sent
+                                    Glide.with(mContext)
+                                            .asBitmap()
+                                            .load(uriOnPhone)
+                                            .into(new SimpleTarget<Bitmap>() {
+                                                @Override
+                                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                                    // Extract a thumbnail
+                                                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(resource, 400, 400);
+
+                                                    // Get a URI for the thumbnail
+                                                    Uri thumbnailUri = FileUtils.getThumbnailUri(thumbnail, mContext);
+
+                                                    // Upload the thumbnail to Firebase Storage
+                                                    uploadThumbnailToFirebase(thumbnailUri, modelChats, chatPosition, holder, finalPhoto_location_original_DB, otherUid);
+                                                }
+
+                                            });
+
+                                }).addOnFailureListener(exception -> {
+                                    // Handle unsuccessful uploads
+                                    onSendFailed(holder, modelChats, otherUid);
+                                }).addOnProgressListener(taskSnapshot -> {
+                                    // Calculate progress percentage
+                                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                    trackLoadProgress(progress, holder, modelChats);
+                                });
+
+                            }
+
+                        });
+
+            }
+
+        } else if (modelChats.getType() == 3) { // it document
+
+            UploadTask uploadTaskFile_ = originalPhotoRef.putFile(uriOnPhone);  // send file as it is. DOnt reduce size nor compress
+
+            // save to map for each photo key
+            uploadTaskMap.put(modelChats.getIdKey(), uploadTaskFile_);
+
+            // track the original photo or doc upload progress
+            uploadTaskFile_.addOnSuccessListener(taskSnapshot -> {
+
+                updateUI_OnSuccess(chatPosition, modelChats, holder);
+
+                // sending docx, cdr, psd, apk etc (files that doesn't have thumbnail)
+                if(modelChats.getPhotoUriOriginal().startsWith("content://com.android")){   // save the file to enable default app to open file
+                    String newUri = saveFileFromContentUriToAppStorage(Uri.parse(modelChats.getPhotoUriOriginal()), mContext);
+                    modelChats.setPhotoUriOriginal(newUri);
+                }
                 onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
                         null, otherUid, null);
-            }
+
+            }).addOnFailureListener(exception -> {
+                // Handle unsuccessful uploads
+                onSendFailed(holder, modelChats, otherUid);
+            }).addOnProgressListener(taskSnapshot -> {
+                // Calculate progress percentage
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                trackLoadProgress(progress, holder, modelChats);
+            });
+        }
+
+    }
+
+    private void updateUI_OnSuccess(int chatPosition, MessageModel modelChats, MessageViewHolder holder){
+        modelChats.setMsgStatus(700024);
+        // hide the progressBar
+        holder.progressBarLoad.setVisibility(View.GONE);
+        notifyItemChanged(chatPosition, new Object());
+    }
+
+    private void onSendFailed(MessageViewHolder holder, MessageModel modelChats, String otherUid){
+        Toast.makeText(mContext, mContext.getString(R.string.corrupt), Toast.LENGTH_SHORT).show();
+        loadBarVisibility(holder, modelChats);
+        MainActivity.documentIdShareRef.edit()
+                .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+        // delete the path from the app memory
+        MainActivity.deleteSingleUriFromAppMemory(modelChats.getPhotoUriOriginal());
+//        System.out.println("what is error " + exception.getMessage());
+    }
+
+    private void uploadThumbnailToFirebase(Uri thumbnailUri, MessageModel modelChats, int chatPosition, MessageViewHolder holder,
+                                           String finalPhoto_location_original_DB, String otherUid) {
+        // update the UI first
+        modelChats.setMsgStatus(700024);
+        holder.progressBarLoad.setVisibility(View.GONE);    // hide the progressBar
+        notifyItemChanged(chatPosition, new Object());
+
+        //  create the path for the low image - storage preference
+        String photo_location_low_DB = "media/thumbnail/" + user.getUid() + "/" + System.currentTimeMillis();
+
+        // link the path to the firebase storage instance
+        StorageReference LowPhotoRef = FirebaseStorage.getInstance()
+                .getReference(photo_location_low_DB);
+
+        // upload the low quality image to firebase
+        UploadTask uploadTaskLow = LowPhotoRef.putFile(thumbnailUri);   // send thumbnail to firebase
+
+        // track upload progress for low quality image or doc thumbnail
+        uploadTaskLow.addOnSuccessListener(taskSnapshot1 -> {
+            // get the low quality image uri path link and send to other user
+            LowPhotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // send the low image uri link to enable other user picasso to auto download it quickly on first arrival
+                String imageLinkToFBStorage = uri.toString();
+
+                if(modelChats.getType() == 3 && modelChats.getPhotoUriOriginal()    // 2 is photo, 3 is doc, 4 is audio, 5 is video
+                        .startsWith("content://com.android"))
+                {   // save the file to enable default app to open file
+                    String newUri = saveFileFromContentUriToAppStorage(Uri.parse(modelChats.getPhotoUriOriginal()), mContext);
+                    modelChats.setPhotoUriOriginal(newUri);
+                }
+
+                modelChats.setPhotoUriPath(thumbnailUri.toString());
+
+                onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
+                        photo_location_low_DB, otherUid, imageLinkToFBStorage);
+
+            }).addOnFailureListener(e -> {
+                loadBarVisibility(holder, modelChats);
+                Toast.makeText(mContext, "Upload failed_", Toast.LENGTH_SHORT).show();
+                MainActivity.documentIdShareRef.edit()
+                        .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
+            });
 
         }).addOnFailureListener(exception -> {
             // Handle unsuccessful uploads
-            Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
             loadBarVisibility(holder, modelChats);
+            Toast.makeText(mContext, "Upload failed__", Toast.LENGTH_SHORT).show();
             MainActivity.documentIdShareRef.edit()
                     .putString(modelChats.getIdKey(), otherUid + AllConstants.JOIN + "yes").apply();
             // delete the path from the app memory
-            MainActivity.deleteSingleUriFromAppMemory(finalOriginalUriPath);
-        }).addOnProgressListener(taskSnapshot -> {
-            // Calculate progress percentage
-            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-            trackLoadProgress(progress, holder, modelChats);
+            MainActivity.deleteSingleUriFromAppMemory(modelChats.getPhotoUriOriginal());
         });
 
     }
 
     private void downloadPhotoOrDocSentByOtherUser(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
     {
-        //media/documents/AZkfy6uZunMfMUxR7HIol4rPZBq2/1708199920604winnerChatJoinPathsnull
-        String pathToFirebase = modelChats.getPhotoUriOriginal();
+        String pathToFirebase = modelChats.getPhotoUriOriginal();   //media/documents/AZkfy6uZunMfMUxR7HIol4rPZBq2/1708199920604winnerChatJoinPathsnull
         if(pathToFirebase.contains(AllConstants.JOIN)){ // split in case the null was not removed
             String splitPath[] = pathToFirebase.split(AllConstants.JOIN);
             pathToFirebase = splitPath[0];
         }
-        Log.d("Checking the name", pathToFirebase);
         // get the path of the original image on the firebase storage
         StorageReference storageRef = FirebaseStorage.getInstance()
                 .getReference(pathToFirebase);
 
         // create the path where you want to download the image on phone storage
-        File saveImageToPhoneUri = new File(MainActivity.getPhotoFolder(mContext), mContext.getString(R.string.app_name) + System.currentTimeMillis() + ".jpg");
-        if(modelChats.getType() == 3){
-            saveImageToPhoneUri = new File(getDocumentFolder(mContext), mContext.getString(R.string.app_name) + "_" + modelChats.getMessage() );
+        File saveImageToPhoneUri = new File(FolderUtils.getPhotoFolder(mContext), mContext.getString(R.string.app_name) + System.currentTimeMillis() + ".jpg");
+        String uuid = String.valueOf(System.currentTimeMillis()).substring(8);
+
+        if(modelChats.getType() == 3){  // it is document
+            String[] splitDetails = modelChats.getEmojiOnly().split("\n");
+            String fileName = splitDetails[0];
+
+            saveImageToPhoneUri = new File(FolderUtils.getDocumentFolder(mContext), mContext.getString(R.string.app_name) + "_" + uuid + fileName );
+
+        } else if (modelChats.getType() == 5) {
+            saveImageToPhoneUri = new File(FolderUtils.getVideoFolder(mContext), mContext.getString(R.string.app_name) + "_" + uuid + "_.mp4" );
         }
-        Uri savePath = Uri.fromFile(saveImageToPhoneUri);
+
+        Uri savePath = Uri.fromFile(saveImageToPhoneUri);   //   File savePath = saveImageToPhoneUri;
 
         // download the image from database into the part
         FileDownloadTask downloadTask = storageRef.getFile(savePath);
         // save the downloadTask to track and update the progress listener while scrolling
         fileDownloadTaskMap.put(modelChats.getIdKey(), downloadTask);
 
+        // get the original path from modelChats.PhotoUriOriginal -- for deleting on firebase storage
+        String originalImageUriToFirebase = pathToFirebase;
+
         downloadTask.addOnSuccessListener(taskSnapshot -> {
-            // get the original path from modelChats.PhotoUriOriginal -- for deleting on firebase storage
-            String originalImageUriToFirebase = modelChats.getPhotoUriOriginal();
 
             // update the UI
             holder.progressBarLoad.setVisibility(View.GONE);
             // update chatList
             modelChats.setPhotoUriOriginal(savePath.toString());
-            modelChats.setImageSize(null);
+//            modelChats.setImageSize(null);
             notifyItemChanged(chatPosition);
 
             // delete from Firebase Storage
@@ -1611,7 +1887,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // update ROOM
             chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
                     modelChats.getFromUid(), modelChats.getPhotoUriPath(), savePath.toString(),
-                    null, 0);
+                    modelChats.getImageSize(), 0);
 
             fileDownloadTaskMap.remove( modelChats.getIdKey()); // remove from when done.
 
@@ -1678,38 +1954,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     private void openDocumentFromUrl(String documentUri) throws URISyntaxException {
-        if(permissions.isStorageOk(mContext)){
-            if(documentUri.startsWith("file:/")) {
-                File docFile = new File(new URI(documentUri));   // starts with file/
-                Uri docContentUri = FileProvider.getUriForFile(mContext, "com.pixel.chatapp.fileprovider", docFile);
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                String mimeType = mContext.getContentResolver().getType(docContentUri); // get the type -> pdf, docx jpeg etc
-                intent.setDataAndType(docContentUri, mimeType);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        System.out.println("what is doc ur " + documentUri);
+        if(documentUri != null){
+                if(documentUri.startsWith("file:/") || documentUri.startsWith("/storage")) {
+                    File docFile;
+                    if(documentUri.startsWith("/storage")) {
+                        docFile = new File(documentUri);
+                    } else {    // starts with file/
+                        docFile = new File(new URI(documentUri));
+                    }
 
-                try {
+                    Uri docContentUri = FileProvider.getUriForFile(mContext, "com.pixel.chatapp.fileprovider", docFile);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    String mimeType = mContext.getContentResolver().getType(docContentUri); // get the type -> pdf, docx jpeg etc
+                    intent.setDataAndType(docContentUri, mimeType);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    try {
 //                    mContext.startActivity(Intent.createChooser(intent, "Open Document with"));
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    // Handle no PDF viewer installed case
-                    Toast.makeText(mContext, "No document viewer installed", Toast.LENGTH_SHORT).show();
+                        mContext.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        // Handle no PDF viewer installed case
+                        Toast.makeText(mContext, "No document viewer installed", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(mContext, mContext.getString(R.string.permission), Toast.LENGTH_SHORT).show();
-//            permissions.requestStorage();
-        }
+            } else Toast.makeText(mContext, mContext.getString(R.string.corrupt), Toast.LENGTH_SHORT).show();
 
     }
 
-    // save small image (thumbnail) to phone
-    public static File saveImageToPhone(Bitmap bitmap, int quality, Context mContext){
+    // save small image (thumbnail) to phone on photo first appearance from other other user
+    public static File saveThumbnailFromOtherUser(Bitmap bitmap, int quality, Context mContext){
 
         String fileName = mContext.getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg";
         // create the path where you want to save the image on phone storage
-        File saveImageToPhoneUri = new File(MainActivity.getThumbnailFolder(mContext), fileName);
+        File saveImageToPhoneUri = new File(getThumbnailFolder(mContext), fileName);
 
         // download the blur thump image to phone
         OutputStream outputStream = null;
@@ -1743,12 +2023,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     {
         // get the image size and send to user before it turns null for me
         String getImageSize = modelChats.getImageSize();
-        // update the local chat list
-        modelChats.setImageSize(null);
-        modelChats.setMsgStatus(700024);
-        // hide the progressBar
-        holder.progressBarLoad.setVisibility(View.GONE);
-        notifyItemChanged(chatPosition, new Object());
 
         Map imageMap = sendMap(modelChats, finalPhoto_location_original_DB,
                 lowPhotoOrDocLocationOn_DB, getImageSize, imageLinkToFBStorage, null);
@@ -1762,6 +2036,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    // just override the file path with the correct photo
+    private void correctPhotoAngleResolution(File getInitialFilepath, MessageModel modelChats){
+        Glide.with(mContext)
+                .asBitmap()
+                .load(modelChats.getPhotoUriOriginal())
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+
+                        OutputStream outputStream;
+                        try {
+                            outputStream = new FileOutputStream(getInitialFilepath);
+                            // save the image to the phone
+                            resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
+    }
     private void displayLowImageOrDocumentThumbnail(Uri imageUri_, MessageViewHolder holder, MessageModel modelChats){
         if(modelChats.getType() == 2){
             holder.documentContainer.setVisibility(View.GONE);
@@ -1773,11 +2069,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.documentContainer.setVisibility(View.VISIBLE);   // make the document container visible
             holder.documentDetails_TV.setText(modelChats.getEmojiOnly());   // I used document details to replace emojiOnly
             holder.document_IV.setVisibility(View.VISIBLE);
-            Glide.with(mContext).load(imageUri_).into(holder.document_IV);  // display the document thumbnail
+            Glide.with(mContext).load(imageUri_)
+//                    .apply(RequestOptions.centerCropTransform())
+                    .into(holder.document_IV);  // display the document thumbnail
 
-        } else {    // remove later
+        } else if (modelChats.getType() == 5) {    // it is video
+            holder.documentContainer.setVisibility(View.GONE);
             holder.showImage.setVisibility(View.VISIBLE);
             Glide.with(mContext).load(imageUri_).into(holder.showImage);
+            // show the playIcon button
         }
 
     }
@@ -1788,77 +2088,60 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(modelChats.getPhotoUriPath().toLowerCase().startsWith("http://")
                     || modelChats.getPhotoUriPath().toLowerCase().startsWith("https://"))
             {
-                Glide.with(mContext)
-                        .asBitmap()
-                        .load(imageUri_)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                try {
+                    // split the original and low image uri location on firebase storage
+                    String[] splitPath = modelChats.getPhotoUriOriginal().split(AllConstants.JOIN);
+                    String originalUri = splitPath[0];
+                    String lowUri = splitPath[1];  //  for deleting from firebase storage
 
-                                // split the original and low image uri location on firebase storage
-                                String[] splitPath = modelChats.getPhotoUriOriginal().split(AllConstants.JOIN);
-                                String originalUri = splitPath[0];
-                                String lowUri = splitPath[1];  //  for deleting from firebase storage
+                    String phoneImagePath = downloadThumbnailFile(modelChats.getPhotoUriPath(), mContext);
 
-                                // save to phone storage if it's internet uri
-                                File downloadImageToPhone = saveImageToPhone(resource, 100, mContext);
-                                String phoneImagePath = Uri.fromFile( downloadImageToPhone ).toString();
+                    // update room and chat list from uri to phone storage path
+                    modelChats.setPhotoUriPath(phoneImagePath);
+                    modelChats.setPhotoUriOriginal(originalUri);
+                    chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
+                            otherUserUid, phoneImagePath, originalUri,
+                            modelChats.getImageSize(), 0);
 
-                                // update room and chat list from uri to phone storage path
-                                modelChats.setPhotoUriPath(phoneImagePath);
-                                modelChats.setPhotoUriOriginal(originalUri);
-                                chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
-                                        otherUserUid, phoneImagePath, originalUri,
-                                        modelChats.getImageSize(), 0);
+                    // delete the blur image from firebase storage database -- ignore the originalUri till user download it
+                    deletePathRef.child(lowUri).delete();
 
-                                // delete the blur image from firebase storage database -- ignore the originalUri till user download it
-                                deletePathRef.child(lowUri).delete();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
-                            }
-                        });
+//                Glide.with(mContext)
+//                        .asBitmap()
+//                        .load(imageUri_)
+//                        .into(new SimpleTarget<Bitmap>() {
+//                            @Override
+//                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//
+//                                // split the original and low image uri location on firebase storage
+//                                String[] splitPath = modelChats.getPhotoUriOriginal().split(AllConstants.JOIN);
+//                                String originalUri = splitPath[0];
+//                                String lowUri = splitPath[1];  //  for deleting from firebase storage
+//
+//                                // save to phone storage if it's internet uri
+//                                File downloadImageToPhone = saveThumbnailFromOtherUser(resource, 100, mContext);
+//                                String phoneImagePath = Uri.fromFile( downloadImageToPhone ).toString();
+//
+//                                // update room and chat list from uri to phone storage path
+//                                modelChats.setPhotoUriPath(phoneImagePath);
+//                                modelChats.setPhotoUriOriginal(originalUri);
+//                                chatViewModel.updatePhotoUriPath(modelChats.getIdKey(),
+//                                        otherUserUid, phoneImagePath, originalUri,
+//                                        modelChats.getImageSize(), 0);
+//
+//                                // delete the blur image from firebase storage database -- ignore the originalUri till user download it
+//                                deletePathRef.child(lowUri).delete();
+//
+//                            }
+//                        });
 
             }
         }
     }
-
-    private String saveDocFromContentUriToAppStorage(MessageModel modelChats) {
-            // Get the content resolver
-        ContentResolver contentResolver = mContext.getContentResolver();
-
-        // Open an input stream for the content URI
-        try {
-            // Open an input stream for the content URI
-            InputStream inputStream = contentResolver.openInputStream(Uri.parse(modelChats.getPhotoUriOriginal()));
-
-            String[] fileName = modelChats.getEmojiOnly().split("\n");
-
-            // Create a file in your app's internal storage directory
-            File pdfFile = new File(getDocumentFolder(mContext), mContext.getString(R.string.app_name) + "_" + fileName[0] );
-
-            // Copy the content from the input stream to the file
-            OutputStream outputStream = new FileOutputStream(pdfFile);
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            // Close streams
-            outputStream.close();
-            inputStream.close();
-
-//            return pdfFile.getPath();
-            Uri uri = Uri.fromFile(pdfFile);
-            return uri.toString();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle errors
-        }
-
-        return null;
-    }
-
 
     //  =============== voice note methods
 
@@ -2047,10 +2330,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         //  create the path - storage preference
         StorageReference voiceNoteRef = FirebaseStorage.getInstance()
                 .getReference(VN_PATH_TO_FB_STORAGE);
-System.out.println("what is path + " + modelChats.getVoiceNote());
+
         //  get the uri file from phone path
-        Uri audioFile = Uri.fromFile(new File(modelChats.getVoiceNote()));  // path begins with /storage:
-        // convert uri to new URI if path starts with
+        Uri audioFile = Uri.fromFile(new File(modelChats.getVoiceNote()));
+        // /storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Audio/Topper_Pheelz-JELO-feat-Young-Jonn.mp3
         if(modelChats.getVoiceNote().equals("content://media")) audioFile = Uri.parse(modelChats.getVoiceNote());
 
         // save to firebase storage
@@ -2064,7 +2347,7 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
                     null, null, VN_PATH_TO_FB_STORAGE);
 
             // send voice note to database and update ROOM DB
-            sendToDatabaseAndRoom(modelChats, imageMap, otherUid);  // voice note
+            sendToDatabaseAndRoom(modelChats, imageMap, otherUid);  // audio or voice note
 
             // update the delivery status
             modelChats.setMsgStatus(700024);
@@ -2103,22 +2386,27 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
         autoRunnableProgress(modelChats, holder); // settings
 
         //  create the path - storage preference
-        StorageReference voiceNoteRef = FirebaseStorage.getInstance()
+        StorageReference voiceNoteRef = FirebaseStorage.getInstance()   // modelChats.getVoiceNote = media/audio/Edcjn9AaPGNwDGjptCDqZIhwNOk1/1708686076728
                 .getReference(modelChats.getVoiceNote());
 
         // create the path to download the voice note to
-        File voiceNoteSavingPath;
-        if ( modelChats.getVoiceNote().contains("Audio") ) {
-            voiceNoteSavingPath = new File(getAudioFolder(mContext), "Audio_" + System.currentTimeMillis() + ".3gp");
+        File voiceNoteOrAudioPath;
+        String uuid = String.valueOf(System.currentTimeMillis()).substring(8);
+        if ( modelChats.getVoiceNote().contains("audio") ) {
+            voiceNoteOrAudioPath = new File(getAudioFolder(mContext),
+                    mContext.getString(R.string.app_name) + "_" + uuid + modelChats.getEmojiOnly() );
         } else {
-            voiceNoteSavingPath = new File(getVoiceNoteFolder(mContext), "voice_note_" + System.currentTimeMillis() + ".3gp");
+            voiceNoteOrAudioPath = new File(getVoiceNoteFolder(mContext),
+                    "voice_note_" + mContext.getString(R.string.app_name) + "_" + uuid + ".opus");
         }
-        FileDownloadTask fileDownloadTask = voiceNoteRef.getFile(voiceNoteSavingPath);  // download
+
+        FileDownloadTask fileDownloadTask = voiceNoteRef.getFile(voiceNoteOrAudioPath);  // download the file to the path
 
         // save to map to track the progress in case user scroll back to the position
         fileDownloadTaskMap.put(modelChats.getIdKey(), fileDownloadTask);
 
-        fileDownloadTask.addOnSuccessListener(taskSnapshot -> {
+        fileDownloadTask.addOnSuccessListener(taskSnapshot ->
+        {
             // get the voice note path from modelChats.getVoiceNote -- for deleting on firebase storage
             String voiceNoteUriToFirebase = modelChats.getVoiceNote();
 
@@ -2127,7 +2415,7 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
             holder.progressBar.setVisibility(View.GONE);
             holder.pauseAndPlay_IV.setVisibility(View.VISIBLE);
             // update chatList
-            modelChats.setVoiceNote(voiceNoteSavingPath.getPath());
+            modelChats.setVoiceNote(voiceNoteOrAudioPath.getPath());
             String voiceNoteDur = modelChats.getVnDuration();
             // if vn dur contain "~" it means it is more than 1 mb -- delete the file size and save only the duration
             if(modelChats.getVnDuration().contains("~")){
@@ -2142,11 +2430,12 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
 
             // update ROOM
             chatViewModel.updateVoiceNotePath(modelChats.getFromUid(), modelChats.getIdKey(),
-                    voiceNoteSavingPath.getPath(), voiceNoteDur);
+                    voiceNoteOrAudioPath.getPath(), voiceNoteDur);
 
             fileDownloadTaskMap.remove( modelChats.getIdKey()); // remove from map when done.
 
-        }).addOnFailureListener(exception -> {
+        }).addOnFailureListener(exception ->
+        {
             // Handle any errors that may occur during the download
             holder.circleDownload.setVisibility(View.VISIBLE);
             holder.progressBar.setVisibility(View.GONE);
@@ -2168,20 +2457,19 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
         Runnable updateProgressRunnable = new Runnable() {
             @Override
             public void run() {
-                // Increment progress by 5
+                // Increment progress by the rate
                 int rate = modelChats.getType() == 1 ? 3 : 1;
                 int currentProgress = holder.progressBar.getProgress();
                 holder.progressBar.setProgress(currentProgress + rate);
-                progressMap.put(modelChats.getIdKey(), currentProgress);
 
-                // Check if progress is 80, and remove callbacks to stop updates
+                // Check if progress is 90 or more, and remove callbacks to stop updates
                 if (currentProgress >= 90) {
                     handler.removeCallbacks(this);
                 } else {
-                    // Schedule the next update after 1 second
-                    handler.postDelayed(this, 100);
+                    // Schedule the next update after 100 milliseconds (or 1000 milliseconds for audio type)
+                    long delayMillis = modelChats.getType() == 1 ? 100 : 1000;
+                    handler.postDelayed(this, delayMillis);
                 }
-
             }
         };
 
@@ -2320,7 +2608,11 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
         messageMap.put("isChatPin", modelChats.getIsChatPin());
         messageMap.put("isChatForward", modelChats.getIsChatForward());
         messageMap.put("photoUriPath", imageLinkToFBStorage);
-        messageMap.put("photoUriOriginal", originalUriPath + AllConstants.JOIN + lowImagePath);
+        if(modelChats.getType() == 4 || modelChats.getType() == 1) { // it's audio | voice note
+            messageMap.put("photoUriOriginal", null);
+        } else {
+            messageMap.put("photoUriOriginal", originalUriPath + AllConstants.JOIN + lowImagePath);
+        }
         messageMap.put("imageSize", imageSize);
 
         return messageMap;
@@ -2351,26 +2643,33 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
 
         // increase the count number
         MainActivity.checkAndSaveCounts_SendMsg(otherUid);
+//System.out.println("what is video pth" + modelChats.getPhotoUriOriginal());
     }
 
     // track the downloading progress for voice_note or photo
     private void trackLoadProgress(double progress, MessageViewHolder holder, MessageModel modelChats)
     {
-        // for image
+        // for image or document
         if(holder.progressBarLoad != null){     // for image or document
+
+            if(progressMap.get(modelChats.getIdKey()) == null) runnableProgressBar(modelChats, holder); // call the runnable method
+
             int whiteColor = ContextCompat.getColor(mContext, R.color.white);
             // Set the indeterminate tint color for the ProgressBar to white
             holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(whiteColor));
             // Update progress
             String progress__ = Math.round(progress) + " %";
             holder.loadProgressTV.setText(progress__);
-            if(Math.round(progress) < 20) holder.loadProgressTV.setText("15 %");
+            if(Math.round(progress) >= 60) {
+                holder.loadProgressTV.setText(progress__);
+                progressMap.put(modelChats.getIdKey(), (int) progress);
+            }
             if(progress == 100.0){
                 new Handler().postDelayed(() -> holder.loadProgressTV.setVisibility(View.GONE), 300);
             }
 
             //  for voice note
-        } else if (holder.progressBar != null) {
+        } else if (holder.progressBar != null) {    // it is voice note
 
             if(progress >= 75.0) {
                 holder.progressBar.setProgress((int) progress);
@@ -2384,6 +2683,33 @@ System.out.println("what is path + " + modelChats.getVoiceNote());
 
     }
 
+    // for image and document and video
+    private void runnableProgressBar(MessageModel modelChats, MessageViewHolder holder){
+        Handler handler = new Handler();
+        Runnable updateProgressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if(modelChats.getType() == 2){
+                    // Increment progress by the rate
+                    int rate = 2;
+                    int currentProgress = progressMap.getOrDefault(modelChats.getIdKey(), 3); // Get current progress from the map
+                    currentProgress += rate; // Increase progress by the rate
+                    holder.loadProgressTV.setText(currentProgress + " %");
+                    progressMap.put(modelChats.getIdKey(), currentProgress); // Update progress in the map
+
+                    if (currentProgress >= 70) {
+                        handler.removeCallbacks(this);
+                    } else {
+                        // Schedule the next update after 100 milliseconds (or 1000 milliseconds for document type)
+                        handler.postDelayed(this, 200);
+                    }
+                }
+            }
+        };
+
+        handler.postDelayed(updateProgressRunnable, 100);
+
+    }
 
     public void setEmojiReact(MessageViewHolder holder, String emoji){
         holder.react_TV.setVisibility(View.VISIBLE);

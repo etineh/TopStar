@@ -1290,13 +1290,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/moreOptionIv"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="30dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_more_vert_24" />
+
         <TextView
             android:id="@+id/count_TV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:text="1"
-            android:textSize="24sp"
+            android:textSize="21sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/cancel_IV"
             app:layout_constraintTop_toTopOf="parent"
@@ -1318,7 +1329,7 @@
             style="@style/BackgroundTintOrange"
             android:layout_width="27dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="18dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/copyText_IV"
             app:layout_constraintTop_toTopOf="parent"
@@ -1330,47 +1341,20 @@
             style="@style/BackgroundTintOrange"
             android:layout_width="25dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="15dp"
+            android:layout_marginEnd="10dp"
             android:tint="#D61515"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/moreOptionIv"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.57"
             app:srcCompat="@drawable/baseline_delete_forever_24" />
-
-        <ImageView
-            android:id="@+id/pin_IV"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="23dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="18dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/forward_IV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.52"
-            app:srcCompat="@drawable/baseline_push_pin_24" />
-
-        <ImageView
-            android:id="@+id/pinALL_IV"
-            style="@style/drawableBG"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_marginBottom="-23dp"
-            android:elevation="3dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/pin_IV"
-            app:layout_constraintEnd_toEndOf="@+id/pin_IV"
-            app:layout_constraintStart_toStartOf="@+id/pin_IV"
-            app:srcCompat="@drawable/baseline_disabled_visible_view_24"
-            app:tint="@color/white" />
 
         <ImageView
             android:id="@+id/copyText_IV"
             style="@style/BackgroundTintOrange"
             android:layout_width="20dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="18dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/delete_IV"
             app:layout_constraintTop_toTopOf="parent"
@@ -1382,33 +1366,21 @@
             style="@style/BackgroundTintOrange"
             android:layout_width="27dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="18dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/react_IV"
+            app:layout_constraintEnd_toStartOf="@id/edit_IV"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
             app:srcCompat="@drawable/reply" />
-
-        <ImageView
-            android:id="@+id/react_IV"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="23dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="18dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/edit_IV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_add_reaction_24" />
 
         <ImageView
             android:id="@+id/edit_IV"
             style="@style/BackgroundTintOrange"
             android:layout_width="25dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="18dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/pin_IV"
+            app:layout_constraintEnd_toStartOf="@+id/forward_IV"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
             app:srcCompat="@drawable/baseline_mode_edit_24" />
@@ -1575,6 +1547,101 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/moreOptionContainer"
+        style="@style/BackgroundW_B"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:clickable="true"
+        android:elevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chatOptions">
+
+        <TextView
+            android:id="@+id/pinChat_TV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:text="@string/pin"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/emojiReactTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:text="@string/react"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pinChat_TV" />
+
+        <TextView
+            android:id="@+id/editChatTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:text="@string/edit"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/emojiReactTV" />
+
+        <TextView
+            android:id="@+id/saveToGalleryTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:text="@string/saveToGallery"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editChatTV" />
+
+        <TextView
+            android:id="@+id/report_TV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="20dp"
+            android:text="@string/report"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/saveToGalleryTV" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/generalBackground"
+        style="@style/trans_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="3dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/firstTopContainer"
         style="@style/cardTopOrange"
         android:layout_width="match_parent"
@@ -1736,6 +1803,162 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/FileAttachOptionContainer"
+            style="@style/trans_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="3dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fileContainerAnim"
+                style="@style/BackgroundW_B"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="60dp"
+                android:clickable="true"
+                android:paddingTop="20dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageView
+                    android:id="@+id/galleryIV"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginBottom="40dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toTopOf="@+id/audioIV"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/gallery_assistant_navigation_24" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gallery"
+                    app:layout_constraintEnd_toEndOf="@+id/galleryIV"
+                    app:layout_constraintStart_toStartOf="@+id/galleryIV"
+                    app:layout_constraintTop_toBottomOf="@+id/galleryIV" />
+
+                <ImageView
+                    android:id="@+id/documentIV"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="40dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toTopOf="@+id/contactIV"
+                    app:layout_constraintEnd_toStartOf="@+id/gameIV"
+                    app:layout_constraintStart_toEndOf="@+id/galleryIV"
+                    app:srcCompat="@drawable/baseline_document_scanner_24" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/document"
+                    app:layout_constraintEnd_toEndOf="@+id/documentIV"
+                    app:layout_constraintStart_toStartOf="@+id/documentIV"
+                    app:layout_constraintTop_toBottomOf="@+id/documentIV" />
+
+                <ImageView
+                    android:id="@+id/gameIV"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginBottom="40dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toTopOf="@+id/other"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/baseline_games_24" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/game"
+                    app:layout_constraintEnd_toEndOf="@+id/gameIV"
+                    app:layout_constraintStart_toStartOf="@+id/gameIV"
+                    app:layout_constraintTop_toBottomOf="@+id/gameIV" />
+
+                <ImageView
+                    android:id="@+id/audioIV"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginBottom="35dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/baseline_audio_file_24" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/audio"
+                    app:layout_constraintEnd_toEndOf="@+id/audioIV"
+                    app:layout_constraintStart_toStartOf="@+id/audioIV"
+                    app:layout_constraintTop_toBottomOf="@+id/audioIV" />
+
+                <ImageView
+                    android:id="@+id/contactIV"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="35dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/other"
+                    app:layout_constraintStart_toEndOf="@+id/audioIV"
+                    app:srcCompat="@drawable/add_contact" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/contact"
+                    app:layout_constraintEnd_toEndOf="@+id/contactIV"
+                    app:layout_constraintStart_toStartOf="@+id/contactIV"
+                    app:layout_constraintTop_toBottomOf="@+id/contactIV" />
+
+                <ImageView
+                    android:id="@+id/other"
+                    style="@style/roundBackgroundAndTint2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginBottom="35dp"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/baseline_emoji_events_24" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="other"
+                    app:layout_constraintEnd_toEndOf="@+id/other"
+                    app:layout_constraintStart_toStartOf="@+id/other"
+                    app:layout_constraintTop_toBottomOf="@+id/other" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/pinOptionBoxConstr"

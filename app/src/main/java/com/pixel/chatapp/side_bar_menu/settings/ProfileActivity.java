@@ -7,15 +7,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -37,6 +41,9 @@ import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.squareup.picasso.Picasso;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -63,9 +70,6 @@ public class ProfileActivity extends AppCompatActivity implements ImageListener 
     private static String imageLink;
 
     ActivityResultLauncher<Intent> activityResultLauncherForSelectImage;
-    private Bitmap selectedImage;
-
-    MainActivity mainActivity = new MainActivity();
 
     private ValueEventListener profileListener; // Declare the listener as a class variable
 
@@ -95,18 +99,12 @@ public class ProfileActivity extends AppCompatActivity implements ImageListener 
 
         getUserInfo();
 
-        textViewImageUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                imageChooser();
-            }
-        });
+        textViewImageUpdate.setOnClickListener(view -> imageChooser());
 
         imageViewUpdate.setOnClickListener(view -> {
             Intent i = new Intent(this, ZoomImage.class);
             i.putExtra("otherName", "My Profile Photo");
             i.putExtra("imageLink", imageLink);
-            System.out.println("checkingHere one " + imageLink);
             startActivity(i);
         });
 
@@ -119,6 +117,24 @@ public class ProfileActivity extends AppCompatActivity implements ImageListener 
     }
 
     //   -------------------------  method  ---------------------------
+
+    private Uri resolveContentUri(Uri contentUri) {
+        String[] projection = {MediaStore.MediaColumns.DATA};
+        try (Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                String filePath = cursor.getString(columnIndex);
+                return Uri.parse(filePath);
+            } else {
+                Log.e("resolveContentUri", "Cursor is null or empty");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("resolveContentUri", "Failed to resolve content URI: " + contentUri, e);
+        }
+        return null;
+    }
+
 
     private void registerActivityForSelectImage() {
 

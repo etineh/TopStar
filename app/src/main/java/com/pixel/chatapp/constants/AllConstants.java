@@ -40,6 +40,8 @@ public interface AllConstants {
     String JOIN = "winnerChatJoinPaths";
 
     String ALL_PHOTOS = "/Media/Photos/";
+    String ALL_VIDEOs= "/Media/Videos/";
+
     String ALL_DOCUMENTS = "/Media/Documents/";
     String ALL_AUDIO = "/Media/Audio/";
     String ALL_VOICENOTE = "/Media/Voice_Note/";
@@ -56,6 +58,8 @@ public interface AllConstants {
 //    int USERNAME_CODE = 1;
     int CONTACTS_REQUEST_CODE = 2000;
     int RECORDING_REQUEST_CODE = 200;
+    int CAMERA_REQUEST_CODE = 10;
+
     String CHANNEL_ID = "1000";
     int NOTIFICATION_ID = 100;
     int REQUEST_PICK_PDF_FILE = 1;

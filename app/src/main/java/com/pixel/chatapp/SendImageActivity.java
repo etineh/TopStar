@@ -1,5 +1,6 @@
 package com.pixel.chatapp;
 
+import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.deleteOldUriFromAppMemory;
 import static com.pixel.chatapp.home.MainActivity.deleteUnusedPhotoFromSharePrefsAndAppMemory;
@@ -28,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -36,12 +36,11 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -51,12 +50,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.github.chrisbanes.photoview.PhotoView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.gson.Gson;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.activities.ColorSeekBar;
@@ -64,11 +61,14 @@ import com.pixel.chatapp.activities.CustomViewPager;
 import com.pixel.chatapp.activities.ImagePainter;
 import com.pixel.chatapp.adapters.SendImageAdapter;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
+import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.all_utils.FolderUtils;
+import com.pixel.chatapp.all_utils.OtherMethods;
+import com.pixel.chatapp.all_utils.PhoneAccess;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
-import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
 import com.yalantis.ucrop.UCrop;
 
@@ -81,7 +81,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -105,7 +104,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     MainActivity mainActivity = new MainActivity();
     Permission permissions_ =new Permission();
 
-    RecyclerView recyclerPhoto;
+    public static RecyclerView recyclerPhoto;
     CustomViewPager viewPager;
 
     SendImageAdapter adapterRecycler;
@@ -136,10 +135,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     private SharedPreferences unusedPhotoShareRef;
     Gson gson = new Gson();
     private boolean isSendingPause;
-
-    ConstraintLayout fileDetailsContainer;
-    TextView fileName_TV, fileNameAtTop_TV;
-    ImageView fileIcon_IV;
+    TextView fileNameAtTop_TV;
+ImageView imageView3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,9 +176,6 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         undoPaint_IV = findViewById(R.id.undoPaint_IV);
 
         // document details id
-        fileDetailsContainer = findViewById(R.id.fileDetailsContainer);
-        fileName_TV = findViewById(R.id.fileName_TV);
-        fileIcon_IV = findViewById(R.id.fileIcon_IV);
         fileNameAtTop_TV = findViewById(R.id.fileNameAtTop_TV);
 
         firstModelMap = new HashMap<>();
@@ -206,10 +200,12 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         registerActivityForSelectImage();
         
         // pick image from gallery
-        if(!sharingPhotoActivated) selectImageFromGallery();
+        if(!sharingPhotoActivated) openOrLaunchGallery();
 
         //  send the image to the firebase and home adapter UI
-        buttonSend.setOnClickListener(view -> {
+        buttonSend.setOnClickListener(v -> {
+
+//            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
 
             if(chatModelList.size() >= 1){
                 isSendingPause = true; // Prevent present model photo uri adding to the delete sharePrefs
@@ -288,16 +284,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 if(!previousModel.getPhotoUriOriginal().equals(firstModelMap.get(previousModel.getIdKey())))
                 {
                     Uri originalUri = Uri.parse(firstModelMap.get(previousModel.getIdKey()));
-                    // update the adapter and local list with the original photo
-                    Glide.with(this)
-                            .asBitmap()
-                            .load(originalUri)
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    updateNewPhoto(originalUri, resource);    // for reset
-                                }
-                            });
+                    updateNewPhoto(originalUri);    // for reset
                     // reset the secondModelMap to the original uri photo
                     secondModelMap.put(previousModel.getIdKey(), originalUri.toString());
                 }
@@ -318,7 +305,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             {
                 // call cropping method
                 activateCrop();
-                
+
                 new Handler().postDelayed(()-> {
                     view.setScaleX(1.0f);
                     view.setScaleY(1.0f);
@@ -334,7 +321,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             // update adapters
             adapterRecycler.notifyDataSetChanged();
             adapterViewPager.notifyDataSetChanged();
-            
+
             viewPager.setCurrentItem(0); // set the current position photo if recycler adapter is click
 
             // make the recycler visible only when the photo on the list is above 1
@@ -350,7 +337,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
 
         addPhoto_IV.setOnClickListener(view -> {
             addNewPhoto = true;
-            selectImageFromGallery();
+            openOrLaunchGallery();
         });
 
         //  reset the paint drawing
@@ -466,30 +453,15 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             deleteOldUriFromAppMemory(tempUri, this); // for saving
 
             //  delete previous photo from phone app storage
-            mainActivity.deleteFileFromPhoneStorage(previousModel);
+//            mainActivity.deleteFileFromPhoneStorage(previousModel);
 
             // upload the new photo to the viewPager and recycler adapter list
             Uri getNewPhotoUri = savePaintPhotoUri(this, paintedBitmap);
-            updateNewPhoto(getNewPhotoUri, null);  // for painting
+            updateNewPhoto(getNewPhotoUri);  // for painting
 
             secondModelMap.put(previousModel.getIdKey(), getNewPhotoUri.toString());    // update the uri map
         });
 
-    }
-
-    public static Uri savePaintPhotoUri(Context context, Bitmap paintBit){
-
-        File savePaintPhotoUri = new File(MainActivity.getPhotoFolder(context), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
-        OutputStream outputStream;
-        try {
-            outputStream = new FileOutputStream(savePaintPhotoUri);
-            paintBit.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
-            outputStream.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Uri.fromFile(savePaintPhotoUri);
     }
 
     //  ====== interface
@@ -514,28 +486,20 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             secondModelMap.put(messageModel.getIdKey(), messageModel.getPhotoUriOriginal());
         }
 
-        if(messageModel.getType() != 2){    // it's not photo
+        //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+        if(messageModel.getType() == 3 || messageModel.getType() == 4 ){
             String[] onlyFileName = messageModel.getEmojiOnly().split("\n");
             fileNameAtTop_TV.setVisibility(View.VISIBLE);
             fileNameAtTop_TV.setText(onlyFileName[0]);
 
             if(messageModel.getType() == 4)  { // audio
-                fileDetailsContainer.setVisibility(View.VISIBLE);
-                fileIcon_IV.setImageResource(R.drawable.baseline_audio_file_24);
-                fileName_TV.setText(messageModel.getEmojiOnly());   // I saved the file name at emojiOnly
                 message_ET.setVisibility(View.INVISIBLE);
                 emoji_IV.setVisibility(View.INVISIBLE);
             } else {
                 message_ET.setVisibility(View.VISIBLE);
                 emoji_IV.setVisibility(View.VISIBLE);
                 new Handler().postDelayed(() -> message_ET.requestFocus(), 1000);
-                fileDetailsContainer.setVisibility(View.GONE);
-                fileName_TV.setText("");
-                if (messageModel.getPhotoUriPath() == null) {   // for docx, cdr or photoshop
-                    fileIcon_IV.setImageResource(R.drawable.baseline_document_scanner_24);
-                    fileDetailsContainer.setVisibility(View.VISIBLE);
-                    fileName_TV.setText(messageModel.getEmojiOnly());   // I saved the file name at emojiOnly
-                }
+
             }
 
             cropper.setVisibility(View.GONE);
@@ -546,10 +510,15 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             cropper.setVisibility(View.VISIBLE);
             reset_IV.setVisibility(View.VISIBLE);
             paintBrush_IV.setVisibility(View.VISIBLE);
-            fileDetailsContainer.setVisibility(View.GONE);
             fileNameAtTop_TV.setVisibility(View.GONE);
             message_ET.setVisibility(View.VISIBLE);
             emoji_IV.setVisibility(View.VISIBLE);
+
+            if(messageModel.getType() == 5) {
+                paintBrush_IV.setVisibility(View.GONE);
+                cropper.setVisibility(View.GONE);
+                reset_IV.setVisibility(View.GONE);
+            }
             new Handler().postDelayed(() -> message_ET.requestFocus(), 1000);
         }
 
@@ -613,14 +582,15 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     }
 
 
-    private  void selectImageFromGallery(){
+    private  void openOrLaunchGallery(){
         if(!permissions_.isStorageOk(this)){
             permissions_.requestStorage(this);
         } else {
 //            Intent intent = new Intent(Intent.EXTRA_ALLOW_MULTIPLE, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType("image/*"); // Limit to images only
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Enable multiple selection
+            intent.setType("*/*"); // Specify all MIME types
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"}); // Specify MIME types for photos and videos
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Allow multiple selection
             activityResultLauncherForSelectImage.launch(intent);
         }
     }
@@ -628,7 +598,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     // crop photo
     private void activateCrop(){
 //        String dest_uri_path = new StringBuilder(UUID.randomUUID().toString()).append(".jpg").toString();
-        File imageFileUri = new File(MainActivity.getPhotoFolder(this), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
+        File imageFileUri = new File(FolderUtils.getPhotoFolder(this), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
 
         UCrop.Options options = new UCrop.Options();
 
@@ -660,7 +630,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         {
             Uri croppedImageUri = UCrop.getOutput(data);   // get the image uri path
             // save the new crop photo
-            updateNewPhoto(croppedImageUri, null);  //  for cropping
+            updateNewPhoto(croppedImageUri);  //  for cropping
 
             allOldUriList.remove(tempCropUri.toString());
             // remove the uri from gson - sharePref, since user perform action on the photo
@@ -697,56 +667,52 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
 
                             for (int i = 0; i < countPhotoPick; i++) {
 
-                                int position = i;
-                                Uri eachUri = data.getClipData().getItemAt(position).getUri();
+                                Uri eachUri = data.getClipData().getItemAt(i).getUri();
 
-                                Glide.with(this).load(eachUri); // to save the memory first
-                                // save low image via Glide to correct rotation
-                                Glide.with(this)
-                                        .asBitmap()
-                                        .load(eachUri)
-                                        .into(new SimpleTarget<Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                String fileName = "🌃 " + FileUtils.getFileName(eachUri, this);
+                                int type = 2;//  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+                                String videoDuration = null;
+                                if( FileUtils.isVideoFile(eachUri, this) ){   //  content://media/external/video/media/1000142346
+                                    type = 5;
+                                    videoDuration = FileUtils.getVideoDuration(eachUri, this);
+                                    fileName = "🎥 " + FileUtils.getFileName(eachUri, this);
+                                }
 
-                                                String size = MainActivity.getFileSize(eachUri, SendImageActivity.this);   // get the size of the image
-                                                Uri lowImage = reduceImageSize(resource, null, 500);    // convert it to low quality
+                                String size = FileUtils.getFileSize(eachUri, this);   // get the size of the image
+                                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
 
-                                                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+                                MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
+                                        System.currentTimeMillis(), chatId, null, 8,
+                                        null, 700033, type, size, null, false, false,
+                                        null, fileName, null, videoDuration, eachUri.toString(), eachUri.toString());
 
-                                                MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                                        System.currentTimeMillis(), chatId, null, 8,
-                                                        null, 700033, 2, size, null, false, false,
-                                                        null, null, null, null, lowImage.toString(), eachUri.toString());
+                                if (MainActivity.chatModelList != null) {
+                                    MainActivity.chatModelList.add(0, messageModel);
+                                }
 
-                                                if (MainActivity.chatModelList != null) {
-                                                    MainActivity.chatModelList.add(messageModel);
-                                                }
+                                adapterRecycler = new SendImageAdapter(SendImageActivity.this, chatModelList);
+                                adapterRecycler.setImageListener(SendImageActivity.this);
+                                recyclerPhoto.setAdapter(adapterRecycler);
+                                adapterRecycler.notifyDataSetChanged();
 
-                                                adapterRecycler = new SendImageAdapter(SendImageActivity.this, chatModelList);
-                                                adapterRecycler.setImageListener(SendImageActivity.this);
-                                                recyclerPhoto.setAdapter(adapterRecycler);
-                                                adapterRecycler.notifyDataSetChanged();
+                                // initialise the adapter for ViewPager
+                                adapterViewPager = new ViewImageAdapter(SendImageActivity.this, chatModelList);
+                                adapterViewPager.setImageListener(SendImageActivity.this); // activate the interface listener
+                                viewPager.setAdapter(adapterViewPager);
+                                adapterViewPager.notifyDataSetChanged();
 
-                                                // initialise the adapter for ViewPager
-                                                adapterViewPager = new ViewImageAdapter(SendImageActivity.this, chatModelList);
-                                                adapterViewPager.setImageListener(SendImageActivity.this); // activate the interface listener
-                                                viewPager.setAdapter(adapterViewPager);
-                                                adapterViewPager.notifyDataSetChanged();
+                                // true false when user new photo has been added and make progressBar gone
+                                if(i == countPhotoPick-1) {
+                                    addNewPhoto = false;
+                                    progressBar.setVisibility(View.GONE);
+                                }
 
-                                                // true false when user new photo has been added and make progressBar gone
-                                                if(position == countPhotoPick-1) {
-                                                    addNewPhoto = false;
-                                                    progressBar.setVisibility(View.GONE);
-                                                }
+                                // make the recycler visible only when the photo on the list is above 1
+                                if(countPhotoPick > 1 || chatModelList.size() > 1) {
+                                    recyclerPhoto.setVisibility(View.VISIBLE);
+                                    OtherMethods.fadeInFastRecyclerview(SendImageActivity.recyclerPhoto);
+                                }
 
-                                                // make the recycler visible only when the photo on the list is above 1
-                                                if(countPhotoPick > 1 || chatModelList.size() > 1) {
-                                                    recyclerPhoto.setVisibility(View.VISIBLE);
-                                                }
-
-                                            }
-                                        });
                             }
                         }
 
@@ -764,9 +730,9 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     }
 
     // upload the new image from crop or paint to the model list and adapter
-    private void updateNewPhoto(Uri newPhotoUri, Bitmap bitmapImage){
+    private void updateNewPhoto(Uri newPhotoUri){
 
-        // first add the previous Uri path to delete after all done.
+        // first add the previous Uri path to delete after all done, except the first original uri
         photoUriToDelete.add(previousModel.getPhotoUriOriginal());
         photoUriToDelete.add(previousModel.getPhotoUriPath());
 
@@ -775,14 +741,14 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         String json = gson.toJson(allOldUriList);
         unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, json).apply();
 
-        String imageSize = MainActivity.getFileSize(newPhotoUri, this);
+        String imageSize = FileUtils.getFileSize(newPhotoUri, this);
         // first check for bitmap image to convert, if not available, then convert the uri
-        Uri lowQualityUri = bitmapImage != null ? reduceImageSize(bitmapImage, null, 500) :
-                reduceImageSize(null, newPhotoUri, 500);    // save the low quality
+//        Uri lowQualityUri = bitmapImage != null ? reduceImageSize(bitmapImage, null, 500) :
+//                reduceImageSize(null, newPhotoUri, 500);    // save the low quality
 
         // update the new list with the new crop photos
         previousModel.setPhotoUriOriginal(newPhotoUri.toString());
-        previousModel.setPhotoUriPath(lowQualityUri.toString());
+        previousModel.setPhotoUriPath(newPhotoUri.toString());
         previousModel.setImageSize(imageSize);
 
         chatModelList.remove(position);
@@ -841,6 +807,22 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 });
     }
 
+    public static Uri savePaintPhotoUri(Context context, Bitmap paintBit){
+
+        File savePaintPhotoUri = new File(FolderUtils.getPhotoFolder(context), "WinnerChat_" + System.currentTimeMillis() + ".jpg");
+        OutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(savePaintPhotoUri);
+            paintBit.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Uri.fromFile(savePaintPhotoUri);
+    }
+
+
     // crop photo and save the thumbnail to app storage
     public Uri reduceImageSize(Bitmap bitmapImage, Uri originalImageUri, int maxSize) {
         try {
@@ -875,7 +857,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                     centerY - (lowDimension / 2), lowDimension, lowDimension);
 
             // save the low photo or thumbnail to phone app memory
-            File saveImageToPhoneUri = new File(MainActivity.getThumbnailFolder(this), getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg");
+            File saveImageToPhoneUri = new File(getThumbnailFolder(this), getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg");
             OutputStream outputStream;
             try {
                 outputStream = new FileOutputStream(saveImageToPhoneUri);
@@ -940,14 +922,13 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == AllConstants.STORAGE_REQUEST_CODE && grantResults.length > 0 
+        if (requestCode == AllConstants.STORAGE_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
 
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            activityResultLauncherForSelectImage.launch(intent);
+            openOrLaunchGallery();
 
         } else {
-            Toast.makeText(this, "Go to phone setting and allow photo permission", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.permission), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -990,7 +971,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
             } else {
                 deleteFile();   // for onBackPress
                 deleteUnusedPhotoFromSharePrefsAndAppMemory(this);    // for onBackPress
-                selectImageFromGallery();   // go back to pick image gallery
+                openOrLaunchGallery();   // go back to pick image gallery
                 message_ET.clearFocus();
             }
         }

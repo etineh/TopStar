@@ -1,8 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fileDetailsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/fileIcon_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.41000003"
+            app:srcCompat="@drawable/baseline_audio_file_24" />
+
+        <TextView
+            android:id="@+id/fileName_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/fileIcon_IV"
+            app:layout_constraintStart_toStartOf="@+id/fileIcon_IV"
+            app:layout_constraintTop_toBottomOf="@+id/fileIcon_IV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/zoomPhoto_PView"
@@ -12,4 +51,94 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/playIconView_IV"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/msg_count"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_play_arrow_24" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/videoSeekBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:background="@color/transBlack50"
+        android:elevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/fileSize_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12MB"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/seekBarProgress"
+            app:layout_constraintStart_toStartOf="@+id/seekBarProgress" />
+
+        <SeekBar
+            android:id="@+id/seekBarProgress"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="70dp"
+            android:progressTint="@color/orange"
+            android:thumbTint="@color/orange"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/playV_IV"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/duration_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:30"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/seekBarProgress"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/playV_IV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/msg_count"
+            android:padding="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.461"
+            app:srcCompat="@drawable/baseline_play_arrow_24"
+            app:tint="@color/white" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

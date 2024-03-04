@@ -170,6 +170,7 @@
         <item name="android:tint">@color/cool_orange</item>
     </style>
 
+
     <!--   round drawable tint and background-->
     <style name="roundBackgroundAndTint2">
         <item name="android:background">@drawable/black_circle_round</item>

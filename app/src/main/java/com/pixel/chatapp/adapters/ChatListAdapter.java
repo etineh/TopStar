@@ -1,5 +1,8 @@
 package com.pixel.chatapp.adapters;
 
+import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
+import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -248,7 +251,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             }
 
             if(!MainActivity.onForward){
-
+                holder.checkBoxContainer.setVisibility(View.GONE);  // close forward chat checkbox if visible by bug
                 // don't show anim if it contain
                 if(viewClickList.contains(v)){
                     // open the user chats
@@ -481,17 +484,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             if(checkBox.isChecked()) {
                 MainActivity.selectCount--;
                 checkBox.setChecked(false);
-                MainActivity.forwardChatUserId.removeIf(name -> name.equals(otherUid));
-                MainActivity.selectedUserNames.removeIf(name -> name.equals(otherName));
+                forwardChatUserId.removeIf(name -> name.equals(otherUid));
+                selectedUserNames.removeIf(name -> name.equals(otherName));
             } else {
                 MainActivity.selectCount++;
                 checkBox.setChecked(true);
-                MainActivity.forwardChatUserId.add(otherUid);  // Add other user id to the List
-                MainActivity.selectedUserNames.add(otherName);  // Add username to the List
+                if( !forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);  // Add other user id to the List
+                if( !selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
             }
             MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
 
-            if(MainActivity.forwardChatUserId.size() > 0){           //  make send button invisible
+            if(forwardChatUserId.size() > 0){           //  make send button invisible
                 MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
             } else
                 MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
@@ -511,17 +514,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         if(checkBox.isChecked()) {
             MainActivity.selectCount++;
-            MainActivity.forwardChatUserId.add(otherUid);
-            MainActivity.selectedUserNames.add(otherName);  // Add username to the List
+            if (!forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);
+            if (!selectedUserNames.contains(otherUid))selectedUserNames.add(otherName);  // Add username to the List
         } else {
             MainActivity.selectCount--;
-            MainActivity.forwardChatUserId.removeIf(name -> name.equals(otherUid)); // remove user id
-            MainActivity.selectedUserNames.removeIf(name -> name.equals(otherName)); // remove user name
+            forwardChatUserId.removeIf(name -> name.equals(otherUid)); // remove user id
+            selectedUserNames.removeIf(name -> name.equals(otherName)); // remove user name
         }
 
         MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
 
-        if(MainActivity.forwardChatUserId.size() > 0){           //  make send button invisible
+        if(forwardChatUserId.size() > 0){           //  make send button invisible
             MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
         } else
             MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);

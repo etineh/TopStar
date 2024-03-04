@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Topper</string>
     <string name="pin">Pin</string>
+    <string name="unpin">Unpin</string>
     <string name="delete">Del.</string>
     <string name="move">Move</string>
     <string name="mute">Mute</string>
@@ -19,24 +20,51 @@
     <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
     <string name="add_message">Add message</string>
     <string name="online">Online</string>
+    <string name="more">Open\nGallery</string>
+    <string name="single">Single</string>
+    <string name="multiple">Multiple</string>
+    <string name="send">Send</string>
+    <string name="done">Done</string>
+
+<!--    <string name="multiple">Multiple</string>-->
+
 
     <string name="page">pages</string>
+    <string name="video">video</string>
     <string name="photo">photo</string>
     <string name="sending">Sending…</string>
 
     <string name="subscribe">Subscribe to Premium to enjoy high features</string>
     <string name="isNetwork">No network connectivity</string>
+    <string name="corrupt">File corrupt or poor network</string>
     <string name="notSentYet">File not sent yet.</string>
     <string name="resend">Delete and resend 🙌</string>
     <string name="empty">Can not send empty file 🙌</string>
     <string name="notFound">file not found…</string>
-    <string name="permission">Go to setting and grant storage permission</string>
+    <string name="dCancel">Download cancel</string>
+<!--    <string name="corrupt">File corrupt or poor network</string>-->
+    <string name="permission">Go to setting and grant storage/camera permission</string>
 
 
     <string name="meet">Meet</string>
     <string name="tour">Tour.</string>
     <string name="gift">Gift</string>
     <string name="host">Host</string>
+
+    <string name="edit">Edit</string>
+    <string name="share">Share</string>
+    <string name="report">Report</string>
+    <string name="openInChat">Open in chat</string>
+    <string name="saveToGallery">Save to gallery</string>
+    <string name="react">React 😀</string>
+
+
+    <string name="gallery">Gallery</string>
+    <string name="document">Document</string>
+    <string name="audio">Audio</string>
+    <string name="contact">Contact</string>
+    <string name="game">Game</string>
+
 
     <string name="connect">connecting…</string>
 

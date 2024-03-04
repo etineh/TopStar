@@ -50,6 +50,14 @@ public class Permission {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, AllConstants.RECORDING_REQUEST_CODE);
     }
 
+    public boolean isCameraOk(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public void requestCamera(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, AllConstants.CAMERA_REQUEST_CODE);
+    }
+
 
 }
 

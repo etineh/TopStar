@@ -4,6 +4,7 @@ import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.uniqueUriForSharingPhotoOrDoc;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 
 import android.content.Intent;
@@ -31,9 +32,11 @@ import java.util.List;
 
 public class ViewImageActivity extends AppCompatActivity implements ImageListener {
 
-    private static TextView fromWho_TV, timeAndDate_TV;
-    private ImageView forwardPhoto_IV, sharePhoto_TV;
+    private static TextView fromWho_TV, timeAndDate_TV, showChatTV;
+    private ImageView forwardPhoto_IV, sharePhoto_TV, openOption;
     MainActivity mainActivity = new MainActivity();
+    ConstraintLayout optionContainer, moreOptionContainer;
+    TextView saveToGalleryTV,openInChat_TV;
 
     public static MessageModel currentModelChat;
 
@@ -46,8 +49,14 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         ImageView arrowBack = findViewById(R.id.arrowBack);
         fromWho_TV = findViewById(R.id.from_TV);
         timeAndDate_TV = findViewById(R.id.date_time_TV);
+        showChatTV = findViewById(R.id.showChat_TV);
         forwardPhoto_IV = findViewById(R.id.forwardPhoto_IV);
         sharePhoto_TV = findViewById(R.id.sharePhoto_IV);
+        optionContainer = findViewById(R.id.optionContainer);
+        moreOptionContainer = findViewById(R.id.moreOptionContainer);
+        saveToGalleryTV = findViewById(R.id.saveToGalleryTV);
+        openInChat_TV = findViewById(R.id.openInChat_TV);
+        openOption = findViewById(R.id.openOption);
 
         // get the details of the items
         List<MessageModel> getChatsList = (List<MessageModel>) getIntent().getSerializableExtra("modelList");
@@ -91,6 +100,33 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
 
         });
 
+        // open more options
+        openOption.setOnClickListener(v -> {
+            if(moreOptionContainer.getVisibility() == View.VISIBLE){
+                optionContainer.setVisibility(View.GONE);
+                moreOptionContainer.setVisibility(View.GONE);
+            } else {
+                optionContainer.setVisibility(View.VISIBLE);
+                moreOptionContainer.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // close option
+        optionContainer.setOnClickListener(v -> {
+            optionContainer.setVisibility(View.GONE);
+            moreOptionContainer.setVisibility(View.GONE);
+        });
+
+        // save the file to phone gallery
+        saveToGalleryTV.setOnClickListener(v -> {
+            Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+        });
+
+        // open the file to where it's located on chat room position
+        openInChat_TV.setOnClickListener(v -> {
+            Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     //  ======= methods
@@ -131,6 +167,8 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
             from = messageModel.getFrom().length() > 10 ? messageModel.getFrom().substring(0, 10) : messageModel.getFrom();
         }
         fromWho_TV.setText("From: " + from);
+
+        showChatTV.setText(messageModel.getMessage());
 
         // set the date and time
         Date d = new Date(messageModel.getTimeSent()); //complete Data -- Mon 2023 -03 - 06 12.32pm

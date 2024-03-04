@@ -1,6 +1,18 @@
 package com.pixel.chatapp.home;
 
+import static com.pixel.chatapp.all_utils.FileUtils.formatDuration;
+import static com.pixel.chatapp.all_utils.FileUtils.getFileName;
+import static com.pixel.chatapp.all_utils.FileUtils.isAudioFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isCdrFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isMsWordFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isPdfFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isPhotoFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isPhotoshopFile;
+import static com.pixel.chatapp.all_utils.FileUtils.isVideoFile;
+import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
+import static com.pixel.chatapp.all_utils.OtherMethods.animateVisibility;
 import static com.pixel.chatapp.constants.AllConstants.ACCEPTED_MIME_TYPES;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -17,7 +29,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -26,18 +37,14 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -49,7 +56,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -89,7 +95,10 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.SendImageActivity;
 import com.pixel.chatapp.ZoomImage;
 import com.pixel.chatapp.activities.AppLifecycleHandler;
+import com.pixel.chatapp.activities.CameraActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.all_utils.PhoneAccess;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.listeners.FragmentListener;
@@ -107,11 +116,7 @@ import com.vanniktech.emoji.EmojiPopup;
 //import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
@@ -241,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static boolean insideChat = false;     // for checking when user wants to send photo from other app
     public static String networkListener = "no";
     public static Boolean networkOk = true, networkTypingOk = true;
-    private static int replyVisibility = 8;    // gone as dafault
+    private static int replyVisibility = 8;    // gone as default
 
 
     //  --------   voice note declares
@@ -256,17 +261,19 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     Handler handler = new Handler(Looper.getMainLooper());
 
     //  --------   chat Options declares
-    public static ConstraintLayout chatOptionsConstraints;
-    public static TextView chatSelected_TV;
+    public static ConstraintLayout chatOptionsConstraints, generalBackground, moreOptionContainer;
+    public static TextView chatSelected_TV, editTV, pinTV, saveTogalleryTV, reportTV, emojiChatOption_TV;
     private static ImageView forwardChatOption_IV, copyChatOption_IV, deleteChatOption_IV, cancelChatOption_IV;
 
-    public static ImageView replyChatOption_IV, emojiChatOption_IV, pinChatOption_IV, editChatOption_IV, pinAllIndicator;
+    public static ImageView replyChatOption_IV, editChatOption_IV, moreOption_IV;
+
+
+
     public static MessageAdapter.MessageViewHolder chatHolder;
     public static MessageModel modelChatsOption;
     public static int chatPosition;
     public static List<MessageModel> chatModelList;
-    public static boolean onPhoto;
-    public static boolean onDocument;
+    public static boolean onShare;
     
     //  checks declares
     public static int downMsgCount, readDatabase, scNum = 0;// 0 is read, 1 is no_read
@@ -329,6 +336,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ActivityResultLauncher<Intent> pickMultipleAudioLauncher;
 
 
+    //  ----------  file option declare
+    private ConstraintLayout fileAttachOptionContainer, fileContainerAnim;
+    private ImageView documentIV, galleryIV, audioIV, contactIV, gameIV;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -373,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         //      --------- message ids starts        ------------------------
         firstTopUserDetailsContainer = findViewById(R.id.firstTopContainer);
         chatContainer = findViewById(R.id.chatBoxContainer);
+
         recyclerContainer = findViewById(R.id.constraintRecyler);
         constraintLayoutAdjust = findViewById(R.id.constraintLayoutAdjust);
         imageViewCalls = findViewById(R.id.callMeet_IV);
@@ -388,6 +401,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         textViewMsgTyping = findViewById(R.id.isTyping_TV);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
         typeMsgContainer = findViewById(R.id.typeMsgContainer);
+
+        //  file options
+        fileAttachOptionContainer = findViewById(R.id.FileAttachOptionContainer);
+        fileContainerAnim = findViewById(R.id.fileContainerAnim);
+        galleryIV = findViewById(R.id.galleryIV);
+        documentIV = findViewById(R.id.documentIV);
+        audioIV = findViewById(R.id.audioIV);
+        contactIV = findViewById(R.id.contactIV);
+        gameIV = findViewById(R.id.gameIV);
+
 
         //  side bar menu
         sideBarMenuContainer = findViewById(R.id.sideBarMenuContainer);
@@ -478,14 +501,19 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         chatOptionsConstraints = findViewById(R.id.chatOptions);
         editChatOption_IV = findViewById(R.id.edit_IV);
         replyChatOption_IV = findViewById(R.id.reply_IV);
-        emojiChatOption_IV = findViewById(R.id.react_IV);
-        pinChatOption_IV = findViewById(R.id.pin_IV);
+        emojiChatOption_TV = findViewById(R.id.emojiReactTV);
         forwardChatOption_IV = findViewById(R.id.forward_IV);
         copyChatOption_IV = findViewById(R.id.copyText_IV);
         deleteChatOption_IV = findViewById(R.id.delete_IV);
-        pinAllIndicator = findViewById(R.id.pinALL_IV);
         chatSelected_TV = findViewById(R.id.count_TV);
         cancelChatOption_IV = findViewById(R.id.cancel_IV);
+        moreOptionContainer = findViewById(R.id.moreOptionContainer);
+        generalBackground = findViewById(R.id.generalBackground);
+        pinTV = findViewById(R.id.pinChat_TV);
+        editTV = findViewById(R.id.editChatTV);
+        saveTogalleryTV = findViewById(R.id.saveToGalleryTV);
+        moreOption_IV = findViewById(R.id.moreOptionIv);
+        reportTV = findViewById(R.id.report_TV);
 
 
         // audio swipe button ids   --  voice note
@@ -754,26 +782,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             });
 
-            // edit button on long press
-            editChatOption_IV.setOnClickListener(view -> {
-                view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
+            // edit or share chat/photo on long press
+            View.OnClickListener onEdit = view -> {
+                view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(30)
                         .withEndAction(() -> {
 
-                            if (onPhoto || onDocument){
+                            // share
+                            if (onShare){
                                 Uri photoOrDocUri = uniqueUriForSharingPhotoOrDoc(modelChatsOption, this);
-
                                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                if (onPhoto)
-                                    shareIntent.setType("image/*");
-                                else if (onDocument) {
-                                    shareIntent.setType("application/pdf|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document" +
-                                            "|application/cdr|image/cdr | image/vnd.adobe.photoshop | audio/*");
-                                    if(isPhotoFile(photoOrDocUri)) {
-                                        shareIntent.setType("image/*");
-                                    } else if (isAudioFile(photoOrDocUri)){
-                                        shareIntent.setType("audio/*");
-//                                        Toast.makeText(this, "I am from audio", Toast.LENGTH_SHORT).show();
-                                    }
+                                
+                                String mimeType = getContentResolver().getType(photoOrDocUri);
+                                if (mimeType != null) {
+                                    shareIntent.setType(mimeType);
+                                } else {
+                                    // Default to generic MIME type for documents if MIME type cannot be determined
+                                    shareIntent.setType("application/octet-stream");
                                 }
 //                                System.out.println("what is uri " + photoOrDocUri);
                                 shareIntent.putExtra(Intent.EXTRA_STREAM, photoOrDocUri);
@@ -793,11 +817,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             view.setScaleY(1.0f);
 
                             pinMsgContainer.setVisibility(View.VISIBLE);
+                            generalBackground.setVisibility(View.GONE);
+                            moreOptionContainer.setVisibility(View.GONE);
                         }).start();
-            });
+
+                clearAllHighlights();
+
+            };
+            editChatOption_IV.setOnClickListener(onEdit);
+            editTV.setOnClickListener(onEdit);
 
             // emoji button on long press
-            emojiChatOption_IV.setOnClickListener(view -> {
+            emojiChatOption_TV.setOnClickListener(view -> {
                 view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
                         .withEndAction(() -> {
 
@@ -808,12 +839,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             view.setScaleY(1.0f);
 
                             pinMsgContainer.setVisibility(View.VISIBLE);
+                            generalBackground.setVisibility(View.GONE);
+                            moreOptionContainer.setVisibility(View.GONE);
                         }).start();
 
             });
 
-            //  pin or share chat/photo
-            pinChatOption_IV.setOnClickListener(view -> {
+            //  pin
+            pinTV.setOnClickListener(view -> {
                 view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
                         .withEndAction(() -> {
 
@@ -825,6 +858,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                             view.setScaleY(1.0f);
 
                             pinMsgContainer.setVisibility(View.VISIBLE);
+                            generalBackground.setVisibility(View.GONE);
+                            moreOptionContainer.setVisibility(View.GONE);
                         }).start();
 
             });
@@ -882,6 +917,53 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             });
 
+            // open more option
+            moreOption_IV.setOnClickListener(view -> {
+                generalBackground.setVisibility(View.VISIBLE);
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
+                {
+                    if(modelChatsOption.getType() != 0){    //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+                        editTV.setVisibility(View.GONE);
+                        if(modelChatsOption.getType() ==  1) {
+                            saveTogalleryTV.setVisibility(View.GONE);
+                        } else saveTogalleryTV.setVisibility(View.VISIBLE);
+
+                    } else {
+                        saveTogalleryTV.setVisibility(View.GONE);
+                        editTV.setVisibility(View.VISIBLE);
+                    }
+
+                    if(moreOptionContainer.getVisibility() == View.GONE){
+                        // Start the animation to make it visible
+                        animateVisibility(moreOptionContainer);
+                    } else {
+                        generalBackground.setVisibility(View.GONE);
+                        moreOptionContainer.setVisibility(View.GONE);
+                    }
+
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 300);
+                });
+            });
+
+            // save photo or file to gallery
+            saveTogalleryTV.setOnClickListener(view -> {
+                Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+            });
+
+            // save photo or file to gallery
+            reportTV.setOnClickListener(view -> {
+                Toast.makeText(this, "Report chat in progress", Toast.LENGTH_SHORT).show();
+            });
+
+            // hide the more option container
+            generalBackground.setOnClickListener(v -> {
+                generalBackground.setVisibility(View.GONE);
+                moreOptionContainer.setVisibility(View.GONE);
+            });
+
 
             //  ================     Send Documents and camera onClick Settings      ===================
 
@@ -889,38 +971,93 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             initialiseMultipleAudioPicker();
 
             camera_IV.setOnClickListener(view -> {
+                // call runnable to check for network
+                handlerTyping.post(runnableTyping);
+
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
                 {
+                    selectedUserNames.clear();
+                    forwardChatUserId.clear();
+                    chatModelList.clear();
                     isSendingFile = true;
                     selectedUserNames.add(otherUserName);
                     forwardChatUserId.add(otherUserUid);
-                    Intent i = new Intent(this, SendImageActivity.class);
-                    startActivity(i);
-
-                    // call runnable to check for network
-                    handlerTyping.post(runnableTyping);
+                    startActivity(new Intent(this, CameraActivity.class));
 
                     new Handler().postDelayed(()-> {
                         view.setScaleX(1f);
                         view.setScaleY(1f);
                     }, 500);
                 });
-            }); // use for gallery first
+            });
+
 
             // set files(documents) -> camera - photo - documents
             file_IV.setOnClickListener(view -> {
+                fileAttachOptionContainer.setVisibility(View.VISIBLE);
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
                 {
+                    // Start the animation to make it visible
+                    animateVisibility(fileContainerAnim);
+
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 300);
+                });
+            });
+
+            fileAttachOptionContainer.setOnClickListener(v -> {
+                fileAttachOptionContainer.setVisibility(View.GONE);
+                fileContainerAnim.setVisibility(View.INVISIBLE);
+            });
+
+            // use for document
+            documentIV.setOnClickListener(view -> {
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                {
+                    forwardChatUserId.clear();
+                    selectedUserNames.clear();
                     forwardChatUserId.add(otherUserUid);
                     selectedUserNames.add(otherUserName);
                     pickDocumentLauncher.launch(ACCEPTED_MIME_TYPES);
 
+                    fileAttachOptionContainer.setVisibility(View.GONE);
+                    fileContainerAnim.setVisibility(View.INVISIBLE);
+
                     new Handler().postDelayed(()-> {
                         view.setScaleX(1f);
                         view.setScaleY(1f);
-                    }, 500);
+                    }, 300);
                 });
-            }); // use for document first
+            });
+
+            galleryIV.setOnClickListener(view -> {
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                {
+                    forwardChatUserId.clear();
+                    selectedUserNames.clear();
+                    chatModelList.clear();
+                    cancelChatOption();
+                    isSendingFile = true;
+                    sharingPhotoActivated = false;
+                    selectedUserNames.add(otherUserName);
+                    forwardChatUserId.add(otherUserUid);
+
+                    Intent i = new Intent(this, SendImageActivity.class);
+                    startActivity(i);
+
+                    fileAttachOptionContainer.setVisibility(View.GONE);
+                    fileContainerAnim.setVisibility(View.INVISIBLE);
+
+                    // call runnable to check for network
+                    handlerTyping.post(runnableTyping);
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 200);
+                });
+            });
 
             // send message
             sendMessageButton.setOnClickListener(view -> {
@@ -928,13 +1065,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 String message = editTextMessage.getText().toString().trim();
 
                 if (!message.isEmpty()) {
+                    //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
                     if (containsOnlyEmojis(message)) {
                         // send as emoji text to increase the size
-                        sendMessage(null, message, 8, null, null, otherUserUid);
+                        sendMessage(null, message, 0, null, null, otherUserUid);
 
                     } else {
                         // Send as normal text
-                        sendMessage(message, null, 8, null, null, otherUserUid);
+                        sendMessage(message, null, 0, null, null, otherUserUid);
                     }
                 }
 
@@ -942,21 +1080,32 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 recordButton.setVisibility(View.VISIBLE);
                 camera_IV.setVisibility(View.VISIBLE);
                 refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
+                clearInputFields();
 
             });
 
-            gameMe_IV.setOnClickListener(view -> {  // use for audio first
+            audioIV.setOnClickListener(view -> {
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
                 {
                     forwardChatUserId.add(otherUserUid);
                     selectedUserNames.add(otherUserName);
                     launchMultipleAudioPicker();
 
+                    fileAttachOptionContainer.setVisibility(View.GONE);
+                    fileContainerAnim.setVisibility(View.INVISIBLE);
+
                     new Handler().postDelayed(()-> {
                         view.setScaleX(1f);
                         view.setScaleY(1f);
                     }, 500);
                 });
+            });
+
+            gameIV.setOnClickListener(v -> {
+                Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+            });
+
+            gameMe_IV.setOnClickListener(v -> {
                 Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
             });
 
@@ -1814,26 +1963,17 @@ scNum = 20;
 
 
         // delay for 3 secs to allow user chatlist to load users
-        new CountDownTimer(3000, 1000){
-            @Override
-            public void onTick(long l) {
-            }
+        new Handler().postDelayed(()-> {
 
-            @Override
-            public void onFinish() {
+            retrieveMessages(userName, otherUID, mContext_);
 
-                retrieveMessages(userName, otherUID, mContext_);
+            // get pinMessage once
+            getPinChats(otherUID);
+            getDeletePinId(otherUID);
+            getEmojiReact(otherUID);
+            getReadChatResponse(otherUID);
 
-                // get pinMessage once
-                getPinChats(otherUID);
-                getDeletePinId(otherUID);
-                getEmojiReact(otherUID);
-                getReadChatResponse(otherUID);
-
-//                constrNetConnect.setVisibility(View.GONE);
-
-            }
-        }.start();
+        }, 3000);
 
     }
 
@@ -1939,9 +2079,11 @@ scNum = 20;
     public void setForwardChat(){
 
         // return back to the first position
-        if(viewPager2General.getCurrentItem() != 0) {
-            viewPager2General.setCurrentItem(0, true);
-        }
+        if(viewPager2General != null)
+            if(viewPager2General.getCurrentItem() != 0) {
+                viewPager2General.setCurrentItem(0, true);
+            }
+
         // Disable user from swiping
         viewPager2General.setUserInputEnabled(false);
 
@@ -1974,10 +2116,13 @@ scNum = 20;
             circleForwardSend.setImageResource(R.drawable.baseline_send_24);
         }
 
+        forwardChatUserId.clear();
+        selectedUserNames.clear();
     }
 
     @Override
-    public void onPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder) {
+    public void onPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder)
+    {
 
         clearEmojiReactSetting();
         hideKeyboard();
@@ -2432,8 +2577,9 @@ scNum = 20;
                 String vnPathFile = chatModel.getVoiceNote();
                 String audioOrVN_Duration = chatModel.getVnDuration();
                 String forwardPhotoPath = chatModel.getPhotoUriPath();
-                String photoOriginal = chatModel.getPhotoUriOriginal();
+                String photoOriginal = chatModel.getPhotoUriOriginal(); // also for document
                 String imageSize_ = chatModel.getImageSize();
+
                 String replyFrom_ = null;
                 int replyVisibility_ = 8;
                 String replyId = null;
@@ -2443,7 +2589,7 @@ scNum = 20;
                     forwardIcon = chatModel.getFromUid().equals(myId) ? false : true;
                 } else forwardIcon = false;
 
-                if(chatModel.getType() == 2 || chatModel.getType() == 4){ // apply to document which is 3.
+                if(chatModel.getType() != 3){ // don't apply to document which is 3.
                     replyFrom_ = replyFrom;
                     replyVisibility_ = replyVisibility;
                     replyId = idKey;
@@ -2452,19 +2598,24 @@ scNum = 20;
 
                 String chatId = refMsgFast.child(myId).child(otherUid).push().getKey();  // create an id for each message
 
+                // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
                 int delivery = chatDeliveryStatus;
-                if(forwardPhotoPath != null || forwardType == 3){
+                if(forwardPhotoPath != null || forwardType == 3)
+                {
                     // save otherId to a photo key, so it doesn't send to another user
                     documentIdShareRef.edit().putString(chatId, otherUid + AllConstants.JOIN + "yes").apply();
                     delivery = 700033;
-                    if(imageSize_ == null && forwardType == 2)
-                        imageSize_ = getFileSize(Uri.parse(photoOriginal), this);
-                } else if (forwardType == 4 || forwardType == 1) {
+                    if(imageSize_ == null){
+                        Uri uriOnPhone = photoOriginal.startsWith("/storage/") ? Uri.fromFile(new File(photoOriginal))
+                                : Uri.parse(photoOriginal);
+                        imageSize_ = FileUtils.getFileSize(uriOnPhone, this);
+                    }
+
+                } else if (forwardType == 4 || forwardType == 1)
+                {
                     delivery = 700033;  // so as to enable sending
-                    // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
                     voiceNoteIdShareRef.edit().putString(chatId, otherUid + AllConstants.JOIN + "yes").apply();
                 }
-                Toast.makeText(context, "ch " + delivery, Toast.LENGTH_SHORT).show();
 
                 // save to local list for fast update
                 MessageModel messageModel = new MessageModel(forwardChat, myUserName, myId, replyFrom_,
@@ -2487,10 +2638,10 @@ scNum = 20;
                     recyclerMap.get(otherUid).scrollToPosition(lastPosition);
                 }   // else don't scroll.
 
-                // save the chatKey to network and reload when network is okay
-                if(chatDeliveryStatus == 700033){
-                    offlineChat.edit().putString(chatId, otherUid).apply();
-                }
+                // save the chatKey to network and reload when network is okay  -- edit later
+//                if(chatDeliveryStatus == 700033){
+//                    offlineChat.edit().putString(chatId, otherUid).apply();
+//                }
 
                 // save to ROOM database
                 chatViewModel.insertChat(otherUid, messageModel);
@@ -2744,48 +2895,8 @@ scNum = 20;
     }
 
     public static String getRecordFilePath(Context mContext){
-        File file = new File(getVoiceNoteFolder(mContext), "voice_note_" + System.currentTimeMillis() + ".3gp");
+        File file = new File(getVoiceNoteFolder(mContext), "voice_note_" + System.currentTimeMillis() + ".opus");
         return file.getPath();
-    }
-
-    public static File getPhotoFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), AllConstants.ALL_PHOTOS);
-        if (!appSpecificFolder.exists()) {
-            appSpecificFolder.mkdirs();
-        }
-        return appSpecificFolder;
-    }
-
-    public static File getThumbnailFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), AllConstants.ALL_THUMBNAIL);
-        if (!appSpecificFolder.exists()) {
-            appSpecificFolder.mkdirs();
-        }
-        return appSpecificFolder;
-    }
-
-    public static File getDocumentFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), AllConstants.ALL_DOCUMENTS);
-        if (!appSpecificFolder.exists()) {
-            appSpecificFolder.mkdirs();
-        }
-        return appSpecificFolder;
-    }
-
-    public static File getAudioFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), AllConstants.ALL_AUDIO);
-        if (!appSpecificFolder.exists()) {
-            appSpecificFolder.mkdirs();
-        }
-        return appSpecificFolder;
-    }
-
-    public static File getVoiceNoteFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), AllConstants.ALL_VOICENOTE);
-        if (!appSpecificFolder.exists()) {
-            appSpecificFolder.mkdirs();
-        }
-        return appSpecificFolder;
     }
 
     public static Uri uniqueUriForSharingPhotoOrDoc(MessageModel model, Context context){
@@ -2809,7 +2920,6 @@ scNum = 20;
             {
                 photoUri = Uri.parse(model.getPhotoUriOriginal());
             }
-
         } else if (model.getVoiceNote() != null) {
             if(model.getVoiceNote().startsWith("file:/")) {
                 try {
@@ -2823,36 +2933,12 @@ scNum = 20;
             else if(model.getVoiceNote().startsWith("/storage")) {
                 File file = new File( model.getVoiceNote() );
                 photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-
             }else if (model.getVoiceNote().startsWith("content:/")) {
                 photoUri = Uri.parse(model.getVoiceNote());
             }
 
         }
         return photoUri;
-    }
-
-    // Function to format duration in milliseconds to "mm:ss" format
-    public static String formatDuration(int durationInMillis) {
-        int seconds = durationInMillis / 1000;
-        int minutes = seconds / 60;
-        seconds = seconds % 60;
-
-        return String.format("%02d:%02d", minutes, seconds);
-    }
-
-    // Function to format duration to "mm:ss" to milliseconds format
-    public static int parseDuration(String durationString) {
-        try {
-            String[] parts = durationString.split(":");
-            int minutes = Integer.parseInt(parts[0]);
-            int seconds = Integer.parseInt(parts[1]);
-
-            return (minutes * 60 + seconds) * 1000;
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace(); // Handle parsing errors if needed
-            return 0; // Default value if parsing fails
-        }
     }
 
     //  get the previous count of new msg and add to it from sendMessage
@@ -2922,18 +3008,21 @@ scNum = 20;
                 }
 
                 runOnUiThread(() -> {
-                    //  delay later for like 3 sec to fetch all old data
+                    //  delay for like 2 sec to fetch all old data first
 
-                    // add new message directly to local List and interact with few msg in refMsgFast database
-                    newMessageInteraction(adapter, otherUID);
+                    new Handler().postDelayed( () -> {
+                        // add new message directly to local List and interact with few msg in refMsgFast database
+                        newMessageInteraction(adapter, otherUID);
 
-                    // edit message
-                    getEditMessage(adapter, otherUID);
+                        // edit message
+                        getEditMessage(adapter, otherUID);
 
-                    // delete local list with idKey
-                    getDeleteMsgId(adapter, otherUID);
+                        // delete local list with idKey
+                        getDeleteMsgId(adapter, otherUID);
 
-                    checkClearChatsDB(otherUID);
+                        checkClearChatsDB(otherUID);
+
+                    }, 2000);
 
                 });
             }
@@ -2946,7 +3035,7 @@ scNum = 20;
         adapter.setFragmentListener((FragmentListener) mContext);
 
         adapterMap.put(otherUID, adapter); // save each user adapter
-
+//
         recyclerMap.get(otherUID).setAdapter(adapter);
 
     }
@@ -3210,11 +3299,14 @@ scNum = 20;
                         String listMessageID = adapter.getModelList().get(i).getIdKey();
 
                         if(deleteIdKey.equals(listMessageID)){
+                            MessageModel chatModel = adapter.getModelList().get(i);
 
                             // delete from ROOM database
-                            chatViewModel.deleteChat(adapter.getModelList().get(i));
+                            chatViewModel.deleteChat(chatModel);
                             // delete photo from my phone storage if photo exist
-                            deleteFileFromPhoneStorage(adapter.getModelList().get(i)); // get id delete other user
+                            if(!chatModel.getFromUid().equals(myId)) {  // other user is not permitted to delete my media except the one they sent me.
+                                deleteFileFromPhoneStorage(chatModel); // get id delete other user
+                            }
                             // delete from local list if id key matches
                             adapter.getModelList().remove(i);
 //                            adapter.notifyItemRemoved(i);
@@ -3282,19 +3374,23 @@ scNum = 20;
 
         // delete the high quality photo saved on my local phone storage
         if(chatModel.getPhotoUriOriginal() != null){
-            // if id is other user, that means I downloaded the photo, so search and delete from my local phone storage
-            if(!chatModel.getFromUid().equals(myId) || chatModel.getPhotoUriOriginal().startsWith("file:/") ){
-                Uri highPhotoUri = Uri.parse(chatModel.getPhotoUriOriginal());
-                File searchPhotoOriginal = new File(highPhotoUri.getPath());
-                if(searchPhotoOriginal.exists()) {
-                    searchPhotoOriginal.delete();
-                }
-
-                //  delete from firebase storage
-                if(chatModel.getPhotoUriOriginal().startsWith("media/voice_note")){
-                    FirebaseStorage.getInstance().getReference(chatModel.getPhotoUriOriginal()).delete();
+            File searchPhotoOriginal = new File(chatModel.getPhotoUriOriginal());
+            if(chatModel.getPhotoUriOriginal().startsWith("file:/")){
+                try {
+                    searchPhotoOriginal = new File(new URI(chatModel.getPhotoUriOriginal()));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
                 }
             }
+            if(searchPhotoOriginal.exists()) {
+                searchPhotoOriginal.delete();
+            }
+
+            //  delete from firebase storage
+            if(chatModel.getPhotoUriOriginal().startsWith("media/voice_note")){
+                FirebaseStorage.getInstance().getReference(chatModel.getPhotoUriOriginal()).delete();
+            }
+            
         }
         // delete voice note from phone storage
         if(chatModel.getVoiceNote() != null){
@@ -3314,29 +3410,6 @@ scNum = 20;
                 FirebaseStorage.getInstance().getReference(chatModel.getVoiceNote()).delete();
             }
         }
-
-    }
-
-    public static String getFileSize(Uri imageUri, Context context){
-        try {   // get the total image length
-            InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
-            if (inputStream != null) {
-                int fileSizeBytes = inputStream.available();
-                int fileSizeKB = fileSizeBytes / 1024; // Size in kilobytes
-                int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
-
-                String sizeString = fileSizeKB < 1000.0 ? Math.round(fileSizeKB) + " kB" : Math.round(fileSizeMB) + " MB";
-
-                inputStream.close();
-
-                return sizeString;
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(context, "Error Occur MA3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-        return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
     }
 
@@ -3951,15 +4024,6 @@ scNum = 20;
 
     }
 
-    private void vibrateDevice(Context context) {
-        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-
-        if (vibrator != null && vibrator.hasVibrator()) {
-            // Vibrate for 100 milliseconds
-            vibrator.vibrate(100);
-        }
-    }
-
     private void swipeReply(){
         itemTouchSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -4302,6 +4366,53 @@ scNum = 20;
         thread.start();
     }
 
+
+    //      ================      Gallery methods (photo and video)          ========================
+
+//    private void launchPhotoAndVideoPicker() {
+//        Intent intent = new Intent(Intent.ACTION_PICK);
+//        intent.setType("*/*"); // Specify all MIME types
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"}); // Specify MIME types for photos and videos
+//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Allow multiple selection
+//        pickPhotoAndVideoLauncher.launch(intent);
+//    }
+
+//    private void initialiseMultipleVideoAndPhotoPicker(){
+//        // Initialize the activity result launcher
+//        pickPhotoAndVideoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+//                result -> {
+//                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+//                        // Handle the selected files
+//                        // Example: Get the URIs of selected files
+//                        System.out.println("what is uri " + result.getResultCode() + " data " + result.getData());
+//
+//                        Intent intent = result.getData();
+//                        if (intent.getData() != null) {
+//                            // Single file selected
+//                            // Example: Uri uri = data.getData();
+//                            System.out.println("what is uri single " + intent.getData());
+//                            videoView.setVideoURI(intent.getData());
+//                            videoView.setVisibility(View.VISIBLE);
+//                            videoView.start();
+//                        } else if (intent.getClipData() != null) {
+//                            // Multiple files selected
+//                            ClipData clipData = intent.getClipData();
+//                            for (int i = 0; i < clipData.getItemCount(); i++) {
+//
+//                                Uri uri = clipData.getItemAt(i).getUri();
+//                                videoView.setVideoPath(uri.toString());
+//                                videoView.setVisibility(View.VISIBLE);
+//                                videoView.start();
+//                            }
+//
+////  content://media/picker/0/com.android.providers.media.photopicker/media/1000147624
+////  content://media/external/video/media/1000070184
+//                        }
+//                    }
+//                });
+//
+//    }
+
     //      ================      audio methods           ========================
     private void launchMultipleAudioPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -4321,8 +4432,11 @@ scNum = 20;
                 if (intent.getClipData() != null) {     //  handle multiple Uri
                     ClipData clipData = intent.getClipData();
                     for (int i = 0; i < clipData.getItemCount(); i++) {
-                        Uri uri = clipData.getItemAt(i).getUri();
-                        String convertUri = saveAudioFileFromContentUriToAppStorage(uri);
+                        Uri uri = clipData.getItemAt(i).getUri();   //  content://com.android.providers.downloads.documents/document/msf%3A1000125619
+                        String convertUri = FileUtils.saveFileFromContentUriToAppStorage(uri, this);
+    // convertUri ->  /storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Audio/Topper_Pheelz-JELO-feat-Young-Jonn.mp3
+
+                        String fileName = getFileName(uri, this);
 
                         // Convert file size to kilobytes (KB) and megabytes (MB)
                         int fileSizeKB = (int) getAudioFileSize(uri) / 1024; // Size in kilobytes
@@ -4331,11 +4445,10 @@ scNum = 20;
                         String formattedDuration = formatDuration((int) getAudioDuration(uri));   // don't auto download for other user if size is greater than 500kb
                         String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
 
-
                         MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
                                 System.currentTimeMillis(), null, null, 8, null,
                                 700033, 4, null, null, false, false,
-                                null, null, convertUri, sizeOrDuration, null, null);
+                                null, fileName, convertUri, sizeOrDuration, null, null);
 
                         chatModelList.add(messageModel);
 
@@ -4347,7 +4460,13 @@ scNum = 20;
 
                 } else {        // handle single uri
                     Uri uri = intent.getData();
-                    String convertUri = saveAudioFileFromContentUriToAppStorage(uri);
+//  content://com.android.providers.downloads.documents/document/msf%3A1000125619
+
+                    String convertUri = FileUtils.saveFileFromContentUriToAppStorage(uri, this);
+//  /storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Audio/Topper_Pheelz-JELO-feat-Young-Jonn.mp3
+
+                    String fileName =getFileName(uri, this);
+
                     // Convert file size to kilobytes (KB) and megabytes (MB)
                     int fileSizeKB = (int) getAudioFileSize(uri) / 1024; // Size in kilobytes
                     int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
@@ -4358,7 +4477,7 @@ scNum = 20;
                     MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
                             System.currentTimeMillis(), null, null, 8, null,
                             700033, 4, null, null, false, false,
-                            null, null, convertUri, sizeOrDuration, null, null);
+                            null, fileName, convertUri, sizeOrDuration, null, null);
 
                     chatModelList.add(messageModel);
                     sendSharedChat(MainActivity.this);
@@ -4399,46 +4518,6 @@ scNum = 20;
         return size;
     }
 
-    //  copy the file from phone storage ("content/com.provider") to app storage ("file://"). This is to enable user share the file to other app
-    private String saveAudioFileFromContentUriToAppStorage(Uri uriFile) {
-        // Get the content resolver
-        ContentResolver contentResolver = this.getContentResolver();
-
-        // Open an input stream for the content URI
-        try {
-            InputStream inputStream = contentResolver.openInputStream(uriFile);
-
-            // Create a file in your app's internal storage directory
-            File file;
-            if(isAudioFile(uriFile)){
-                file = new File(getAudioFolder(this), getString(R.string.app_name) + "_" + getFileName(uriFile) );
-            } else {
-                file = new File(getDocumentFolder(this), getString(R.string.app_name) + "_" + getFileName(uriFile) );
-//                file = new File(getPhotoFolder(), getString(R.string.app_name) + "_" + getFileName(uriFile) );
-            }
-
-            // Copy the content from the input stream to the file
-            OutputStream outputStream = new FileOutputStream(file);
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            // Close streams
-            outputStream.close();
-            inputStream.close();
-
-            return file.getPath();
-           
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle errors
-        }
-
-        return null;
-    }
-
 
     //      ================      document methods           ========================
     private void activityDocumentLauncher(){
@@ -4447,41 +4526,42 @@ scNum = 20;
                     @Override
                     public void onActivityResult(List<Uri> results) {
                         if (results != null && !results.isEmpty()) {
-                            
-                            for (int i = 0; i < results.size(); i++) {
-                               
-                                Uri documentUri = results.get(i);
-                                String docName = getFileName(documentUri);
-                                String docSize = getFileSize(documentUri, MainActivity.this);
-                                String lowUri = null;
-//                                int numberOfPages = 1;
-                                String details = getString(R.string.app_name);
 
-                                if(isPdfFile(documentUri))  // for pdf
+                            chatModelList.clear();
+
+                            for (int i = 0; i < results.size(); i++) {  // I don't download document here. it's done via the adapter
+                               
+                                Uri documentUri = results.get(i);   //  content://com.android.providers.downloads.documents/document/msf%3A1000135295
+                                String docName = getFileName(documentUri, MainActivity.this);
+                                String docSize = FileUtils.getFileSize(documentUri, MainActivity.this);
+                                String lowUri = null;
+                                String details;
+
+                                if(isPdfFile(documentUri, MainActivity.this))  // for pdf
                                 {
                                     lowUri = getThumbnailFromPdfUri(documentUri).toString();
                                     int numberOfPages = getNumberOfPdfPages(documentUri);
 
                                     details = numberOfPages + " " + getString(R.string.page) + " ~ " + docSize + " ~ pdf";
 
-                                } else if (isMsWordFile(documentUri))   // for ms word
+                                } else if (isMsWordFile(documentUri, MainActivity.this))   // for ms word
                                 {
                                     details = docSize + " ~ docx";
 
-                                } else if (isPhotoFile(documentUri))    // for photo
+                                } else if (isPhotoFile(documentUri, MainActivity.this))    // for photo
                                 {
                                     details = docSize + " ~ " + getString(R.string.photo);
 
-                                } else if (isCdrFile(documentUri))  // for corel draw
+                                } else if (isCdrFile(documentUri, MainActivity.this))  // for corel draw
                                 {
                                     details = docSize + " ~ cdr";
-                                } else if ( isPhotoshopFile(documentUri) )  // for photoshop
+                                } else if ( isPhotoshopFile(documentUri, MainActivity.this) )  // for photoshop
                                 {
                                     details = docSize + " ~ photoshop";
-                                } else if(isAudioFile(documentUri)) // for audio
+                                } else if(isAudioFile(documentUri, MainActivity.this)) // for audio
                                 {
                                     details = docSize + " ~ audio";
-                                } else if (isVideoFile(documentUri))    // for video
+                                } else if (isVideoFile(documentUri, MainActivity.this))    // for video
                                 {
                                     details = docSize + " ~ video";
                                 } else {
@@ -4519,23 +4599,6 @@ scNum = 20;
                 });
     }
 
-    private String getFileName(Uri uri) {
-        String displayName = getString(R.string.app_name);
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (index != -1) {
-                        displayName = cursor.getString(index);
-                    }
-                }
-            }
-        } else if (uri.getScheme().equals("file")) {
-            displayName = uri.getLastPathSegment();
-        }
-        return displayName;
-    }
-
     private int getNumberOfPdfPages(Uri pdfUri) {
         try {
             ParcelFileDescriptor parcelFileDescriptor =
@@ -4570,7 +4633,7 @@ scNum = 20;
                 renderer.close();
                 parcelFileDescriptor.close();
 
-                Uri newUri = reduceImageSize(thumbnail, null, 500);
+                Uri newUri = FileUtils.reduceImageSize(thumbnail, null, 500, this);
 
                 return newUri;
             }
@@ -4579,95 +4642,6 @@ scNum = 20;
         }
         return null;
     }
-
-    private boolean isPdfFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("application/pdf");
-    }
-
-    private boolean isMsWordFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("application/msword")
-                || mimeType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    }
-
-    private boolean isPhotoFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("image/jpeg") || mimeType.equals("image/png") || mimeType.equals("image/*");
-    }
-
-    private boolean isAudioFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("audio/mpeg") || mimeType.equals("audio/mp3") || mimeType.equals("audio/*");
-    }
-
-    private boolean isVideoFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("video/mp4") || mimeType.equals("video/*");
-    }
-
-    private boolean isCdrFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("application/cdr") || mimeType.equals("image/cdr");
-    }
-
-    private boolean isPhotoshopFile(Uri uri) {
-        String mimeType = getContentResolver().getType(uri);
-        return mimeType != null && mimeType.equals("image/vnd.adobe.photoshop");
-    }
-
-    private Uri reduceImageSize(Bitmap bitmapImage, Uri originalImageUri, int maxSize) {
-        try {
-            // Get the original bitmap from the Uri
-            Bitmap originalBitmap = bitmapImage == null ? MediaStore.Images.Media.getBitmap(getContentResolver(), originalImageUri) : bitmapImage;
-
-            int width = originalBitmap.getWidth();
-            int height = originalBitmap.getHeight();
-
-            float ratio = (float) width / (float) height;
-            // reduce the length and width
-            if (ratio > 1) {
-                width = maxSize;
-                height = (int) (width / ratio);
-            } else {
-                height = maxSize;
-                width = (int) (height * ratio);
-            }
-
-            // Resize the original bitmap
-            Bitmap reduceSize = Bitmap.createScaledBitmap(originalBitmap, width, height, true);
-
-            // Calculate the cropping dimensions based on the smaller dimension
-            int lowDimension = Math.min(width, height);
-
-            // Calculate the center coordinates for cropping
-            int centerX = reduceSize.getWidth() / 2;
-            int centerY = reduceSize.getHeight() / 2;
-
-            // Crop the reduced size image
-            Bitmap croppedBitmap = Bitmap.createBitmap(reduceSize, centerX - (lowDimension / 2),
-                    centerY - (lowDimension / 2), lowDimension, lowDimension);
-
-            // save the photo to phone app memory
-            File saveImageToPhoneUri = new File(MainActivity.getDocumentFolder(this), getString(R.string.app_name) + System.currentTimeMillis() + "_.jpg");
-            OutputStream outputStream;
-            try {
-                outputStream = new FileOutputStream(saveImageToPhoneUri);
-                // save the image to the phone
-                croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return Uri.fromFile(saveImageToPhoneUri);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 
 
     // Method to hide the soft keyboard when needed
@@ -4742,9 +4716,8 @@ scNum = 20;
         if(!sharingPhotoActivated) chatModelList.clear();
         editChatOption_IV.setVisibility(View.VISIBLE);
         replyChatOption_IV.setVisibility(View.VISIBLE);
-        emojiChatOption_IV.setVisibility(View.VISIBLE);
-        pinChatOption_IV.setVisibility(View.VISIBLE);
-        MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
+        moreOption_IV.setVisibility(View.VISIBLE);
+        editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
 
         deleteChatForOnlyOther_TV.setVisibility(View.VISIBLE);
 
@@ -4753,8 +4726,7 @@ scNum = 20;
         // clear chat highlight position
         MessageAdapter.chatPositionList.clear();
 
-        onPhoto = false;
-        onDocument = false;
+        onShare = false;
         MessageAdapter.isOnlongPress = false;
 
         clearAllHighlights();
@@ -4842,12 +4814,11 @@ scNum = 20;
     // clear old photo from app memory
     public static boolean deleteOldUriFromAppMemory(List<String> uriToDelete, Context context){   // the list contain both low and hugh quality uri path
         for (int i = 0; i < uriToDelete.size(); i++) {
-            if(uriToDelete.get(i) != null){
+            if(uriToDelete.get(i) != null && !uriToDelete.get(i).startsWith("content")){
 
                 Uri uriPhoto = Uri.parse(uriToDelete.get(i));
                 File searchPhotoPath = new File(uriPhoto.getPath());
 
-                Log.d(" what is Done deleting","" + uriPhoto);
                 if(searchPhotoPath.exists()) {
                     searchPhotoPath.delete();
 
@@ -5044,8 +5015,7 @@ scNum = 20;
             //  hide emoji keyboard
             et_emoji.clearFocus();
             editTextMessage.clearFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(et_emoji.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
 
             // turn off my online and set my last seen date/time
             refUsers.child(myId).child("presence").setValue(ServerValue.TIMESTAMP);
@@ -5084,6 +5054,8 @@ scNum = 20;
     protected void onResume() {
         // change my presence back to "online"
         if(myId != null){
+            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard if any
+
             refUsers.child(auth.getUid()).child("presence").setValue(1);
             //  reverse the emoji initialization back to the emoji button icon
             popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
@@ -5110,20 +5082,38 @@ scNum = 20;
         super.onResume();
     }
 
+    private void closeAllContainer(){
+        fileAttachOptionContainer.setVisibility(View.GONE);
+        fileContainerAnim.setVisibility(View.GONE);
+        generalBackground.setVisibility(View.GONE);
+        moreOptionContainer.setVisibility(View.GONE);
+        pinOptionBox.setVisibility(View.GONE);
+        chatOptionsConstraints.setVisibility(View.GONE);
+        firstTopUserDetailsContainer.setVisibility(View.GONE);
+        clearAllHighlights();
+    }
+
     @Override
     public void onBackPressed() {
 
-        if(constraintMsgBody.getVisibility() == View.VISIBLE){
-
+        if(constraintMsgBody.getVisibility() == View.VISIBLE)
+        {
             boolean isEmojiVisible_ = popup.isShowing();
             if(isEmojiVisible_){
                 popup.dismiss();
                 isEmojiVisible = false;
                 typeMsgContainer.setVisibility(View.VISIBLE);
 
+            } else if(fileAttachOptionContainer.getVisibility() == View.VISIBLE)
+            {
+                fileAttachOptionContainer.setVisibility(View.GONE);
+                fileContainerAnim.setVisibility(View.GONE);
             } else if (chatOptionsConstraints.getVisibility() == View.VISIBLE)
             {
                 cancelChatOption();
+                generalBackground.setVisibility(View.GONE);
+                moreOptionContainer.setVisibility(View.GONE);
+
             } else if(constraintDelBody.getVisibility() == View.VISIBLE)
             {
                 cancelChatDeleteOption();
@@ -5132,6 +5122,7 @@ scNum = 20;
                 pinOptionBox.setVisibility(View.GONE);
                 cancelChatOption();
             } else{
+
                 emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
                 handlerEmoji.removeCallbacks(emojiRunnable);
                 et_emoji.clearFocus();
@@ -5223,6 +5214,10 @@ scNum = 20;
         } else if (viewPager2General.getCurrentItem() != 0)
         {
             viewPager2General.setCurrentItem(0, true);
+        } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE)
+        {
+            fileAttachOptionContainer.setVisibility(View.GONE);
+            fileContainerAnim.setVisibility(View.GONE);
         } else {
             super.onBackPressed();
         }

@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
@@ -76,7 +77,7 @@ public class SendImageAdapter extends RecyclerView.Adapter<SendImageAdapter.Imag
 
         // display the photos
         if(chatModel.getPhotoUriPath() != null){    // 1 is voice note, 2 is photo, 3 is document, 4 is audio
-            Picasso.get().load(imageUri).into(holder.showImage_IV);
+            Glide.with(context).load(imageUri).into(holder.showImage_IV);
         } else if (chatModel.getType() == 3 && chatModel.getPhotoUriPath() == null) {
             // change icon if it's docx since no photo or thumbnail for docx
             holder.showImage_IV.setImageResource(R.drawable.baseline_document_scanner_24);
@@ -89,7 +90,7 @@ public class SendImageAdapter extends RecyclerView.Adapter<SendImageAdapter.Imag
     public void highLightView(int photoPosition){
         try{
             View view = viewList.get(photoPosition);
-            if(lastView != null ) lastView.setBackgroundColor(ContextCompat.getColor(context, R.color.cool_orange));
+            if(lastView != null ) lastView.setBackgroundColor(0);
 
             view.setBackgroundColor(ContextCompat.getColor(context, R.color.orange));
 
