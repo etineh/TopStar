@@ -32,22 +32,6 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
 
-
-    // for camera and video recording
-    implementation "androidx.camera:camera-camera2:1.3.1"
-    implementation "androidx.camera:camera-lifecycle:1.3.1"
-    implementation 'androidx.camera:camera-view:1.3.1'
-    implementation "androidx.camera:camera-core:1.3.1"
-    implementation "androidx.camera:camera-video:1.3.1"
-    implementation "androidx.camera:camera-mlkit-vision:1.3.0-beta02"
-    implementation "androidx.camera:camera-extensions:1.3.1"
-
-    // video compression
-    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
-    implementation ('com.googlecode.mp4parser:isoparser:1.0.6') {
-        exclude group: 'org.aspectj', module: 'aspectjrt'
-    }
-
     def room_version = "2.4.1"
 
     implementation "androidx.room:room-runtime:$room_version"
@@ -76,8 +60,6 @@ dependencies {
     // bug_fix.. change the sdk from + to 8.1.2. And minSDK to 24 above
 //    implementation ('org.jitsi.react:jitsi-meet-sdk:8.1.2') { transitive = true }
 
-//    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
-
     //  for voice note
     implementation 'com.github.3llomi:RecordView:3.1.3'
 
@@ -94,10 +76,26 @@ dependencies {
     implementation 'jp.wasabeef:blurry:4.0.1'
 
     //  for cropping image
-//    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
-//    implementation 'com.github.yalantis:ucrop:2.2.8'
     implementation 'com.github.krokyze:ucropnedit:2.2.6-2'
 
+    // for camera and video recording
+    implementation "androidx.camera:camera-camera2:1.3.1"
+    implementation "androidx.camera:camera-lifecycle:1.3.1"
+    implementation 'androidx.camera:camera-view:1.3.1'
+    implementation "androidx.camera:camera-core:1.3.1"
+    implementation "androidx.camera:camera-video:1.3.1"
+    implementation "androidx.camera:camera-mlkit-vision:1.3.0-beta02"
+    implementation "androidx.camera:camera-extensions:1.3.1"
+
+    // video compression
+    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
+    implementation ('com.googlecode.mp4parser:isoparser:1.0.6') {
+        exclude group: 'org.aspectj', module: 'aspectjrt'
+    }
+
+    // for video call
+    implementation 'com.mesibo.api:webrtc:1.0.5'
+    implementation 'com.guolindev.permissionx:permissionx:1.6.1'
 
     // glide for displaying photo
     implementation 'com.github.bumptech.glide:glide:4.16.0'

@@ -1,6 +1,5 @@
 package com.pixel.chatapp.activities;
 
-import static com.pixel.chatapp.all_utils.FileUtils.convertFileUriToContentUri;
 import static com.pixel.chatapp.all_utils.FileUtils.getFileName;
 import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
@@ -65,7 +64,7 @@ import com.pixel.chatapp.SendImageActivity;
 import com.pixel.chatapp.adapters.GalleryAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
-import com.pixel.chatapp.all_utils.PhoneAccess;
+import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
@@ -481,7 +480,7 @@ public class CameraActivity extends AppCompatActivity {
                             sendALLPhoto_TV.setVisibility(View.VISIBLE);
                             photoSelected_TV.setText(getCount);
                             progressBarCamera.setVisibility(View.GONE);
-                            PhoneAccess.vibrateDevice(CameraActivity.this);
+                            PhoneUtils.vibrateDevice(CameraActivity.this);
                             mAdapter.notifyDataSetChanged();
 
                         } else {
@@ -489,7 +488,7 @@ public class CameraActivity extends AppCompatActivity {
                             finish();
                         }
 
-                        PhoneAccess.vibrateDevice(CameraActivity.this);
+                        PhoneUtils.vibrateDevice(CameraActivity.this);
 // file:///storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Photos/Topper_photo_1708539683370.jpg
 
                     }

@@ -14,6 +14,7 @@ import static com.pixel.chatapp.all_utils.OtherMethods.animateVisibility;
 import static com.pixel.chatapp.constants.AllConstants.ACCEPTED_MIME_TYPES;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -33,6 +34,8 @@ import android.graphics.pdf.PdfRenderer;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,6 +54,7 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -93,15 +97,21 @@ import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.SendImageActivity;
+import com.pixel.chatapp.VideoCallComingOut;
 import com.pixel.chatapp.ZoomImage;
 import com.pixel.chatapp.activities.AppLifecycleHandler;
 import com.pixel.chatapp.activities.CameraActivity;
+import com.pixel.chatapp.activities.MainRepository;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.PhoneAccess;
+import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.DataModelType;
+import com.pixel.chatapp.interface_listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.NewEventCallBack;
+import com.pixel.chatapp.model.DataModel;
 import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
@@ -129,6 +139,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -164,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
     public static ConstraintLayout firstTopUserDetailsContainer, typeMsgContainer;
     private static ConstraintLayout mainViewConstraint, topMainContainer;
-    private ImageView editOrReplyIV, imageViewCalls;
+    private ImageView editOrReplyIV;
     private MessageAdapter.MessageViewHolder replyHolder;
     public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
     private ConstraintLayout chatMenuProfile, constraintDelBody;
@@ -220,7 +231,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  -------------   network settings    -----------
     public static ConstraintLayout constrNetConnect;
-    public static String otherUserUid, otherUserName, myUserName, imageUri;
+    public static String otherUserUid, otherUserName, myUserName, imageUri, callOtherUid;
+
+    DataModel dataModel;
 
     public static Handler handlerInternet = new Handler(), handlerTyping = new Handler();
     public static Runnable internetCheckRunnable, runnableTyping;
@@ -233,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private static MessageModel messageModel;
     private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks, refUsers,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign,
-            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead;
+            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls;
 
     private ValueEventListener chatReadListener; // Declare the listener as a class variable
 
@@ -253,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private String fileNamePath;
     private MediaRecorder mediaRecorder;
     private static MediaPlayer mediaPlayer;
-    private Permission permissions = new Permission();
+    private Permission permissionCheck = new Permission();
     private static RecordView recordView;
     private static RecordButton recordButton;
     public static ConstraintLayout constraintMsgBody;
@@ -340,7 +353,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ConstraintLayout fileAttachOptionContainer, fileContainerAnim;
     private ImageView documentIV, galleryIV, audioIV, contactIV, gameIV;
 
+    //  =============   video and audio call declares
+    Gson gson = new Gson();
+    private static MainRepository mainRepository;
 
+    LinearLayout incomingCallLayout;
+    TextView whoIsCallingTV;
+    ImageView callButton, answerCall_IV, rejectCall_IV;
+    CallUtils callUtils;
+
+    public static int run = 0;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -388,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         recyclerContainer = findViewById(R.id.constraintRecyler);
         constraintLayoutAdjust = findViewById(R.id.constraintLayoutAdjust);
-        imageViewCalls = findViewById(R.id.callMeet_IV);
+        callButton = findViewById(R.id.callMeet_IV);
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
         imageViewBack = findViewById(R.id.backArrow_IV);
         textViewOtherUser = findViewById(R.id.userName_TV);
@@ -401,6 +424,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         textViewMsgTyping = findViewById(R.id.isTyping_TV);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
         typeMsgContainer = findViewById(R.id.typeMsgContainer);
+
+        // calls
+        incomingCallLayout = findViewById(R.id.incomingCallLayout);
+        whoIsCallingTV = findViewById(R.id.incomingNameTV);
+        answerCall_IV = findViewById(R.id.annswerCall_IV);
+        rejectCall_IV = findViewById(R.id.rejectCall_IV);
 
         //  file options
         fileAttachOptionContainer = findViewById(R.id.FileAttachOptionContainer);
@@ -545,6 +574,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         refEmojiReact = FirebaseDatabase.getInstance().getReference("EmojiReact");
         refOnReadRequest = FirebaseDatabase.getInstance().getReference("OnReadRequest");
         refChatIsRead = FirebaseDatabase.getInstance().getReference("ChatIsRead");
+        refCalls = FirebaseDatabase.getInstance().getReference("Calls");
 
         chatViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication())
         // initialise room database
@@ -579,6 +609,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         selectedUserNames = new ArrayList<>();
         selectCount = 0;
 
+        mainRepository = MainRepository.getInstance();
+
         // XXX  =================   get intent when file is share from other app    ================
         sharingPhotoActivated = getIntent().getBooleanExtra("isSharing", false);
         photoModelList = (List<MessageModel>) getIntent().getSerializableExtra("photoModel");   // get all the photos model and add it to chatList
@@ -586,6 +618,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         adjustRecyclerViewToPhoneScreen();
 
         hideKeyboard();
+
+        callUtils = new CallUtils(this);
 
         if(user == null){
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -682,6 +716,48 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                 onBackPressed();
             });
 
+            //  ==================      top chat layer button     ===========================
+            callButton.setOnClickListener(view -> {
+                // I am calling user
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(() ->
+                {
+                    if(permissionCheck.isCameraOk(this) ){
+                        if(permissionCheck.isRecordingOk(this)){
+
+                            makeCall();
+
+                        } else{
+                            permissionCheck.requestRecordingForCall(this);
+                        }
+                    } else {
+                        permissionCheck.requestCameraForCall(this);
+                    }
+
+                    // Reset the scale
+                    view.setScaleX(1.0f);
+                    view.setScaleY(1.0f);
+
+                }).start();
+
+            });
+
+            rejectCall_IV.setOnClickListener(v -> {
+                rejectCall();
+            });
+
+            answerCall_IV.setOnClickListener(v->{
+
+                if(permissionCheck.isCameraOk(this) ){
+                    if(permissionCheck.isRecordingOk(this)){
+                       answerCall();
+                    } else{
+                        permissionCheck.requestRecordingForCall(this);
+                    }
+                } else {
+                    permissionCheck.requestCameraForCall(this);
+                }
+
+            });
 
             //  ==================      side bar menu option     ===========================
 
@@ -1732,11 +1808,59 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
+    private void makeCall() {
+        if(run == 0){
+            Intent intent = new Intent(this, VideoCallComingOut.class);
+            intent.putExtra("otherUid", otherUserUid);
+            intent.putExtra("myId", myId);
+            intent.putExtra("otherName", otherUserName);
+            intent.putExtra("myUsername", myUserName);
+            intent.putExtra("answerCall", false);
+            intent.putExtra("videoCall", true);
+
+            startActivity(intent);
+            DataModel data = new DataModel(otherUserUid, otherUserName, user.getUid(), myUserName, null, DataModelType.StartCall);
+            refCalls.child(otherUserUid).child(myId).setValue(gson.toJson(data));
+
+        } else {
+            Intent callIntentActivity = new Intent(this, VideoCallComingOut.class);
+            callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(callIntentActivity);
+        }
+        run = 1;
+    }
+
+    private void rejectCall() {
+        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None);
+        refCalls.child(myId).child(callOtherUid).setValue(gson.toJson(data));
+        refCalls.child(callOtherUid).child(myId).setValue(gson.toJson(data));
+        incomingCallLayout.setVisibility(View.GONE);
+        callUtils.stopRingtone();   // stop the ringtone
+        callUtils.stopVibration();
+        run = 0;
+    }
+
+    private void answerCall() {
+        Intent intent = new Intent(this, VideoCallComingOut.class);
+        intent.putExtra("otherUid", dataModel.getSenderUid());
+        intent.putExtra("myId", myId);
+        intent.putExtra("otherName", dataModel.getSenderName());
+        intent.putExtra("myUsername", myUserName);
+        intent.putExtra("answerCall", true);
+        intent.putExtra("videoCall", true);
+        callUtils.stopRingtone();
+        callUtils.stopVibration();
+
+        startActivity(intent);
+        incomingCallLayout.setVisibility(View.GONE);
+        run = 1;
+    }
+
     //  --------------- methods && interface --------------------
 
 
     @Override
-    public void callAllMethods(String otherUid, Context context) {
+    public void callAllMethods(String otherUid, Context context, Activity activity) {
         getMyUserTyping();
         tellUserAmTyping_AddUser();
         getPreviousCounts();
@@ -1757,7 +1881,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             new Handler().postDelayed(() -> reloadFailedMessagesWhenNetworkIsOk(), 500);
 
         // initialize voice note
-        voiceNote(context);
+        voiceNote(context, activity);
     }
 
 //    @Override
@@ -1961,17 +2085,42 @@ scNum = 20;
 
         mContext = mContext_;
 
+        // only alert me if I am not on another call    -- work on this later
+        mainRepository.subscribeForLatestEvent(otherUID, (data)->{
+            dataModel = data;
+            if (data.getType()== DataModelType.StartCall){
+                runOnUiThread(()->{
+                    incomingCallLayout.setVisibility(View.VISIBLE);
+                    callOtherUid = data.getSenderUid();
+                    String whoIsCalling = data.getSenderName() + " " + getString(R.string.isCalling);
+                    whoIsCallingTV.setText(whoIsCalling);
+                    //vibrate my tone
+                    callUtils.startContinuousVibration();
+                    callUtils.playRingtone();
 
-        // delay for 3 secs to allow user chatlist to load users
+                });
+            } else if (data.getType()== DataModelType.None) {
+                runOnUiThread(()->{
+                    incomingCallLayout.setVisibility(View.GONE);
+                    callUtils.stopVibration();
+                    callUtils.stopRingtone();
+                });
+
+            }
+        });
+
+        // delay for 3 secs to allow user chatList to load users first
         new Handler().postDelayed(()-> {
 
             retrieveMessages(userName, otherUID, mContext_);
 
             // get pinMessage once
-            getPinChats(otherUID);
-            getDeletePinId(otherUID);
-            getEmojiReact(otherUID);
-            getReadChatResponse(otherUID);
+//            getPinChats(otherUID);
+//            getDeletePinId(otherUID);
+//            getEmojiReact(otherUID);
+//            getReadChatResponse(otherUID);
+
+
 
         }, 3000);
 
@@ -2709,7 +2858,7 @@ scNum = 20;
     }
 
     // record voiceNote
-    private void voiceNote (Context context){
+    private void voiceNote (Context context, Activity activity){
 
         //IMPORTANT
 //        recordButton.setRecordView(recordView);
@@ -2727,7 +2876,7 @@ scNum = 20;
             @Override
             public void onStart() {
 
-                if(permissions.isRecordingOk(context)){
+                if(permissionCheck.isRecordingOk(context)){
                     isSendingVoiceNote = true;
                     //Start Recording..
                     setUpRecording(fileNamePath);
@@ -2760,7 +2909,7 @@ scNum = 20;
                     handlerTyping.post(runnableTyping);
 
                 } else{
-                    permissions.requestRecording((Activity) context);
+                    permissionCheck.requestRecording(activity);
                     onCancel();
                 }
 
@@ -3034,9 +3183,9 @@ scNum = 20;
 
         adapter.setFragmentListener((FragmentListener) mContext);
 
-        adapterMap.put(otherUID, adapter); // save each user adapter
-//
-        recyclerMap.get(otherUID).setAdapter(adapter);
+    //        adapterMap.put(otherUID, adapter); // save each user adapter
+    ////
+    //        recyclerMap.get(otherUID).setAdapter(adapter);
 
     }
 
@@ -4108,6 +4257,30 @@ scNum = 20;
 
     }
 
+
+    // call - alert me when other user is calling me
+    public void observeIncomingLatestEvent(String otherUid, NewEventCallBack callBack) {
+        refCalls.child(myId).child(otherUid).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String data = Objects.requireNonNull(snapshot.getValue()).toString();
+                            DataModel dataModel = gson.fromJson(data, DataModel.class);
+                            callBack.onNewEventReceived(dataModel);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                }
+        );
+    }
+
     private void scrollToPinMessage(int i){
         pinMsg_TV.setTypeface(null);    // remove italic style if any
 
@@ -5015,7 +5188,7 @@ scNum = 20;
             //  hide emoji keyboard
             et_emoji.clearFocus();
             editTextMessage.clearFocus();
-            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
+            PhoneUtils.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
 
             // turn off my online and set my last seen date/time
             refUsers.child(myId).child("presence").setValue(ServerValue.TIMESTAMP);
@@ -5054,7 +5227,8 @@ scNum = 20;
     protected void onResume() {
         // change my presence back to "online"
         if(myId != null){
-            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard if any
+
+            PhoneUtils.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard if any
 
             refUsers.child(auth.getUid()).child("presence").setValue(1);
             //  reverse the emoji initialization back to the emoji button icon
@@ -5218,6 +5392,10 @@ scNum = 20;
         {
             fileAttachOptionContainer.setVisibility(View.GONE);
             fileContainerAnim.setVisibility(View.GONE);
+        } else if (run == 1) {
+            Intent callIntentActivity = new Intent(this, VideoCallComingOut.class);
+            callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(callIntentActivity);
         } else {
             super.onBackPressed();
         }
@@ -5257,9 +5435,24 @@ scNum = 20;
 //                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //            Toast.makeText(this, "write is granted", Toast.LENGTH_SHORT).show();
 
+        }else if(requestCode == AllConstants.CALL_CAMERA_REQUEST_CODE && grantResults.length > 0
+                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            if(permissionCheck.isRecordingOk(this)){
+                answerCall();
+            } else {
+                permissionCheck.requestRecordingForCall(this);
+            }
+
+        } else if(requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
+                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            answerCall();
         }else {
             if(requestCode == AllConstants.RECORDING_REQUEST_CODE){
                 Toast.makeText(mainActivityContext, "Go to phone app settings and permit Microphone", Toast.LENGTH_SHORT).show();
+            } else if(requestCode == AllConstants.CALL_CAMERA_REQUEST_CODE || requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE){
+                rejectCall();
+                Toast.makeText(mainActivityContext, getString(R.string.permissionCall), Toast.LENGTH_SHORT).show();
             }
 //            else if (requestCode == AllConstants.WRITE_REQUEST_CODE) {
 //                Toast.makeText(mainActivityContext, "write not granted", Toast.LENGTH_SHORT).show();

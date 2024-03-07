@@ -1,10 +1,13 @@
-package com.pixel.chatapp.listeners;
+package com.pixel.chatapp.interface_listeners;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.recyclerview.widget.RecyclerView;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.model.MessageModel;
+
+import java.lang.reflect.AccessibleObject;
 
 public interface FragmentListener {
 
@@ -23,7 +26,7 @@ public interface FragmentListener {
 
     void msgBackgroundActivities(String otherUid);
 
-    void callAllMethods(String otherUid, Context context);
+    void callAllMethods(String otherUid, Context context, Activity activity);
 
     void onNetworkStatusChanged(boolean isConnected);
 

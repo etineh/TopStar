@@ -1,5 +1,6 @@
 package com.pixel.chatapp.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -17,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pixel.chatapp.listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
@@ -123,7 +124,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
             listener.msgBackgroundActivities(otherUid);
 
-            listener.callAllMethods(otherUid, getmContext());
+            listener.callAllMethods(otherUid, getmContext(), new Activity());
 
             // activate adapter for user if null
             if(MainActivity.adapterMap.get(otherUid) == null){

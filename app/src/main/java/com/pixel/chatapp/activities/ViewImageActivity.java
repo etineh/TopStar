@@ -5,7 +5,6 @@ import static com.pixel.chatapp.home.MainActivity.uniqueUriForSharingPhotoOrDoc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.FileProvider;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -19,12 +18,9 @@ import android.widget.Toast;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.listeners.ImageListener;
+import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

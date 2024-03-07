@@ -1,4 +1,4 @@
-package com.pixel.chatapp.listeners;
+package com.pixel.chatapp.interface_listeners;
 
 import android.net.Uri;
 

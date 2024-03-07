@@ -23,7 +23,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.SendImageActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.OtherMethods;
-import com.pixel.chatapp.listeners.ImageListener;
+import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
 
 import java.util.HashMap;

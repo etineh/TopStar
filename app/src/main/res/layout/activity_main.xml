@@ -8,6 +8,49 @@
     android:layout_height="match_parent"
     tools:context=".home.MainActivity">
 
+    <LinearLayout
+        android:id="@+id/incomingCallLayout"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/orange"
+        android:elevation="3dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/incomingNameTV"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="6"
+            android:gravity="center"
+            android:text="someone is calling"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/annswerCall_IV"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:padding="15dp"
+            app:srcCompat="@drawable/baseline_call_24" />
+
+        <ImageView
+            android:id="@+id/rejectCall_IV"
+            style="@style/BackgroundTint"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:background="@android:color/holo_red_dark"
+            android:padding="15dp"
+            app:srcCompat="@drawable/baseline_call_end_24" />
+
+    </LinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sideBarMenuContainer"
         android:layout_width="match_parent"
@@ -136,11 +179,11 @@
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginStart="15dp"
-                        android:tint="@color/orange"
                         app:layout_constraintBottom_toBottomOf="@+id/textViewPhoneNum"
                         app:layout_constraintStart_toEndOf="@+id/imageViewPhoneHid"
                         app:layout_constraintTop_toTopOf="@+id/textViewPhoneNum"
-                        app:srcCompat="@drawable/copy" />
+                        app:srcCompat="@drawable/copy"
+                        app:tint="@color/orange" />
 
                     <ImageView
                         android:id="@+id/copyUserNameIV"

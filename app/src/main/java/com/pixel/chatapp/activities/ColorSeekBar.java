@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import android.widget.SeekBar;
 
-import com.pixel.chatapp.listeners.ImageListener;
+import com.pixel.chatapp.interface_listeners.ImageListener;
 
 public class ColorSeekBar extends AppCompatSeekBar {
 

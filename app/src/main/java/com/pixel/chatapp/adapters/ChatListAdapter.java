@@ -4,6 +4,7 @@ import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -34,7 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.ZoomImage;
 import com.pixel.chatapp.chats.MessageAdapter;
@@ -52,7 +53,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -63,6 +63,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //    private static List<String> otherUsersId;
 
     private static Context mContext;
+    private static Activity activity;
     private static String userName;
 
     private DatabaseReference referenceUsers, refUsersLast, referenceCheck, refChatList, refChat,
@@ -86,9 +87,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     private static ChatListAdapter instance;
 
     // constructor
-    public ChatListAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, String userName) {
+    public ChatListAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, String userName, Activity activity)
+    {
         this.otherUsersId = otherUsersId;
         this.mContext = mContext;
+        this.activity = activity;
         this.userName = userName;
 //        MainActivity.myHolder_ = new ArrayList<>();
 
@@ -111,7 +114,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     public static ChatListAdapter getInstance() {
         if (instance == null) {
-            instance = new ChatListAdapter(otherUsersId, mContext, userName);
+            instance = new ChatListAdapter(otherUsersId, mContext, userName, activity);
         }
         return instance;
     }
@@ -263,7 +266,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.msgBackgroundActivities(otherUid);
 
-                        listener.callAllMethods(otherUid, mContext);
+                        listener.callAllMethods(otherUid, mContext, activity);
 
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
@@ -279,7 +282,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.msgBackgroundActivities(otherUid);
 
-                        listener.callAllMethods(otherUid, mContext);
+                        listener.callAllMethods(otherUid, mContext, activity);
 
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
@@ -319,7 +322,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         listener.msgBackgroundActivities(otherUid);
 
-                                        listener.callAllMethods(otherUid, mContext);
+                                        listener.callAllMethods(otherUid, mContext, activity);
 
                                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
@@ -335,7 +338,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         listener.msgBackgroundActivities(otherUid);
 
-                                        listener.callAllMethods(otherUid, mContext);
+                                        listener.callAllMethods(otherUid, mContext, activity);
 
                                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 

@@ -58,7 +58,13 @@ public class Permission {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, AllConstants.CAMERA_REQUEST_CODE);
     }
 
+    public void requestCameraForCall(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, AllConstants.CALL_CAMERA_REQUEST_CODE);
+    }
 
+    public void requestRecordingForCall(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, AllConstants.CALL_RECORDING_REQUEST_CODE);
+    }
 }
 
 

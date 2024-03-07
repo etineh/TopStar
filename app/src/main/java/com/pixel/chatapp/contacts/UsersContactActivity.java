@@ -1,24 +1,16 @@
 package com.pixel.chatapp.contacts;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,8 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.UsersAdapter;
 import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
-import com.pixel.chatapp.listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.model.ContactModel;
 
 import java.util.ArrayList;

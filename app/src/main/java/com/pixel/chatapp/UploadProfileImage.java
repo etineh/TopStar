@@ -8,17 +8,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.provider.MediaStore;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.listeners.ImageListener;
+import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;
 import com.yalantis.ucrop.UCrop;
 

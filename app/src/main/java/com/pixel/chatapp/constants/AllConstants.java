@@ -59,6 +59,8 @@ public interface AllConstants {
     int CONTACTS_REQUEST_CODE = 2000;
     int RECORDING_REQUEST_CODE = 200;
     int CAMERA_REQUEST_CODE = 10;
+    int CALL_CAMERA_REQUEST_CODE = 11;
+    int CALL_RECORDING_REQUEST_CODE = 12;
 
     String CHANNEL_ID = "1000";
     int NOTIFICATION_ID = 100;

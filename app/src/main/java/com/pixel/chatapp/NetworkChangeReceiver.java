@@ -17,10 +17,8 @@ import java.util.concurrent.Executors;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
-import android.widget.Toast;
 
-import com.pixel.chatapp.listeners.FragmentListener;
+import com.pixel.chatapp.interface_listeners.FragmentListener;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 

@@ -10,7 +10,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class PhoneAccess {
+public class PhoneUtils {
     public static void vibrateDevice(Context context) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -27,16 +27,6 @@ public class PhoneAccess {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
 
-    }
-
-
-    public static void saveFileToPhoneGallery(File file, String fileName, Context context){
-        try {   // saved or copy photo from app storage to phone gallery
-            MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), fileName, null);
-        } catch (FileNotFoundException e) {
-            Toast.makeText(context, "Error occur in showing image to gallery", Toast.LENGTH_SHORT).show();
-            throw new RuntimeException(e);
-        }
     }
 
 }
