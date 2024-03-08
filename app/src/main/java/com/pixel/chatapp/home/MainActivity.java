@@ -357,12 +357,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     Gson gson = new Gson();
     private static MainRepository mainRepository;
 
-    LinearLayout incomingCallLayout;
-    TextView whoIsCallingTV;
-    ImageView callButton, answerCall_IV, rejectCall_IV;
-    CallUtils callUtils;
+    private static LinearLayout incomingCallLayout;
+    private static TextView whoIsCallingTV;
+    private static ImageView callButton, answerCall_IV, rejectCall_IV;
+    private static CallUtils callUtils;
 
     public static int run = 0;
+    private boolean makeCall;
+    public static int activeOnCall = 0;
+
+    public static Handler handlerOnAnotherCall;
+    public static Runnable runnableOnAnotherCall;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -609,6 +614,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         selectedUserNames = new ArrayList<>();
         selectCount = 0;
 
+        // video and audio calls
+        handlerOnAnotherCall = new Handler();
+
         mainRepository = MainRepository.getInstance();
 
         // XXX  =================   get intent when file is share from other app    ================
@@ -718,6 +726,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             //  ==================      top chat layer button     ===========================
             callButton.setOnClickListener(view -> {
+                makeCall = true;
                 // I am calling user
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(() ->
                 {
@@ -1819,8 +1828,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
             intent.putExtra("videoCall", true);
 
             startActivity(intent);
-            DataModel data = new DataModel(otherUserUid, otherUserName, user.getUid(), myUserName, null, DataModelType.StartCall);
-            refCalls.child(otherUserUid).child(myId).setValue(gson.toJson(data));
+//            DataModel data = new DataModel(otherUserUid, otherUserName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
+//            refCalls.child(otherUserUid).child(myId).setValue(gson.toJson(data));
 
         } else {
             Intent callIntentActivity = new Intent(this, VideoCallComingOut.class);
@@ -1831,13 +1840,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     private void rejectCall() {
-        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None);
+        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
         refCalls.child(myId).child(callOtherUid).setValue(gson.toJson(data));
         refCalls.child(callOtherUid).child(myId).setValue(gson.toJson(data));
         incomingCallLayout.setVisibility(View.GONE);
         callUtils.stopRingtone();   // stop the ringtone
         callUtils.stopVibration();
         run = 0;
+        activeOnCall = 0;
     }
 
     private void answerCall() {
@@ -1854,6 +1864,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         startActivity(intent);
         incomingCallLayout.setVisibility(View.GONE);
         run = 1;
+        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
     }
 
     //  --------------- methods && interface --------------------
@@ -2087,19 +2098,38 @@ scNum = 20;
 
         // only alert me if I am not on another call    -- work on this later
         mainRepository.subscribeForLatestEvent(otherUID, (data)->{
-            dataModel = data;
-            if (data.getType()== DataModelType.StartCall){
+
+            if (data.getType().equals(DataModelType.StartCall)){
+                activeOnCall+=1;
                 runOnUiThread(()->{
-                    incomingCallLayout.setVisibility(View.VISIBLE);
-                    callOtherUid = data.getSenderUid();
-                    String whoIsCalling = data.getSenderName() + " " + getString(R.string.isCalling);
-                    whoIsCallingTV.setText(whoIsCalling);
-                    //vibrate my tone
-                    callUtils.startContinuousVibration();
-                    callUtils.playRingtone();
+                    if (activeOnCall <= 2) {    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
+                        dataModel = data;
+                        callUtils.stopVibration();
+                        callUtils.stopRingtone();
+
+                        incomingCallLayout.setVisibility(View.VISIBLE);
+                        callOtherUid = data.getSenderUid();
+                        String whoIsCalling = data.getSenderName() + " " + getString(R.string.isCalling);
+                        whoIsCallingTV.setText(whoIsCalling);
+                        //vibrate my tone
+                        callUtils.startContinuousVibration();
+                        callUtils.playRingtone();
+
+                        data.setIsRinging(true);    // indicate to other user that it is ringing
+                        refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
+
+                        // make activeCall return back to 0 after 33sec if I didn't pick
+                        runnableOnAnotherCall = () -> activeOnCall = 0;
+                        handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
+
+                    } else {
+                        data.setType(DataModelType.OnAnotherCall);    // indicate to other user that it is ringing
+                        refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
+                        Toast.makeText(this, "I have sent the busy", Toast.LENGTH_SHORT).show();
+                    }
 
                 });
-            } else if (data.getType()== DataModelType.None) {
+            } else if (data.getType().equals(DataModelType.None)) {
                 runOnUiThread(()->{
                     incomingCallLayout.setVisibility(View.GONE);
                     callUtils.stopVibration();
@@ -2357,7 +2387,7 @@ scNum = 20;
 
     // get last seen and set inbox status to be true
     @Override
-    public void getLastSeenAndOnline(String otherUid) {
+    public void getLastSeenAndOnline(String otherUid, Context context) {
 
         // get last seen
         try{
@@ -2465,7 +2495,7 @@ scNum = 20;
 
                         }
                     } catch (Exception e){
-                        String appName = getString(R.string.app_name);
+                        String appName = context.getString(R.string.app_name);
                         textViewLastSeen.setText(appName);
                     }
                 }
@@ -5439,7 +5469,10 @@ scNum = 20;
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             if(permissionCheck.isRecordingOk(this)){
-                answerCall();
+                if(!makeCall){
+                    answerCall();
+                }
+
             } else {
                 permissionCheck.requestRecordingForCall(this);
             }

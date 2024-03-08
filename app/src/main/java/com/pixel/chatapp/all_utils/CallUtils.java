@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 
+import java.io.IOException;
+
 public class CallUtils {
 
     Context context;
@@ -80,9 +82,36 @@ public class CallUtils {
     }
 
     // Method to start ringing
-    public void startRingingIndicator() {
-        // Create a MediaPlayer instance and prepare it with the ringback tone audio file
-        ringbackPlayer = MediaPlayer.create(context, R.raw.ringtone);
+    public void startRingingIndicator(boolean useSpeakerphone) {
+        // Get AudioManager instance
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+        // Set the audio mode to MODE_RINGTONE for ringing behavior
+        audioManager.setMode(AudioManager.MODE_RINGTONE);
+
+        // Determine the audio stream type based on the call mode
+        int streamType = useSpeakerphone ? AudioManager.STREAM_RING : AudioManager.STREAM_VOICE_CALL;
+
+        // Set the audio attributes for the MediaPlayer
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setLegacyStreamType(streamType)
+                .build();
+
+        // Create a MediaPlayer instance and set the audio attributes
+        ringbackPlayer = new MediaPlayer();
+        ringbackPlayer.setAudioAttributes(attributes);
+
+        try {
+            // Prepare the MediaPlayer with the ringback tone audio file
+            ringbackPlayer.setDataSource(context, Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.ringtone));
+            ringbackPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle error
+            return;
+        }
 
         // Set looping to true for continuous playback
         ringbackPlayer.setLooping(true);
@@ -90,6 +119,9 @@ public class CallUtils {
         // Start playback
         ringbackPlayer.start();
     }
+
+
+
 
     // Method to stop ringing
     public void stopRingingIndicator() {

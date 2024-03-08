@@ -22,7 +22,7 @@ public interface FragmentListener {
 
     void getMessage(String userName, String uID, Context mContext);
 
-    void getLastSeenAndOnline(String otherUid);
+    void getLastSeenAndOnline(String otherUid, Context context);
 
     void msgBackgroundActivities(String otherUid);
 

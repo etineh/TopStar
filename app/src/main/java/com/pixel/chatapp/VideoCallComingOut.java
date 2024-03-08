@@ -2,14 +2,14 @@ package com.pixel.chatapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,25 +24,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.pixel.chatapp.activities.MainRepository;
-import com.pixel.chatapp.activities.SpeakerManager;
 import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.DataModelType;
-import com.pixel.chatapp.interface_listeners.SuccessCallBack;
 import com.pixel.chatapp.model.DataModel;
-import com.pixel.chatapp.webrtc.MyPeerConnectionObserver;
-import com.pixel.chatapp.webrtc.WebRTCClient;
-import com.squareup.picasso.Picasso;
 
 //import org.jitsi.meet.sdk.JitsiMeetActivity;
 //import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 
-import org.webrtc.IceCandidate;
-import org.webrtc.MediaStream;
-import org.webrtc.PeerConnection;
 import org.webrtc.SurfaceViewRenderer;
 
-import java.util.List;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -70,13 +61,17 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
     private Boolean isConnected = false;
     private Boolean onLoudSpeaker = false;
 
-    SpeakerManager speakerManager;
-
     MainRepository mainRepository;
 
     ValueEventListener valueEventListener;
 
     CallUtils callUtils;
+    private AudioManager audioManager;
+
+    Handler handlerOnline, handlerRinging, handlerDuration;
+    Runnable runnableOnline, runnableRinging, updateTimeRunnable;
+
+    String connectionStatus, isUserAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +93,15 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         refCall = FirebaseDatabase.getInstance().getReference("Calls");
-        speakerManager = new SpeakerManager(this);
+        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         callUtils = new CallUtils(this);
+
+        handlerOnline = new Handler();
+        handlerRinging = new Handler();
+        handlerDuration = new Handler();
+
+        connectionStatus = getString(R.string.initialising);
+        isUserAvailable = getString(R.string.notAvailable);
 
         // get all intent data
         myId = getIntent().getStringExtra("myId");
@@ -109,31 +111,26 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         answerCall = getIntent().getBooleanExtra("answerCall", false);
         videoCall = getIntent().getBooleanExtra("videoCall", false);
 
-        if(!videoCall){  // set it on loud speaker by default
-            speakerManager.setSpeakerphoneOn(true);
-        } else {
-            speakerManager.setSpeakerphoneOn(false);
-        }
+        setSpeaker();
+
+        new Handler().postDelayed(() -> {
+            if(!videoCall){  // set it on loud speaker by default
+                setSpeakerphoneOn(true);
+            } else {
+                setSpeakerphoneOn(false);
+            }
+        }, 2000);
+
 
         //  toggle speaker
         speakerButton.setOnClickListener(v -> {
-            if(onLoudSpeaker){
-                speakerManager.setSpeakerphoneOn(true);
-                onLoudSpeaker = false;
-                // change icon
-            } else {
-                speakerManager.setSpeakerphoneOn(false);
-                onLoudSpeaker = true;
-                // change icon
-            }
-//            speakerManager.toggleSpeakerphone();
+            setSpeaker();
         });
 
         tvName.setText(otherName);
 
         // check if it is ringing on the other user
-        isRinging_TV.setText("Ringing...");
-
+        isRinging_TV.setText(connectionStatus);
 
         mainRepository = MainRepository.getInstance();
         mainRepository.initialiseWebRTC(myUserName, getApplicationContext(), otherUid, otherName, myId);
@@ -143,14 +140,20 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         mainRepository.initLocalView(local_view);
         mainRepository.initRemoteView(remoteView);
 
-        // start call if I am the one receiving the call
+        // send calling signal or answer call
         if(answerCall){
-//            System.out.println("what is uid " + myId);
-            mainRepository.startCall(otherUid);
-            isRinging_TV.setText("connecting...");
-        } else {
+            mainRepository.startCall(otherUid);     // answer the call
+            isRinging_TV.setText(R.string.pairing);
+        } else
+        {
+            // check if user is on another call before signaling him
+            sendSignalToTheTargetUser();
+
             // which mean I am the one calling.
-            callUtils.startRingingIndicator();
+            new Handler().postDelayed(()->{
+                callUtils.startRingingIndicator(false);
+            }, 1500);
+
         }
 
         // mute and un-mute video
@@ -177,15 +180,6 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         // switch camera back and front
         switch_camera_button.setOnClickListener(v->{
-//            if(!isSwitching){
-//                for (int i = 0; i < 2; i++) {
-//                    mainRepository.switchCamera();
-//                    if(i == 1){
-//                        isSwitching = true;
-//                    }
-//                }
-//            } else {
-//            }
             mainRepository.switchCamera();
         });
 
@@ -196,17 +190,20 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         //  end call
         endCall_IV.setOnClickListener(view -> {
-            callEnd();
+            callEnd(false);
             finish();
         });
 
         // end call in 30 sec if user did not pick
-        new Handler().postDelayed(()-> {
-            if(!isConnected){
-                callEnd();
+        runnableRinging = () -> {
+            if (!isConnected) { // first check if it rang
+                Toast.makeText(this, isUserAvailable, Toast.LENGTH_SHORT).show();
+                callEnd(false);
             }
-        }, 30_000);
+        };
+        handlerRinging.postDelayed(runnableRinging, 30_000);
 
+        // observe when user end call or didn't pick
         new Handler().postDelayed(() -> {
             observeWhenAnyoneEndCall(myId, otherUid);
         }, 3000);
@@ -216,6 +213,43 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
     // ------------  methods -----------
 
+    private void sendSignalToTheTargetUser() {
+
+        //  send the signal to other user
+        DataModel dataModel1 = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
+        refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel1));
+
+//        refCall.keepSynced(true);
+//        refCall.child(otherUid).child(myId).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                if(snapshot.getValue() != null){
+//                    String data = Objects.requireNonNull(snapshot.getValue()).toString();
+//                    DataModel dataModel = gson.fromJson(data, DataModel.class);
+//                    if(dataModel.getType().equals(DataModelType.None)){
+//                        Toast.makeText(VideoCallComingOut.this, dataModel.getTargetName()+"", Toast.LENGTH_SHORT).show();
+//
+//                    } else {
+//                        Toast.makeText(VideoCallComingOut.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
+//                        callEnd();
+//                        finish();
+//                    }
+//                } else {
+//                    // send data to other user for the first time
+//                    DataModel dataModel1 = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
+//                    refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel1));
+//                    callEnd();
+//                    finish();
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+    }
 
     private void observeWhenAnyoneEndCall(String myId, String otherUid){
 
@@ -225,8 +259,27 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
                 if(snapshot.exists()){
                     String data = Objects.requireNonNull(snapshot.getValue()).toString();
                     DataModel dataModel = gson.fromJson(data, DataModel.class);
-                    if(dataModel.getType().equals(DataModelType.None)){
-                        callEnd();
+
+                    if(dataModel.getType().equals(DataModelType.None))
+                    {     // when user change busy my call, it change from StartCall to None
+                        Toast.makeText(VideoCallComingOut.this, R.string.userBusy, Toast.LENGTH_SHORT).show();
+                        callEnd(false);
+                        finish();
+
+                    } else if(dataModel.getIsRinging())
+                    {    // call is ringing on the other user device
+                        connectionStatus = getString(R.string.ringing);
+                        isRinging_TV.setText(connectionStatus);
+                        // when ringing, restart the isConnected runnable to 0
+                        handlerRinging.removeCallbacks(runnableRinging);
+                        handlerRinging.postDelayed(runnableRinging, 30_000);
+                        // indicate user is not picking via toast and end call
+                        isUserAvailable = getString(R.string.notPicking);
+
+                    } else if (dataModel.getType().equals(DataModelType.OnAnotherCall))
+                    {   // when user is on another call, alert me and end my call.
+                        Toast.makeText(VideoCallComingOut.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
+                        callEnd(true);
                         finish();
                     }
                 }
@@ -240,6 +293,48 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         refCall.child(otherUid).child(myId).addValueEventListener(valueEventListener);
 
+    }
+
+
+    @Override
+    public void webrtcConnected() {
+        runOnUiThread(()->{
+            imageView.setVisibility(View.GONE);
+            isRinging_TV.setVisibility(View.GONE);
+            tvName.setVisibility(View.GONE);
+
+            updateTimeRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    // Update the time/duration TextView here
+                    updateTextView();
+
+                    // Post the Runnable again after a delay (1 second)
+                    handlerDuration.postDelayed(this, 1000);
+                }
+            };
+
+            // Start the initial post of the Runnable
+            handlerDuration.post(updateTimeRunnable);
+
+        });
+    }
+
+    @Override
+    public void isConnecting() {
+        runOnUiThread(()->{
+            isConnected = true;
+            callUtils.stopRingingIndicator();
+            connectionStatus = getString(R.string.pairing);
+            isRinging_TV.setText(connectionStatus);
+            durationTV.setText("00:00");
+        });
+    }
+
+
+    public void webrtcClosed() {
+        callEnd(false);
+        runOnUiThread(this::finish);
     }
 
     // Method to update the TextView with time count
@@ -258,45 +353,26 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         durationTV.setText(timeText);
     }
 
-
-    @Override
-    public void webrtcConnected() {
-        runOnUiThread(()->{
-            imageView.setVisibility(View.GONE);
-            isRinging_TV.setVisibility(View.GONE);
-            tvName.setVisibility(View.GONE);
-
-            Handler handler = new Handler();
-            Runnable updateTimeRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    // Update the time/duration TextView here
-                    updateTextView();
-
-                    // Post the Runnable again after a delay (1 second)
-                    handler.postDelayed(this, 1000);
-                }
-            };
-
-            // Start the initial post of the Runnable
-            handler.post(updateTimeRunnable);
-
-        });
-    }
-
-    public void webrtcClosed() {
-        callEnd();
-        runOnUiThread(this::finish);
-    }
-
-    private void callEnd(){
+    private void callEnd(boolean onAnotherCall){
+        setSpeakerphoneOn(false);
         callUtils.stopRingingIndicator();
-        DataModel dataModel = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.None);
-        refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel));
+        DataModel dataModel = new DataModel(otherUid, otherName, user.getUid(), myUserName,
+                null, DataModelType.None, false);
+
+        if(!onAnotherCall) {    // only change the other user TYPE when he is not on another call
+            refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel));
+        }
         refCall.child(myId).child(otherUid).setValue(gson.toJson(dataModel));
         mainRepository.endCall();
 
         MainActivity.run = 0;   // restart to 0 so it can create new instead
+        MainActivity.activeOnCall = 0;
+
+        handlerRinging.removeCallbacks(runnableRinging);
+
+        if(updateTimeRunnable != null){
+            handlerDuration.removeCallbacks(updateTimeRunnable);
+        }
 
         if(valueEventListener != null){
             refCall.child(otherUid).child(myId).removeEventListener(valueEventListener);
@@ -304,14 +380,30 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
     }
 
-    @Override
-    public void isConnecting() {
-        runOnUiThread(()->{
-            isConnected = true;
-            callUtils.stopRingingIndicator();
-            isRinging_TV.setText("pairing...");
-            durationTV.setText("00:00");
-        });
+    private void setSpeaker(){
+        if(videoCall){  // set it on loud speaker by default
+            int colorRes = ContextCompat.getColor(this, R.color.transparent_orange);
+            speakerButton.setBackgroundTintList(ColorStateList.valueOf(colorRes));
+            setSpeakerphoneOn(true);
+            videoCall = false;
+        } else {
+            int colorRes = ContextCompat.getColor(this, R.color.orange);
+            speakerButton.setBackgroundTintList(ColorStateList.valueOf(colorRes));
+            setSpeakerphoneOn(false);
+            videoCall = true;
+        }
+    }
+
+    //  toggle loud and normal speaker
+    public void setSpeakerphoneOn(boolean on) {
+        if (on) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            audioManager.setSpeakerphoneOn(true);
+        } else {
+            audioManager.setSpeakerphoneOn(false);
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+
+        }
     }
 
 
@@ -346,21 +438,6 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         startActivity(mainActivityIntent);
     }
 
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//    }
-
-    //    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        Intent intent = new Intent(this, MainActivity.class);
-////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//
-////        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        startActivity(intent);
-////        Toast.makeText(this, "i am called pause", Toast.LENGTH_SHORT).show();
-//    }
 }
 
 

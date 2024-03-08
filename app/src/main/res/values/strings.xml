@@ -29,6 +29,15 @@
 <!--    <string name="multiple">Multiple</string>-->
 
     <string name="isCalling"> is calling</string>
+    <string name="initialising">initialising</string>
+    <string name="ringing">ringing…</string>
+    <string name="busy">busy</string>
+    <string name="pairing">pairing…</string>
+    <string name="notAvailable">User not available</string>
+    <string name="onAnotherCall">User on another call</string>
+    <string name="notPicking">User not picking</string>
+    <string name="userBusy">User busy</string>
+
 
     <string name="page">pages</string>
     <string name="video">video</string>

@@ -120,7 +120,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
             listener.chatBodyVisibility(otherName, imageUrl, myUserName, otherUid, getmContext(), holder.recyclerChat);
 
-            listener.getLastSeenAndOnline(otherUid);
+            listener.getLastSeenAndOnline(otherUid, mContext);
 
             listener.msgBackgroundActivities(otherUid);
 

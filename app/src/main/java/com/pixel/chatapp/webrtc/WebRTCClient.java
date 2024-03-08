@@ -162,7 +162,7 @@ public class WebRTCClient {
 //                            if (listener!=null){
 
                                 DataModel dataModel = new DataModel(targetUid, otherName, myId,
-                                        username, sessionDescription.description, DataModelType.Offer);
+                                        username, sessionDescription.description, DataModelType.Offer, true);
 //                                listener.onTransferDataToOtherPeer();
                                 refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
                                 
@@ -188,7 +188,7 @@ public class WebRTCClient {
                         public void onSetSuccess() {
                             super.onSetSuccess();
                             DataModel dataModel = new DataModel(targetUid, otherUid, myId, username,
-                                    sessionDescription.description, DataModelType.Answer);
+                                    sessionDescription.description, DataModelType.Answer, false);
 //                                listener.onTransferDataToOtherPeer();
                             refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
 
@@ -217,7 +217,7 @@ public class WebRTCClient {
 
     public void sendIceCandidate(IceCandidate iceCandidate, String targetUid){
         addIceCandidate(iceCandidate);
-        DataModel dataModel = new DataModel(targetUid, otherName, myId, username,  gson.toJson(iceCandidate), DataModelType.IceCandidate);
+        DataModel dataModel = new DataModel(targetUid, otherName, myId, username,  gson.toJson(iceCandidate), DataModelType.IceCandidate, false);
         refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
 
 

@@ -9,14 +9,17 @@ public class DataModel {
     private String senderName;
     private String data;
     private DataModelType type;
+    boolean isRinging;
 
-    public DataModel(String otherUid, String targetName, String senderUid, String senderName, String data, DataModelType type) {
+    public DataModel(String otherUid, String targetName, String senderUid, String senderName,
+                     String data, DataModelType type, boolean isRinging) {
         this.otherUid = otherUid;
         this.targetName = targetName;
         this.senderUid = senderUid;
         this.senderName = senderName;
         this.data = data;
         this.type = type;
+        this.isRinging = isRinging;
     }
 
     public String getOtherUid() {
@@ -65,5 +68,13 @@ public class DataModel {
 
     public void setType(DataModelType type) {
         this.type = type;
+    }
+
+    public boolean getIsRinging() {
+        return isRinging;
+    }
+
+    public void setIsRinging(boolean ringing) {
+        isRinging = ringing;
     }
 }

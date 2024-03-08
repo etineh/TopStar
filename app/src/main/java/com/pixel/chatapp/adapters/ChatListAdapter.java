@@ -262,7 +262,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
-                        listener.getLastSeenAndOnline(otherUid);
+                        listener.getLastSeenAndOnline(otherUid, mContext);
 
                         listener.msgBackgroundActivities(otherUid);
 
@@ -278,7 +278,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
-                        listener.getLastSeenAndOnline(otherUid);
+                        listener.getLastSeenAndOnline(otherUid, mContext);
 
                         listener.msgBackgroundActivities(otherUid);
 
@@ -318,7 +318,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
-                                        listener.getLastSeenAndOnline(otherUid);
+                                        listener.getLastSeenAndOnline(otherUid, mContext);
 
                                         listener.msgBackgroundActivities(otherUid);
 
@@ -334,7 +334,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
 
-                                        listener.getLastSeenAndOnline(otherUid);
+                                        listener.getLastSeenAndOnline(otherUid, mContext);
 
                                         listener.msgBackgroundActivities(otherUid);
 
