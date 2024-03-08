@@ -1840,14 +1840,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     }
 
     private void rejectCall() {
-        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
+        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
         refCalls.child(myId).child(callOtherUid).setValue(gson.toJson(data));
-        refCalls.child(callOtherUid).child(myId).setValue(gson.toJson(data));
+        DataModel dataModel = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
+        refCalls.child(callOtherUid).child(myId).setValue(gson.toJson(dataModel));
         incomingCallLayout.setVisibility(View.GONE);
         callUtils.stopRingtone();   // stop the ringtone
         callUtils.stopVibration();
         run = 0;
         activeOnCall = 0;
+        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
     }
 
     private void answerCall() {
@@ -2099,10 +2101,11 @@ scNum = 20;
         // only alert me if I am not on another call    -- work on this later
         mainRepository.subscribeForLatestEvent(otherUID, (data)->{
 
-            if (data.getType().equals(DataModelType.StartCall)){
+            if (data.getType().equals(DataModelType.StartCall))
+            {
                 activeOnCall+=1;
                 runOnUiThread(()->{
-                    if (activeOnCall <= 2) {    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
+                    if (activeOnCall <= 1) {    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
                         dataModel = data;
                         callUtils.stopVibration();
                         callUtils.stopRingtone();
@@ -2116,6 +2119,7 @@ scNum = 20;
                         callUtils.playRingtone();
 
                         data.setIsRinging(true);    // indicate to other user that it is ringing
+                        data.setType(DataModelType.Offline);    // indicate to other user that it is ringing
                         refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
 
                         // make activeCall return back to 0 after 33sec if I didn't pick
@@ -2129,11 +2133,15 @@ scNum = 20;
                     }
 
                 });
-            } else if (data.getType().equals(DataModelType.None)) {
+            } else if (data.getType().equals(DataModelType.None))
+            {
                 runOnUiThread(()->{
                     incomingCallLayout.setVisibility(View.GONE);
                     callUtils.stopVibration();
                     callUtils.stopRingtone();
+                    handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+                    activeOnCall = 0;
+                    Toast.makeText(this, "I have close" + data.getType(), Toast.LENGTH_SHORT).show();
                 });
 
             }

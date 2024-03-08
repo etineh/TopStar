@@ -98,7 +98,6 @@ public class WebRTCClient {
     }
 
     //initilizing ui like surface view renderers
-
     public void initSurfaceViewRender(SurfaceViewRenderer viewRenderer){
         viewRenderer.setEnableHardwareScaler(true);
         viewRenderer.setMirror(true);
@@ -219,13 +218,6 @@ public class WebRTCClient {
         addIceCandidate(iceCandidate);
         DataModel dataModel = new DataModel(targetUid, otherName, myId, username,  gson.toJson(iceCandidate), DataModelType.IceCandidate, false);
         refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
-
-
-//                                listener.onTransferDataToOtherPeer();
-//        if (listener!=null){
-//            listener.onTransferDataToOtherPeer(new DataModel(targetUid, otherName, myId,
-//                    username, gson.toJson(iceCandidate), DataModelType.IceCandidate));
-//        }
     }
 
     public void switchCamera() {
@@ -242,7 +234,6 @@ public class WebRTCClient {
 
     public void closeConnection(){
         try{
-//System.out.println("what is: " );
             localVideoTrack.dispose();
             videoCapturer.stopCapture();
             videoCapturer.dispose();

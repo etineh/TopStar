@@ -59,49 +59,6 @@ public class MainRepository implements WebRTCClient.Listener {
         return instance;
     }
 
-//    public void login(String username, Context context, SuccessCallBack callBack){
-//        firebaseClient.login(username,()->{
-//            updateCurrentUsername(username);
-//            this.webRTCClient = new WebRTCClient(context,new MyPeerConnectionObserver(){
-//                @Override
-//                public void onAddStream(MediaStream mediaStream) {
-//                    super.onAddStream(mediaStream);
-//                    try{
-//                        mediaStream.videoTracks.get(0).addSink(remoteView);
-//                    }catch (Exception e){
-//                        e.printStackTrace();
-//                    }
-//                }
-//
-//                @Override
-//                public void onConnectionChange(PeerConnection.PeerConnectionState newState) {
-//                    Log.d("TAG", "onConnectionChange: "+newState);
-//                    super.onConnectionChange(newState);
-//                    if (newState == PeerConnection.PeerConnectionState.CONNECTED && listener!=null){
-//                        listener.webrtcConnected();
-//                    }
-//
-//                    if (newState == PeerConnection.PeerConnectionState.CLOSED ||
-//                            newState == PeerConnection.PeerConnectionState.DISCONNECTED ){
-//                        if (listener!=null){
-//                            listener.webrtcClosed();
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void onIceCandidate(IceCandidate iceCandidate) {
-//                    super.onIceCandidate(iceCandidate);
-//                    webRTCClient.sendIceCandidate(iceCandidate,target);
-//                }
-//            },username);
-//            webRTCClient.listener = this;
-//            callBack.onSuccess();
-//        });
-//    }
-
-    //  =========== methods
-
     public void initialiseWebRTC(String username, Context context, String targetUid,
                                  String otherName, String senderUid)
     {
@@ -159,7 +116,7 @@ public class MainRepository implements WebRTCClient.Listener {
         this.remoteView = view;
     }
 
-    public void startCall(String targetUid){
+    public void answerCall(String targetUid){
         webRTCClient.call(targetUid);
     }
 
@@ -230,10 +187,6 @@ public class MainRepository implements WebRTCClient.Listener {
 //        firebaseClient.sendMessageToOtherUser(model,()->{});
     }
 
-//    @Override
-//    public void onTransferDataToOtherPeer(DataModel model) {
-//
-//    }
 
     public interface Listener{
         void webrtcConnected();

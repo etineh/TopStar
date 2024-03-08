@@ -115,6 +115,7 @@
             android:exported="false" />
         <activity
             android:name=".VideoCallComingOut"
+            android:supportsPictureInPicture="true"
             android:exported="false" />
         <activity
             android:name=".VideoCallComeIn"

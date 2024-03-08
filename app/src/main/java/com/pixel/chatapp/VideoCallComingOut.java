@@ -4,12 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Rational;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -69,9 +73,13 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
     private AudioManager audioManager;
 
     Handler handlerOnline, handlerRinging, handlerDuration;
-    Runnable runnableOnline, runnableRinging, updateTimeRunnable;
+    Runnable runnableRinging, updateTimeRunnable;
 
     String connectionStatus, isUserAvailable;
+
+    private PictureInPictureParams.Builder pipBuilder;
+    private boolean isInPictureInPictureMode = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +107,11 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         handlerOnline = new Handler();
         handlerRinging = new Handler();
         handlerDuration = new Handler();
+
+        // Initialize Picture-in-Picture builder
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pipBuilder = new PictureInPictureParams.Builder();
+        }
 
         connectionStatus = getString(R.string.initialising);
         isUserAvailable = getString(R.string.notAvailable);
@@ -137,22 +150,23 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         mainRepository.listener = this;
 
+        // set up the video camera
         mainRepository.initLocalView(local_view);
         mainRepository.initRemoteView(remoteView);
 
         // send calling signal or answer call
         if(answerCall){
-            mainRepository.startCall(otherUid);     // answer the call
+            mainRepository.answerCall(otherUid);     // answer the call
             isRinging_TV.setText(R.string.pairing);
         } else
         {
-            // check if user is on another call before signaling him
+            // signal the other user that I am calling
             sendSignalToTheTargetUser();
 
-            // which mean I am the one calling.
+            // start the calling ringback tone
             new Handler().postDelayed(()->{
                 callUtils.startRingingIndicator(false);
-            }, 1500);
+            }, 1000);
 
         }
 
@@ -190,15 +204,14 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
         //  end call
         endCall_IV.setOnClickListener(view -> {
-            callEnd(false);
-            finish();
+            callEnd(false); // when I end the call myself
         });
 
         // end call in 30 sec if user did not pick
         runnableRinging = () -> {
             if (!isConnected) { // first check if it rang
                 Toast.makeText(this, isUserAvailable, Toast.LENGTH_SHORT).show();
-                callEnd(false);
+                callEnd(false); // end if user is unavailable
             }
         };
         handlerRinging.postDelayed(runnableRinging, 30_000);
@@ -219,36 +232,6 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         DataModel dataModel1 = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
         refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel1));
 
-//        refCall.keepSynced(true);
-//        refCall.child(otherUid).child(myId).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                if(snapshot.getValue() != null){
-//                    String data = Objects.requireNonNull(snapshot.getValue()).toString();
-//                    DataModel dataModel = gson.fromJson(data, DataModel.class);
-//                    if(dataModel.getType().equals(DataModelType.None)){
-//                        Toast.makeText(VideoCallComingOut.this, dataModel.getTargetName()+"", Toast.LENGTH_SHORT).show();
-//
-//                    } else {
-//                        Toast.makeText(VideoCallComingOut.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
-//                        callEnd();
-//                        finish();
-//                    }
-//                } else {
-//                    // send data to other user for the first time
-//                    DataModel dataModel1 = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
-//                    refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel1));
-//                    callEnd();
-//                    finish();
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
     }
 
     private void observeWhenAnyoneEndCall(String myId, String otherUid){
@@ -260,11 +243,10 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
                     String data = Objects.requireNonNull(snapshot.getValue()).toString();
                     DataModel dataModel = gson.fromJson(data, DataModel.class);
 
-                    if(dataModel.getType().equals(DataModelType.None))
+                    if(dataModel.getType().equals(DataModelType.Busy))
                     {     // when user change busy my call, it change from StartCall to None
                         Toast.makeText(VideoCallComingOut.this, R.string.userBusy, Toast.LENGTH_SHORT).show();
-                        callEnd(false);
-                        finish();
+                        callEnd(false); // end when user is busy
 
                     } else if(dataModel.getIsRinging())
                     {    // call is ringing on the other user device
@@ -279,8 +261,7 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
                     } else if (dataModel.getType().equals(DataModelType.OnAnotherCall))
                     {   // when user is on another call, alert me and end my call.
                         Toast.makeText(VideoCallComingOut.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
-                        callEnd(true);
-                        finish();
+                        callEnd(true);  // end when user is on another call
                     }
                 }
             }
@@ -298,6 +279,7 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
     @Override
     public void webrtcConnected() {
+        MainActivity.activeOnCall = 1;
         runOnUiThread(()->{
             imageView.setVisibility(View.GONE);
             isRinging_TV.setVisibility(View.GONE);
@@ -316,7 +298,6 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
             // Start the initial post of the Runnable
             handlerDuration.post(updateTimeRunnable);
-
         });
     }
 
@@ -333,8 +314,8 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
 
 
     public void webrtcClosed() {
-        callEnd(false);
-        runOnUiThread(this::finish);
+//        callEnd(false); // end when the connection is closed
+//        runOnUiThread(this::finish);
     }
 
     // Method to update the TextView with time count
@@ -353,7 +334,7 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         durationTV.setText(timeText);
     }
 
-    private void callEnd(boolean onAnotherCall){
+    private void callEnd(Boolean onAnotherCall){
         setSpeakerphoneOn(false);
         callUtils.stopRingingIndicator();
         DataModel dataModel = new DataModel(otherUid, otherName, user.getUid(), myUserName,
@@ -362,8 +343,10 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         if(!onAnotherCall) {    // only change the other user TYPE when he is not on another call
             refCall.child(otherUid).child(myId).setValue(gson.toJson(dataModel));
         }
+
         refCall.child(myId).child(otherUid).setValue(gson.toJson(dataModel));
-        mainRepository.endCall();
+
+        mainRepository.endCall();   // close all camera settings
 
         MainActivity.run = 0;   // restart to 0 so it can create new instead
         MainActivity.activeOnCall = 0;
@@ -378,6 +361,9 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
             refCall.child(otherUid).child(myId).removeEventListener(valueEventListener);
         }
 
+        local_view.setVisibility(View.GONE);
+        remoteView.setVisibility(View.GONE);
+        finish();
     }
 
     private void setSpeaker(){
@@ -406,6 +392,49 @@ public class VideoCallComingOut extends AppCompatActivity implements MainReposit
         }
     }
 
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        // Enter Picture-in-Picture mode when user minimizes the app
+        startPictureInPictureMode();
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+            this.isInPictureInPictureMode = isInPictureInPictureMode;
+            if (isInPictureInPictureMode) {
+                // Hide non-essential UI elements
+                local_view.setVisibility(View.GONE);
+                arrowBackButton.setVisibility(View.GONE);
+                video_button.setVisibility(View.GONE);
+                remoteView.setVisibility(View.GONE);
+
+                System.out.println("what is hiding");
+            } else {
+                // Show UI elements when exiting Picture-in-Picture mode
+                local_view.setVisibility(View.VISIBLE);
+                arrowBackButton.setVisibility(View.VISIBLE);
+                video_button.setVisibility(View.VISIBLE);
+                remoteView.setVisibility(View.GONE);
+                System.out.println("what is showing");
+
+            }
+        } else {
+            System.out.println("what is try again");
+
+        }
+    }
+
+    private void startPictureInPictureMode() {
+        // Enter Picture-in-Picture mode
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Rational aspectRatio = new Rational(local_view.getWidth(), local_view.getHeight());
+            pipBuilder.setAspectRatio(aspectRatio);
+            enterPictureInPictureMode(pipBuilder.build());
+        }
+    }
 
 //    public interface Listener{
 //        void webrtcConnected();
