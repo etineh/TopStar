@@ -1,4 +1,4 @@
-package com.pixel.chatapp.activities;
+package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.uniqueUriForSharingPhotoOrDoc;

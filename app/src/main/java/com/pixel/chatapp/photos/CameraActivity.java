@@ -1,4 +1,4 @@
-package com.pixel.chatapp.activities;
+package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.all_utils.FileUtils.getFileName;
 import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
@@ -60,7 +60,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.SendImageActivity;
 import com.pixel.chatapp.adapters.GalleryAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
@@ -135,7 +134,7 @@ public class CameraActivity extends AppCompatActivity {
         scrollToLast_IV = findViewById(R.id.scrollToLast_IV);
         onPhoto_TV = findViewById(R.id.onPhoto_IV);
         onVideo_TV = findViewById(R.id.onVideo_IV);
-        showSnapPhoto_IV = findViewById(R.id.showSnapPhoto_IV);
+//        showSnapPhoto_IV = findViewById(R.id.showSnapPhoto_IV);
 
         // Get a reference to the PreviewView in your layout
         previewView = findViewById(R.id.previewView);
@@ -480,7 +479,7 @@ public class CameraActivity extends AppCompatActivity {
                             sendALLPhoto_TV.setVisibility(View.VISIBLE);
                             photoSelected_TV.setText(getCount);
                             progressBarCamera.setVisibility(View.GONE);
-                            PhoneUtils.vibrateDevice(CameraActivity.this);
+                            PhoneUtils.vibrateDevice(CameraActivity.this, 80);
                             mAdapter.notifyDataSetChanged();
 
                         } else {
@@ -488,7 +487,7 @@ public class CameraActivity extends AppCompatActivity {
                             finish();
                         }
 
-                        PhoneUtils.vibrateDevice(CameraActivity.this);
+                        PhoneUtils.vibrateDevice(CameraActivity.this, 80);
 // file:///storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Photos/Topper_photo_1708539683370.jpg
 
                     }

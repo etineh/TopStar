@@ -2,7 +2,7 @@ package com.pixel.chatapp.model;
 
 import com.pixel.chatapp.interface_listeners.DataModelType;
 
-public class DataModel {
+public class CallModel {
     private String otherUid;
     private String targetName;
     private String senderUid;
@@ -11,7 +11,7 @@ public class DataModel {
     private DataModelType type;
     boolean isRinging;
 
-    public DataModel(String otherUid, String targetName, String senderUid, String senderName,
+    public CallModel(String otherUid, String targetName, String senderUid, String senderName,
                      String data, DataModelType type, boolean isRinging) {
         this.otherUid = otherUid;
         this.targetName = targetName;

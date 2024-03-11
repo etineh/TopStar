@@ -1,11 +1,9 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.calls;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,17 +14,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.pixel.chatapp.chats.MessageActivity;
+import com.pixel.chatapp.R;
 import com.squareup.picasso.Picasso;
 //
 //import org.jitsi.meet.sdk.JitsiMeetActivity;
 //import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 
-import java.net.URL;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class VideoCallComeIn extends AppCompatActivity {
+public class ViewCallRequest extends AppCompatActivity {
 
     TextView tvName;
     CircleImageView imageView, decline, answerCall;
@@ -58,7 +54,7 @@ public class VideoCallComeIn extends AppCompatActivity {
 
         decline.setOnClickListener(view -> {
             refChecks.child(user.getUid()).child(otherUid).child("vCallResp").setValue("no");
-            Toast.makeText(VideoCallComeIn.this, "You decline the call", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ViewCallRequest.this, "You decline the call", Toast.LENGTH_SHORT).show();
             finish();
         });
 
@@ -84,13 +80,13 @@ public class VideoCallComeIn extends AppCompatActivity {
 //                    .setRoom(otherUid)
 //                    .build();
 //
-//            JitsiMeetActivity.launch(VideoCallComeIn.this, options);
+//            JitsiMeetActivity.launch(ViewCallRequest.this, options);
 //            finish();
 //
 //        } catch (Exception e){
 //            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 //        }
-////        Toast.makeText(VideoCallComeIn.this, "You have accepted the call", Toast.LENGTH_SHORT).show();
+////        Toast.makeText(ViewCallRequest.this, "You have accepted the call", Toast.LENGTH_SHORT).show();
 //
 //    }
 

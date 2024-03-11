@@ -1,4 +1,4 @@
-package com.pixel.chatapp.activities;
+package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.home.MainActivity.unusedPhotoShareRef;
 
@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.constants.AllConstants;
 
 import java.io.IOException;

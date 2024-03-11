@@ -11,14 +11,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class PhoneUtils {
-    public static void vibrateDevice(Context context) {
+    public static void vibrateDevice(Context context, int volume) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         if (vibrator != null && vibrator.hasVibrator()) {
             // Vibrate for 100 milliseconds
-            vibrator.vibrate(100);
+            vibrator.vibrate(volume);
         }
     }
+
 
     public static void hideKeyboard(Context context, View view) {
         // Get a reference to the InputMethodManager

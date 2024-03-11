@@ -1,4 +1,4 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
@@ -55,9 +55,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pixel.chatapp.Permission.Permission;
-import com.pixel.chatapp.activities.ColorSeekBar;
-import com.pixel.chatapp.activities.CustomViewPager;
-import com.pixel.chatapp.activities.ImagePainter;
+import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.SendImageAdapter;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;

@@ -11,10 +11,10 @@ import static com.pixel.chatapp.all_utils.FileUtils.isPhotoshopFile;
 import static com.pixel.chatapp.all_utils.FileUtils.isVideoFile;
 import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.all_utils.OtherMethods.animateVisibility;
+import static com.pixel.chatapp.calls.CallCenterActivity.handlerVibrate;
 import static com.pixel.chatapp.constants.AllConstants.ACCEPTED_MIME_TYPES;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -34,8 +34,6 @@ import android.graphics.pdf.PdfRenderer;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -54,7 +52,6 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -96,12 +93,13 @@ import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.SendImageActivity;
-import com.pixel.chatapp.VideoCallComingOut;
-import com.pixel.chatapp.ZoomImage;
+import com.pixel.chatapp.interface_listeners.CallsListener;
+import com.pixel.chatapp.photos.SendImageActivity;
+import com.pixel.chatapp.calls.CallCenterActivity;
+import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.activities.AppLifecycleHandler;
-import com.pixel.chatapp.activities.CameraActivity;
-import com.pixel.chatapp.activities.MainRepository;
+import com.pixel.chatapp.photos.CameraActivity;
+import com.pixel.chatapp.calls.MainRepository;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.all_utils.FileUtils;
@@ -111,7 +109,7 @@ import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.DataModelType;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.interface_listeners.NewEventCallBack;
-import com.pixel.chatapp.model.DataModel;
+import com.pixel.chatapp.model.CallModel;
 import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
@@ -143,7 +141,7 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity implements FragmentListener {
+public class MainActivity extends AppCompatActivity implements FragmentListener, CallCenterActivity.CallLister {
 
     private static TabLayout tabLayoutGeneral;
     private static ViewPager2 viewPager2General;
@@ -231,10 +229,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     //  -------------   network settings    -----------
     public static ConstraintLayout constrNetConnect;
-    public static String otherUserUid, otherUserName, myUserName, imageUri, callOtherUid;
+    public static String otherUserUid, otherUserName, myUserName, imageUri;
 
-    DataModel dataModel;
-
+    private CallModel callModel;
+    private String callType_;
     public static Handler handlerInternet = new Handler(), handlerTyping = new Handler();
     public static Runnable internetCheckRunnable, runnableTyping;
 
@@ -353,22 +351,35 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
     private ConstraintLayout fileAttachOptionContainer, fileContainerAnim;
     private ImageView documentIV, galleryIV, audioIV, contactIV, gameIV;
 
+
     //  =============   video and audio call declares
     Gson gson = new Gson();
     private static MainRepository mainRepository;
 
-    private static LinearLayout incomingCallLayout;
+    private static ConstraintLayout incomingCallLayout, returnToCallLayout;
+    private static ConstraintLayout audioOrVideoOptionConatiner;
+    private static TextView returnToCallWithDuration, audioCallButton, videoCallButton;
     private static TextView whoIsCallingTV;
-    private static ImageView callButton, answerCall_IV, rejectCall_IV;
+    private static ImageView answerCall_IV, rejectCall_IV;
+    private static ImageView callButton;
     private static CallUtils callUtils;
 
-    public static int run = 0;
+    private static int run = 0;
+    public static boolean onPictureMood;
     private boolean makeCall;
     public static int activeOnCall = 0;
+    public static String goBackToCall;
+    
+    private static String currentUserUidOnCall;
 
     public static Handler handlerOnAnotherCall;
     public static Runnable runnableOnAnotherCall;
-    
+    public static Handler handlerOnAnotherCall2;
+    public static Runnable runnableOnAnotherCall2;
+
+    public static CallsListener callsListener;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -416,7 +427,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         recyclerContainer = findViewById(R.id.constraintRecyler);
         constraintLayoutAdjust = findViewById(R.id.constraintLayoutAdjust);
-        callButton = findViewById(R.id.callMeet_IV);
         constraintMsgBody = findViewById(R.id.constraintMsgBody);
         imageViewBack = findViewById(R.id.backArrow_IV);
         textViewOtherUser = findViewById(R.id.userName_TV);
@@ -432,9 +442,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
         // calls
         incomingCallLayout = findViewById(R.id.incomingCallLayout);
-        whoIsCallingTV = findViewById(R.id.incomingNameTV);
-        answerCall_IV = findViewById(R.id.annswerCall_IV);
-        rejectCall_IV = findViewById(R.id.rejectCall_IV);
+        whoIsCallingTV = incomingCallLayout.findViewById(R.id.incomingNameTV);
+        answerCall_IV = incomingCallLayout.findViewById(R.id.annswerCall_IV);
+        rejectCall_IV = incomingCallLayout.findViewById(R.id.rejectCall_IV);
+        callButton = findViewById(R.id.callMeet_IV);
+
+        returnToCallLayout = findViewById(R.id.returnBackToCAll);
+        returnToCallWithDuration = returnToCallLayout.findViewById(R.id.tapInfoTV);
+
+        audioOrVideoOptionConatiner = findViewById(R.id.videoOrAudioOptionLayout);
+        audioCallButton = audioOrVideoOptionConatiner.findViewById(R.id.audioCallOption);
+        videoCallButton = audioOrVideoOptionConatiner.findViewById(R.id.videoCallOption);
 
         //  file options
         fileAttachOptionContainer = findViewById(R.id.FileAttachOptionContainer);
@@ -555,7 +573,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         recordButton = (RecordButton) findViewById(R.id.record_button9);
         recordButton.setRecordView(recordView);
 
-
         tabLayoutGeneral = findViewById(R.id.tabLayerMain);
         viewPager2General = findViewById(R.id.viewPageMain);
         sideBarMenuOpen = findViewById(R.id.imageViewMenu);
@@ -617,6 +634,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
         // video and audio calls
         handlerOnAnotherCall = new Handler();
 
+        CallCenterActivity.callLister = this;
+
+        goBackToCall = getString(R.string.returnToCall);
         mainRepository = MainRepository.getInstance();
 
         // XXX  =================   get intent when file is share from other app    ================
@@ -726,14 +746,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
             //  ==================      top chat layer button     ===========================
             callButton.setOnClickListener(view -> {
-                makeCall = true;
-                // I am calling user
-                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(() ->
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
                 {
                     if(permissionCheck.isCameraOk(this) ){
                         if(permissionCheck.isRecordingOk(this)){
 
-                            makeCall();
+                            audioOrVideoOptionConatiner.setVisibility(View.VISIBLE);
 
                         } else{
                             permissionCheck.requestRecordingForCall(this);
@@ -748,6 +766,35 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
                 }).start();
 
+            });
+
+            audioOrVideoOptionConatiner.setOnClickListener(v -> audioOrVideoOptionConatiner.setVisibility(View.GONE));
+
+            audioCallButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
+                {
+                    makeCall("audio");
+                    makeCall = true;
+                    audioOrVideoOptionConatiner.setVisibility(View.GONE);
+                    // Reset the scale
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+
+                }).start();
+            });
+
+            videoCallButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
+                {
+                    makeCall("video");
+                    makeCall = true;
+                    audioOrVideoOptionConatiner.setVisibility(View.GONE);
+
+                    // Reset the scale
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+
+                }).start();
             });
 
             rejectCall_IV.setOnClickListener(v -> {
@@ -766,6 +813,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
                     permissionCheck.requestCameraForCall(this);
                 }
 
+            });
+
+            returnToCallLayout.setOnClickListener(v -> {
+                makeCall(null);
             });
 
             //  ==================      side bar menu option     ===========================
@@ -1817,55 +1868,62 @@ public class MainActivity extends AppCompatActivity implements FragmentListener 
 
     }
 
-    private void makeCall() {
+    private void makeCall(String callType) {
         if(run == 0){
-            Intent intent = new Intent(this, VideoCallComingOut.class);
+            Intent intent = new Intent(this, CallCenterActivity.class);
             intent.putExtra("otherUid", otherUserUid);
             intent.putExtra("myId", myId);
             intent.putExtra("otherName", otherUserName);
             intent.putExtra("myUsername", myUserName);
             intent.putExtra("answerCall", false);
-            intent.putExtra("videoCall", true);
-
+            intent.putExtra("callType", callType);
             startActivity(intent);
-//            DataModel data = new DataModel(otherUserUid, otherUserName, user.getUid(), myUserName, null, DataModelType.StartCall, false);
-//            refCalls.child(otherUserUid).child(myId).setValue(gson.toJson(data));
 
+            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
+            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+
+            currentUserUidOnCall = otherUserUid;
+
+            activeOnCall = 0;
         } else {
-            Intent callIntentActivity = new Intent(this, VideoCallComingOut.class);
+            Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
             callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(callIntentActivity);
         }
-        run = 1;
+        run = 1;    // to make the call activity to open instead of recreating new instance
     }
 
     private void rejectCall() {
-        DataModel data = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
-        refCalls.child(myId).child(callOtherUid).setValue(gson.toJson(data));
-        DataModel dataModel = new DataModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
-        refCalls.child(callOtherUid).child(myId).setValue(gson.toJson(dataModel));
+        CallModel data = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
+        refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(data));
+        CallModel callModel = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
+        refCalls.child(currentUserUidOnCall).child(myId).setValue(gson.toJson(callModel));
         incomingCallLayout.setVisibility(View.GONE);
         callUtils.stopRingtone();   // stop the ringtone
         callUtils.stopVibration();
-        run = 0;
-        activeOnCall = 0;
+        endCall();
         handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
     }
 
     private void answerCall() {
-        Intent intent = new Intent(this, VideoCallComingOut.class);
-        intent.putExtra("otherUid", dataModel.getSenderUid());
-        intent.putExtra("myId", myId);
-        intent.putExtra("otherName", dataModel.getSenderName());
-        intent.putExtra("myUsername", myUserName);
-        intent.putExtra("answerCall", true);
-        intent.putExtra("videoCall", true);
-        callUtils.stopRingtone();
-        callUtils.stopVibration();
+        if(callModel != null){
+            Intent intent = new Intent(this, CallCenterActivity.class);
+            intent.putExtra("otherUid", callModel.getSenderUid());
+            intent.putExtra("myId", myId);
+            intent.putExtra("otherName", callModel.getSenderName());
+            intent.putExtra("myUsername", myUserName);
+            intent.putExtra("answerCall", true);
+            intent.putExtra("callType", callType_);
 
-        startActivity(intent);
+            callUtils.stopRingtone();
+            callUtils.stopVibration();
+            startActivity(intent);
+            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
+            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+        }
+
         incomingCallLayout.setVisibility(View.GONE);
-        run = 1;
+        run = 1;    // to make the call activity to open instead of recreating new instance
         handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
     }
 
@@ -2100,36 +2158,54 @@ scNum = 20;
 
         // only alert me if I am not on another call    -- work on this later
         mainRepository.subscribeForLatestEvent(otherUID, (data)->{
-
-            if (data.getType().equals(DataModelType.StartCall))
+            if (data.getType().equals(DataModelType.AudioCall) || data.getType().equals(DataModelType.VideoCall)
+            || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
             {
                 activeOnCall+=1;
                 runOnUiThread(()->{
-                    if (activeOnCall <= 1) {    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
-                        dataModel = data;
-                        callUtils.stopVibration();
-                        callUtils.stopRingtone();
+                    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
+                    if (activeOnCall <= 1 || ( currentUserUidOnCall != null && currentUserUidOnCall.equals(data.getSenderUid())) ) {
 
-                        incomingCallLayout.setVisibility(View.VISIBLE);
-                        callOtherUid = data.getSenderUid();
-                        String whoIsCalling = data.getSenderName() + " " + getString(R.string.isCalling);
-                        whoIsCallingTV.setText(whoIsCalling);
-                        //vibrate my tone
-                        callUtils.startContinuousVibration();
-                        callUtils.playRingtone();
+                        if(activeOnCall <=1){
 
-                        data.setIsRinging(true);    // indicate to other user that it is ringing
-                        data.setType(DataModelType.Offline);    // indicate to other user that it is ringing
-                        refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
+                            iHaveACall(data);
 
-                        // make activeCall return back to 0 after 33sec if I didn't pick
-                        runnableOnAnotherCall = () -> activeOnCall = 0;
-                        handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
+                        } else if (currentUserUidOnCall != null) {
+
+                            goBackToCall = getString(R.string.returnToCall);
+
+                            if(data.getType().equals(DataModelType.VideoCall))
+                            {
+                                if(CallCenterActivity.callType.equals("audio")){
+                                    callsListener.getRequestVideoCall(data);
+                                    goBackToCall =  data.getSenderName() +" " + getString(R.string.requestForVideoCall);
+                                }
+                                CallCenterActivity.isOtherUserCameraOn = true;
+
+                            } else if (data.getType().equals(DataModelType.RejectVideo))
+                            {
+                                callsListener.getRejectVideoCallResp(data);
+
+                            } else if (data.getType().equals(DataModelType.AcceptVideo))
+                            {
+                                // get  the response when other user accept my video call
+                                callsListener.acceptVideoCall();
+
+                            }else if (data.getType().equals(DataModelType.AudioCall))
+                            {
+                                //  notify me when other user off his camera
+                                if(!CallCenterActivity.isOnVideo) { // If I'm on audio mood, change to audio mood background
+                                    callsListener.myUserOffCamera();
+                                }
+                                CallCenterActivity.isOtherUserCameraOn = false;
+                            }
+                        }
 
                     } else {
                         data.setType(DataModelType.OnAnotherCall);    // indicate to other user that it is ringing
                         refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
-                        Toast.makeText(this, "I have sent the busy", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, data.getSenderName() +" " +
+                                getString(R.string.anotherUserIsCalling), Toast.LENGTH_SHORT).show();
                     }
 
                 });
@@ -2139,9 +2215,9 @@ scNum = 20;
                     incomingCallLayout.setVisibility(View.GONE);
                     callUtils.stopVibration();
                     callUtils.stopRingtone();
+                    handlerVibrate.removeCallbacks(CallCenterActivity.runnableVibrate);
                     handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
                     activeOnCall = 0;
-                    Toast.makeText(this, "I have close" + data.getType(), Toast.LENGTH_SHORT).show();
                 });
 
             }
@@ -2162,6 +2238,40 @@ scNum = 20;
 
         }, 3000);
 
+    }
+
+    private void iHaveACall(CallModel callData){
+        this.callModel = callData;
+        callUtils.stopVibration();
+        callUtils.stopRingtone();
+
+        incomingCallLayout.setVisibility(View.VISIBLE);
+        currentUserUidOnCall = callData.getSenderUid();
+
+        String whoIsCalling;
+        if(callData.getType().equals(DataModelType.VideoCall)) {
+            whoIsCalling = getString(R.string.videoCall) +  "  " + callData.getSenderName();
+            callType_ = "video";
+        } else {
+            whoIsCalling = getString(R.string.audioCall) +  "  " + callData.getSenderName();
+            callType_ = "audio";
+        }
+        whoIsCallingTV.setText(whoIsCalling);
+        //vibrate my tone
+        callUtils.startContinuousVibration();
+        callUtils.playRingtone();
+
+        callData.setIsRinging(true);    // indicate to other user that it is ringing
+        callData.setType(DataModelType.Offline);    // indicate to other user that it is ringing
+        refCalls.child(myId).child(callData.getSenderUid()).setValue(gson.toJson(callData));
+
+        // make activeCall return back to 0 after 33sec if I didn't pick
+        runnableOnAnotherCall = () -> activeOnCall = 0;
+        handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
+
+        // make activeCall return back to 0 after 5min if I didn't pick
+//        runnableOnAnotherCall2 = () -> activeOnCall = 0;
+//        handlerOnAnotherCall2.postDelayed(runnableOnAnotherCall2, 300_000);
     }
 
     @Override
@@ -4304,8 +4414,8 @@ scNum = 20;
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         try {
                             String data = Objects.requireNonNull(snapshot.getValue()).toString();
-                            DataModel dataModel = gson.fromJson(data, DataModel.class);
-                            callBack.onNewEventReceived(dataModel);
+                            CallModel callModel = gson.fromJson(data, CallModel.class);
+                            callBack.onNewEventReceived(callModel);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -5268,6 +5378,8 @@ scNum = 20;
 
             PhoneUtils.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard if any
 
+            toggleCallButtonVisibility();
+
             refUsers.child(auth.getUid()).child("presence").setValue(1);
             //  reverse the emoji initialization back to the emoji button icon
             popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
@@ -5294,15 +5406,13 @@ scNum = 20;
         super.onResume();
     }
 
-    private void closeAllContainer(){
-        fileAttachOptionContainer.setVisibility(View.GONE);
-        fileContainerAnim.setVisibility(View.GONE);
-        generalBackground.setVisibility(View.GONE);
-        moreOptionContainer.setVisibility(View.GONE);
-        pinOptionBox.setVisibility(View.GONE);
-        chatOptionsConstraints.setVisibility(View.GONE);
-        firstTopUserDetailsContainer.setVisibility(View.GONE);
-        clearAllHighlights();
+    private void toggleCallButtonVisibility(){
+       if(onPictureMood){
+           returnToCallLayout.setVisibility(View.GONE);
+           callButton.setVisibility(View.GONE);
+       } else {
+           callButton.setVisibility(View.VISIBLE);
+       }
     }
 
     @Override
@@ -5333,6 +5443,8 @@ scNum = 20;
             {
                 pinOptionBox.setVisibility(View.GONE);
                 cancelChatOption();
+            } else if (audioOrVideoOptionConatiner.getVisibility() == View.VISIBLE){
+                audioOrVideoOptionConatiner.setVisibility(View.GONE);
             } else{
 
                 emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
@@ -5431,7 +5543,7 @@ scNum = 20;
             fileAttachOptionContainer.setVisibility(View.GONE);
             fileContainerAnim.setVisibility(View.GONE);
         } else if (run == 1) {
-            Intent callIntentActivity = new Intent(this, VideoCallComingOut.class);
+            Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
             callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(callIntentActivity);
         } else {
@@ -5479,6 +5591,8 @@ scNum = 20;
             if(permissionCheck.isRecordingOk(this)){
                 if(!makeCall){
                     answerCall();
+                } else {
+                    audioOrVideoOptionConatiner.setVisibility(View.VISIBLE);
                 }
 
             } else {
@@ -5513,7 +5627,35 @@ scNum = 20;
         super.onDestroy();
         clearGlideCache();
     }
-    
+
+    //  call listener
+    @Override
+    public void endCall() {
+        run = 0;   // restart to 0 so it can create new instead
+        activeOnCall = 0;
+        callButton.setVisibility(View.VISIBLE);
+        currentUserUidOnCall = null;
+        returnToCallLayout.setVisibility(View.GONE);
+        returnToCallWithDuration.setText(getString(R.string.returnToCall));
+
+        new Handler().postDelayed(()-> {
+            activeOnCall = 0;
+        }, 2000);
+    }
+
+    @Override
+    public void callConnected(String duration) {
+//        activeOnCall = 1;
+        String dur = goBackToCall + "   " + duration;
+
+        returnToCallWithDuration.setText(dur);
+    }
+
+    @Override
+    public void returnToCallLayoutVisibilty() {
+        returnToCallLayout.setVisibility(View.VISIBLE);
+    }
+
 
     //    File appSpecificFolder = new File(getExternalFilesDir(null), "MyFolder");
 //    if (!appSpecificFolder.exists()) {

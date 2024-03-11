@@ -6,7 +6,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pixel.chatapp.interface_listeners.DataModelType;
-import com.pixel.chatapp.model.DataModel;
+import com.pixel.chatapp.model.CallModel;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -53,7 +53,7 @@ public class WebRTCClient {
     DatabaseReference refCall;
 
     String otherUid, otherName, myId;
-//    DataModel dataModel = new DataModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.Offer);
+//    CallModel dataModel = new CallModel(otherUid, otherName, user.getUid(), myUserName, null, DataModelType.Offer);
 
     public WebRTCClient(Context context, PeerConnection.Observer observer, String otherUid, String otherName,
                         String myId, String username) {
@@ -160,10 +160,10 @@ public class WebRTCClient {
                             //its time to transfer this sdp to other peer
 //                            if (listener!=null){
 
-                                DataModel dataModel = new DataModel(targetUid, otherName, myId,
+                                CallModel callModel = new CallModel(targetUid, otherName, myId,
                                         username, sessionDescription.description, DataModelType.Offer, true);
 //                                listener.onTransferDataToOtherPeer();
-                                refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
+                                refCall.child(targetUid).child(myId).setValue(gson.toJson(callModel));
                                 
 //                                System.out.println("what is c " + sessionDescription.description);
 //                            }
@@ -186,17 +186,11 @@ public class WebRTCClient {
                         @Override
                         public void onSetSuccess() {
                             super.onSetSuccess();
-                            DataModel dataModel = new DataModel(targetUid, otherUid, myId, username,
+                            CallModel callModel = new CallModel(targetUid, otherUid, myId, username,
                                     sessionDescription.description, DataModelType.Answer, false);
 //                                listener.onTransferDataToOtherPeer();
-                            refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
+                            refCall.child(targetUid).child(myId).setValue(gson.toJson(callModel));
 
-                            //its time to transfer this sdp to other peer
-//                            if (listener!=null){
-//                                listener.onTransferDataToOtherPeer(new DataModel(targetUid, otherName, myId,
-//                                        username, sessionDescription.description, DataModelType.Answer));
-//
-//                            }
                         }
                     },sessionDescription);
                 }
@@ -216,8 +210,8 @@ public class WebRTCClient {
 
     public void sendIceCandidate(IceCandidate iceCandidate, String targetUid){
         addIceCandidate(iceCandidate);
-        DataModel dataModel = new DataModel(targetUid, otherName, myId, username,  gson.toJson(iceCandidate), DataModelType.IceCandidate, false);
-        refCall.child(targetUid).child(myId).setValue(gson.toJson(dataModel));
+        CallModel callModel = new CallModel(targetUid, otherName, myId, username,  gson.toJson(iceCandidate), DataModelType.IceCandidate, false);
+        refCall.child(targetUid).child(myId).setValue(gson.toJson(callModel));
     }
 
     public void switchCamera() {
@@ -243,7 +237,8 @@ public class WebRTCClient {
         }
     }
 
+
     public interface Listener {
-        void onTransferDataToOtherPeer(DataModel model);
+        void onTransferDataToOtherPeer(CallModel model);
     }
 }

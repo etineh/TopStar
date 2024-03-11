@@ -37,7 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.ZoomImage;
+import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;

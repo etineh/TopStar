@@ -26,17 +26,29 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
 
-<!--    <string name="multiple">Multiple</string>-->
+<!--    calls -->
+    <string name="videoCall">Video call from</string>
+    <string name="audioCall">Audio call from</string>
+    <string name="video_call">Video call</string>
+    <string name="audio_call">Audio call</string>
+    <string name="accept">Accept</string>
+    <string name="reject">Reject</string>
 
-    <string name="isCalling"> is calling</string>
     <string name="initialising">initialising</string>
     <string name="ringing">ringing…</string>
     <string name="busy">busy</string>
     <string name="pairing">pairing…</string>
     <string name="notAvailable">User not available</string>
     <string name="onAnotherCall">User on another call</string>
+    <string name="callEnd">Call end</string>
     <string name="notPicking">User not picking</string>
     <string name="userBusy">User busy</string>
+    <string name="returnToCall">Return back to call</string>
+    <string name="waitForUser">Waiting for other user to join</string>
+    <string name="anotherUserIsCalling">is trying to call you</string>
+    <string name="requestForVideoCall">is requesting for video call</string>
+    <string name="rejectVideoCall">reject video call</string>
+    <string name="switchToVideo">Switch to video call mood first</string>
 
 
     <string name="page">pages</string>

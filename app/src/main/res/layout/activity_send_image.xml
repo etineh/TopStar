@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SendImageActivity">
+    tools:context=".photos.SendImageActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayerConstraint"
@@ -307,7 +307,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.pixel.chatapp.activities.CustomViewPager
+    <com.pixel.chatapp.photos.CustomViewPager
         android:id="@+id/viewPagerP"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -318,9 +318,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-    </com.pixel.chatapp.activities.CustomViewPager>
+    </com.pixel.chatapp.photos.CustomViewPager>
 
-    <com.pixel.chatapp.activities.ColorSeekBar
+    <com.pixel.chatapp.photos.ColorSeekBar
         android:id="@+id/seek_bar_color"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

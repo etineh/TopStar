@@ -9,13 +9,13 @@
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="$USER_HOME$/.android/avd/Pixel_3a_Edited_API_34.avd" />
+                  <type value="SERIAL_NUMBER" />
+                  <value value="RZ8W208E5SR" />
                 </Key>
               </deviceKey>
             </Target>
           </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-03-08T16:01:16.701988Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-03-11T16:35:27.973870Z" />
         </State>
       </entry>
       <entry key="ProfileActivity">

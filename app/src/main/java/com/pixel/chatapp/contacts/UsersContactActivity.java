@@ -6,6 +6,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 
@@ -64,9 +65,9 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
         database = FirebaseDatabase.getInstance();
         refUsers = database.getReference();
 
-        imageViewBack.setOnClickListener(view -> finish());
+        imageViewBack.setOnClickListener(view -> onBackPressed());
 
-        fragmentListener = (FragmentListener) mainActivity.getMainActivityContext();
+        fragmentListener = mainActivity.getMainActivityContext();
 
         adapter = new UsersAdapter(list, UsersContactActivity.this);
         adapter.setListener(fragmentListener);
@@ -82,6 +83,9 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
     @Override
     public void onBackButtonClicked() {
         // Close the activity
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(mainActivityIntent);
         finish();
     }
 
@@ -120,6 +124,11 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        onBackButtonClicked();
+    }
 }
 
 

@@ -53,8 +53,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.VideoCallComeIn;
-import com.pixel.chatapp.VideoCallComingOut;
+import com.pixel.chatapp.calls.ViewCallRequest;
+import com.pixel.chatapp.calls.CallCenterActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.squareup.picasso.Picasso;
 
@@ -281,7 +281,7 @@ public class MessageActivity extends AppCompatActivity {
 
         // video call
         imageViewCalls.setOnClickListener(view -> {
-            Intent intent = new Intent(MessageActivity.this, VideoCallComingOut.class);
+            Intent intent = new Intent(MessageActivity.this, CallCenterActivity.class);
             intent.putExtra("uid", uID);
             intent.putExtra("imageUri", imageUrl);
             intent.putExtra("otherName", otherName);
@@ -440,7 +440,7 @@ public class MessageActivity extends AppCompatActivity {
                             refChecks.child(uID).child(user.getUid()).child("vCall").setValue("off");
                         } else {
                             if(snapshot.getValue().equals("on")){
-                                Intent intent = new Intent(MessageActivity.this, VideoCallComeIn.class);
+                                Intent intent = new Intent(MessageActivity.this, ViewCallRequest.class);
                                 intent.putExtra("otherUid", uID);
                                 intent.putExtra("imageUri", imageUrl);
                                 startActivity(intent);

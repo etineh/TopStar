@@ -19,4 +19,7 @@
     <color name="transparent_orangeLow">#33FFA500</color> <!-- 80% transparent -->
     <color name="whiteTransparent">#80FFFFFF</color>
 
+    <color name="green">#00FF00</color> <!-- This is a bright green color -->
+    <color name="red">#FF0000</color> <!-- This is a bright red color -->
+
 </resources>

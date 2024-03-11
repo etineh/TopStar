@@ -7,9 +7,8 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.Toast;
 
-import com.pixel.chatapp.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.home.MainActivity;
 
 public class AppLifecycleHandler implements Application.ActivityLifecycleCallbacks {

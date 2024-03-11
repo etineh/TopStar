@@ -1,22 +1,11 @@
-package com.pixel.chatapp.activities;
-
-import static com.pixel.chatapp.interface_listeners.DataModelType.Offer;
+package com.pixel.chatapp.calls;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.interface_listeners.ErrorCallBack;
 import com.pixel.chatapp.interface_listeners.NewEventCallBack;
-import com.pixel.chatapp.interface_listeners.SuccessCallBack;
-import com.pixel.chatapp.model.DataModel;
+import com.pixel.chatapp.model.CallModel;
 import com.pixel.chatapp.webrtc.MyPeerConnectionObserver;
 import com.pixel.chatapp.webrtc.WebRTCClient;
 
@@ -25,8 +14,6 @@ import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceViewRenderer;
-
-import java.util.Objects;
 
 public class MainRepository implements WebRTCClient.Listener {
 
@@ -135,7 +122,7 @@ public class MainRepository implements WebRTCClient.Listener {
 
 //    public void sendCallRequest(String target, ErrorCallBack errorCallBack){
 //        firebaseClient.sendMessageToOtherUser(
-//                new DataModel(target,currentUsername,null, DataModelType.StartCall),errorCallBack
+//                new CallModel(target,currentUsername,null, DataModelType.StartCall),errorCallBack
 //        );
 //    }
 
@@ -172,7 +159,10 @@ public class MainRepository implements WebRTCClient.Listener {
                             e.printStackTrace();
                         }
                     break;
-                case StartCall:
+                case AudioCall:
+                case VideoCall:
+                case AcceptVideo:
+                case RejectVideo:
                 case None:
 //                    this.target = model.getSenderUid();
                     callBack.onNewEventReceived(model);
@@ -183,7 +173,7 @@ public class MainRepository implements WebRTCClient.Listener {
     }
 
     @Override
-    public void onTransferDataToOtherPeer(DataModel model) {
+    public void onTransferDataToOtherPeer(CallModel model) {
 //        firebaseClient.sendMessageToOtherUser(model,()->{});
     }
 

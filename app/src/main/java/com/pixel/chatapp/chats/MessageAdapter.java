@@ -66,7 +66,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.pixel.chatapp.activities.ViewImageActivity;
+import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;

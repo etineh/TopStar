@@ -1,4 +1,4 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.photos;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.chrisbanes.photoview.PhotoView;
+import com.pixel.chatapp.R;
 import com.squareup.picasso.Picasso;
 
 public class ZoomImage extends AppCompatActivity {

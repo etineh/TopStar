@@ -20,7 +20,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.activities.CameraActivity;
+import com.pixel.chatapp.photos.CameraActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.model.MessageModel;
 

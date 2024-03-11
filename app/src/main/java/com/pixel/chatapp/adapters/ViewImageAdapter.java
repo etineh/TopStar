@@ -20,7 +20,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.OtherMethods;
 import com.pixel.chatapp.interface_listeners.ImageListener;

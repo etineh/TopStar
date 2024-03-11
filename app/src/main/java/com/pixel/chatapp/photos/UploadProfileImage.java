@@ -1,4 +1,4 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.photos;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.R;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;

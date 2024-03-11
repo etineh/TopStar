@@ -167,6 +167,11 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="TextAndBackground">
+        <item name="android:background">@color/orange</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <!--    drawable tint and background-->
     <style name="roundBackgroundAndTint">
         <item name="android:background">@drawable/msg_count</item>

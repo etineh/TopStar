@@ -1,4 +1,4 @@
-package com.pixel.chatapp.activities;
+package com.pixel.chatapp.photos;
 
 import android.content.Context;
 import android.util.AttributeSet;
