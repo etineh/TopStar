@@ -1,4 +1,4 @@
-package com.pixel.chatapp.webrtc;
+package com.pixel.chatapp.calls.webrtc;
 
 import org.webrtc.DataChannel;
 import org.webrtc.IceCandidate;

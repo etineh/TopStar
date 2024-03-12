@@ -26,7 +26,7 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
 
-<!--    calls -->
+    <!--    calls -->
     <string name="videoCall">Video call from</string>
     <string name="audioCall">Audio call from</string>
     <string name="video_call">Video call</string>
@@ -64,7 +64,7 @@
     <string name="empty">Can not send empty file 🙌</string>
     <string name="notFound">file not found…</string>
     <string name="dCancel">Download cancel</string>
-<!--    <string name="corrupt">File corrupt or poor network</string>-->
+    <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>
     <string name="permissionCall">Go to setting and grant camera | record permission</string>
 

@@ -53,8 +53,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.calls.ViewCallRequest;
 import com.pixel.chatapp.calls.CallCenterActivity;
+import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.model.MessageModel;
 import com.squareup.picasso.Picasso;
 
@@ -440,7 +440,7 @@ public class MessageActivity extends AppCompatActivity {
                             refChecks.child(uID).child(user.getUid()).child("vCall").setValue("off");
                         } else {
                             if(snapshot.getValue().equals("on")){
-                                Intent intent = new Intent(MessageActivity.this, ViewCallRequest.class);
+                                Intent intent = new Intent(MessageActivity.this, CallPickUpCenter.class);
                                 intent.putExtra("otherUid", uID);
                                 intent.putExtra("imageUri", imageUrl);
                                 startActivity(intent);

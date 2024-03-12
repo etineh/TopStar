@@ -1,4 +1,4 @@
-package com.pixel.chatapp.webrtc;
+package com.pixel.chatapp.calls.webrtc;
 
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;

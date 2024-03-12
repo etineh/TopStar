@@ -93,6 +93,8 @@ import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.calls.CallPickUpCenter;
+import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
 import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.calls.CallCenterActivity;
@@ -141,7 +143,7 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity implements FragmentListener, CallCenterActivity.CallLister {
+public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext {
 
     private static TabLayout tabLayoutGeneral;
     private static ViewPager2 viewPager2General;
@@ -374,8 +376,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static Handler handlerOnAnotherCall;
     public static Runnable runnableOnAnotherCall;
-    public static Handler handlerOnAnotherCall2;
-    public static Runnable runnableOnAnotherCall2;
 
     public static CallsListener callsListener;
 
@@ -634,7 +634,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // video and audio calls
         handlerOnAnotherCall = new Handler();
 
-        CallCenterActivity.callLister = this;
+        CallCenterActivity.callListenerNext = this;
+        CallPickUpCenter.callListenerNext = this;
 
         goBackToCall = getString(R.string.returnToCall);
         mainRepository = MainRepository.getInstance();
@@ -817,6 +818,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             returnToCallLayout.setOnClickListener(v -> {
                 makeCall(null);
+            });
+
+            // open the call in view call center
+            incomingCallLayout.setOnClickListener(v -> {
+                if(callModel != null){
+                    Intent intent = new Intent(this, CallPickUpCenter.class);
+                    intent.putExtra("otherUid", callModel.getSenderUid());
+                    intent.putExtra("myId", myId);
+                    intent.putExtra("otherName", callModel.getSenderName());
+                    intent.putExtra("myUsername", myUserName);
+                    intent.putExtra("answerCall", true);
+                    intent.putExtra("callType", callType_);
+                    startActivity(intent);
+                }
             });
 
             //  ==================      side bar menu option     ===========================
@@ -1894,15 +1909,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     private void rejectCall() {
-        CallModel data = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
-        refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(data));
-        CallModel callModel = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
-        refCalls.child(currentUserUidOnCall).child(myId).setValue(gson.toJson(callModel));
-        incomingCallLayout.setVisibility(View.GONE);
-        callUtils.stopRingtone();   // stop the ringtone
+        busyCall();
+    }
+
+    public void stopRingTone(){
         callUtils.stopVibration();
-        endCall();
-        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+        callUtils.stopRingtone();   // stop the ringtone
     }
 
     private void answerCall() {
@@ -1915,8 +1927,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             intent.putExtra("answerCall", true);
             intent.putExtra("callType", callType_);
 
-            callUtils.stopRingtone();
-            callUtils.stopVibration();
+            stopRingTone();
+
             startActivity(intent);
             new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
             returnToCallWithDuration.setText(getString(R.string.returnToCall));
@@ -2157,9 +2169,30 @@ scNum = 20;
         mContext = mContext_;
 
         // only alert me if I am not on another call    -- work on this later
+        incomingCallObserver(otherUID);
+
+        // delay for 3 secs to allow user chatList to load users first
+        new Handler().postDelayed(()-> {
+
+            retrieveMessages(userName, otherUID, mContext_);
+
+            // get pinMessage once
+//            getPinChats(otherUID);
+//            getDeletePinId(otherUID);
+//            getEmojiReact(otherUID);
+//            getReadChatResponse(otherUID);
+
+
+
+        }, 3000);
+
+    }
+
+    // only alert me if I am not on another call    -- work on this later
+    public void incomingCallObserver(String otherUID){
         mainRepository.subscribeForLatestEvent(otherUID, (data)->{
             if (data.getType().equals(DataModelType.AudioCall) || data.getType().equals(DataModelType.VideoCall)
-            || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
+                    || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
             {
                 activeOnCall+=1;
                 runOnUiThread(()->{
@@ -2185,6 +2218,10 @@ scNum = 20;
                             } else if (data.getType().equals(DataModelType.RejectVideo))
                             {
                                 callsListener.getRejectVideoCallResp(data);
+                                // change mine "type" to "recall" so user can still recall
+                                CallModel callModel1 = new CallModel(currentUserUidOnCall, otherUserName,
+                                        user.getUid(), myUserName,null, DataModelType.RecallCall, false);
+                                refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(callModel1));
 
                             } else if (data.getType().equals(DataModelType.AcceptVideo))
                             {
@@ -2213,37 +2250,23 @@ scNum = 20;
             {
                 runOnUiThread(()->{
                     incomingCallLayout.setVisibility(View.GONE);
-                    callUtils.stopVibration();
-                    callUtils.stopRingtone();
+                    stopRingTone();
                     handlerVibrate.removeCallbacks(CallCenterActivity.runnableVibrate);
                     handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
                     activeOnCall = 0;
                 });
 
+                // to enable viewCallerActivity to end or finish when other user end call
+                callsListener.myUserEndCall();
             }
+
         });
-
-        // delay for 3 secs to allow user chatList to load users first
-        new Handler().postDelayed(()-> {
-
-            retrieveMessages(userName, otherUID, mContext_);
-
-            // get pinMessage once
-//            getPinChats(otherUID);
-//            getDeletePinId(otherUID);
-//            getEmojiReact(otherUID);
-//            getReadChatResponse(otherUID);
-
-
-
-        }, 3000);
 
     }
 
     private void iHaveACall(CallModel callData){
         this.callModel = callData;
-        callUtils.stopVibration();
-        callUtils.stopRingtone();
+        stopRingTone();
 
         incomingCallLayout.setVisibility(View.VISIBLE);
         currentUserUidOnCall = callData.getSenderUid();
@@ -5635,8 +5658,10 @@ scNum = 20;
         activeOnCall = 0;
         callButton.setVisibility(View.VISIBLE);
         currentUserUidOnCall = null;
+        callModel = null;
         returnToCallLayout.setVisibility(View.GONE);
         returnToCallWithDuration.setText(getString(R.string.returnToCall));
+        incomingCallLayout.setVisibility(View.GONE);
 
         new Handler().postDelayed(()-> {
             activeOnCall = 0;
@@ -5645,7 +5670,6 @@ scNum = 20;
 
     @Override
     public void callConnected(String duration) {
-//        activeOnCall = 1;
         String dur = goBackToCall + "   " + duration;
 
         returnToCallWithDuration.setText(dur);
@@ -5654,6 +5678,28 @@ scNum = 20;
     @Override
     public void returnToCallLayoutVisibilty() {
         returnToCallLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void isConnecting(String return_duration) {
+        incomingCallLayout.setVisibility(View.GONE);
+        returnToCallLayout.setVisibility(View.VISIBLE);
+        returnToCallWithDuration.setText(getString(R.string.returnToCall));
+        activeOnCall = 1;
+        goBackToCall = getString(R.string.returnToCall);
+        run = 1;    // to make the call activity to open instead of recreating new instance
+        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+    }
+
+    @Override
+    public void busyCall() {
+        CallModel data = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
+        refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(data));
+        CallModel callModel = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);
+        refCalls.child(currentUserUidOnCall).child(myId).setValue(gson.toJson(callModel));
+
+        stopRingTone();
+        endCall();
     }
 
 

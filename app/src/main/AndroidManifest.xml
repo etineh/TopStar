@@ -23,6 +23,14 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".FirebaseOffline"
@@ -37,12 +45,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp"
         tools:targetApi="31">
-
+        <activity
+            android:name=".calls.CallPickUpCenter"
+            android:exported="false" />
         <activity
             android:name=".photos.CameraActivity"
-            android:exported="false" />
-
-        <!--        this is enable file to be send from my app storage to other app or open uri on default phone viewer-->
+            android:exported="false" /> <!-- this is enable file to be send from my app storage to other app or open uri on default phone viewer -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.pixel.chatapp.fileprovider"
@@ -89,7 +97,6 @@
                 <data android:mimeType="application/vnd.android.package-archive" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".photos.ViewImageActivity"
             android:exported="false" />
@@ -116,8 +123,8 @@
         <activity
             android:name=".calls.CallCenterActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:supportsPictureInPicture="true"
-            android:exported="false" />
+            android:exported="false"
+            android:supportsPictureInPicture="true" />
         <activity
             android:name=".calls.ViewCallRequest"
             android:exported="false"
@@ -155,15 +162,5 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
-
-    <uses-permission android:name="android.permission.VIBRATE" />
 
 </manifest>

@@ -18,6 +18,9 @@ import android.util.DisplayMetrics;
 import android.util.Rational;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,9 +35,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.all_utils.AnimUtils;
 import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
 import com.pixel.chatapp.interface_listeners.DataModelType;
 import com.pixel.chatapp.model.CallModel;
@@ -73,7 +78,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
     public static Runnable runnableVibrate;
 
     private static TextView whoIsRequestingForVideoCall;
-    private static ImageView acceptVideoRequest_IV, rejectVideoRequest_IV;
+    private static ImageView acceptVideoRequest_IV, rejectVideoRequest_IV, videoIcon;
     private static TextView acceptTV, rejectTV;
 
     private static ConstraintLayout topContainer;
@@ -107,8 +112,10 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
     private Runnable delayedEndCallRunnable;
     private Handler handlerDelayEndCall;
 
-    public static CallLister callLister;
+    public static CallListenerNext callListenerNext;
 
+    Runnable runnableAnim;
+    Handler handlerAnim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +143,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         whoIsRequestingForVideoCall = videoRequestLayout.findViewById(R.id.whoIsRequestingVideoCall_TV);
         acceptTV = videoRequestLayout.findViewById(R.id.acceptTV);
         rejectTV = videoRequestLayout.findViewById(R.id.rejectTV);
+        videoIcon = videoRequestLayout.findViewById(R.id.videoOrAudioIcon);
 
         remoteViewContainer = findViewById(R.id.remoteViewContainer);
         localViewContainer = findViewById(R.id.localViewContainer);
@@ -197,6 +205,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 ////            answerCallOrSendCallRequest(DataModelType.VideoCall);
 //        });
 
+        System.out.println("what is " + myId+otherUid+otherName+myUserName+callType+answerCall);
         new Handler().postDelayed(() -> {
             if(!videoCall){  // set it on loud speaker by default
                 setSpeakerphoneOn(true);
@@ -204,8 +213,6 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
                 setSpeakerphoneOn(false);
             }
         }, 2000);
-
-//        Toast.makeText(this, "How are you", Toast.LENGTH_SHORT).show();
 
         tvName.setText(otherName);
 
@@ -223,6 +230,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 
         if(callType != null) {
             if(callType.equals("audio")){
+
                 switch_camera_button.setVisibility(View.GONE);
 
                 mainRepository.toggleVideo(false);  // off camera
@@ -252,6 +260,8 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             audioBackground.setVisibility(View.GONE);
             switch_camera_button.setVisibility(View.VISIBLE);
 
+            handlerAnim.removeCallbacks(runnableAnim);
+
             mainRepository.toggleVideo(true);  // turn on camera!
             isCameraMuted= false;
 
@@ -278,12 +288,21 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             audioBackground.setVisibility(View.VISIBLE);
             switch_camera_button.setVisibility(View.GONE);
 
+            handlerAnim.removeCallbacks(runnableAnim);
+
             mainRepository.toggleVideo(false);  // off camera
             isCameraMuted= true;
 
             sendSignalToTheTargetUser(DataModelType.RejectVideo);
+
             handlerVibrate.removeCallbacks(runnableVibrate);
             MainActivity.goBackToCall = getString(R.string.returnToCall);
+
+            //  make my type "none" so I can recall again
+            CallModel callModel1 = new CallModel(otherUid, otherName, user.getUid(), myUserName,
+                    null, DataModelType.RecallCall, false);
+            refCall.child(myId).child(otherUid).setValue(gson.toJson(callModel1));
+
         };
         rejectTV.setOnClickListener(rejectVideo);
         rejectVideoRequest_IV.setOnClickListener(rejectVideo);
@@ -319,7 +338,8 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         // mute and un-mute video   | request for video call
         video_button.setOnClickListener(v->{
 
-            if(callType.equals("audio") && isConnected){
+            if(callType.equals("audio") && isConnected)
+            {
                 // send request to other user (the target user)
                 sendSignalToTheTargetUser(DataModelType.VideoCall);
 
@@ -330,15 +350,19 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
                 acceptTV.setVisibility(View.GONE);
                 rejectTV.setVisibility(View.GONE);
 
+                handlerAnim.postDelayed(runnableAnim, 1000);
+
                 isOnVideo = false;
-            } else if (callType.equals("video")) {
+
+            } else if (callType.equals("video"))
+            {
 
                 if (isCameraMuted){ // Turn on video camera
                     video_button.setImageResource(R.drawable.baseline_video_call_24);
                     sendSignalToTheTargetUser(DataModelType.VideoCall);
                     isOnVideo = true;
                 }else { // Turn off video camera
-                    video_button.setImageResource(R.drawable.baseline_video_library_24);
+                    video_button.setImageResource(R.drawable.baseline_videocam_off_24);
                     sendSignalToTheTargetUser(DataModelType.AudioCall);
                     isOnVideo = false;
 
@@ -359,7 +383,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             if (isMicrophoneMuted){
                 mic_button.setImageResource(R.drawable.baseline_mic_24);
             }else {
-                mic_button.setImageResource(R.drawable.baseline_motion_photos_off_view_24);
+                mic_button.setImageResource(R.drawable.baseline_mic_off_24);
             }
             mainRepository.toggleAudio(isMicrophoneMuted);
             isMicrophoneMuted=!isMicrophoneMuted;
@@ -398,6 +422,12 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             observeWhenAnyoneEndCall(myId, otherUid);
         }, 3000);
 
+        handlerAnim = new Handler();
+        runnableAnim = () -> {
+            videoIcon.startAnimation(AnimUtils.makeTransition());
+            handlerAnim.postDelayed(runnableAnim, 1000);
+        };
+
     }
 
 
@@ -427,7 +457,6 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         //  send the signal to other user
         CallModel callModel1 = new CallModel(otherUid, otherName, user.getUid(), myUserName, null, type, false);
         refCall.child(otherUid).child(myId).setValue(gson.toJson(callModel1));
-
     }
 
     // listening to other user
@@ -501,7 +530,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         } else {
             durationTV.setVisibility(View.GONE);
         }
-        callLister.callConnected(timeText);
+        callListenerNext.callConnected(timeText);
     }
 
     private void callEnd(Boolean onAnotherCall){
@@ -517,10 +546,12 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         refCall.child(myId).child(otherUid).setValue(gson.toJson(callModel));
 
         mainRepository.endCall();   // close all camera settings
-
-        callLister.endCall();
+        callListenerNext.endCall();
 
         handlerRinging.removeCallbacks(runnableRinging);
+
+        // Stop the animation
+        handlerAnim.removeCallbacks(runnableAnim);
 
         if(updateTimeRunnable != null){
             handlerDuration.removeCallbacks(updateTimeRunnable);
@@ -771,7 +802,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         super.onResume();
         handlerDelayEndCall.removeCallbacks(delayedEndCallRunnable);
         onBackPress = false;
-        if(isConnected) callLister.returnToCallLayoutVisibilty();
+        if(isConnected) callListenerNext.returnToCallLayoutVisibilty();
     }
 
 
@@ -837,10 +868,8 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
     public void isConnecting() {
         runOnUiThread(()->{
 
-            MainActivity.activeOnCall = 1;
-            MainActivity.goBackToCall = getString(R.string.returnToCall);
-
-            callLister.callConnected(getString(R.string.returnToCall));
+            callListenerNext.isConnecting(getString(R.string.returnToCall));
+            
             isConnected = true;
             callUtils.stopRingingIndicator();
             connectionStatus = getString(R.string.pairing);
@@ -882,6 +911,8 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         };
 
         handlerVibrate.postDelayed(runnableVibrate, 1000);
+
+        handlerAnim.postDelayed(runnableAnim, 1000);
     }
 
     @Override
@@ -901,6 +932,9 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         imageView.setVisibility(View.GONE);
         handlerVibrate.removeCallbacks(CallCenterActivity.runnableVibrate);
 
+        // Stop the animation
+        handlerAnim.removeCallbacks(runnableAnim);
+
         callType = "video";
         isOnVideo = true;
         isOtherUserCameraOn = true;
@@ -912,6 +946,9 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         String reject = callModel.getSenderName() + " " + getString(R.string.rejectVideoCall);
         Toast.makeText(this, reject, Toast.LENGTH_SHORT).show();
         videoRequestLayout.setVisibility(View.GONE);
+
+        // Stop the animation
+        handlerAnim.removeCallbacks(runnableAnim);
     }
 
     @Override
@@ -925,11 +962,11 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         isOnVideo = false;
     }
 
-    public interface CallLister{
-        void endCall();
-        void callConnected(String return_duration);
-        void returnToCallLayoutVisibilty();
+    @Override
+    public void myUserEndCall() {
+
     }
+
 
 }
 

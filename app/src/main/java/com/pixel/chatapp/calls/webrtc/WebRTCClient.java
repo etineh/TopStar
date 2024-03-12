@@ -1,4 +1,4 @@
-package com.pixel.chatapp.webrtc;
+package com.pixel.chatapp.calls.webrtc;
 
 import android.content.Context;
 

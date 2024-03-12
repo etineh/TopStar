@@ -8,5 +8,7 @@ public interface CallsListener {
     void acceptVideoCall();
     void getRejectVideoCallResp(CallModel callModel);
     void myUserOffCamera();
+    void myUserEndCall();
+
 
 }
