@@ -74,16 +74,13 @@ public class LoginActivity extends AppCompatActivity {
         // -----------------------  methods  ---------------------
     // sign in method
     public void signIn(String userEmail, String userPassword){
-        auth.signInWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()){
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    Toast.makeText(LoginActivity.this, "Login Successfully", Toast.LENGTH_SHORT).show();
-
-                } else{
-                    Toast.makeText(LoginActivity.this, "Error Occur! Check details.", Toast.LENGTH_SHORT).show();
-                }
+        auth.signInWithEmailAndPassword(userEmail, userPassword)
+                .addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                Toast.makeText(LoginActivity.this, "Login Successfully", Toast.LENGTH_SHORT).show();
+            } else{
+                Toast.makeText(LoginActivity.this, "Error Occur! Check details.", Toast.LENGTH_SHORT).show();
             }
         });
     }

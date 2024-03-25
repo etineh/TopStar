@@ -23,6 +23,11 @@
         layout="@layout/inc_call_option"
         android:visibility="gone" />
 
+    <include
+        android:id="@+id/networkCheckLayout"
+        layout="@layout/inc_network_check"
+        android:visibility="gone" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sideBarMenuContainer"
         android:layout_width="match_parent"
@@ -40,7 +45,7 @@
             style="@style/BackgroundW_B"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginEnd="100dp"
+            android:layout_marginEnd="80dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -181,12 +186,12 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardViewProfile"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:id="@+id/cardViewDashboard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -201,7 +206,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:background="@drawable/msg_count"
                             android:padding="5dp"
                             android:src="@drawable/baseline_space_dashboard_24"
@@ -217,20 +222,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="4dp"
-                            android:text="Dashboard"
+                            android:text="@string/dashboard"
                             android:textSize="16sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
                             android:id="@+id/textView20"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
-                            android:lines="1"
-                            android:text="Account ~ Balance ~ Rank ~ Withdraw..."
-                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:paddingBottom="5dp"
+                            android:text="@string/dashboardSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -238,15 +246,15 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewSettings"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/cardViewProfile">
+                    app:layout_constraintTop_toBottomOf="@+id/cardViewDashboard">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         style="@style/userCard"
@@ -257,7 +265,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:background="@drawable/msg_count"
                             android:padding="3dp"
                             android:src="@drawable/baseline_settings_24"
@@ -273,20 +281,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="4dp"
-                            android:text="Settings"
+                            android:text="@string/setting"
                             android:textSize="16sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
                             android:id="@+id/textView19"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Privacy ~ Profile ~ Sounds ~ Games..."
-                            android:textSize="12sp"
+                            android:paddingBottom="5dp"
+                            android:text="@string/settingSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
@@ -355,11 +366,11 @@
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewPremium"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="15dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -374,7 +385,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:padding="1dp"
                             android:src="@drawable/verified"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -389,20 +400,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="4dp"
-                            android:text="Premium"
+                            android:text="@string/premium"
                             android:textSize="16sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
                             android:id="@+id/textView18"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Orange Tick ~ Access high features..."
-                            android:textSize="12sp"
+                            android:paddingBottom="5dp"
+                            android:text="@string/premiumSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -413,9 +427,9 @@
                     android:id="@+id/cardAdvert"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -430,7 +444,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:background="@drawable/msg_count"
                             android:padding="5dp"
                             android:src="@drawable/baseline_business_24"
@@ -446,20 +460,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="4dp"
-                            android:text="Advertise"
+                            android:text="@string/advertise"
                             android:textSize="16sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
                             android:id="@+id/textView18"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Run ads and reach more people..."
-                            android:textSize="12sp"
+                            android:paddingBottom="5dp"
+                            android:text="@string/advertiseSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -470,9 +487,9 @@
                     android:id="@+id/cardViewInvite2"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -487,7 +504,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:background="@drawable/msg_count"
                             android:padding="5dp"
                             android:src="@drawable/add_contact"
@@ -510,13 +527,16 @@
 
                         <TextView
                             android:id="@+id/textView10"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Refer friends and earn cash bonus..."
-                            android:textSize="12sp"
+                            android:paddingBottom="5dp"
+                            android:text="@string/advertiseSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -527,9 +547,9 @@
                     android:id="@+id/cardViewCustomerCare"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     app:cardCornerRadius="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -544,7 +564,7 @@
                             android:id="@+id/circleI"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="5dp"
                             android:background="@drawable/msg_count"
                             android:padding="3dp"
                             android:src="@drawable/customer_care"
@@ -560,20 +580,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="4dp"
-                            android:text="Support"
+                            android:text="@string/support"
                             android:textSize="16sp"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
                             android:id="@+id/textView11"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Live chat ~ Community ~ Contacts..."
-                            android:textSize="12sp"
+                            android:paddingBottom="5dp"
+                            android:text="@string/supportSub"
+                            android:textSize="11sp"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@+id/circleI"
                             app:layout_constraintTop_toBottomOf="@+id/textView4" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -701,41 +724,6 @@
             android:layout_height="match_parent">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constrNetCheck"
-        style="@style/cardTop"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/trans"
-        android:elevation="8dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ProgressBar
-            android:id="@+id/progressConnect"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_marginEnd="5dp"
-            android:elevation="8dp"
-            android:indeterminateTint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/connectTV"
-            app:layout_constraintEnd_toStartOf="@+id/connectTV"
-            app:layout_constraintTop_toTopOf="@+id/connectTV" />
-
-        <TextView
-            android:id="@+id/connectTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="8dp"
-            android:text="@string/connect"
-            android:textColor="@color/white"
-            android:textSize="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

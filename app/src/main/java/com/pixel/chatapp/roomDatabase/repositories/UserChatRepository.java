@@ -190,6 +190,12 @@ public class UserChatRepository {
     public List<UserOnChatUI_Model> getUsers(){
         return userChatDao.getEachUser();
     }
+
+    // get all the chats of each user
+//    public List<MessageModel> getEachUserChats_(String userUID){
+//        return userChatDao.getEachUserChat_(userUID);
+//    }
+
 }
 
 

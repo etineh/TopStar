@@ -59,7 +59,8 @@ public class FileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur DM3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error Occur FileUtil 62: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            System.out.println("Error Occur FileUtil 62: " + imageUri + " show error: " + e.getMessage());
         }
         return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
@@ -101,7 +102,8 @@ public class FileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur DM3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error Occur FileUtil 105: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            System.out.println("Error Occur FileUtil 106: " + imageUri + " show error: " + e.getMessage());
         }
         return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
@@ -124,7 +126,8 @@ public class FileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur DM3200: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error Occur FileUtil 129: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            System.out.println("Error Occur FileUtil 129: " + imageUri + " show error: " + e.getMessage());
         }
         return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
@@ -206,7 +209,8 @@ public class FileUtils {
     }
 
 
-    //  copy the file from phone storage ("content/com.provider" or "content://com.android") to app storage ("/storage/emulated/0"). This is to enable user share the file to other app
+    //  copy the file from phone storage ("content/com.provider" or "content://com.android") to app storage ("/storage/emulated/0").
+    //  This is to enable user share the file to other app
     public static String saveFileFromContentUriToAppStorage(Uri uriFile, Context context) {
         // Get the content resolver
         ContentResolver contentResolver = context.getContentResolver();

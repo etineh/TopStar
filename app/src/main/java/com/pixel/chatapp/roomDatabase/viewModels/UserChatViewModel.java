@@ -101,6 +101,10 @@ public class UserChatViewModel extends AndroidViewModel {
         return repository.getEachUserChats(id);
     }
 
+    // get the chats of each user
+//    public List<MessageModel> getEachUserChat_(String userUid){
+//        return repository.getEachUserChats_(userUid);
+//    }
 }
 
 

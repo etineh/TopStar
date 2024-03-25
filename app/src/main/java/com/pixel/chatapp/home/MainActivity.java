@@ -78,10 +78,13 @@ import com.bumptech.glide.Glide;
 import com.devlomi.record_view.OnRecordListener;
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -93,6 +96,7 @@ import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.api.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
@@ -142,6 +146,11 @@ import java.util.Map;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext {
 
@@ -246,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static MessageModel messageModel;
     private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks, refUsers,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign,
-            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls;
+            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls, refWallet;
 
     private ValueEventListener chatReadListener; // Declare the listener as a class variable
 
@@ -379,6 +388,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static CallsListener callsListener;
 
+    String newToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -526,7 +536,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         replyVisible = findViewById(R.id.textReplying9);
 
         // scroll position and network ids
-        constrNetConnect = findViewById(R.id.constrNetCheck);
+        constrNetConnect = findViewById(R.id.networkCheckLayout);
         scrollPositionIV = findViewById(R.id.scrollToPositionIV);
         scrollCountTV = findViewById(R.id.scrollCountTV);
         receiveIndicator = findViewById(R.id.receiveIndicatorTV);
@@ -597,6 +607,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         refOnReadRequest = FirebaseDatabase.getInstance().getReference("OnReadRequest");
         refChatIsRead = FirebaseDatabase.getInstance().getReference("ChatIsRead");
         refCalls = FirebaseDatabase.getInstance().getReference("Calls");
+        refWallet = FirebaseDatabase.getInstance().getReference("WalletClient");
 
         chatViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication())
         // initialise room database
@@ -717,16 +728,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                         switch (position){
                             case 0:
-                                tab.setText("Chats");
+                                tab.setText(getString(R.string.alert));
                                 break;
                             case 1:
-                                tab.setText("Players");
+                                tab.setText(getString(R.string.players));
                                 break;
                             case 2:
-                                tab.setText("Team");
+                                tab.setText(getString(R.string.team));
                                 break;
                             case 3:
-                                tab.setText("Tour 🏆");
+                                tab.setText(getString(R.string.tour) + " 🏆");
                                 break;
                         }
                     });
@@ -834,10 +845,54 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
             });
 
+            Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8080/")
+                    .addConverterFactory(GsonConverterFactory.create()).build();
+
+
+            WalletListener walletListener = retrofit.create(WalletListener.class);
+
             //  ==================      side bar menu option     ===========================
 
             sideBarMenuOpen.setOnClickListener(view -> {    // open the side bar menu option
                 sideBarMenuContainer.setVisibility(View.VISIBLE);
+
+
+//                walletListener.getName().enqueue(new Callback<List<String>>() {
+//                    @Override
+//                    public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+//                        if (response.isSuccessful()) {
+//                            List<String> names = response.body();
+//                            if (names != null && !names.isEmpty()) {
+//                                String firstName = names.get(0); // Assuming the first name is at index 0
+//                                System.out.println("First name: " + names);
+//                            } else {
+//                                System.out.println("No names returned");
+//                            }
+//                        } else {
+//                            System.out.println("Failed to get names. Response code: " + response.code());
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<List<String>> call, Throwable t) {   // when the server is down
+//                        System.out.println("Failed to get names. Error: " + t.getMessage());
+//                    }
+//                });
+
+                // Generate a new authentication token (e.g., ID token) using Firebase Authentication
+                FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
+                        .addOnSuccessListener(result -> {
+                            // New authentication token obtained successfully
+                            newToken = result.getToken();
+
+                        })
+                        .addOnFailureListener(e -> {
+                            // Handle token generation failure
+                            System.out.println("what is token : fail to gen");
+
+                        });
+
+
             });
 
             // open menu option via logo too
@@ -846,6 +901,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // close the side bar menu option
             sideBarMenuClose.setOnClickListener(view -> {
                 sideBarMenuContainer.setVisibility(View.GONE);
+
+                System.out.println("what is token : " + newToken);
+//                FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+
             });
             sideBarMenuContainer.setOnClickListener(view -> {
                 sideBarMenuContainer.setVisibility(View.GONE);
@@ -2177,10 +2236,10 @@ scNum = 20;
             retrieveMessages(userName, otherUID, mContext_);
 
             // get pinMessage once
-//            getPinChats(otherUID);
-//            getDeletePinId(otherUID);
-//            getEmojiReact(otherUID);
-//            getReadChatResponse(otherUID);
+            getPinChats(otherUID);
+            getDeletePinId(otherUID);
+            getEmojiReact(otherUID);
+            getReadChatResponse(otherUID);
 
 
 
@@ -3323,13 +3382,13 @@ scNum = 20;
                 if(chatViewModel.getEachUserChat(otherUID) != null){
                     EachUserChats eachUserChat = chatViewModel.getEachUserChat(otherUID);
                     List<MessageModel> userChatModel = eachUserChat.userChatList;
+//                    List<MessageModel> getEachUserChats = chatViewModel.getEachUserChat_(otherUID);
                     adapter.setModelList(userChatModel);
                     modelListMap.put(otherUID, adapter.getModelList());
                 }
 
                 runOnUiThread(() -> {
                     //  delay for like 2 sec to fetch all old data first
-
                     new Handler().postDelayed( () -> {
                         // add new message directly to local List and interact with few msg in refMsgFast database
                         newMessageInteraction(adapter, otherUID);
@@ -3354,9 +3413,9 @@ scNum = 20;
 
         adapter.setFragmentListener((FragmentListener) mContext);
 
-    //        adapterMap.put(otherUID, adapter); // save each user adapter
-    ////
-    //        recyclerMap.get(otherUID).setAdapter(adapter);
+        adapterMap.put(otherUID, adapter); // save each user adapter
+
+        recyclerMap.get(otherUID).setAdapter(adapter);
 
     }
 

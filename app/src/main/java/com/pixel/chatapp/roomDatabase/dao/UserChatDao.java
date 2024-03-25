@@ -87,6 +87,10 @@ public interface UserChatDao {
     @Query("DELETE FROM chats WHERE id = :id")
     void deleteUserChatsById(String id);
 
+    // get the chats of each user based on the id
+//    @Query("SELECT * FROM chats WHERE id = :userUid")
+//    List<MessageModel> getEachUserChat_(String userUid);
+
     @Transaction
     @Query("SELECT * FROM chats WHERE id = :id")
     EachUserChats getEachUserChat(String id);

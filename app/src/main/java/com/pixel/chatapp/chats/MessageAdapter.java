@@ -1313,10 +1313,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 : Uri.parse(modelChats.getPhotoUriOriginal());  // change from /storage to file://
 
         if( isFileLessThan150Kb(uriOnPhone, mContext) && modelChats.getId().equals(myId) &&
-            !modelChats.getPhotoUriOriginal().startsWith("/storage/") && !modelChats.getPhotoUriOriginal().startsWith("file:/")){
+            !modelChats.getPhotoUriOriginal().startsWith("/storage/")
+                && !modelChats.getPhotoUriOriginal().startsWith("file:/"))
+        {
             String imageSize = modelChats.getImageSize();
             holder.loadProgressTV.setText(imageSize);
-        } else {
+
+        } else if(!modelChats.getId().equals(myId)) {
+            String imageSize = modelChats.getImageSize();
+            holder.loadProgressTV.setText(imageSize);
+
+        }else {
             String imageSize = FileUtils.getEstimatePhotoSize(uriOnPhone,mContext);
             holder.loadProgressTV.setText(imageSize);
         }

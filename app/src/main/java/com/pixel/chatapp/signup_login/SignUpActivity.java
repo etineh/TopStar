@@ -128,10 +128,12 @@ public class SignUpActivity extends AppCompatActivity {
                 if (task.isSuccessful())
                 {
                     //  --------- save the username to the database
-                    reference.child("Users").child(auth.getUid()).child("userName").setValue(userName);
+                    reference.child("Users").child(auth.getUid())
+                            .child("userName").setValue(userName);
 
                     //  --------- save empty msg to the database
-                    reference.child("Users").child(auth.getUid()).child("message").setValue("");
+                    reference.child("Users").child(auth.getUid()).
+                            child("message").setValue("");
 
                     // check if the user has chosen an image
                     if(imageCheck)
@@ -148,7 +150,8 @@ public class SignUpActivity extends AppCompatActivity {
 
                             myStorageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                                 String filePath = uri.toString();       // convert img to string and save to FirebaseDataBase
-                                reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                reference.child("Users").child(auth.getUid()).child("image")
+                                        .setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
                                         Toast.makeText(SignUpActivity.this, "Image saved successfully", Toast.LENGTH_SHORT).show();

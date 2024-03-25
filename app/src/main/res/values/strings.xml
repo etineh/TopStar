@@ -26,6 +26,26 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
 
+    <!--    tap layout name-->
+    <string name="alert">Alert</string>
+    <string name="players">Players</string>
+    <string name="team">Team</string>
+    <string name="tour">Tour.</string>
+
+    <!--    side bar    -->
+    <string name="dashboard">Dashboard</string>
+    <string name="dashboardSub">Wallet ~ Withdraw ~ Rank ~ Balance…</string>
+    <string name="setting">Settings</string>
+    <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Games…</string>
+    <string name="premium">Premium</string>
+    <string name="premiumSub">Orange Tick ~ Access high features…</string>
+    <string name="advertise">Advertise</string>
+    <string name="advertiseSub">Run ads and reach more people…</string>
+    <string name="invite_friends">Invite Friends</string>
+    <string name="invite_friendSub">Refer friends and earn cash bonus…</string>
+    <string name="support">Support</string>
+    <string name="supportSub">Live chat ~ Community ~ Contacts…</string>
+
     <!--    calls -->
     <string name="videoCall">Video call from</string>
     <string name="audioCall">Audio call from</string>
@@ -33,7 +53,6 @@
     <string name="audio_call">Audio call</string>
     <string name="accept">Accept</string>
     <string name="reject">Reject</string>
-
     <string name="initialising">initialising</string>
     <string name="ringing">ringing…</string>
     <string name="busy">busy</string>
@@ -70,7 +89,6 @@
 
 
     <string name="meet">Meet</string>
-    <string name="tour">Tour.</string>
     <string name="gift">Gift</string>
     <string name="host">Host</string>
 
