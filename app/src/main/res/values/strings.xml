@@ -33,8 +33,10 @@
     <string name="tour">Tour.</string>
 
     <!--    side bar    -->
+    <string name="wallet">Wallet</string>
+    <string name="walletSub">Asset ~ Withdraw ~ Transfer ~ P2P…</string>
     <string name="dashboard">Dashboard</string>
-    <string name="dashboardSub">Wallet ~ Withdraw ~ Rank ~ Balance…</string>
+    <string name="dashboardSub">Rewards ~ Rank ~ Tournaments…</string>
     <string name="setting">Settings</string>
     <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Games…</string>
     <string name="premium">Premium</string>
@@ -122,4 +124,100 @@
     <string name="reset">Reset</string>
 
 
+    <!--    //  wallet-->
+    <string name="totalAsset">Total Asset</string>
+    <string name="localAsset">Local Asset</string>
+    <string name="usdtAsset">USDT Asset</string>
+    <string name="gameAsset">Game Rewards</string>
+    <string name="bonusAsset">Bonus/Airdrop</string>
+    <string name="uniCountryCurrencySymbol">₦ 60,000.00</string>
+    <string name="uniCountryCurrencySymbol_">＄ 20.00</string>
+    <string name="transfer">Transfer</string>
+    <string name="deposit">Deposit</string>
+    <string name="withdraw">Withdraw</string>
+    <string name="convert">Convert</string>
+    <string name="viewAll">View all</string>
+    <string name="p2p">P2P</string>
+    <string name="pinInfo">Never disclose your pin/password to anyone, or to anyone claiming to be topstar customer care/support.
+        We will never ask you for your pin details. Protect your funds by all means!</string>
+    <string name="withdrawVia">Withdraw via:</string>
+    <string name="depositVia">Deposit via:</string>
+    <string name="usdt">USDT (Crypto Network)</string>
+    <string name="peer2peer">Peer-2-Peer (p2p)</string>
+    <string name="usdtDepositInfo">Receive funds via your usdt address instantly</string>
+    <string name="p2pDepositInfo">Interact with a verified TopStar user to fund your wallet via bank transaction</string>
+    <string name="p2pWithdrawInfo">Withdraw directly to your bank account via p2p</string>
+    <string name="usdtWithdrawInfo">Withdraw fund directly to any usdt address</string>
+    <string name="searchUser">email / phone no / username</string>
+    <string name="transferringto">Transferring to:</string>
+    <string name="enterAmount">Enter Amount</string>
+    <string name="enterPin">Enter Pin</string>
+    <string name="transfer_from">Transfer from:</string>
+    <string name="withdraw_from">Withdraw from:</string>
+    <string name="convert_from">Convert from:</string>
+    <string name="available_balance">Available balance:</string>
+    <string name="to">To:</string>
+    <string name="proceed">Proceed</string>
+    <string name="convertForUser">User will receive: </string>
+    <string name="convertForAddress">Address will receive: </string>
+    <string name="convertForAsset">Address will receive: </string>
+    <string name="convertForLocalAsset">Local asset will receive: </string>
+    <string name="convertForUSDTAsset">USDT asset will receive: </string>
+    <string name="convertForGameAsset">Game asset will receive: </string>
+    <string name="convertForBonus">Bonus asset will receive: </string>
+
+    <string name="zeroFee">Zero (0) fee! 😍</string>
+    <string name="withdrawWithCaution">Ensure all details are correct</string>
+    <string name="note">Note: when transferring funds from your local currency to an international user, it will be converted to and sent as "USDT".</string>
+    <string name="incorrectPin">Pin incorrect</string>
+    <string name="invalid_Amount">Invalid amount</string>
+    <string name="date">Date: </string>
+    <string name="time">Time: </string>
+    <string name="amount">Amount: </string>
+    <string name="transactionSuccessful">Transaction Successful</string>
+    <string name="receiver">Receiver: </string>
+    <string name="sender">Sender: </string>
+    <string name="back">Back </string>
+    <string name="history">History </string>
+    <string name="transaction_ID">Transaction ID: </string>
+    <string name="transactionType">Transaction Type: </string>
+    <string name="address">USDT address</string>
+    <string name="enterUsdtAddress">Enter correct usdt address </string>
+    <string name="network">Network </string>
+    <string name="choseNetwork">Select network </string>
+    <string name="usdtMin"> Minimum withdrawal 10 usdt </string>
+    <string name="localMin">Enter amount </string>
+    <string name="tron">Tron (TRC20) </string>
+    <string name="bep20">BNB Smart Chain (Bep20)</string>
+    <string name="minBep20"> Minimum deposit 5 USDT </string>
+    <string name="minTron20"> Minimum deposit 7 USDT </string>
+    <string name="estArrivalTron20"> Est. arrival time: 3 mins </string>
+    <string name="estArrivalBep20"> Est. arrival time: 5 mins </string>
+    <string name="networkCaution"> Please choose the correct network for the address provided. We can\'t recover fund sent to a wrong network. </string>
+    <string name="lessAmount"> If you send less than the minimum amount, the fund will be lost. </string>
+    <string name="usdtDeposit"> USDT Deposit Address </string>
+    <string name="copyAddress"> Copy Address </string>
+    <string name="networkCaution2"> Please send to the exact network you selected. We can\'t recover fund sent to a wrong network. </string>
+    <string name="assetSwitch"> Asset switched </string>
+    <string name="convertSuccessfully"> Asset successfully converted </string>
+
+
+    <string-array name="dropdown_networks">
+        <item>Choose Network</item>
+        <item>BSc (Bep20) ~ $0.4 fee</item>
+        <item>Tron (Trc20) ~ $1.4 fee</item>
+    </string-array>
+
+    <string-array name="convertAssets_List">
+        <item>Local Asset</item>
+        <item>USDT Asset</item>
+        <item>Game Rewards</item>
+        <item>Bonus/Giveaway</item>
+    </string-array>
+
+    <!--    <string-array name="dropdown_networks">-->
+    <!--        <item>Choose Network</item>-->
+    <!--        <item>BSc (Bep20) ~ $0.4 fee</item>-->
+    <!--        <item>Tron (Trc20) ~ $1.4 fee</item>-->
+    <!--    </string-array>-->
 </resources>

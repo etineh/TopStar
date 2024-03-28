@@ -123,6 +123,7 @@ import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
+import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
@@ -160,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ---------   SideBar Menu     -----------------
     private ImageView sideBarMenuOpen, sideBarMenuClose, imageViewLogo, imageViewUserPhoto;
     private ConstraintLayout sideBarMenuContainer;
+    private CardView cardViewWallet;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     private TextView logout, textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV;
     Switch darkMoodSwitch;
@@ -476,6 +478,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         //  side bar menu
         sideBarMenuContainer = findViewById(R.id.sideBarMenuContainer);
+        cardViewWallet = findViewById(R.id.cardViewWallet);
         logout = findViewById(R.id.textViewLogOut);
         sideBarMenuClose = findViewById(R.id.imageViewMenuClose);
         tapImage_TV = findViewById(R.id.tapImage_TV);
@@ -908,6 +911,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
             sideBarMenuContainer.setOnClickListener(view -> {
                 sideBarMenuContainer.setVisibility(View.GONE);
+            });
+
+            // wallet
+            cardViewWallet.setOnClickListener(v -> {
+
+//                new Handler().postDelayed( ()-> {
+//
+//                }, 20);
+
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+                {
+                    Intent intent = new Intent(this, WalletActivity.class);
+                    startActivity(intent);
+                    // Reset the scale
+                    new Handler().postDelayed( ()-> {
+                        v.setScaleX(1.0f);
+                        v.setScaleY(1.0f);
+                    }, 50);
+                }).start();
+
             });
 
             // view my profile photo @sideBar menu

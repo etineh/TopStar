@@ -78,6 +78,11 @@
         <item name="android:textColor">@color/orange</item>
     </style>
 
+    -    // text-->
+    <style name="textColorWhiteAndCoolOrange">
+        <item name="android:textColor">@color/cool_orange</item>
+    </style>
+
     <style name="textColorFullBlack">
         <item name="android:textColor">@color/white</item>
     </style>
@@ -102,6 +107,11 @@
     <!--    background Tink Dark orange and white-->
     <style name="BackgroundTintDarkOrange">
         <item name="android:tint">@color/white</item>
+    </style>
+
+
+    <style name="CardViewBackground">
+        <item name="android:backgroundTint">@color/black</item>
     </style>
 
     <!--    background White and Cool orange -->
@@ -140,6 +150,15 @@
     <!--    chat theme background-->
     <style name="ChatBackground">
         <item name="android:background">@drawable/dark_theme</item>
+    </style>
+
+    <!--    radius background-->
+    <style name="roundRadiusBackground">
+        <item name="android:background">@drawable/round_radius_dark</item>
+    </style>
+
+    <style name="roundRadiusBackground2">
+        <item name="android:background">@drawable/round_radius_dark</item>
     </style>
 
     <!--    chat box msg background.  dark orange   #281600-->

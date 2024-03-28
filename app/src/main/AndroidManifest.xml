@@ -47,8 +47,16 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".peer2peer.P2pExchangeActivity"
+            android:exported="false" />
+        <activity
             android:name=".side_bar_menu.wallet.WalletActivity"
             android:exported="false" />
+        <activity
+            android:name=".CaptureAct"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme" />
         <activity
             android:name=".calls.CallPickUpCenter"
             android:exported="false" />
@@ -129,10 +137,6 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
             android:supportsPictureInPicture="true" />
-        <activity
-            android:name=".calls.ViewCallRequest"
-            android:exported="false"
-            android:parentActivityName=".chats.MessageActivity" />
         <activity
             android:name=".contacts.UsersContactActivity"
             android:exported="true" />
