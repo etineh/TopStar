@@ -4,7 +4,7 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_200</item>
 <!--        change bar color here-->
-        <item name="colorPrimaryVariant">#121111</item>
+        <item name="colorPrimaryVariant">#070707</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -43,7 +43,11 @@
     </style>
 
     <style name="cardTop">
-        <item name="android:background">#191818</item>
+        <item name="android:background">#0E0E0E</item>
+    </style>
+
+    <style name="mainBackground">
+        <item name="android:background">#0E0E0E</item>
     </style>
 
     <style name="cardTopOrange">
@@ -51,7 +55,7 @@
     </style>
 
     <style name="cardTop2">
-        <item name="android:background">@color/black</item>
+        <item name="android:background">#070707</item>
     </style>
 
 
@@ -80,6 +84,10 @@
 
     -    // text-->
     <style name="textColorWhiteAndCoolOrange">
+        <item name="android:textColor">@color/cool_orange</item>
+    </style>
+
+    <style name="textOrangeAndCoolOrange">
         <item name="android:textColor">@color/cool_orange</item>
     </style>
 
@@ -123,6 +131,11 @@
     <style name="checkBoxTint">
         <item name="android:buttonTint">@color/cool_orange</item>
         <item name="android:background">#121111</item>
+    </style>
+
+    <style name="checkBoxTint2">
+        <item name="android:buttonTint">@color/cool_orange</item>
+<!--        <item name="android:background">#121111</item>-->
     </style>
 
     <!--    TextView Orange and Cool orange -->

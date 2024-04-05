@@ -2,8 +2,167 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/cardTop"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".peer2peer.P2pExchangeActivity">
+    android:padding="10dp"
+    tools:context=".peer2peer.exchange.P2pExchangeActivity">
+
+    <ProgressBar
+        android:id="@+id/progressBarP"
+        style="@style/progressBarColour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewP2p" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/search_bar"
+        style="@style/roundRadiusBackground2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="40dp"
+        app:layout_constraintEnd_toStartOf="@+id/filter_IV"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buy_Button">
+
+        <ImageView
+            android:id="@+id/searchButton"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_search_24" />
+
+        <EditText
+            android:id="@+id/seachAmount_ET"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="@color/fullTransparent"
+            android:ellipsize="end"
+            android:ems="10"
+            android:hint="@string/searchAmount"
+            android:inputType="number|numberDecimal|numberSigned"
+            android:maxLines="1"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/searchButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/buy_Button"
+        style="@style/textColorFullBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/round_radius_green"
+        android:padding="5dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/buy"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/closeP2p_Button" />
+
+    <TextView
+        android:id="@+id/sell_Button"
+        style="@style/textColorFullBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/round_radius_orange"
+        android:padding="5dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/sell"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/buy_Button"
+        app:layout_constraintStart_toEndOf="@+id/buy_Button"
+        app:layout_constraintTop_toTopOf="@+id/buy_Button" />
+
+    <ImageView
+        android:id="@+id/closeP2p_Button"
+        style="@style/Tint_Orange_CoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_arrow_back_24" />
+
+    <ImageView
+        android:id="@+id/liveSupport_Button"
+        style="@style/Tint_Orange_CoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:padding="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/customer_care" />
+
+    <TextView
+        android:id="@+id/textView36"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/p2pExc"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/liveSupport_Button"
+        app:layout_constraintStart_toEndOf="@+id/closeP2p_Button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/pending_order_TV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:gravity="right"
+        android:text="@string/pendingOrder"
+        android:textColor="@color/orange"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="@+id/sell_Button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/sell_Button"
+        app:layout_constraintTop_toTopOf="@+id/sell_Button" />
+
+    <ImageView
+        android:id="@+id/filter_IV"
+        style="@style/Tint_Orange_CoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/search_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/search_bar"
+        app:srcCompat="@drawable/baseline_filter_list_alt_24" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewP2p"
+        style="@style/mainBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        tools:listitem="@layout/p2p_exhange_user_card" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

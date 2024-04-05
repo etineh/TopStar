@@ -36,15 +36,16 @@
             android:id="@+id/seachUser_ET"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
             android:backgroundTint="@color/fullTransparent"
+            android:ellipsize="end"
             android:ems="10"
             android:hint="@string/searchUser"
             android:inputType="text"
             android:maxLines="1"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageView15"
+            app:layout_constraintEnd_toStartOf="@+id/searchButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

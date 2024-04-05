@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp"
+    tools:context=".activities.CreatePinActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/createPinContainer"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/createPinButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/round_radius_green"
+            android:paddingStart="25dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="8dp"
+            android:text="@string/createPin"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/checkBoxTerms_" />
+
+        <EditText
+            android:id="@+id/new_pin_et"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="50dp"
+            android:backgroundTint="@color/orange"
+            android:ems="10"
+            android:hint="@string/enterNewPin"
+            android:inputType="number|numberPassword"
+            android:maxLines="1"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView66" />
+
+        <EditText
+            android:id="@+id/confirmNewPin_ET"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/orange"
+            android:drawableTint="@color/dark_orange1"
+            android:ems="10"
+            android:hint="@string/confirmPin"
+            android:inputType="number|numberPassword"
+            android:maxLines="1"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/new_pin_et"
+            app:layout_constraintStart_toStartOf="@+id/new_pin_et"
+            app:layout_constraintTop_toBottomOf="@+id/new_pin_et" />
+
+        <CheckBox
+            android:id="@+id/checkBoxTerms_"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="20dp"
+            android:buttonTint="@color/orange"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pinError_TV" />
+
+        <TextView
+            android:id="@+id/textView61"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="15dp"
+            android:text="@string/createPinInfo"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView65"
+            app:lineHeight="20dp" />
+
+        <TextView
+            android:id="@+id/textView63"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="@string/iUnderstand"
+            app:layout_constraintBottom_toBottomOf="@+id/checkBoxTerms_"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxTerms_"
+            app:layout_constraintTop_toTopOf="@+id/checkBoxTerms_" />
+
+        <TextView
+            android:id="@+id/textView64"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/createIn5sec"
+            app:layout_constraintBottom_toBottomOf="@+id/cancelCreatePin_IV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cancelCreatePin_IV" />
+
+        <ImageView
+            android:id="@+id/cancelCreatePin_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_cancel_24" />
+
+        <TextView
+            android:id="@+id/textView65"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/fingerprintTerms"
+            app:layout_constraintStart_toStartOf="@+id/checkBoxTerms_"
+            app:layout_constraintTop_toBottomOf="@+id/createPinButton" />
+
+        <TextView
+            android:id="@+id/textView66"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/pin_usage"
+            android:textColor="@color/orange"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView64"
+            app:lineHeight="18sp" />
+
+        <TextView
+            android:id="@+id/pinError_TV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/orange"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/incorrectPin"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/confirmNewPin_ET" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

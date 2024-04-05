@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/cardTop2"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    tools:layout_editor_absoluteY="25dp">
+
+    <TextView
+        android:id="@+id/transactionInfo_TV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/winPoker"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/amount1_TV"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/amount1_TV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:text="+1000"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/transactionDate_TV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Mar 30, 2025, 10:10AM"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/transactionStatus_TV"
+        app:layout_constraintStart_toStartOf="@+id/transactionInfo_TV"
+        app:layout_constraintTop_toBottomOf="@+id/transactionInfo_TV" />
+
+    <TextView
+        android:id="@+id/transactionStatus_TV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/received"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/amount1_TV"
+        app:layout_constraintTop_toBottomOf="@+id/amount1_TV" />
+
+    <TextView
+        android:id="@+id/lineH"
+        style="@style/roundRadiusBackground2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transactionDate_TV" />
+
+    <ImageView
+        android:id="@+id/imageView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/transactionStatus_TV"
+        app:layout_constraintEnd_toStartOf="@+id/transactionStatus_TV"
+        app:layout_constraintTop_toBottomOf="@+id/amount1_TV"
+        app:srcCompat="@drawable/arrow_right_"
+        app:tint="@color/orange" />
+</androidx.constraintlayout.widget.ConstraintLayout>

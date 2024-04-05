@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/cardTop"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".peer2peer.exchange.BuyerInputAmountActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+
+        <ImageView
+            android:id="@+id/cancelP2PSellButton"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_cancel_24" />
+
+        <TextView
+            android:id="@+id/caution"
+            style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@string/feeCharge"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/cancelP2PSellButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cancelP2PSellButton"
+            app:layout_constraintTop_toTopOf="@+id/cancelP2PSellButton" />
+
+        <TextView
+            android:id="@+id/textView44"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/traderFee"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cancelP2PSellButton" />
+
+        <TextView
+            android:id="@+id/lineH"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView44" />
+
+        <TextView
+            android:id="@+id/traderFee_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="50 NGN"
+            android:textColor="@color/orange"
+            app:layout_constraintBottom_toBottomOf="@+id/textView44"
+            app:layout_constraintStart_toEndOf="@+id/textView44"
+            app:layout_constraintTop_toTopOf="@+id/textView44" />
+
+        <TextView
+            android:id="@+id/amountRange_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="Range amount: 30,000 - 500,000 NGN"
+            app:layout_constraintStart_toStartOf="@+id/lineH"
+            app:layout_constraintTop_toBottomOf="@+id/lineH" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/amountContainer"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/amountRange_TV">
+
+
+            <EditText
+                android:id="@+id/enterAmount_ET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:backgroundTint="@color/fullTransparent"
+                android:ems="10"
+                android:hint="@string/enterAmount"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/allAmount_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:padding="5dp"
+                android:text="@string/all"
+                android:textColor="@color/orange"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/amountToBeCredited_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/receive_amount_seller"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/amountContainer" />
+
+        <TextView
+            android:id="@+id/network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/chooseMyAccount"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/amountToBeCredited_TV" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/networkContainer"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/network">
+
+
+            <!--            <TextView-->
+            <!--                android:id="@+id/chooseNetwork_TV"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="10dp"-->
+            <!--                android:backgroundTint="@color/fullTransparent"-->
+            <!--                android:ems="10"-->
+            <!--                android:hint="@string/choseNetwork"-->
+            <!--                android:maxLines="2"-->
+            <!--                android:textSize="16sp"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toStartOf="@+id/openNetwotkType"-->
+            <!--                app:layout_constraintStart_toStartOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent" />-->
+            <Spinner
+                android:id="@+id/choosePaymentMethod_Spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:entries="@array/paymentOption"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!--            <ImageView-->
+            <!--                android:id="@+id/openNetwotkType"-->
+            <!--                style="@style/Tint_Orange_CoolOrange"-->
+            <!--                android:layout_width="38dp"-->
+            <!--                android:layout_height="29dp"-->
+            <!--                android:scaleType="centerCrop"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent"-->
+            <!--                app:srcCompat="@drawable/baseline_arrow_drop_down_24" />-->
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <CheckBox
+            android:id="@+id/checkBoxTerms"
+            style="@style/checkBoxTint2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/networkContainer" />
+
+        <TextView
+            android:id="@+id/textView31"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/acceptTerms"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/checkBoxTerms"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxTerms"
+            app:layout_constraintTop_toTopOf="@+id/checkBoxTerms" />
+
+        <TextView
+            android:id="@+id/proceedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/round_radius_orange"
+            android:paddingStart="25dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="8dp"
+            android:text="@string/proceed"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView31" />
+
+        <TextView
+            android:id="@+id/textView48"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/trade_remark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/proceedButton" />
+
+        <TextView
+            android:id="@+id/traderRemark_TV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Make payment on time. I am fast in releasing."
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView48"
+            app:lineHeight="20sp" />
+
+        <TextView
+            android:id="@+id/textView50"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/tsInfo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/traderRemark_TV" />
+
+        <TextView
+            android:id="@+id/topstarRemark"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/topStarInfo2"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView50"
+            app:lineHeight="20dp" />
+
+        <ImageView
+            android:id="@+id/refresh_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/lineH"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/baseline_data_saver_off_24" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

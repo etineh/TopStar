@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/trans_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:elevation="4dp"
+    android:gravity="bottom">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/cardTopOrange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteY="341dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pinContainerAck"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/checkBoxTerms_2">
+
+
+            <EditText
+                android:id="@+id/enterAckPin_ET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/fullTransparent"
+                android:ems="10"
+                android:hint="@string/enterPin"
+                android:inputType="number|numberPassword"
+                android:maxLines="1"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/cancelAct_IV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_cancel_24"
+            app:tint="@color/white" />
+
+        <CheckBox
+            android:id="@+id/checkBoxTerms_"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="30dp"
+            android:buttonTint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cancelAct_IV" />
+
+        <CheckBox
+            android:id="@+id/checkBoxTerms_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:buttonTint="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/checkBoxTerms_"
+            app:layout_constraintStart_toStartOf="@+id/checkBoxTerms_"
+            app:layout_constraintTop_toBottomOf="@+id/textView62" />
+
+        <TextView
+            android:id="@+id/completedButton"
+            style="@style/roundRadiusBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="20dp"
+            android:paddingStart="25dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="8dp"
+            android:text="@string/confirm"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pinContainerAck" />
+
+        <TextView
+            android:id="@+id/confirmName"
+            style="@style/textColorWhiteAndCoolOrange"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="@string/iAcknowledge3"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/checkBoxTerms_2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxTerms_2"
+            app:layout_constraintTop_toTopOf="@+id/checkBoxTerms_2"
+            app:lineHeight="20dp" />
+
+        <TextView
+            android:id="@+id/textView62"
+            style="@style/textColorWhiteAndCoolOrange"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="@string/iAcknowledge2"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/checkBoxTerms_"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxTerms_"
+            app:layout_constraintTop_toTopOf="@+id/checkBoxTerms_"
+            app:lineHeight="20dp" />
+
+        <TextView
+            android:id="@+id/textView56"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/confirmPayment"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/cancelAct_IV"
+            app:layout_constraintEnd_toStartOf="@+id/cancelAct_IV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cancelAct_IV" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

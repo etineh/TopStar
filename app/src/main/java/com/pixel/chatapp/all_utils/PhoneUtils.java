@@ -1,14 +1,12 @@
 package com.pixel.chatapp.all_utils;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileNotFoundException;
+import android.widget.TextView;
 
 public class PhoneUtils {
     public static void vibrateDevice(Context context, int volume) {
@@ -27,7 +25,17 @@ public class PhoneUtils {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
-
     }
+
+    public static void copyText(Context context, TextView textView)
+    {
+        ClipboardManager clipboard =  (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", textView.getText());
+
+        if (clipboard == null || clip == null) return;
+        clipboard.setPrimaryClip(clip);
+    }
+
+
 
 }

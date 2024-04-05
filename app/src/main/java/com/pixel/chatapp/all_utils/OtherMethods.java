@@ -4,13 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class OtherMethods {
 
-    public static void animateVisibility(ConstraintLayout containerAnim) {
+    public static void animateVisibility(ConstraintLayout containerAnim, LinearLayout linearLayout) {
         // Animate the alpha property for fading effect
         ObjectAnimator animator = ObjectAnimator.ofFloat(containerAnim, "alpha", 0f, 1f);
         animator.setDuration(500); // Adjust duration as needed
@@ -18,7 +19,11 @@ public class OtherMethods {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                containerAnim.setVisibility(View.VISIBLE);
+                if(containerAnim != null){
+                    containerAnim.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override

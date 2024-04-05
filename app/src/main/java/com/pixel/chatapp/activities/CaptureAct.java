@@ -1,4 +1,4 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.activities;
 
 
 import com.journeyapps.barcodescanner.CaptureActivity;

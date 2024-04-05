@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="12dp"
+    tools:layout_editor_absoluteY="25dp">
+
+    <TextView
+        android:id="@+id/user_display_name"
+        style="@style/textColorFullBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Ndifreke Sunday"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/userImage_TV"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/verifyIcon"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="2dp"
+        app:layout_constraintStart_toEndOf="@+id/user_display_name"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/verified" />
+
+
+    <TextView
+        android:id="@+id/rangeAmount_TV"
+        style="@style/textColorFullBlack"
+        android:layout_width="318dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="10,000 - 4,000,000 NGN"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView43"
+        app:layout_constraintStart_toEndOf="@+id/textView43"
+        app:layout_constraintTop_toTopOf="@+id/textView43" />
+
+
+    <TextView
+        android:id="@+id/onlinePresence_TV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/online"
+        android:textColor="@color/orange"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/paySpeed_TV"
+        app:layout_constraintStart_toStartOf="@+id/user_display_name"
+        app:layout_constraintTop_toBottomOf="@+id/user_display_name" />
+
+    <TextView
+        android:id="@+id/sellOrBuy_Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/round_radius_green"
+        android:padding="5dp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:text="@string/buy"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/marchantFee_TV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/marchantFee_TV" />
+
+    <TextView
+        android:id="@+id/lineH"
+        style="@style/roundRadiusBackground2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentOptions_TV" />
+
+    <TextView
+        android:id="@+id/userImage_TV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/msg_count"
+        android:padding="3dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="N"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/paySpeed_TV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pay_speed"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_display_name" />
+
+    <TextView
+        android:id="@+id/textView43"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="@string/amount"
+        app:layout_constraintStart_toStartOf="@+id/user_display_name"
+        app:layout_constraintTop_toBottomOf="@+id/onlinePresence_TV" />
+
+    <TextView
+        android:id="@+id/textView46"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/fee"
+        app:layout_constraintStart_toStartOf="@+id/textView43"
+        app:layout_constraintTop_toBottomOf="@+id/textView43" />
+
+    <TextView
+        android:id="@+id/marchantFee_TV"
+        style="@style/textColorFullBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="50 NGN"
+        app:layout_constraintBottom_toBottomOf="@+id/textView46"
+        app:layout_constraintStart_toStartOf="@+id/rangeAmount_TV"
+        app:layout_constraintTop_toTopOf="@+id/textView46" />
+
+    <TextView
+        android:id="@+id/paymentOptions_TV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="[ Bank, Opay, Palmpay, MoniePoint, Paycentre ]"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView46"
+        app:layout_constraintTop_toBottomOf="@+id/sellOrBuy_Button" />
+
+    <TextView
+        android:id="@+id/totalOrderTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="50 orders."
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/paySpeed_TV"
+        app:layout_constraintTop_toBottomOf="@+id/user_display_name" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,14 +2,13 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/cardTop"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clickable="true"
     android:elevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        style="@style/cardTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp">
@@ -68,20 +67,20 @@
             app:layout_constraintTop_toBottomOf="@+id/network">
 
 
-<!--            <TextView-->
-<!--                android:id="@+id/chooseNetwork_TV"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="10dp"-->
-<!--                android:backgroundTint="@color/fullTransparent"-->
-<!--                android:ems="10"-->
-<!--                android:hint="@string/choseNetwork"-->
-<!--                android:maxLines="2"-->
-<!--                android:textSize="16sp"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toStartOf="@+id/openNetwotkType"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent" />-->
+            <!--            <TextView-->
+            <!--                android:id="@+id/chooseNetwork_TV"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="10dp"-->
+            <!--                android:backgroundTint="@color/fullTransparent"-->
+            <!--                android:ems="10"-->
+            <!--                android:hint="@string/choseNetwork"-->
+            <!--                android:maxLines="2"-->
+            <!--                android:textSize="16sp"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toStartOf="@+id/openNetwotkType"-->
+            <!--                app:layout_constraintStart_toStartOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent" />-->
             <Spinner
                 android:id="@+id/chooseNetwork_TV"
                 android:layout_width="0dp"
@@ -92,22 +91,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-<!--            <ImageView-->
-<!--                android:id="@+id/openNetwotkType"-->
-<!--                style="@style/Tint_Orange_CoolOrange"-->
-<!--                android:layout_width="38dp"-->
-<!--                android:layout_height="29dp"-->
-<!--                android:scaleType="centerCrop"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:srcCompat="@drawable/baseline_arrow_drop_down_24" />-->
+            <!--            <ImageView-->
+            <!--                android:id="@+id/openNetwotkType"-->
+            <!--                style="@style/Tint_Orange_CoolOrange"-->
+            <!--                android:layout_width="38dp"-->
+            <!--                android:layout_height="29dp"-->
+            <!--                android:scaleType="centerCrop"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent"-->
+            <!--                app:srcCompat="@drawable/baseline_arrow_drop_down_24" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/zeroFee"
-            style="@style/textColorCustomise"
+            style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -133,7 +132,7 @@
             android:id="@+id/textView27"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:text="@string/address"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -198,7 +197,7 @@
                 android:backgroundTint="@color/fullTransparent"
                 android:ems="10"
                 android:hint="@string/enterAmount"
-                android:inputType="number"
+                android:inputType="number|numberDecimal"
                 android:maxLines="1"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -210,58 +209,29 @@
             android:id="@+id/getTransferConvertAmount_TV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:text="@string/convertForAddress"
-            android:textSize="14sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/amountContainer" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/pinContainer"
-            style="@style/roundRadiusBackground2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/getTransferConvertAmount_TV">
-
-
-            <EditText
-                android:id="@+id/enterPin_ET"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/fullTransparent"
-                android:ems="10"
-                android:hint="@string/enterPin"
-                android:inputType="number|numberPassword"
-                android:maxLines="1"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="52dp"
-            android:background="@drawable/round_orange_background_10dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/round_radius_orange"
             android:paddingStart="25dp"
             android:paddingTop="8dp"
             android:paddingEnd="25dp"
             android:paddingBottom="8dp"
-            android:text="@string/send"
+            android:text="@string/proceed"
             android:textColor="@color/white"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainer" />
+            app:layout_constraintTop_toBottomOf="@+id/getTransferConvertAmount_TV" />
 
         <TextView
             android:id="@+id/textView31"
@@ -274,18 +244,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/networkContainer" />
-
-        <TextView
-            android:id="@+id/errorInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/incorrectPin"
-            android:textColor="@color/orange"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainer" />
 
         <TextView
             android:id="@+id/textView33"

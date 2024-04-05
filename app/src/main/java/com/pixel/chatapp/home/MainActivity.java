@@ -14,6 +14,7 @@ import static com.pixel.chatapp.all_utils.OtherMethods.animateVisibility;
 import static com.pixel.chatapp.calls.CallCenterActivity.handlerVibrate;
 import static com.pixel.chatapp.constants.AllConstants.ACCEPTED_MIME_TYPES;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -52,6 +53,7 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -64,6 +66,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -78,13 +81,10 @@ import com.bumptech.glide.Glide;
 import com.devlomi.record_view.OnRecordListener;
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -96,10 +96,12 @@ import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.activities.CreatePinActivity;
 import com.pixel.chatapp.api.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
+import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
 import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.calls.CallCenterActivity;
 import com.pixel.chatapp.photos.ZoomImage;
@@ -145,11 +147,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -159,9 +159,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static ViewPager2 viewPager2General;
 
     //  ---------   SideBar Menu     -----------------
-    private ImageView sideBarMenuOpen, sideBarMenuClose, imageViewLogo, imageViewUserPhoto;
+    private ImageView imageViewUserPhoto;
+
     private ConstraintLayout sideBarMenuContainer;
-    private CardView cardViewWallet;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     private TextView logout, textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV;
     Switch darkMoodSwitch;
@@ -174,16 +174,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static String getMyUserName;
     private Boolean nightMood;
 
-    private MainActivity mainActivityContext = MainActivity.this;
+    private final MainActivity mainActivityContext = MainActivity.this;
 
     public MainActivity getMainActivityContext() {
         return mainActivityContext;
     }
 
     //    ------- message/chat declares
-    private ImageView imageViewBack;
     public static CircleImageView circleImageLogo;
-    private ImageView imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
     public static ConstraintLayout firstTopUserDetailsContainer, typeMsgContainer;
     private static ConstraintLayout mainViewConstraint, topMainContainer;
     private ImageView editOrReplyIV;
@@ -191,11 +189,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible;
     private ConstraintLayout chatMenuProfile, constraintDelBody;
     private static ImageView emoji_IV, file_IV, camera_IV, gameMe_IV;
-    private Context mContext;
+
 
     // -----------      pin declares
     private static ConstraintLayout pinIconsContainer, pinMsgBox_Constr;
     public static ConstraintLayout pinMsgContainer, pinOptionBox, line, chatContainer;
+    @SuppressLint("StaticFieldLeak")
     private static ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
     private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
     private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
@@ -285,13 +284,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     Handler handler = new Handler(Looper.getMainLooper());
 
     //  --------   chat Options declares
-    public static ConstraintLayout chatOptionsConstraints, generalBackground, moreOptionContainer;
-    public static TextView chatSelected_TV, editTV, pinTV, saveTogalleryTV, reportTV, emojiChatOption_TV;
-    private static ImageView forwardChatOption_IV, copyChatOption_IV, deleteChatOption_IV, cancelChatOption_IV;
+    public static ConstraintLayout chatOptionsConstraints, generalBackground;
+    LinearLayout moreOptionContainer;
+    @SuppressLint("StaticFieldLeak")
+    public static TextView chatSelected_TV, editTV, pinTV, saveToGalleryTV, reportTV, emojiChatOption_TV;
 
+    @SuppressLint("StaticFieldLeak")
     public static ImageView replyChatOption_IV, editChatOption_IV, moreOption_IV;
 
-
+    private TextView verifyLoadTV;
+    private ProgressBar verifyProgressBar;
 
     public static MessageAdapter.MessageViewHolder chatHolder;
     public static MessageModel modelChatsOption;
@@ -364,6 +366,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private ConstraintLayout fileAttachOptionContainer, fileContainerAnim;
     private ImageView documentIV, galleryIV, audioIV, contactIV, gameIV;
 
+    //  ============    wallet pin verify   =======================
+    ConstraintLayout walletVerifyLayout, pinContainerHome, pinOptionContainer;
+    ImageView cancelPinOption_IV, fingerprintIcon;
+    TextView or_TV, openPinBox_TV, verifyViaTV, openWalletButton;
+    EditText enterAckPin_ET;
+
 
     //  =============   video and audio call declares
     Gson gson = new Gson();
@@ -391,6 +399,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static CallsListener callsListener;
 
     String newToken;
+
+    private Executor executor;
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo promptInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -433,6 +445,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+
+        // local variables
+        ImageView forwardChatOption_IV, copyChatOption_IV, deleteChatOption_IV, cancelChatOption_IV;
+        CardView cardViewWallet;
+        ImageView imageViewBack, imageViewOpenMenu, imageViewCloseMenu, imageViewCancelDel, replyOrEditCancel_IV;
+        ImageView sideBarMenuOpen, sideBarMenuClose, imageViewLogo, viewWalletIcon, p2pHome_IV;
+
+
         //      --------- message ids starts        ------------------------
         firstTopUserDetailsContainer = findViewById(R.id.firstTopContainer);
         chatContainer = findViewById(R.id.chatBoxContainer);
@@ -451,6 +471,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         textViewMsgTyping = findViewById(R.id.isTyping_TV);
         circleImageLogo = findViewById(R.id.circleImageLogo9);
         typeMsgContainer = findViewById(R.id.typeMsgContainer);
+        viewWalletIcon = findViewById(R.id.viewWalletIcon);
+        p2pHome_IV = findViewById(R.id.p2pHome_IV);
 
         // calls
         incomingCallLayout = findViewById(R.id.incomingCallLayout);
@@ -478,14 +500,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         //  side bar menu
         sideBarMenuContainer = findViewById(R.id.sideBarMenuContainer);
-        cardViewWallet = findViewById(R.id.cardViewWallet);
-        logout = findViewById(R.id.textViewLogOut);
-        sideBarMenuClose = findViewById(R.id.imageViewMenuClose);
-        tapImage_TV = findViewById(R.id.tapImage_TV);
-        imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
-        textViewDisplayName = findViewById(R.id.textViewDisplayName2);
-        textViewUserName = findViewById(R.id.textViewUserName2);
-        cardViewSettings = findViewById(R.id.cardViewSettings);
+        cardViewWallet = sideBarMenuContainer.findViewById(R.id.cardViewWallet);
+        logout = sideBarMenuContainer.findViewById(R.id.textViewLogOut);
+        sideBarMenuClose = sideBarMenuContainer.findViewById(R.id.imageViewMenuClose);
+        tapImage_TV = sideBarMenuContainer.findViewById(R.id.tapImage_TV);
+        imageViewUserPhoto = sideBarMenuContainer.findViewById(R.id.imageViewUserPhoto);
+        textViewDisplayName = sideBarMenuContainer.findViewById(R.id.textViewDisplayName2);
+        textViewUserName = sideBarMenuContainer.findViewById(R.id.textViewUserName2);
+        cardViewSettings = sideBarMenuContainer.findViewById(R.id.cardViewSettings);
 
 
         // delete ids
@@ -562,24 +584,39 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         chatMenuProfile = findViewById(R.id.chatMenuConstraint);
         clearChat_TV = findViewById(R.id.clearChat_TV);
 
+        //  ============    wallet pin verify id  =======================
+        walletVerifyLayout = findViewById(R.id.walletVerifyLayout);
+        pinContainerHome = walletVerifyLayout.findViewById(R.id.pinContainerHome);
+        cancelPinOption_IV = walletVerifyLayout.findViewById(R.id.cancelPinOption_IV);
+        or_TV = walletVerifyLayout.findViewById(R.id.or_TV);
+        openPinBox_TV = walletVerifyLayout.findViewById(R.id.openPinBox_TV);
+        pinOptionContainer = walletVerifyLayout.findViewById(R.id.pinOptionContainer);
+        fingerprintIcon = walletVerifyLayout.findViewById(R.id.fingerprintIcon);
+        verifyViaTV = walletVerifyLayout.findViewById(R.id.verifyViaTV);
+        openWalletButton = walletVerifyLayout.findViewById(R.id.openWalletButton);
+        enterAckPin_ET = walletVerifyLayout.findViewById(R.id.enterAckPin_ET);
+
         //  chatOptions ids
         chatOptionsConstraints = findViewById(R.id.chatOptions);
-        editChatOption_IV = findViewById(R.id.edit_IV);
-        replyChatOption_IV = findViewById(R.id.reply_IV);
-        emojiChatOption_TV = findViewById(R.id.emojiReactTV);
-        forwardChatOption_IV = findViewById(R.id.forward_IV);
-        copyChatOption_IV = findViewById(R.id.copyText_IV);
-        deleteChatOption_IV = findViewById(R.id.delete_IV);
-        chatSelected_TV = findViewById(R.id.count_TV);
-        cancelChatOption_IV = findViewById(R.id.cancel_IV);
-        moreOptionContainer = findViewById(R.id.moreOptionContainer);
-        generalBackground = findViewById(R.id.generalBackground);
-        pinTV = findViewById(R.id.pinChat_TV);
-        editTV = findViewById(R.id.editChatTV);
-        saveTogalleryTV = findViewById(R.id.saveToGalleryTV);
-        moreOption_IV = findViewById(R.id.moreOptionIv);
-        reportTV = findViewById(R.id.report_TV);
+        editChatOption_IV = chatOptionsConstraints.findViewById(R.id.edit_IV);
+        replyChatOption_IV = chatOptionsConstraints.findViewById(R.id.reply_IV);
+        forwardChatOption_IV = chatOptionsConstraints.findViewById(R.id.forward_IV);
+        copyChatOption_IV = chatOptionsConstraints.findViewById(R.id.copyText_IV);
+        deleteChatOption_IV = chatOptionsConstraints.findViewById(R.id.delete_IV);
+        chatSelected_TV = chatOptionsConstraints.findViewById(R.id.count_TV);
+        cancelChatOption_IV = chatOptionsConstraints.findViewById(R.id.cancel_IV);
+        moreOption_IV = chatOptionsConstraints.findViewById(R.id.moreOptionIv);
 
+        moreOptionContainer = findViewById(R.id.moreOptionContainer);
+        pinTV = moreOptionContainer.findViewById(R.id.pinChat_TV);
+        editTV = moreOptionContainer.findViewById(R.id.editChatTV);
+        emojiChatOption_TV = moreOptionContainer.findViewById(R.id.emojiReactTV);
+        saveToGalleryTV = moreOptionContainer.findViewById(R.id.saveToGalleryTV);
+        reportTV = moreOptionContainer.findViewById(R.id.report_TV);
+
+        generalBackground = findViewById(R.id.generalBackground);
+        verifyProgressBar = findViewById(R.id.verifyProgressBar);
+        verifyLoadTV = findViewById(R.id.verifyLoadTV);
 
         // audio swipe button ids   --  voice note
         recordView = (RecordView) findViewById(R.id.record_view9);
@@ -661,6 +698,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         adjustRecyclerViewToPhoneScreen();
 
         hideKeyboard();
+
+        // Create an executor
+        executor = ContextCompat.getMainExecutor(this);
 
         callUtils = new CallUtils(this);
 
@@ -914,24 +954,53 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             // wallet
-            cardViewWallet.setOnClickListener(v -> {
+            View.OnClickListener openWallet = v -> {
 
-//                new Handler().postDelayed( ()-> {
-//
-//                }, 20);
+                // check if user is new -- not created pin yet
+                Intent intent = new Intent(this, CreatePinActivity.class);
+//                startActivity(intent);
 
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+                // move on to fingerprint if pin match (maybe it request pin only after 10min delay after first open)
+                walletVerifyLayout.setVisibility(View.VISIBLE);
+                pinOptionContainer.setVisibility(View.GONE);
+                showFingerPrint();
+
+            };
+            cardViewWallet.setOnClickListener(openWallet);
+            viewWalletIcon.setOnClickListener(openWallet);
+
+            cancelPinOption_IV.setOnClickListener(v -> {
+                walletVerifyLayout.setVisibility(View.GONE);
+            });
+
+            openPinBox_TV.setOnClickListener(v -> verifyWithPin());
+            fingerprintIcon.setOnClickListener(v -> showFingerPrint());
+
+            openWalletButton.setOnClickListener(v -> {
+                if(enterAckPin_ET.length() == 4){
+                    loadVerify();
+                    openWalletMethod();     // pin
+                } else {
+                    Toast.makeText(this, getString(R.string.incorrectPin), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // down buttons at home
+            p2pHome_IV.setOnClickListener(v -> {
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
                 {
-                    Intent intent = new Intent(this, WalletActivity.class);
+                    Intent intent = new Intent(this, P2pExchangeActivity.class);
                     startActivity(intent);
+
                     // Reset the scale
-                    new Handler().postDelayed( ()-> {
+                    new Handler().postDelayed(()-> {
                         v.setScaleX(1.0f);
                         v.setScaleY(1.0f);
-                    }, 50);
-                }).start();
+                    }, 200);
 
+                }).start();
             });
+
 
             // view my profile photo @sideBar menu
             View.OnClickListener viewImage = view -> {
@@ -986,10 +1055,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             //  ==================    Long Press chat option settings     ===========================
 
             cancelChatOption_IV.setOnClickListener(view -> {
-                view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50)
                         .withEndAction(() -> {
 
-                            cancelChatOption();
+                            onBackPressed();
 
                             // Reset the scale
                             view.setScaleX(1.0f);
@@ -1062,7 +1131,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             // emoji button on long press
             emojiChatOption_TV.setOnClickListener(view -> {
-                view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
+                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(40)
                         .withEndAction(() -> {
 
                             onEmojiReact(chatHolder, modelChatsOption.getIdKey());
@@ -1080,7 +1149,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             //  pin
             pinTV.setOnClickListener(view -> {
-                view.animate().scaleX(1.3f).scaleY(1.3f).setDuration(50)
+                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(40)
                         .withEndAction(() -> {
 
                             onPinData(modelChatsOption.getIdKey(), modelChatsOption.getMessage(),
@@ -1158,17 +1227,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if(modelChatsOption.getType() != 0){    //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
                         editTV.setVisibility(View.GONE);
                         if(modelChatsOption.getType() ==  1) {
-                            saveTogalleryTV.setVisibility(View.GONE);
-                        } else saveTogalleryTV.setVisibility(View.VISIBLE);
+                            saveToGalleryTV.setVisibility(View.GONE);
+                        } else saveToGalleryTV.setVisibility(View.VISIBLE);
 
                     } else {
-                        saveTogalleryTV.setVisibility(View.GONE);
+                        saveToGalleryTV.setVisibility(View.GONE);
                         editTV.setVisibility(View.VISIBLE);
                     }
 
                     if(moreOptionContainer.getVisibility() == View.GONE){
                         // Start the animation to make it visible
-                        animateVisibility(moreOptionContainer);
+                        animateVisibility(null, moreOptionContainer);
                     } else {
                         generalBackground.setVisibility(View.GONE);
                         moreOptionContainer.setVisibility(View.GONE);
@@ -1182,7 +1251,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             // save photo or file to gallery
-            saveTogalleryTV.setOnClickListener(view -> {
+            saveToGalleryTV.setOnClickListener(view -> {
                 Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
             });
 
@@ -1231,7 +1300,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
                 {
                     // Start the animation to make it visible
-                    animateVisibility(fileContainerAnim);
+                    animateVisibility(fileContainerAnim, null);
 
                     new Handler().postDelayed(()-> {
                         view.setScaleX(1f);
@@ -1965,60 +2034,112 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    private void makeCall(String callType) {
-        if(run == 0){
-            Intent intent = new Intent(this, CallCenterActivity.class);
-            intent.putExtra("otherUid", otherUserUid);
-            intent.putExtra("myId", myId);
-            intent.putExtra("otherName", otherUserName);
-            intent.putExtra("myUsername", myUserName);
-            intent.putExtra("answerCall", false);
-            intent.putExtra("callType", callType);
-            startActivity(intent);
+    private void openWalletMethod(){
 
-            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
-            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+        PhoneUtils.hideKeyboard(this, enterAckPin_ET);
 
-            currentUserUidOnCall = otherUserUid;
+        Intent intent = new Intent(this, WalletActivity.class);
+        startActivity(intent);
 
-            activeOnCall = 0;
+        walletVerifyLayout.setVisibility(View.GONE);
+
+        sideBarMenuContainer.setVisibility(View.GONE);
+
+//        v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+//        {
+
+            // Reset the scale
+//            new Handler().postDelayed( ()-> {
+//                v.setScaleX(1.0f);
+//                v.setScaleY(1.0f);
+//            }, 50);
+//        }).start();
+    }
+
+    private void showFingerPrint(){
+        if(permissionCheck.isBiometricOk(this)){
+
+            enterAckPin_ET.setText(null);
+            // Create a BiometricPrompt instance
+            biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback()
+            {
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    if(errorCode == 13){
+
+                        verifyWithPin();
+                        
+                    } else {
+                        pinOptionContainer.setVisibility(View.VISIBLE);
+                        pinContainerHome.setVisibility(View.GONE);
+                        openWalletButton.setVisibility(View.GONE);
+
+                        fingerprintIcon.setVisibility(View.VISIBLE);
+                        verifyViaTV.setVisibility(View.VISIBLE);
+                        or_TV.setVisibility(View.VISIBLE);
+                        openPinBox_TV.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+
+                    loadVerify();
+
+                    openWalletMethod(); // fingerprint
+
+                    Toast.makeText(MainActivity.this, getString(R.string.verifying), Toast.LENGTH_SHORT).show();
+                    // Handle authentication success
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    Toast.makeText(MainActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                    // verify with PIN directly
+                    verifyWithPin();
+                }
+            });
+
+            // Create a BiometricPrompt.PromptInfo instance
+            promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Fingerprint Authentication")
+                    .setSubtitle("Click 'Verify by PIN' if fingerprint is dirty or wet")
+                    .setNegativeButtonText("Or\n Verify by PIN")
+                    .build();
+
+            // Show the fingerprint authentication dialog
+            biometricPrompt.authenticate(promptInfo);
+
         } else {
-            Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
-            callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(callIntentActivity);
-        }
-        run = 1;    // to make the call activity to open instead of recreating new instance
-    }
-
-    private void rejectCall() {
-        busyCall();
-    }
-
-    public void stopRingTone(){
-        callUtils.stopVibration();
-        callUtils.stopRingtone();   // stop the ringtone
-    }
-
-    private void answerCall() {
-        if(callModel != null){
-            Intent intent = new Intent(this, CallCenterActivity.class);
-            intent.putExtra("otherUid", callModel.getSenderUid());
-            intent.putExtra("myId", myId);
-            intent.putExtra("otherName", callModel.getSenderName());
-            intent.putExtra("myUsername", myUserName);
-            intent.putExtra("answerCall", true);
-            intent.putExtra("callType", callType_);
-
-            stopRingTone();
-
-            startActivity(intent);
-            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
-            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+            permissionCheck.requestBiometric(this);
         }
 
-        incomingCallLayout.setVisibility(View.GONE);
-        run = 1;    // to make the call activity to open instead of recreating new instance
-        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+    }
+
+    private void verifyWithPin(){
+        pinOptionContainer.setVisibility(View.VISIBLE);
+        pinContainerHome.setVisibility(View.VISIBLE);
+        openWalletButton.setVisibility(View.VISIBLE);
+
+        fingerprintIcon.setVisibility(View.GONE);
+        verifyViaTV.setVisibility(View.GONE);
+        or_TV.setVisibility(View.GONE);
+        openPinBox_TV.setVisibility(View.GONE);
+    }
+
+    private void loadVerify(){
+        generalBackground.setVisibility(View.VISIBLE);
+        verifyLoadTV.setVisibility(View.VISIBLE);
+        verifyProgressBar.setVisibility(View.VISIBLE);
+
+        new Handler().postDelayed(()-> {
+            generalBackground.setVisibility(View.GONE);
+            verifyLoadTV.setVisibility(View.GONE);
+            verifyProgressBar.setVisibility(View.GONE);
+        }, 2000);
     }
 
     //  --------------- methods && interface --------------------
@@ -2248,8 +2369,6 @@ scNum = 20;
         // store myUserName for looping through load message status and change to delivery status
         myUserName = userName;
 
-        mContext = mContext_;
-
         // only alert me if I am not on another call    -- work on this later
         incomingCallObserver(otherUID);
 
@@ -2270,114 +2389,6 @@ scNum = 20;
 
     }
 
-    // only alert me if I am not on another call    -- work on this later
-    public void incomingCallObserver(String otherUID){
-        mainRepository.subscribeForLatestEvent(otherUID, (data)->{
-            if (data.getType().equals(DataModelType.AudioCall) || data.getType().equals(DataModelType.VideoCall)
-                    || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
-            {
-                activeOnCall+=1;
-                runOnUiThread(()->{
-                    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
-                    if (activeOnCall <= 1 || ( currentUserUidOnCall != null && currentUserUidOnCall.equals(data.getSenderUid())) ) {
-
-                        if(activeOnCall <=1){
-
-                            iHaveACall(data);
-
-                        } else if (currentUserUidOnCall != null) {
-
-                            goBackToCall = getString(R.string.returnToCall);
-
-                            if(data.getType().equals(DataModelType.VideoCall))
-                            {
-                                if(CallCenterActivity.callType.equals("audio")){
-                                    callsListener.getRequestVideoCall(data);
-                                    goBackToCall =  data.getSenderName() +" " + getString(R.string.requestForVideoCall);
-                                }
-                                CallCenterActivity.isOtherUserCameraOn = true;
-
-                            } else if (data.getType().equals(DataModelType.RejectVideo))
-                            {
-                                callsListener.getRejectVideoCallResp(data);
-                                // change mine "type" to "recall" so user can still recall
-                                CallModel callModel1 = new CallModel(currentUserUidOnCall, otherUserName,
-                                        user.getUid(), myUserName,null, DataModelType.RecallCall, false);
-                                refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(callModel1));
-
-                            } else if (data.getType().equals(DataModelType.AcceptVideo))
-                            {
-                                // get  the response when other user accept my video call
-                                callsListener.acceptVideoCall();
-
-                            }else if (data.getType().equals(DataModelType.AudioCall))
-                            {
-                                //  notify me when other user off his camera
-                                if(!CallCenterActivity.isOnVideo) { // If I'm on audio mood, change to audio mood background
-                                    callsListener.myUserOffCamera();
-                                }
-                                CallCenterActivity.isOtherUserCameraOn = false;
-                            }
-                        }
-
-                    } else {
-                        data.setType(DataModelType.OnAnotherCall);    // indicate to other user that it is ringing
-                        refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
-                        Toast.makeText(this, data.getSenderName() +" " +
-                                getString(R.string.anotherUserIsCalling), Toast.LENGTH_SHORT).show();
-                    }
-
-                });
-            } else if (data.getType().equals(DataModelType.None))
-            {
-                runOnUiThread(()->{
-                    incomingCallLayout.setVisibility(View.GONE);
-                    stopRingTone();
-                    handlerVibrate.removeCallbacks(CallCenterActivity.runnableVibrate);
-                    handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
-                    activeOnCall = 0;
-                });
-
-                // to enable viewCallerActivity to end or finish when other user end call
-                callsListener.myUserEndCall();
-            }
-
-        });
-
-    }
-
-    private void iHaveACall(CallModel callData){
-        this.callModel = callData;
-        stopRingTone();
-
-        incomingCallLayout.setVisibility(View.VISIBLE);
-        currentUserUidOnCall = callData.getSenderUid();
-
-        String whoIsCalling;
-        if(callData.getType().equals(DataModelType.VideoCall)) {
-            whoIsCalling = getString(R.string.videoCall) +  "  " + callData.getSenderName();
-            callType_ = "video";
-        } else {
-            whoIsCalling = getString(R.string.audioCall) +  "  " + callData.getSenderName();
-            callType_ = "audio";
-        }
-        whoIsCallingTV.setText(whoIsCalling);
-        //vibrate my tone
-        callUtils.startContinuousVibration();
-        callUtils.playRingtone();
-
-        callData.setIsRinging(true);    // indicate to other user that it is ringing
-        callData.setType(DataModelType.Offline);    // indicate to other user that it is ringing
-        refCalls.child(myId).child(callData.getSenderUid()).setValue(gson.toJson(callData));
-
-        // make activeCall return back to 0 after 33sec if I didn't pick
-        runnableOnAnotherCall = () -> activeOnCall = 0;
-        handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
-
-        // make activeCall return back to 0 after 5min if I didn't pick
-//        runnableOnAnotherCall2 = () -> activeOnCall = 0;
-//        handlerOnAnotherCall2.postDelayed(runnableOnAnotherCall2, 300_000);
-    }
 
     @Override
     public void onDeleteMessage() {
@@ -5070,6 +5081,173 @@ scNum = 20;
     }
 
 
+    //      ================      call methods           ========================
+    private void makeCall(String callType) {
+        if(run == 0){
+            Intent intent = new Intent(this, CallCenterActivity.class);
+            intent.putExtra("otherUid", otherUserUid);
+            intent.putExtra("myId", myId);
+            intent.putExtra("otherName", otherUserName);
+            intent.putExtra("myUsername", myUserName);
+            intent.putExtra("answerCall", false);
+            intent.putExtra("callType", callType);
+            startActivity(intent);
+
+            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
+            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+
+            currentUserUidOnCall = otherUserUid;
+
+            activeOnCall = 0;
+        } else {
+            Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
+            callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(callIntentActivity);
+        }
+        run = 1;    // to make the call activity to open instead of recreating new instance
+    }
+
+    private void rejectCall() {
+        busyCall();
+    }
+
+    public void stopRingTone(){
+        callUtils.stopVibration();
+        callUtils.stopRingtone();   // stop the ringtone
+    }
+
+    private void answerCall() {
+        if(callModel != null){
+            Intent intent = new Intent(this, CallCenterActivity.class);
+            intent.putExtra("otherUid", callModel.getSenderUid());
+            intent.putExtra("myId", myId);
+            intent.putExtra("otherName", callModel.getSenderName());
+            intent.putExtra("myUsername", myUserName);
+            intent.putExtra("answerCall", true);
+            intent.putExtra("callType", callType_);
+
+            stopRingTone();
+
+            startActivity(intent);
+            new Handler().postDelayed(() -> returnToCallLayout.setVisibility(View.VISIBLE), 1000);
+            returnToCallWithDuration.setText(getString(R.string.returnToCall));
+        }
+
+        incomingCallLayout.setVisibility(View.GONE);
+        run = 1;    // to make the call activity to open instead of recreating new instance
+        handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+    }
+
+    // only alert me if I am not on another call    -- work on this later
+    public void incomingCallObserver(String otherUID){
+        mainRepository.subscribeForLatestEvent(otherUID, (data)->{
+            if (data.getType().equals(DataModelType.AudioCall) || data.getType().equals(DataModelType.VideoCall)
+                    || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
+            {
+                activeOnCall+=1;
+                runOnUiThread(()->{
+                    //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
+                    if (activeOnCall <= 1 || ( currentUserUidOnCall != null && currentUserUidOnCall.equals(data.getSenderUid())) ) {
+
+                        if(activeOnCall <=1){
+
+                            iHaveACall(data);
+
+                        } else if (currentUserUidOnCall != null) {
+
+                            goBackToCall = getString(R.string.returnToCall);
+
+                            if(data.getType().equals(DataModelType.VideoCall))
+                            {
+                                if(CallCenterActivity.callType.equals("audio")){
+                                    callsListener.getRequestVideoCall(data);
+                                    goBackToCall =  data.getSenderName() +" " + getString(R.string.requestForVideoCall);
+                                }
+                                CallCenterActivity.isOtherUserCameraOn = true;
+
+                            } else if (data.getType().equals(DataModelType.RejectVideo))
+                            {
+                                callsListener.getRejectVideoCallResp(data);
+                                // change mine "type" to "recall" so user can still recall
+                                CallModel callModel1 = new CallModel(currentUserUidOnCall, otherUserName,
+                                        user.getUid(), myUserName,null, DataModelType.RecallCall, false);
+                                refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(callModel1));
+
+                            } else if (data.getType().equals(DataModelType.AcceptVideo))
+                            {
+                                // get  the response when other user accept my video call
+                                callsListener.acceptVideoCall();
+
+                            }else if (data.getType().equals(DataModelType.AudioCall))
+                            {
+                                //  notify me when other user off his camera
+                                if(!CallCenterActivity.isOnVideo) { // If I'm on audio mood, change to audio mood background
+                                    callsListener.myUserOffCamera();
+                                }
+                                CallCenterActivity.isOtherUserCameraOn = false;
+                            }
+                        }
+
+                    } else {
+                        data.setType(DataModelType.OnAnotherCall);    // indicate to other user that it is ringing
+                        refCalls.child(myId).child(data.getSenderUid()).setValue(gson.toJson(data));
+                        Toast.makeText(this, data.getSenderName() +" " +
+                                getString(R.string.anotherUserIsCalling), Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+            } else if (data.getType().equals(DataModelType.None))
+            {
+                runOnUiThread(()->{
+                    incomingCallLayout.setVisibility(View.GONE);
+                    stopRingTone();
+                    handlerVibrate.removeCallbacks(CallCenterActivity.runnableVibrate);
+                    handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
+                    activeOnCall = 0;
+                });
+
+                // to enable viewCallerActivity to end or finish when other user end call
+                callsListener.myUserEndCall();
+            }
+
+        });
+
+    }
+
+    private void iHaveACall(CallModel callData){
+        this.callModel = callData;
+        stopRingTone();
+
+        incomingCallLayout.setVisibility(View.VISIBLE);
+        currentUserUidOnCall = callData.getSenderUid();
+
+        String whoIsCalling;
+        if(callData.getType().equals(DataModelType.VideoCall)) {
+            whoIsCalling = getString(R.string.videoCall) +  "  " + callData.getSenderName();
+            callType_ = "video";
+        } else {
+            whoIsCalling = getString(R.string.audioCall) +  "  " + callData.getSenderName();
+            callType_ = "audio";
+        }
+        whoIsCallingTV.setText(whoIsCalling);
+        //vibrate my tone
+        callUtils.startContinuousVibration();
+        callUtils.playRingtone();
+
+        callData.setIsRinging(true);    // indicate to other user that it is ringing
+        callData.setType(DataModelType.Offline);    // indicate to other user that it is ringing
+        refCalls.child(myId).child(callData.getSenderUid()).setValue(gson.toJson(callData));
+
+        // make activeCall return back to 0 after 33sec if I didn't pick
+        runnableOnAnotherCall = () -> activeOnCall = 0;
+        handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
+
+        // make activeCall return back to 0 after 5min if I didn't pick
+//        runnableOnAnotherCall2 = () -> activeOnCall = 0;
+//        handlerOnAnotherCall2.postDelayed(runnableOnAnotherCall2, 300_000);
+    }
+
+
     // Method to hide the soft keyboard when needed
     private void hideKeyboard() {
         View currentFocusView = getCurrentFocus();
@@ -5637,7 +5815,11 @@ scNum = 20;
         } else if (onForward)
         {
             cancelForwardSettings(this);    // onBackPress
-        } else if (sideBarMenuContainer.getVisibility() == View.VISIBLE)
+        } else if (walletVerifyLayout.getVisibility() == View.VISIBLE)
+        {
+            walletVerifyLayout.setVisibility(View.GONE);
+
+        }else if (sideBarMenuContainer.getVisibility() == View.VISIBLE)
         {
             sideBarMenuContainer.setVisibility(View.GONE);
         } else if (viewPager2General.getCurrentItem() != 0)
@@ -5707,7 +5889,12 @@ scNum = 20;
         } else if(requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED){
             answerCall();
-        }else {
+        }
+        else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Permission granted
+            Toast.makeText(this, "I have verify!", Toast.LENGTH_SHORT).show();
+            showFingerPrint();
+        } else {
             if(requestCode == AllConstants.RECORDING_REQUEST_CODE){
                 Toast.makeText(mainActivityContext, "Go to phone app settings and permit Microphone", Toast.LENGTH_SHORT).show();
             } else if(requestCode == AllConstants.CALL_CAMERA_REQUEST_CODE || requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE){
@@ -5733,7 +5920,7 @@ scNum = 20;
         clearGlideCache();
     }
 
-    //  call listener
+    //  ==========  call interface listener
     @Override
     public void endCall() {
         run = 0;   // restart to 0 so it can create new instead

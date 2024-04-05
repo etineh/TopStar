@@ -44,6 +44,10 @@
         <item name="android:background">#F1EAEA</item>
     </style>
 
+    <style name="mainBackground">
+        <item name="android:background">@color/white</item>
+    </style>
+
     <style name="cardTopOrange">
         <item name="android:background">@color/orange</item>
     </style>
@@ -81,6 +85,10 @@
         <item name="android:textColor">#F1EAEA</item>
     </style>
 
+    <style name="textOrangeAndCoolOrange">
+        <item name="android:textColor">@color/orange</item>
+    </style>
+
     <style name="textColorFullBlack">
         <item name="android:textColor">@color/black</item>
     </style>
@@ -116,6 +124,10 @@
     <style name="checkBoxTint">
         <item name="android:buttonTint">@color/orange</item>
         <item name="android:background">#FBF9F9</item>
+    </style>
+    <style name="checkBoxTint2">
+        <item name="android:buttonTint">@color/orange</item>
+<!--        <item name="android:background">#FBF9F9</item>-->
     </style>
 
     <!--    TextView Orange and Cool orange -->

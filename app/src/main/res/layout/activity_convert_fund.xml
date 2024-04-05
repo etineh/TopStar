@@ -5,8 +5,8 @@
     style="@style/cardTop"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:elevation="4dp"
-    android:padding="15dp">
+    android:padding="15dp"
+    tools:context=".side_bar_menu.wallet.ConvertFundActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

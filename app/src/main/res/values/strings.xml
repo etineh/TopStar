@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Topper</string>
-    <string name="pin">Pin</string>
+    <string name="pin">PIN</string>
+    <string name="pinChat">Pin</string>
+    <string name="copied">Copied</string>
     <string name="unpin">Unpin</string>
     <string name="delete">Del.</string>
     <string name="move">Move</string>
@@ -123,14 +125,33 @@
     <!--    others-->
     <string name="reset">Reset</string>
 
+    <!--    create new pin-->
+    <string name="createPin">Create Pin</string>
+    <string name="createIn5sec">Create new Pin in 10 secs</string>
+    <string name="enterNewPin">Enter 4 new digit PIN</string>
+    <string name="confirmPin">Confirm PIN</string>
+    <string name="createPinInfo">1. On pin complexion, if device supports fingerprint (biometric), it will be enabled automatically. \n2. This is
+    to enable you have access to your wallet quickly, and also prevent other party from seeing your PIN when typing it.
+    \n3. If you don\'t need the fingerprint, you can disable it via app settings to continue using only PIN.\n4. TopStar Team will never ask
+        you for your PIN. Never disclose your PIN to anyone. Protect your funds! \n\n\n\n\n</string>
+    <string name="iUnderstand"> I have read and understood the terms below.</string>
+    <string name="fingerprintTerms">Terms on PIN and fingerprint</string>
+    <string name="pin_usage"> This pin is used for opening your wallet and processing transactions. Hence, it should be different from your login password.</string>
+
 
     <!--    //  wallet-->
+    <string name="myAssets">My Assets</string>
     <string name="totalAsset">Total Asset</string>
+    <string name="totalGameAsset">Total Game Asset</string>
+    <string name="totalLocalAsset">Total Local Asset</string>
+    <string name="totalUSDTAsset">Total USDT Asset</string>
+    <string name="totalBonusAsset">Total Bonus/Airdrop Asset</string>
+
     <string name="localAsset">Local Asset</string>
     <string name="usdtAsset">USDT Asset</string>
     <string name="gameAsset">Game Rewards</string>
     <string name="bonusAsset">Bonus/Airdrop</string>
-    <string name="uniCountryCurrencySymbol">₦ 60,000.00</string>
+    <string name="uniCountryCurrencySymbol">₦ 25,000.00</string>
     <string name="uniCountryCurrencySymbol_">＄ 20.00</string>
     <string name="transfer">Transfer</string>
     <string name="deposit">Deposit</string>
@@ -151,7 +172,8 @@
     <string name="searchUser">email / phone no / username</string>
     <string name="transferringto">Transferring to:</string>
     <string name="enterAmount">Enter Amount</string>
-    <string name="enterPin">Enter Pin</string>
+    <!--    <string name="searchAmount">Search Amount</string>-->
+    <string name="enterPin">Enter PIN</string>
     <string name="transfer_from">Transfer from:</string>
     <string name="withdraw_from">Withdraw from:</string>
     <string name="convert_from">Convert from:</string>
@@ -170,9 +192,9 @@
     <string name="withdrawWithCaution">Ensure all details are correct</string>
     <string name="note">Note: when transferring funds from your local currency to an international user, it will be converted to and sent as "USDT".</string>
     <string name="incorrectPin">Pin incorrect</string>
-    <string name="invalid_Amount">Invalid amount</string>
     <string name="date">Date: </string>
     <string name="time">Time: </string>
+    <string name="fee">Fee: </string>
     <string name="amount">Amount: </string>
     <string name="transactionSuccessful">Transaction Successful</string>
     <string name="receiver">Receiver: </string>
@@ -200,6 +222,19 @@
     <string name="networkCaution2"> Please send to the exact network you selected. We can\'t recover fund sent to a wrong network. </string>
     <string name="assetSwitch"> Asset switched </string>
     <string name="convertSuccessfully"> Asset successfully converted </string>
+    <string name="received">Received </string>
+
+    <string name="or">Or </string>
+
+    <string name="gameRewardHistory">Game Reward History </string>
+    <string name="bonusRewardHistory">Bonus/Airdrop History </string>
+    <string name="USDTHistory">USDT History </string>
+    <string name="LocalAssetHistory">Local Asset History </string>
+
+    <string name="winPoker">Win Poker game against </string>
+    <string name="losePoker">Lost Poker game against</string>
+    <string name="winWhot">Win Whot game against</string>
+    <string name="loseWhot">Lost Whot game against </string>
 
 
     <string-array name="dropdown_networks">
@@ -215,9 +250,129 @@
         <item>Bonus/Giveaway</item>
     </string-array>
 
-    <!--    <string-array name="dropdown_networks">-->
-    <!--        <item>Choose Network</item>-->
-    <!--        <item>BSc (Bep20) ~ $0.4 fee</item>-->
-    <!--        <item>Tron (Trc20) ~ $1.4 fee</item>-->
-    <!--    </string-array>-->
+    <!--    p2p exchange-->
+    <string name="order">order(s) </string>
+    <string name="pay_speed">Pay speed: </string>
+    <string name="buy">Buy </string>
+    <string name="buyMood">Buy Mood </string>
+    <string name="sellMood">Sell Mood </string>
+    <string name="sell">Sell </string>
+    <string name="p2pExc">P2P Trading</string>
+    <string name="pendingOrder">pending order</string>
+    <string name="searchAmount">Search Amount</string>
+    <string name="traderFee">Trader\'s fee: </string>
+    <string name="feeCharge">If trader charges you beyond their stated fee, kindly report such user immediately. </string>
+    <string name="receive_amount">I will be credited: </string>
+    <string name="receive_amount_seller">I will receive: </string>
+    <string name="chooseTraderAccount">Choose Trader Account </string>
+    <string name="chooseMyAccount">Pay to my: </string>
+
+    <string name="acceptTerms"> Failure to comply to TopStar terms and trader remark below may result in lost. Click to accept. </string>
+    <string name="tsInfo"> TopStar Terms:</string>
+    <string name="topStarInfo"> If payment is not made to trader\'s account within 20 minutes after you proceed, the order will be cancelled automatically.</string>
+    <string name="topStarInfo2"> 1. If you do not release fund after receiving payment from trader, the system will reach out to you first. And
+        if no response from you within 6 hours of reaching out to you, the system will automatically release fund to trader. Stay active!
+        \n2. In a situation of network issue, ensure you relate it with the trader.
+    \n3. If trader files a report again you about complete payment with evidence, and you claimed not to have received payment, Verified TopStar Support will
+        reach out to you for evidence or bank statement, and if no response from you within 6 hours, funds will be automatically released.
+    \n4. If there\'s response from you within the 6 hours time frame, your fund will remain intact but locked, till all verification and
+        proof of evidence between you and trader are be carried out and resolved by TopStar Team. \n\n</string>
+    <string name="trade_remark"> Trader\'s Remark:</string>
+    <string name="all"> All</string>
+    <string name="range"> Range: </string>
+    <string name="termNotAccepted">Accept terms first</string>
+    <string name="alertTrader">Alert Trader</string>
+    <string name="order_ID">Order ID: </string>
+    <string name="order_time">Order Time: </string>
+    <string name="name">Name: </string>
+    <string name="account_number">Account Number: </string>
+    <string name="bank_name">Bank Name: </string>
+    <string name="tpInfo">Trader asset for the order amount has been locked. You can go ahead with payment within the above time frame! </string>
+    <string name="tpInfo2">If trader\'s real name above doesn\'t match with the payment name, don\'t release the fund yet until you have reached
+        out to TopStar Support.  Protect your account! </string>
+
+    <string name="cancel_order">Cancel Order </string>
+    <string name="completed">Completed</string>
+    <string name="iHavePaid">I have paid</string>
+    <string name="releaseNow">Release Now</string>
+    <string name="wait">Wait!</string>
+    <string name="order_cancel"> Order cancelled. </string>
+    <string name="trade_smoothly"> Trade Smoothly! </string>
+
+    <string name="tick_box"> Tick the box if you have confirmed payment. </string>
+    <string name="tick_box_fingerprint"> Tick the box if you have read and agreed to terms. </string>
+
+    <string name="pin_4"> PIN must be 4 digits </string>
+    <string name="pin_create"> PIN created successfully </string>
+    <string name="pin_not_match"> PIN does not match. </string>
+    <string name="open_walletVia"> Open wallet via: </string>
+
+    <string name="hide_pin"> Please hide your PIN from everyone. </string>
+
+    <string name="orderCompleted"> Order Completed! </string>
+
+    <string name="giveReview">Give trader review!</string>
+    <string name="verifying">Verifying…</string>
+
+    <!--    <string name="infoWarning">* After making payment, ensure to click the \"complete\" button before the estimated time ends -->
+    <!--        \n* if you don\'t click the \"complete\" button before the time ends, the order will be closed automatically by the system. -->
+    <!--        \n* Lastly, ensure you complete payment within the time frame before clicking the \"complete\" button.</string>-->
+
+    <string name="timeWarning">Your payment time left:</string>
+    <string name="creditTimeLeft">Expect payment from trader within:</string>
+    <string name="creditInfo">Ensure you received the fund in your bank account or wallet first before you click \"Release Now\".</string>
+
+    <string name="infoWarning">If you don\'t click \"I have paid\" button before the time ends, the order will be closed automatically by the system.
+        And ensure you complete payment within the time frame before clicking \"I have paid\" button.</string>
+
+    <string name="payCompleted">Awaiting trader to release fund in:</string>
+    <string name="payCation">A request has been sent to trader to check your payment.
+        If trader does not release fund within the time frame, alert him/her. If no respond, make a report!</string>
+
+    <string name="payTo">Kindly transfer 50,000 NGN to:</string>
+    <string name="youPaidTo">You transferred 50,000 NGN to:</string>
+    <string name="awaitingTrader">Ndifreke Sunday will send 50,000 NGN to your:</string>
+    <string name="invalidAmount">Invalid Amount</string>
+
+    <string name="forgetPin">Forget Pin?</string>
+
+    <string name="confirmPayment">Please confirm payment first. </string>
+    <string name="confirm_Withd_Trans">Please ensure all details are correct before entering PIN. </string>
+
+    <string name="iAcknowledge">I acknowledge I have sent the exact amount to trader.</string>
+    <string name="iAcknowledge2">I acknowledge I have checked my bank account or e-wallet and confirmed trader/payer has made complete payment to my account.</string>
+    <string name="iAcknowledge3">I acknowledge the trader/payer legal name display on P2P TopStar app is same as the payment name.</string>
+
+    <string name="confirm">Confirm </string>
+    <string name="openWallet"> Open Wallet </string>
+
+    <string name="markOrderNotify">Order marked! \nTrader/payer has claimed to make payment. Kindly check your
+        account for confirmation and click on \"Release Now\" if seen. </string>
+
+    <string name="paidAlready">1. If you have made payment already, please do not cancel this order, because we can\'t recover the fund back.
+        \n2. If you cancel order twice in a day, the system will automatically stop you from performing any p2p transaction in 24hours.</string>
+    <!--    <string name="iAcknowledge">I acknowledge I have sent the exact amount to trader.</string>-->
+    <!--    <string name="iAcknowledge">I acknowledge I have sent the exact amount to trader.</string>-->
+
+    <string name="issue">Relate the issue:</string>
+    <string name="networkIssue">There is network issue.</string>
+    <string name="meetRequire">I didn\'t meet the trader\'s requirements.</string>
+    <string name="extraFee">Trader is requesting for extra fee.</string>
+    <string name="differName">Trader\'s account name is different from his/her legal name.</string>
+    <string name="invalidAccount">Trader\'s account is incorrect/invalid.</string>
+    <string name="other">Other</string>
+    <string name="cancelNow">Cancel Now</string>
+    <string name="stateReason">State the reason you are cancelling.</string>
+
+    <string name="stateOtherReason">State other reason(s)</string>
+
+
+    <string-array name="paymentOption">
+        <item>Choose payment method</item>
+        <item>Zenith Bank</item>
+        <item>PalmPay</item>
+        <item>Opay</item>
+        <item>First Bank</item>
+        <item>MoniePoint</item>
+    </string-array>
 </resources>

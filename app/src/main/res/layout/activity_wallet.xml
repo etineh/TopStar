@@ -2,12 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/cardTop"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".side_bar_menu.wallet.WalletActivity">
-
-    <include layout="@layout/inc_network_check" />
 
     <include
         android:id="@+id/trans_background"
@@ -15,18 +13,13 @@
         android:visibility="gone" />
 
     <include
-        android:id="@+id/transferLayout"
-        layout="@layout/inc_transfer_layout"
+        android:id="@+id/transferPayeeListLayout"
+        layout="@layout/inc_transfer_payee_list_layout"
         android:visibility="gone" />
 
     <include
         android:id="@+id/transferPageLayout"
         layout="@layout/inc_transfer_page"
-        android:visibility="gone" />
-
-    <include
-        android:id="@+id/transferSuccessfulPage"
-        layout="@layout/inc_successfull_layout"
         android:visibility="gone" />
 
     <include
@@ -45,15 +38,15 @@
         android:visibility="gone" />
 
     <include
-        android:id="@+id/convertPageLayout"
-        layout="@layout/inc_convert_assets_layout"
+        android:id="@+id/acknowledgeLayout"
+        layout="@layout/inc_acknowledge_withd_or_trans"
         android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayerConstraint"
+        style="@style/mainBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/transBlack50"
         android:elevation="3dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,6 +55,7 @@
 
         <ImageView
             android:id="@+id/resetPin_IV"
+            style="@style/Tint_Orange_CoolOrange"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="15dp"
@@ -70,16 +64,15 @@
             app:layout_constraintEnd_toStartOf="@+id/support_IV"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/reset_password"
-            app:tint="@color/white" />
+            app:srcCompat="@drawable/reset_password" />
 
         <TextView
             android:id="@+id/photoSelected_TV"
+            style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="@string/app_name"
-            android:textColor="@color/white"
+            android:text="@string/myAssets"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/arrowBack_IV"
@@ -87,43 +80,30 @@
 
         <ImageView
             android:id="@+id/support_IV"
-            style="@style/BackgroundTintDarkOrange"
+            style="@style/Tint_Orange_CoolOrange"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="15dp"
-            android:padding="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/history_IV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.51"
-            app:srcCompat="@drawable/customer_care"
-            app:tint="@color/white" />
-
-
-        <ImageView
-            android:id="@+id/arrowBack_IV"
-            android:layout_width="30dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_arrow_back_24"
-            app:tint="@color/white" />
-
-        <ImageView
-            android:id="@+id/history_IV"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
+            android:layout_marginEnd="20dp"
             android:padding="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.51"
+            app:srcCompat="@drawable/customer_care" />
+
+
+        <ImageView
+            android:id="@+id/arrowBack_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_calendar_month_24"
-            app:tint="@color/white" />
+            app:srcCompat="@drawable/baseline_arrow_back_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -246,11 +226,12 @@
                         app:layout_constraintTop_toBottomOf="@+id/textView30" />
 
                     <ImageView
-                        android:id="@+id/imageView11"
+                        android:id="@+id/hideAmount_IV"
                         style="@style/Tint_Orange_CoolOrange"
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
                         android:layout_marginStart="15dp"
+                        android:padding="5dp"
                         app:layout_constraintBottom_toBottomOf="@+id/textView30"
                         app:layout_constraintStart_toEndOf="@+id/textView30"
                         app:layout_constraintTop_toTopOf="@+id/textView30"

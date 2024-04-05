@@ -31,6 +31,7 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:name=".FirebaseOffline"
@@ -47,13 +48,40 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".peer2peer.P2pExchangeActivity"
+            android:name=".activities.CreatePinActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.exchange.BuyerInputAmountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.exchange.BuyerPaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.FingerprintActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.exchange.SellerPaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.exchange.SellerInputAmountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.wallet.ConvertFundActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.wallet.EachAssetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".peer2peer.exchange.P2pExchangeActivity"
             android:exported="false" />
         <activity
             android:name=".side_bar_menu.wallet.WalletActivity"
             android:exported="false" />
         <activity
-            android:name=".CaptureAct"
+            android:name=".side_bar_menu.wallet.TransactionReceiptActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CaptureAct"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme" />

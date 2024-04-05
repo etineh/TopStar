@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/cardTop"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clickable="true"
     android:elevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        style="@style/cardTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp">
@@ -142,7 +142,7 @@
 
 
             <EditText
-                android:id="@+id/enterAmount_ET"
+                android:id="@+id/transferAmount_ET"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
@@ -164,58 +164,28 @@
             android:id="@+id/getTransferConvertAmount_TV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="5dp"
             android:text="@string/convertForUser"
-            android:textSize="14sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/amountContainer" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/pinContainer"
-            style="@style/roundRadiusBackground2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/getTransferConvertAmount_TV">
-
-
-            <EditText
-                android:id="@+id/enterPin_ET"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/fullTransparent"
-                android:ems="10"
-                android:hint="@string/enterPin"
-                android:inputType="number|numberPassword"
-                android:maxLines="1"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
-            android:background="@drawable/round_orange_background_10dp"
+            android:background="@drawable/round_radius_orange"
             android:paddingStart="25dp"
             android:paddingTop="8dp"
             android:paddingEnd="25dp"
             android:paddingBottom="8dp"
-            android:text="@string/send"
+            android:text="@string/proceed"
             android:textColor="@color/white"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainer" />
+            app:layout_constraintTop_toBottomOf="@+id/getTransferConvertAmount_TV" />
 
         <TextView
             android:id="@+id/textView31"
@@ -230,18 +200,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/sendButton" />
 
-        <TextView
-            android:id="@+id/errorInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/incorrectPin"
-            android:textColor="@color/orange"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainer" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </ScrollView>

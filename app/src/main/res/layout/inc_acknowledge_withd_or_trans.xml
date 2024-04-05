@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/trans_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:elevation="5dp"
+    android:gravity="bottom">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/cardTopOrange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteY="386dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pinContainerAck"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView56">
+
+
+            <EditText
+                android:id="@+id/enterPin_ET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/fullTransparent"
+                android:ems="10"
+                android:hint="@string/enterPin"
+                android:inputType="number|numberPassword"
+                android:maxLines="1"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/cancelAct_IV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:padding="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_cancel_24"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/sendTransactionButton"
+            style="@style/roundRadiusBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="20dp"
+            android:paddingStart="25dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="8dp"
+            android:text="@string/send"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/forgetPin_Button" />
+
+        <TextView
+            android:id="@+id/textView56"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/confirm_Withd_Trans"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/cancelAct_IV"
+            app:layout_constraintEnd_toStartOf="@+id/cancelAct_IV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:lineHeight="20dp" />
+
+        <TextView
+            android:id="@+id/forgetPin_Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/forgetPin"
+            android:textColor="@color/white"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="@+id/pinContainerAck"
+            app:layout_constraintTop_toBottomOf="@+id/pinContainerAck" />
+
+        <TextView
+            android:id="@+id/textView67"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/hide_pin"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/pinContainerAck"
+            app:layout_constraintStart_toStartOf="@+id/pinContainerAck" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

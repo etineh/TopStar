@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".peer2peer.exchange.BuyerPaymentInfoActivity">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout15"
+        style="@style/cardTop2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:elevation="2dp"
+        android:padding="7dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/cancleOrder_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:elevation="2dp"
+            android:paddingStart="15dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="15dp"
+            android:paddingBottom="8dp"
+            android:text="@string/cancel_order"
+            android:textColor="#FF5722"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/iHavePaid_Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:background="@drawable/round_radius_green"
+            android:elevation="2dp"
+            android:paddingStart="25dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="8dp"
+            android:text="@string/iHavePaid"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/acknowledge_payment_layout"
+        layout="@layout/inc_acknowledge_payment"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="15dp" />
+
+    <include
+        android:id="@+id/cancel_trade_layout"
+        layout="@layout/inc_cancel_trade"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="15dp" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="15dp"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/timeCount_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:text="19 : 15"
+                android:textColor="@color/orange"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/progressInfo_TV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/progressInfo_TV" />
+
+            <TextView
+                android:id="@+id/progressInfo_TV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@string/timeWarning"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toStartOf="@+id/timeCount_TV"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/backArrow" />
+
+            <ImageView
+                android:id="@+id/backArrow"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                app:srcCompat="@drawable/baseline_arrow_back_24" />
+
+            <TextView
+                android:id="@+id/payCation_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:text="@string/infoWarning"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/progressInfo_TV"
+                app:layout_constraintTop_toBottomOf="@+id/progressInfo_TV"
+                app:lineHeight="17dp" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/paymentDetailsContainer"
+                style="@style/roundRadiusBackground2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/payCation_TV">
+
+                <TextView
+                    android:id="@+id/textView30"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/buyMood"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/localCurrencyAmount_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="36dp"
+                    android:text="@string/amount"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView30" />
+
+                <LinearLayout
+                    android:id="@+id/alertTrader_linearLay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/round_radius_orange"
+                    android:orientation="horizontal"
+                    android:padding="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/imageView13"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/chat_img"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/textView53"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:text="@string/alertTrader"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/amount_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:text="50,000 NGN"
+                    android:textColor="@color/deepGreen"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/localCurrencyAmount_TV"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/localCurrencyAmount_TV" />
+
+                <TextView
+                    android:id="@+id/textView55"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/fee"
+                    app:layout_constraintStart_toStartOf="@+id/localCurrencyAmount_TV"
+                    app:layout_constraintTop_toBottomOf="@+id/localCurrencyAmount_TV" />
+
+                <TextView
+                    android:id="@+id/fee_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:text="50 NGN"
+                    android:textColor="@color/orange"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView55"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textView55" />
+
+                <TextView
+                    android:id="@+id/textView57"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/order_ID"
+                    app:layout_constraintStart_toStartOf="@+id/textView55"
+                    app:layout_constraintTop_toBottomOf="@+id/textView55" />
+
+                <ImageView
+                    android:id="@+id/copy_Order_ID_IV"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="25dp"
+                    android:layout_height="30dp"
+                    android:padding="5dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView57"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textView57"
+                    app:srcCompat="@drawable/copy" />
+
+                <TextView
+                    android:id="@+id/order_ID_TV"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:ellipsize="end"
+                    android:gravity="right"
+                    android:maxLines="1"
+                    android:text="1174531056622604800"
+                    app:layout_constraintBottom_toBottomOf="@+id/copy_Order_ID_IV"
+                    app:layout_constraintEnd_toStartOf="@+id/copy_Order_ID_IV"
+                    app:layout_constraintStart_toEndOf="@+id/textView57"
+                    app:layout_constraintTop_toTopOf="@+id/copy_Order_ID_IV" />
+
+                <TextView
+                    android:id="@+id/textView59"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/order_time"
+                    app:layout_constraintStart_toStartOf="@+id/textView57"
+                    app:layout_constraintTop_toBottomOf="@+id/textView57" />
+
+                <TextView
+                    android:id="@+id/orderTime_TV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:text="2024-05-12 21:23:09"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView59"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textView59" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/paymentMethod"
+                style="@style/roundRadiusBackground2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="100dp"
+                android:padding="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/paymentDetailsContainer">
+
+                <TextView
+                    android:id="@+id/payAmountNotice_TV"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/payTo"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/localCurrencyAmount_TV2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/account_number"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView592" />
+
+                <TextView
+                    android:id="@+id/accountNumber_TV"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:text="7032816934"
+                    app:layout_constraintBottom_toBottomOf="@+id/localCurrencyAmount_TV2"
+                    app:layout_constraintEnd_toStartOf="@+id/copyAccountNumber"
+                    app:layout_constraintTop_toTopOf="@+id/localCurrencyAmount_TV2" />
+
+                <TextView
+                    android:id="@+id/textView552"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/bank_name"
+                    app:layout_constraintStart_toStartOf="@+id/localCurrencyAmount_TV2"
+                    app:layout_constraintTop_toBottomOf="@+id/localCurrencyAmount_TV2" />
+
+                <TextView
+                    android:id="@+id/bankName_TV"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:gravity="right"
+                    android:text="Palmpay"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView552"
+                    app:layout_constraintEnd_toStartOf="@+id/copy_BankName_IV"
+                    app:layout_constraintStart_toEndOf="@+id/textView552"
+                    app:layout_constraintTop_toTopOf="@+id/textView552" />
+
+                <ImageView
+                    android:id="@+id/copyAccountNumber"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="4dp"
+                    android:padding="5dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/localCurrencyAmount_TV2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/localCurrencyAmount_TV2"
+                    app:srcCompat="@drawable/copy" />
+
+                <ImageView
+                    android:id="@+id/copy_BankName_IV"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="25dp"
+                    android:layout_height="30dp"
+                    android:layout_marginEnd="5dp"
+                    android:padding="5dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView552"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textView552"
+                    app:srcCompat="@drawable/copy" />
+
+                <ImageView
+                    android:id="@+id/copy_Name"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="5dp"
+                    android:padding="5dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView592"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textView592"
+                    app:srcCompat="@drawable/copy" />
+
+                <TextView
+                    android:id="@+id/textView592"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/name"
+                    app:layout_constraintStart_toStartOf="@+id/payAmountNotice_TV"
+                    app:layout_constraintTop_toBottomOf="@+id/payAmountNotice_TV" />
+
+                <TextView
+                    android:id="@+id/userAccountName_TV"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:ellipsize="end"
+                    android:gravity="right"
+                    android:maxLines="2"
+                    android:text="Frank Umoro"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView592"
+                    app:layout_constraintEnd_toStartOf="@+id/copy_Name"
+                    app:layout_constraintStart_toEndOf="@+id/textView592"
+                    app:layout_constraintTop_toTopOf="@+id/textView592" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/tpInfo"
+                    android:textColor="@color/deepGreen"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView552" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

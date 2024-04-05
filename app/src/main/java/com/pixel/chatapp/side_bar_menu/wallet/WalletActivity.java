@@ -1,17 +1,19 @@
 package com.pixel.chatapp.side_bar_menu.wallet;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,19 +35,23 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.pixel.chatapp.CaptureAct;
+import com.pixel.chatapp.activities.CaptureAct;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.FundTransferUserAdapter;
 import com.pixel.chatapp.all_utils.BarcodeUtils;
 import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.model.FundTransferUser;
+import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
+import com.pixel.chatapp.peer2peer.exchange.SellerPaymentInfoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class WalletActivity extends AppCompatActivity implements FundTransferUserAdapter.ProceedToTransferPage {
 
-    private ImageView resetPinButton, customerCareButton, historyButton, arrowBack;
+    private ImageView resetPinButton, customerCareButton, arrowBack, hideAmount_IV;
     private TextView totalAssetAmount_TV, localCurrencyAmount_TV,dollarAmount_TV, gameAmount_TV,bonusAmount_TV;
     private CardView depositCardView,withdrawCardView, transferCardView, convertCardView, p2pCardView;
     private CardView cardViewLocalAmount, cardViewUDSTAmount, cardViewGameAmount, cardViewBonusAmount;
@@ -53,25 +60,22 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
     private TextView withdrawOrDeposit_TV, p2pInfo_TV, usdtInfo_TV, gameCurrency_TV;
 
     //  ----------  transfer var
-    private ConstraintLayout transferLayout;
+    private ConstraintLayout transferPayeeListLayout;
     private ImageView closeTransferArrow, searchButton, cancleTransferButton;
     private RadioButton localCurrencyRadioButton, usdtRadioButton;
-    private EditText searchUser_ET, enterTransferAmount_ET, enterPin_ET;
+    private EditText searchUser_ET, transferAmount_ET;
     @SuppressLint("StaticFieldLeak")
-    private static ScrollView transferAmountLayout;
-    private TextView getTransferConvertAmount_TV, sendTransferButton, errorInfo;
+    private static ScrollView transferPageLayout;
+    private TextView getTransferConvertAmount_TV, sendTransferButton;
+//    private ImageView fingerprint_trans_IV;
 
-    // transfer successful page
-    private ScrollView transferSuccessLayout;
-    private TextView amount_TV, date_TV, time_TV, receiver_TV, sender_TV, back, goHistory, trxId, trxType;
-    private ImageView copyId;
 
     //  withdraw variables
     private ScrollView withdrawPageLayout;
     private ImageView cancleWithdraw, scanAddress;
-    private EditText usdtWithdrawAddress_ET, withdrawAmount_ET, withdrawPin_ET;
+    private EditText usdtWithdrawAddress_ET, withdrawAmount_ET;
     private Spinner spinner;
-    private TextView sendWithrawal, withdrawConvertAmount_TV;
+    private TextView sendWithdrawal, withdrawConvertAmount_TV;
     RadioGroup radioGroupWithdraw;
 
     // usdt deposit network selection
@@ -85,15 +89,6 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
     private ImageView closeDeposit_IV, barCode, copyAddress, changeNetwork;
     private TextView setUsdtAddress_TV, copyAddress_TV;
 
-    //  convert currency page
-    private ScrollView convertPageLayout;
-    private EditText enterConvertAmount_ET;
-    private ImageView switchBetweenAssets, cancelConvert;
-    private TextView convertAssetButton, assetWillReceive_TV, available_balance_TV;
-    private Spinner chooseAssetSpinner, selectToAssetSpinner;
-    //    private String getSelectedAssetBalance = getString(R.string.convertForLocalAsset);
-    private String selectedAsset;
-
     //  transfer recycler adapter
     private RecyclerView recyclerViewTransfer;
     private FundTransferUserAdapter fundTransferUserAdapter;
@@ -101,6 +96,17 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
     private List<FundTransferUser> userList;
 
     private String userSelection;
+
+    //  acknowledge layout for withdraw and send
+    RelativeLayout acknowledgeLayout;
+    EditText enterPin_ET;
+    ImageView cancelAct_IV;
+    TextView sendTransactionButton, forgetPin_Button;
+
+    // biometric fingerprint
+//    private Executor executor;
+    BiometricPrompt biometricPrompt;
+    BiometricPrompt.PromptInfo promptInfo;
 
 
     @Override
@@ -110,8 +116,8 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
         resetPinButton = findViewById(R.id.resetPin_IV);
         customerCareButton = findViewById(R.id.support_IV);
-        resetPinButton = findViewById(R.id.history_IV);
         arrowBack = findViewById(R.id.arrowBack_IV);
+        hideAmount_IV = findViewById(R.id.hideAmount_IV);
         totalAssetAmount_TV = findViewById(R.id.totalAssetAmount_TV);
         localCurrencyAmount_TV = findViewById(R.id.localCurrencyAmount_TV);
         dollarAmount_TV = findViewById(R.id.dollarAmount_TV);
@@ -142,45 +148,30 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         withdrawOrDeposit_TV = findViewById(R.id.withdrawOrDeposit_TV);
         bonusAmount_TV = findViewById(R.id.bonusAmount_TV);
 
-        // transfer ids
-        transferLayout = findViewById(R.id.transferLayout);
-        closeTransferArrow = transferLayout.findViewById(R.id.arrowCloseButton);
-        searchButton = transferLayout.findViewById(R.id.searchButton);
-        searchUser_ET = transferLayout.findViewById(R.id.seachUser_ET);
-        // transfer page (amount and pin)
-        transferAmountLayout = findViewById(R.id.transferPageLayout);
-        cancleTransferButton = transferAmountLayout.findViewById(R.id.cancleTransferButton);
-        localCurrencyRadioButton = transferAmountLayout.findViewById(R.id.localCurrencyRadioButton);
-        usdtRadioButton = transferAmountLayout.findViewById(R.id.usdtRadioButton);
-        enterTransferAmount_ET = transferAmountLayout.findViewById(R.id.enterAmount_ET);
-        enterPin_ET = transferAmountLayout.findViewById(R.id.enterPin_ET);
-        getTransferConvertAmount_TV = transferAmountLayout.findViewById(R.id.getTransferConvertAmount_TV);
-        sendTransferButton = transferAmountLayout.findViewById(R.id.sendButton);
-        errorInfo = transferAmountLayout.findViewById(R.id.errorInfo);
-        RadioGroup radioGroupTransfer = transferAmountLayout.findViewById(R.id.radioGroup);
-//        RadioButton localRadio = transferLayout.findViewById(R.id.localCurrencyRadioButton);
+        // transfer ids and layoutPage
+        transferPayeeListLayout = findViewById(R.id.transferPayeeListLayout);
+        closeTransferArrow = transferPayeeListLayout.findViewById(R.id.arrowCloseButton);
+        searchButton = transferPayeeListLayout.findViewById(R.id.searchButton);
+        searchUser_ET = transferPayeeListLayout.findViewById(R.id.seachUser_ET);
+        // transfer page (amount and pin)   -- layout page
+        transferPageLayout = findViewById(R.id.transferPageLayout);
+        cancleTransferButton = transferPageLayout.findViewById(R.id.cancleTransferButton);
+        transferAmount_ET = transferPageLayout.findViewById(R.id.transferAmount_ET);
+        localCurrencyRadioButton = transferPageLayout.findViewById(R.id.localCurrencyRadioButton);
+        usdtRadioButton = transferPageLayout.findViewById(R.id.usdtRadioButton);
+        getTransferConvertAmount_TV = transferPageLayout.findViewById(R.id.getTransferConvertAmount_TV);
+        sendTransferButton = transferPageLayout.findViewById(R.id.sendButton);
+        RadioGroup radioGroupTransfer = transferPageLayout.findViewById(R.id.radioGroup);
+//        RadioButton localRadio = transferPayeeListLayout.findViewById(R.id.localCurrencyRadioButton);
         radioGroupTransfer.check(R.id.localCurrencyRadioButton); // Set the default selection to the localCurrencyRadioButton
 
-        // transfer successful ids
-        transferSuccessLayout = findViewById(R.id.transferSuccessfulPage);
-        amount_TV = transferSuccessLayout.findViewById(R.id.amount_TV);
-        date_TV = transferSuccessLayout.findViewById(R.id.date_TV);
-        time_TV = transferSuccessLayout.findViewById(R.id.time_TV);
-        receiver_TV = transferSuccessLayout.findViewById(R.id.receiver_TV);
-        sender_TV = transferSuccessLayout.findViewById(R.id.sender_TV);
-        back = transferSuccessLayout.findViewById(R.id.back);
-        goHistory = transferSuccessLayout.findViewById(R.id.historySuccess);
-        copyId = transferSuccessLayout.findViewById(R.id.copyId);
-        trxId = transferSuccessLayout.findViewById(R.id.transactionID_TV);
-        trxType = transferSuccessLayout.findViewById(R.id.transactionType_TV);
 
-        // withdraw ids
+        // withdraw ids and layoutPage
         withdrawPageLayout = findViewById(R.id.withdrawPageLayout);
         cancleWithdraw = withdrawPageLayout.findViewById(R.id.cancleTransferButton);
         usdtWithdrawAddress_ET = withdrawPageLayout.findViewById(R.id.usdtAddress_ET);
         withdrawAmount_ET = withdrawPageLayout.findViewById(R.id.enterAmount_ET);
-        withdrawPin_ET = withdrawPageLayout.findViewById(R.id.enterPin_ET);
-        sendWithrawal = withdrawPageLayout.findViewById(R.id.sendButton);
+        sendWithdrawal = withdrawPageLayout.findViewById(R.id.sendButton);
         withdrawConvertAmount_TV = withdrawPageLayout.findViewById(R.id.getTransferConvertAmount_TV);
 //        cancleWithdraw = withdrawPageLayout.findViewById(R.id.cancleTransferButton);
         scanAddress = withdrawPageLayout.findViewById(R.id.scanAddress);
@@ -188,6 +179,13 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         spinner.setSelection(0); // Set the default selection to the first item in the array
         radioGroupWithdraw = withdrawPageLayout.findViewById(R.id.radioGroup);
         radioGroupWithdraw.check(R.id.usdtRadioButton); // Set the default selection to the localCurrencyRadioButton
+
+        // acknowledge layout
+        acknowledgeLayout = findViewById(R.id.acknowledgeLayout);
+        enterPin_ET = acknowledgeLayout.findViewById(R.id.enterPin_ET);
+        cancelAct_IV = acknowledgeLayout.findViewById(R.id.cancelAct_IV);
+        sendTransactionButton = acknowledgeLayout.findViewById(R.id.sendTransactionButton);
+        forgetPin_Button = acknowledgeLayout.findViewById(R.id.forgetPin_Button);
 
         // usdt deposit network selection
         usdtNetworkLayout = findViewById(R.id.usdtNetworkLayout);
@@ -204,38 +202,73 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         setUsdtAddress_TV = depositPageLayout.findViewById(R.id.usdtAddress_TV);
         copyAddress_TV = depositPageLayout.findViewById(R.id.copyAddress_TV);
 
-        //  convert currency page
-        convertPageLayout = findViewById(R.id.convertPageLayout);
-        enterConvertAmount_ET = convertPageLayout.findViewById(R.id.enterConvertAmount_ET);
-        cancelConvert = convertPageLayout.findViewById(R.id.cancleConvertButton);
-        switchBetweenAssets = convertPageLayout.findViewById(R.id.switchBetweenAssets);
-        convertAssetButton = convertPageLayout.findViewById(R.id.convertButton);
-        available_balance_TV = convertPageLayout.findViewById(R.id.available_balance);
-        assetWillReceive_TV = convertPageLayout.findViewById(R.id.assetWillReceive_TV);
-        chooseAssetSpinner = convertPageLayout.findViewById(R.id.chooseAssetSpinner);
-        chooseAssetSpinner.setSelection(0); // Set the default selection to the first item in the array
-        selectToAssetSpinner = convertPageLayout.findViewById(R.id.selectToAssetSpinner);
-        selectToAssetSpinner.setSelection(1); // Set the default selection to the first item in the array
-
         //  transfer recyclerView
-        recyclerViewTransfer = transferLayout.findViewById(R.id.recyclerViewTransfer);
+        recyclerViewTransfer = transferPayeeListLayout.findViewById(R.id.recyclerViewTransfer);
         recyclerViewTransfer.setLayoutManager(new LinearLayoutManager(this));
         userList = new ArrayList<>();
 
-        selectedAsset = getString(R.string.convertForUSDTAsset);
+        // top buttons
+        resetPinButton.setOnClickListener(v -> {
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+                Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 500);
+
+            }).start();
+
+        });
+
+        customerCareButton.setOnClickListener(v -> {
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+                Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 500);
+
+            }).start();
+
+        });
+
+        hideAmount_IV.setOnClickListener(v -> {
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+                Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 500);
+
+            }).start();
+
+        });
+
+        // Create an executor
+//        executor = ContextCompat.getMainExecutor(this);
 
         // withdraw or deposit via selection method   ====================
         p2pPaymentOption.setOnClickListener(v -> {
+
             trans_background.setVisibility(View.GONE);
             withdrawOrDepositContainer.setVisibility(View.GONE);
 
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, P2pExchangeActivity.class);
+            startActivity(intent);
+
         });
 
         usdtPaymentOption.setOnClickListener(v -> {
 
             if(userSelection.equals("withdraw"))
             {
+
                 trans_background.setVisibility(View.GONE);
                 withdrawOrDepositContainer.setVisibility(View.GONE);
 
@@ -251,9 +284,49 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
                 withdrawOrDepositContainer.setVisibility(View.GONE);
                 usdtNetworkLayout.setVisibility(View.VISIBLE);
             }
+            
+        });
+
+        //  ===============   Acknowledge -- confirm pin for withdraw or transfer      =======================
+        sendTransactionButton.setOnClickListener(v -> {
+
+            if(enterPin_ET.length() == 4){
+                enterPin_ET.setText(null);
+                withdrawAmount_ET.setText(null);
+                transferAmount_ET.setText(null);
+
+                transferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
+                withdrawAmount_ET.removeTextChangedListener(listenToConvertAmount("withdraw"));
+                PhoneUtils.hideKeyboard(this, enterPin_ET);
+
+                spinner.setSelection(0); // Set the default selection to the first item in the array
+
+                if(userSelection.equals("transfer")){
+                    sendTransferMethod();
+                } else if (userSelection.equals("withdraw")){
+                    sendWithdrawalMethod();
+                }
+                Toast.makeText(this, "successfully sent", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed( () -> {
+                    withdrawPageLayout.setVisibility(View.GONE);
+                    transferPageLayout.setVisibility(View.GONE);
+                    transferPayeeListLayout.setVisibility(View.GONE);
+                }, 1000);
+
+                acknowledgeLayout.setVisibility(View.GONE);
+
+            } else {
+                Toast.makeText(this, getString(R.string.incorrectPin), Toast.LENGTH_SHORT).show();
+            }
 
         });
 
+        forgetPin_Button.setOnClickListener(v -> {
+            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+        });
+
+        cancelAct_IV.setOnClickListener(v -> onBackPressed());
 
         //  ===============     Make a deposit      =======================
         depositCardView.setOnClickListener(v -> {
@@ -322,16 +395,12 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
             v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(() ->
             {
-                ClipboardManager clipboard =  (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("label", setUsdtAddress_TV.getText());
-
-                if (clipboard == null || clip == null) return;
-                clipboard.setPrimaryClip(clip);
+                PhoneUtils.copyText(this, setUsdtAddress_TV);
 
                 new Handler().postDelayed( ()-> {
                     v.setScaleX(1.0f);
                     v.setScaleY(1.0f);
-                }, 1000);
+                }, 500);
 
             }).start();
 
@@ -371,19 +440,18 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
             barcodeLauncher.launch(options);
         });
 
-        // send the withdrawal
-        sendWithrawal.setOnClickListener(v -> {
 
-            withdrawPageLayout.setVisibility(View.GONE);
-            transferSuccessLayout.setVisibility(View.VISIBLE);
+        // send the withdrawal  ==-- proceed
+        sendWithdrawal.setOnClickListener(v -> {
 
-            spinner.setSelection(0); // Set the default selection to the first item in the array
-            withdrawAmount_ET.removeTextChangedListener(listenToConvertAmount("withdraw"));
-            withdrawPin_ET.setText(null);
-            withdrawAmount_ET.setText(null);
+            if(withdrawAmount_ET.length() >= 2 ){ // verify pin later
+                acknowledgeLayout.setVisibility(View.VISIBLE);
+                withdrawAmount_ET.clearFocus();
+                enterPin_ET.requestFocus();
+            } else {
+                Toast.makeText(this, getString(R.string.invalidAmount), Toast.LENGTH_SHORT).show();
+            }
 
-            PhoneUtils.hideKeyboard(this, withdrawAmount_ET);
-            Toast.makeText(this, "successfully sent", Toast.LENGTH_SHORT).show();
         });
 
         // ============ transfer funds to user in topstar    -------------------------------------
@@ -394,7 +462,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
             v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(() ->
             {
-                transferLayout.setVisibility(View.VISIBLE);
+                transferPayeeListLayout.setVisibility(View.VISIBLE);
                 searchUser_ET.requestFocus();
 
                 // set data
@@ -429,7 +497,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
                 }
             });
 
-            enterTransferAmount_ET.addTextChangedListener(listenToConvertAmount("transfer"));
+            transferAmount_ET.addTextChangedListener(listenToConvertAmount("transfer"));
 
         });
         
@@ -449,10 +517,41 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         });
 
         closeTransferArrow.setOnClickListener(v -> {
-            transferLayout.setVisibility(View.GONE);
+            transferPayeeListLayout.setVisibility(View.GONE);
 
         });
-//
+
+        // proceed with the transfer
+        sendTransferButton.setOnClickListener(v -> {
+
+            if(transferAmount_ET.length() >= 2){ // verify pin later
+                acknowledgeLayout.setVisibility(View.VISIBLE);
+                transferAmount_ET.clearFocus();
+                enterPin_ET.requestFocus();
+            } else {
+                Toast.makeText(this, getString(R.string.invalidAmount), Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
+        //  ========    convert between currency    ================================================
+        convertCardView.setOnClickListener(v -> {
+            // open convert activity
+            v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, ConvertFundActivity.class);
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
+
+        });
+
 //        localCurrencyRadioButton.setOnClickListener(v -> {
 //
 //            Toast.makeText(this, "in progress" + localCurrencyRadioButton.getText(), Toast.LENGTH_SHORT).show();
@@ -462,99 +561,94 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 //            Toast.makeText(this, "in progress" + usdtRadioButton.getText(), Toast.LENGTH_SHORT).show();
 //        });
 
-        sendTransferButton.setOnClickListener(v -> {
-            if(enterPin_ET.length() == 0){
-                errorInfo.setVisibility(View.VISIBLE);
-                errorInfo.setText(getString(R.string.incorrectPin));
-            } else {
-                enterPin_ET.setText(null);
-                enterTransferAmount_ET.setText(null);
-                transferAmountLayout.setVisibility(View.GONE);
-                transferLayout.setVisibility(View.GONE);
-                transferSuccessLayout.setVisibility(View.VISIBLE);
-
-                PhoneUtils.hideKeyboard(this, enterTransferAmount_ET);
-                Toast.makeText(this, "successfully sent!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        goHistory.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
-        });
-
-        copyId.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
-        });
-
-
-        //  ========    convert between currency    ================================================
-        convertCardView.setOnClickListener(v -> {
-            convertPageLayout.setVisibility(View.VISIBLE);
-
-            enterConvertAmount_ET.addTextChangedListener(listenToConvertAmount("convert"));
-
-            // activate both listener;
-            convertSpinner();
-
-            new Handler().postDelayed(()-> enterConvertAmount_ET.requestFocus(), 500);
-        });
-
-        switchBetweenAssets.setOnClickListener(v -> {
-
-            int getChooseAssetSpinner = chooseAssetSpinner.getSelectedItemPosition();
-            int getSelectToAssetSpinner = selectToAssetSpinner.getSelectedItemPosition();
-            chooseAssetSpinner.setSelection(getSelectToAssetSpinner);
-            selectToAssetSpinner.setSelection(getChooseAssetSpinner);
-
-            if(selectToAssetSpinner.getSelectedItemPosition() == 0){
-                selectedAsset = getString(R.string.convertForLocalAsset);
-            } else if (selectToAssetSpinner.getSelectedItemPosition() == 1) {
-                selectedAsset = getString(R.string.convertForUSDTAsset);
-            } else if (selectToAssetSpinner.getSelectedItemPosition() == 2) {
-                selectedAsset = getString(R.string.convertForGameAsset);
-            } else if (selectToAssetSpinner.getSelectedItemPosition() == 3) {
-                selectedAsset = getString(R.string.convertForBonus);
-            }
-
-            enterConvertAmount_ET.setText("");
-            assetWillReceive_TV.setText(selectedAsset);
-            Toast.makeText(WalletActivity.this, getString(R.string.assetSwitch), Toast.LENGTH_SHORT).show();
-
-        });
-
-        convertAssetButton.setOnClickListener(v -> {
-            // hide keyboard
-            PhoneUtils.hideKeyboard(this, enterConvertAmount_ET);
-            convertPageLayout.setVisibility(View.GONE);
-            Toast.makeText(this, getString(R.string.convertSuccessfully), Toast.LENGTH_SHORT).show();
-        });
 
         //  ========    peer to peer p2p    ================================================
         p2pCardView.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, P2pExchangeActivity.class);
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
+
         });
 
         //  ========    open various assets    ================================================
         cardViewLocalAmount.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "localAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
         });
 
         cardViewUDSTAmount.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "USDTAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
         });
 
+        // open game wallet activity
         cardViewGameAmount.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "gameAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
         });
 
-        // change the game currency
+        // change the game currency to naira or usdt
         gameCurrency_TV.setOnClickListener(v -> {
 
             Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
         });
 
         cardViewBonusAmount.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "BonusAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
         });
 
         // onBackPress
@@ -562,13 +656,11 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
             onBackPressed();
         };
         arrowBack.setOnClickListener(backPress);
-        back.setOnClickListener(backPress);
         cancleTransferButton.setOnClickListener(backPress);
         arrowBack.setOnClickListener(backPress);
         cancleWithdraw.setOnClickListener(backPress);
         closeUsdtNetwork.setOnClickListener(backPress);
         closeDeposit_IV.setOnClickListener(backPress);
-        cancelConvert.setOnClickListener(backPress);
 
     }
 
@@ -584,49 +676,22 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
             });
 
     //`========     methods     ==================
-    private void convertSpinner() {
-        selectToAssetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                String selectedItem = parent.getItemAtPosition(position).toString();
-                if(selectedItem.equals("Local Asset")){
-                    selectedAsset = getString(R.string.convertForLocalAsset);
-                } else if (selectedItem.equals("USDT Asset")) {
-                    selectedAsset = getString(R.string.convertForUSDTAsset);
-                } else if (selectedItem.equals("Game Rewards")) {
-                    selectedAsset = getString(R.string.convertForGameAsset);
-                } else if (selectedItem.equals("Bonus/Giveaway")) {
-                    selectedAsset = getString(R.string.convertForBonus);
-                }
-                enterConvertAmount_ET.setText("");
-                assetWillReceive_TV.setText(selectedAsset);
+    private void sendWithdrawalMethod(){
 
-            }
+        Intent intent = new Intent(this, TransactionReceiptActivity.class);
+        intent.putExtra("from", "withdraw");
+        startActivity(intent);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Handle case where nothing is selected (optional)
-            }
-        });
-
-        chooseAssetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                enterConvertAmount_ET.setText("");
-
-                //  get the available balance later
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Handle case where nothing is selected (optional)
-            }
-        });
     }
 
+    private void sendTransferMethod(){
+
+        Intent intent = new Intent(this, TransactionReceiptActivity.class);
+        intent.putExtra("from", "transfer");
+        startActivity(intent);
+
+    }
 
     private void withdrawRadioAndSpinner() {
         radioGroupWithdraw.setOnCheckedChangeListener((group, checkedId) -> {
@@ -683,10 +748,6 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
                     String withdrawConvert = getString(R.string.convertForAddress) + " " + s;
                     withdrawConvertAmount_TV.setText(withdrawConvert);
 
-                } else if (type.equals("convert"))
-                {
-                    String assetConvert = selectedAsset + " " + s;
-                    assetWillReceive_TV.setText(assetConvert);
                 }
 
             }
@@ -714,62 +775,137 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         }
     }
 
+
+//    private void showFingerPrint(String type){
+//        // Create a BiometricPrompt instance
+//        biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
+//            @Override
+//            public void onAuthenticationError(int errorCode, CharSequence errString) {
+//                super.onAuthenticationError(errorCode, errString);
+//                // push user to pin page    --10 is back press, 13 is using pin
+//                if(type.equals("withdraw"))
+//                {
+//                    if(errorCode == 13){
+//                        pinWithdContainer.setVisibility(View.VISIBLE);
+//                        orTV.setVisibility(View.GONE);
+//                        fingerprint_IV.setVisibility(View.GONE);
+//                    } else {
+//                        pinWithdContainer.setVisibility(View.VISIBLE);
+//                        orTV.setVisibility(View.VISIBLE);
+//                        fingerprint_IV.setVisibility(View.VISIBLE);
+//                    }
+//                }
+////                else {    // transfer
+////                    if(errorCode == 13){
+////                        pinTransContainer.setVisibility(View.VISIBLE);
+////                        or_trans_TV.setVisibility(View.GONE);
+////                        fingerprint_trans_IV.setVisibility(View.GONE);
+////                    } else {
+////                        pinTransContainer.setVisibility(View.VISIBLE);
+////                        or_trans_TV.setVisibility(View.VISIBLE);
+////                        fingerprint_trans_IV.setVisibility(View.VISIBLE);
+////                    }
+////                }
+//
+//            }
+//
+//            @Override
+//            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+//                super.onAuthenticationSucceeded(result);
+//
+//                if(type.equals("withdraw")){
+//                    sendWithdrawalMethod();  // for finger print
+//                } else {
+//                    sendTransferMethod();
+//                }
+//            }
+//
+//            @Override
+//            public void onAuthenticationFailed() {
+//                super.onAuthenticationFailed();
+//                Toast.makeText(WalletActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        // Create a BiometricPrompt.PromptInfo instance
+//        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+//                .setTitle("Biometric authentication")
+//                .setSubtitle("If fingerprint is dirty, you can choose 'verify by PIN'.")
+//                .setNegativeButtonText("Or\n Verify by PIN")
+//                .build();
+//
+//        // Show the fingerprint authentication dialog
+//        biometricPrompt.authenticate(promptInfo);
+//    }
+
     @Override
     public void onBackPressed() {
-        if(trans_background.getVisibility() == View.VISIBLE){
+        if(trans_background.getVisibility() == View.VISIBLE)
+        {
             trans_background.setVisibility(View.GONE);
             withdrawOrDepositContainer.setVisibility(View.GONE);
 
-        } else if (transferSuccessLayout.getVisibility() == View.VISIBLE) {
-            transferAmountLayout.setVisibility(View.GONE);
-            transferLayout.setVisibility(View.GONE);
-            transferSuccessLayout.setVisibility(View.GONE);
-            enterTransferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
-            spinner.setSelection(0); // Set the default selection to the first item in the array
-
-        } else if (transferAmountLayout.getVisibility() == View.VISIBLE) {
-            transferAmountLayout.setVisibility(View.GONE);
-            enterTransferAmount_ET.setText(null);
+        } else if (acknowledgeLayout.getVisibility() == View.VISIBLE)
+        {
+            acknowledgeLayout.setVisibility(View.GONE);
             enterPin_ET.setText(null);
-            errorInfo.setVisibility(View.GONE);
-            enterTransferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
+
+        } else if (transferPageLayout.getVisibility() == View.VISIBLE)
+        {
+            transferPageLayout.setVisibility(View.GONE);
+            transferAmount_ET.setText(null);
+            enterPin_ET.setText(null);
+            transferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
+//            errorInfo.setVisibility(View.GONE);
             spinner.setSelection(0); // Set the default selection to the first item in the array
 
-        }  else if (usdtNetworkLayout.getVisibility() == View.VISIBLE) {
+        }  else if (usdtNetworkLayout.getVisibility() == View.VISIBLE)
+        {
             usdtNetworkLayout.setVisibility(View.GONE);
 
-        } else if (depositPageLayout.getVisibility() ==View.VISIBLE) {
+        } else if (depositPageLayout.getVisibility() ==View.VISIBLE)
+        {
             depositPageLayout.setVisibility(View.GONE);
 
-        } else if (withdrawPageLayout.getVisibility() == View.VISIBLE) {
+        } else if (withdrawPageLayout.getVisibility() == View.VISIBLE)
+        {
             trans_background.setVisibility(View.GONE);
             withdrawOrDepositContainer.setVisibility(View.GONE);
             withdrawPageLayout.setVisibility(View.GONE);
             usdtWithdrawAddress_ET.setText(null);
             withdrawAmount_ET.setText(null);
-            withdrawPin_ET.setText(null);
+            enterPin_ET.setText(null);
             spinner.setSelection(0); // Set the default selection to the first item in the array
 
             withdrawAmount_ET.removeTextChangedListener(listenToConvertAmount("withdraw"));
 
-        } else if (convertPageLayout.getVisibility() == View.VISIBLE)
+        } else if (transferPayeeListLayout.getVisibility() == View.VISIBLE)
         {
-            convertPageLayout.setVisibility(View.GONE);
-            enterConvertAmount_ET.removeTextChangedListener(listenToConvertAmount("convert"));
-            enterConvertAmount_ET.setText(null);
-
-        } else if (transferLayout.getVisibility() == View.VISIBLE) {
-            transferLayout.setVisibility(View.GONE);
+            transferPayeeListLayout.setVisibility(View.GONE);
         } else {
             super.onBackPressed();
             finish();
         }
     }
 
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == AllConstants.BIOMETRIC_REQUEST_CODE) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Permission granted
+//                Toast.makeText(this, "Fingerprint verified!", Toast.LENGTH_SHORT).show();
+//                showFingerPrint(userSelection);
+//            } else {
+//                // Permission denied
+//                Toast.makeText(this, "Permission denied to use biometric authentication", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
+
 
     @Override
     public void openTransferPage(FundTransferUser fundTransferUser) {
-        transferAmountLayout.setVisibility(View.VISIBLE);
+        transferPageLayout.setVisibility(View.VISIBLE);
     }
 }
 

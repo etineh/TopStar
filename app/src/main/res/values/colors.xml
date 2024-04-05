@@ -21,7 +21,9 @@
 
     <color name="fullTransparent">#00FFFFFF</color>    <!-- full transparent -->
 
-    <color name="green">#00FF00</color> <!-- This is a bright green color -->
+    <color name="green">#00FF00</color> <!-- This is a bright green color -->\
+    <color name="deepGreen">#1BB31B</color> <!-- This is a bright green color -->
+
     <color name="red">#FF0000</color> <!-- This is a bright red color -->
 
 </resources>

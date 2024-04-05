@@ -65,6 +65,15 @@ public class Permission {
     public void requestRecordingForCall(Activity activity) {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, AllConstants.CALL_RECORDING_REQUEST_CODE);
     }
+
+    public boolean isBiometricOk(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_BIOMETRIC) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public void requestBiometric(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.USE_BIOMETRIC}, AllConstants.BIOMETRIC_REQUEST_CODE);
+    }
+
 }
 
 
