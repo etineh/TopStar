@@ -20,7 +20,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -63,7 +62,6 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.biometric.BiometricPrompt;
@@ -97,7 +95,7 @@ import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreatePinActivity;
-import com.pixel.chatapp.api.WalletListener;
+import com.pixel.chatapp.api.Dao_interface.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
@@ -118,13 +116,13 @@ import com.pixel.chatapp.interface_listeners.DataModelType;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.interface_listeners.NewEventCallBack;
 import com.pixel.chatapp.model.CallModel;
-import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;
 import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
+import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
 import com.pixel.chatapp.signup_login.LoginActivity;
 import com.squareup.picasso.Picasso;
@@ -150,8 +148,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext {
 
@@ -162,8 +158,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private ImageView imageViewUserPhoto;
 
     private ConstraintLayout sideBarMenuContainer;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    private TextView logout, textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV;
+    private TextView textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV;
     Switch darkMoodSwitch;
     CardView cardViewSettings;
     String imageLink;
@@ -369,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ============    wallet pin verify   =======================
     ConstraintLayout walletVerifyLayout, pinContainerHome, pinOptionContainer;
     ImageView cancelPinOption_IV, fingerprintIcon;
-    TextView or_TV, openPinBox_TV, verifyViaTV, openWalletButton;
+    TextView or_TV, openPinBox_TV, verifyViaTV, openWalletButton, forgetPin_Button;
     EditText enterAckPin_ET;
 
 
@@ -501,7 +496,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         //  side bar menu
         sideBarMenuContainer = findViewById(R.id.sideBarMenuContainer);
         cardViewWallet = sideBarMenuContainer.findViewById(R.id.cardViewWallet);
-        logout = sideBarMenuContainer.findViewById(R.id.textViewLogOut);
         sideBarMenuClose = sideBarMenuContainer.findViewById(R.id.imageViewMenuClose);
         tapImage_TV = sideBarMenuContainer.findViewById(R.id.tapImage_TV);
         imageViewUserPhoto = sideBarMenuContainer.findViewById(R.id.imageViewUserPhoto);
@@ -594,6 +588,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         fingerprintIcon = walletVerifyLayout.findViewById(R.id.fingerprintIcon);
         verifyViaTV = walletVerifyLayout.findViewById(R.id.verifyViaTV);
         openWalletButton = walletVerifyLayout.findViewById(R.id.openWalletButton);
+        forgetPin_Button = walletVerifyLayout.findViewById(R.id.forgetPin_Button);
         enterAckPin_ET = walletVerifyLayout.findViewById(R.id.enterAckPin_ET);
 
         //  chatOptions ids
@@ -888,11 +883,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
             });
 
-            Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8080/")
-                    .addConverterFactory(GsonConverterFactory.create()).build();
 
-
-            WalletListener walletListener = retrofit.create(WalletListener.class);
+            WalletListener walletListener = AllConstants.retrofit.create(WalletListener.class);
 
             //  ==================      side bar menu option     ===========================
 
@@ -985,6 +977,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
             });
 
+            forgetPin_Button.setOnClickListener(v -> {
+                Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+            });
+
             // down buttons at home
             p2pHome_IV.setOnClickListener(v -> {
                 v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
@@ -1012,17 +1008,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             imageViewUserPhoto.setOnClickListener(viewImage);
             tapImage_TV.setOnClickListener(viewImage);
 
-            //logout
-            logout.setOnClickListener(view -> logoutOption());
-
             // settings
             cardViewSettings.setOnClickListener(view -> {
-                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-                cardViewSettings.setClickable(false);
+
+//                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
+                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20)
+                        .withEndAction(() -> {
+
+                            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+
+                            cardViewSettings.setClickable(false);
+
+                        }).start();
+
                 new Handler().postDelayed(() -> {
                     sideBarMenuContainer.setVisibility(View.GONE);
                     cardViewSettings.setClickable(true);
+                    // Reset the scale
+                    view.setScaleX(1.0f);
+                    view.setScaleY(1.0f);
                 }, 1000);
+
             });
 
 
@@ -2074,6 +2081,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         pinOptionContainer.setVisibility(View.VISIBLE);
                         pinContainerHome.setVisibility(View.GONE);
                         openWalletButton.setVisibility(View.GONE);
+                        forgetPin_Button.setVisibility(View.GONE);
 
                         fingerprintIcon.setVisibility(View.VISIBLE);
                         verifyViaTV.setVisibility(View.VISIBLE);
@@ -2123,6 +2131,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         pinOptionContainer.setVisibility(View.VISIBLE);
         pinContainerHome.setVisibility(View.VISIBLE);
         openWalletButton.setVisibility(View.VISIBLE);
+        forgetPin_Button.setVisibility(View.VISIBLE);
 
         fingerprintIcon.setVisibility(View.GONE);
         verifyViaTV.setVisibility(View.GONE);
@@ -5584,29 +5593,6 @@ scNum = 20;
             }
         });
     }
-    
-    public void logoutOption()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("WinnerChat");
-        builder.setMessage("Are you sure you want to logout?");
-        builder.setCancelable(false);
-        builder.setNegativeButton("Logout", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                auth.signOut();
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
-            }
-        });
-        builder.setPositiveButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        builder.create().show();
-    }
 
 
     @Override
@@ -5663,7 +5649,7 @@ scNum = 20;
 
             toggleCallButtonVisibility();
 
-            refUsers.child(auth.getUid()).child("presence").setValue(1);
+            refUsers.child(user.getUid()).child("presence").setValue(1);
             //  reverse the emoji initialization back to the emoji button icon
             popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
 

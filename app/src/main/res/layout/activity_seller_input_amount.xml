@@ -277,7 +277,7 @@
             android:padding="10dp"
             app:layout_constraintBottom_toTopOf="@+id/lineH"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/baseline_data_saver_off_24" />
+            app:srcCompat="@drawable/baseline_restart_alt_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

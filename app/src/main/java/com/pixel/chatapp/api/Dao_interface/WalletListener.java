@@ -1,4 +1,4 @@
-package com.pixel.chatapp.api;
+package com.pixel.chatapp.api.Dao_interface;
 
 import java.util.List;
 

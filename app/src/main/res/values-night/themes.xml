@@ -4,7 +4,7 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_200</item>
 <!--        change bar color here-->
-        <item name="colorPrimaryVariant">#070707</item>
+        <item name="colorPrimaryVariant">#070707</item> <!-- For the top bar color -->
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -51,7 +51,8 @@
     </style>
 
     <style name="cardTopOrange">
-        <item name="android:background">#121111</item>
+        <item name="android:background">#070707</item>
+<!--        <item name="android:background">#121111</item>-->
     </style>
 
     <style name="cardTop2">

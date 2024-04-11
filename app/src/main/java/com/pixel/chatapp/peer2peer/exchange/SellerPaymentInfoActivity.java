@@ -40,7 +40,7 @@ public class SellerPaymentInfoActivity extends AppCompatActivity {
     ImageView copy_Order_ID_IV, copyAccountNumber, copy_Name, copy_BankName_IV, backArrow;
     ImageView cancelAct_IV;
     CheckBox checkBoxTerms_, checkBoxTerms_2;
-    TextView completedButton, releaseFund_Button;
+    TextView completedButton, releaseFund_Button, forgetPin_Button;
     ConstraintLayout pinContainerAck;
     EditText enterAckPin_ET;
 
@@ -70,6 +70,7 @@ public class SellerPaymentInfoActivity extends AppCompatActivity {
         bankName_TV = findViewById(R.id.bankName_TV);
         backArrow = findViewById(R.id.backArrow);
         releaseFund_Button = findViewById(R.id.releaseFund_Button);
+        forgetPin_Button = findViewById(R.id.forgetPin_Button);
 
         iHavePaid_Button = findViewById(R.id.iHavePaid_Button);
         cancleOrder_TV = findViewById(R.id.cancleOrder_TV);
@@ -88,8 +89,11 @@ public class SellerPaymentInfoActivity extends AppCompatActivity {
         enterAckPin_ET = acknowledgeLayout.findViewById(R.id.enterAckPin_ET);
 
         // Create an executor
-        executor = ContextCompat.getMainExecutor(this);
+//        executor = ContextCompat.getMainExecutor(this);
 
+        forgetPin_Button.setOnClickListener(v -> {
+            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+        });
 
         releaseFund_Button.setOnClickListener(v -> {
             acknowledgeLayout.setVisibility(View.VISIBLE);

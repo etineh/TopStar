@@ -41,34 +41,27 @@ public class LoginActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        buttonSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        buttonSignIn.setOnClickListener(view -> {
 
-                String email = editTextEmail.getText().toString();
-                String password = editTextPassword.getText().toString();
+            String email = editTextEmail.getText().toString();
+            String password = editTextPassword.getText().toString();
 
-                if(!email.equals("") && !password.equals("")){
-                    signIn(email, password);
-                } else {
-                    Toast.makeText(LoginActivity.this, "Fields should not be empty", Toast.LENGTH_SHORT).show();
-                }
+            if(!email.equals("") && !password.equals("")){
+                signIn(email, password);
+            } else {
+                Toast.makeText(LoginActivity.this, "Fields should not be empty", Toast.LENGTH_SHORT).show();
             }
         });
 
-        buttonSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-            }
+        buttonSignUp.setOnClickListener(view -> {
+            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
         });
 
-        textViewForgetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LoginActivity.this, ForgetActivity.class));
-            }
+        textViewForgetPassword.setOnClickListener(view -> {
+            startActivity(new Intent(LoginActivity.this, ForgetActivity.class));
         });
+
+
     }
 
         // -----------------------  methods  ---------------------

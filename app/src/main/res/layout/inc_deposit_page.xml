@@ -196,5 +196,18 @@
             app:layout_constraintTop_toBottomOf="@+id/textView34"
             app:srcCompat="@drawable/baseline_document_scanner_24" />
 
+        <TextView
+            android:id="@+id/textView60"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="@string/USDT_Deposit"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/closeDeposit_IV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/closeDeposit_IV" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

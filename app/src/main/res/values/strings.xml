@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Topper</string>
+    <string name="app_name">TopStar</string>
+    <string name="app_name...">TopStar…</string>
     <string name="pin">PIN</string>
     <string name="pinChat">Pin</string>
     <string name="copied">Copied</string>
@@ -28,6 +29,9 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
 
+    <string name="terms">Read TopStar full terms</string>
+    <string name="logOut">Logout</string>
+
     <!--    tap layout name-->
     <string name="alert">Alert</string>
     <string name="players">Players</string>
@@ -38,17 +42,50 @@
     <string name="wallet">Wallet</string>
     <string name="walletSub">Asset ~ Withdraw ~ Transfer ~ P2P…</string>
     <string name="dashboard">Dashboard</string>
-    <string name="dashboardSub">Rewards ~ Rank ~ Tournaments…</string>
+    <string name="dashboardSub">P2P setup ~ Rank ~ Tournaments…</string>
     <string name="setting">Settings</string>
     <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Games…</string>
     <string name="premium">Premium</string>
-    <string name="premiumSub">Orange Tick ~ Access high features…</string>
+    <string name="premiumSub">Orange tick ~ Create team ~ More features…</string>
     <string name="advertise">Advertise</string>
     <string name="advertiseSub">Run ads and reach more people…</string>
     <string name="invite_friends">Invite Friends</string>
     <string name="invite_friendSub">Refer friends and earn cash bonus…</string>
     <string name="support">Support</string>
     <string name="supportSub">Live chat ~ Community ~ Contacts…</string>
+    <string name="language">Language +</string>
+
+    <!--    settings bar    -->
+    <string name="profileInfo">KYC verification, change photo, username, display name</string>
+    <string name="privacy">Privacy</string>
+    <string name="privacyInfo">Last seen, alert, calls, society &amp; block user.</string>
+    <string name="sounds">Sounds</string>
+    <string name="soundsInfo">Alert, society, calls, p2p notify &amp; game.</string>
+    <string name="storage">Storage</string>
+    <string name="storageInfo">Free space, network usage.</string>
+    <string name="security">Security</string>
+    <string name="securityInfo">Change password, pin &amp; un/activate fingerprint.</string>
+    <string name="Games">Account</string>
+    <string name="P2PInfo">Setup payment account, register as P2P trader.</string>
+
+
+    <!--    profile side bar    -->
+    <string name="profile">Profile</string>
+    <string name="display_name">Display Name</string>
+    <string name="displayNameIn">Sunday Ndifreke</string>
+    <string name="Username">Username</string>
+    <string name="usernameIn">\@Ndifreke</string>
+    <string name="email">Email</string>
+    <string name="userEmail">sundayndifreke@gmail.com</string>
+    <string name="phoneNumber">Phone Number</string>
+    <!--    <string name="photo">Photo Ndifreke</string>-->
+    <string name="photo_">Photo</string>
+    <string name="KYC">KYC Verification</string>
+    <string name="KYCin">Your details are secured and encrypted.</string>
+    <string name="verifyNow">Verify now</string>
+    <string name="legalName">Legal Name</string>
+    <string name="usedForP2p">This is used for your P2P trading once you are verified (KYC).</string>
+    <string name="oneMinute">(1 minute process)</string>
 
     <!--    calls -->
     <string name="videoCall">Video call from</string>
@@ -81,6 +118,12 @@
 
     <string name="subscribe">Subscribe to Premium to enjoy high features</string>
     <string name="isNetwork">No network connectivity</string>
+    <string name="errorOccur">Error occur.</string>
+    <string name="errorWithOtp">Error with OTP. Resend again.</string>
+    <string name="timeout">timeout</string>
+    <string name="timeoutResendOtp">Timeout, resend OTP.</string>
+
+    <string name="emailExist">"Email already exists "</string>
     <string name="corrupt">File corrupt or poor network</string>
     <string name="notSentYet">File not sent yet.</string>
     <string name="resend">Delete and resend 🙌</string>
@@ -90,7 +133,9 @@
     <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>
     <string name="permissionCall">Go to setting and grant camera | record permission</string>
-
+    <string name="tooManyAttempt">Too many attempt. try again later!</string>
+    <string name="accountDisable">Access to this account has been temporarily disabled due to many failed password attempts.
+    Try again in one hour time.</string>
 
     <string name="meet">Meet</string>
     <string name="gift">Gift</string>
@@ -136,7 +181,8 @@
         you for your PIN. Never disclose your PIN to anyone. Protect your funds! \n\n\n\n\n</string>
     <string name="iUnderstand"> I have read and understood the terms below.</string>
     <string name="fingerprintTerms">Terms on PIN and fingerprint</string>
-    <string name="pin_usage"> This pin is used for opening your wallet and processing transactions. Hence, it should be different from your login password.</string>
+    <string name="pin_usage"> This pin is used for opening your wallet and processing transactions only.
+        Hence, it should be different from your login password.</string>
 
 
     <!--    //  wallet-->
@@ -164,7 +210,7 @@
     <string name="withdrawVia">Withdraw via:</string>
     <string name="depositVia">Deposit via:</string>
     <string name="usdt">USDT (Crypto Network)</string>
-    <string name="peer2peer">Peer-2-Peer (p2p)</string>
+    <string name="peer2peer">Peer-To-Peer (p2p)</string>
     <string name="usdtDepositInfo">Receive funds via your usdt address instantly</string>
     <string name="p2pDepositInfo">Interact with a verified TopStar user to fund your wallet via bank transaction</string>
     <string name="p2pWithdrawInfo">Withdraw directly to your bank account via p2p</string>
@@ -173,7 +219,41 @@
     <string name="transferringto">Transferring to:</string>
     <string name="enterAmount">Enter Amount</string>
     <!--    <string name="searchAmount">Search Amount</string>-->
-    <string name="enterPin">Enter PIN</string>
+    <string name="enterPin">Enter 4 digit PIN</string>
+    <string name="enterPassword">Enter login password</string>
+
+
+    <string name="newUsername">New username</string>
+    <string name="newDisplayName"> New display name </string>
+    <string name="newEmail">New email</string>
+    <string name="newPhoneNumber">New phone number</string>
+    <string name="save">Save</string>
+    <string name="saved">Saved</string>
+    <string name="enterOTPEmail">Enter OTP sent to the new Email address</string>
+    <string name="enterOTPNumber">Enter OTP sent to the new phone number</string>
+    <string name="resend_">Resend</string>
+    <string name="phoneNumberUpdated">Phone number updated successfully</string>
+    <string name="emailNumberUpdated">Email address updated successfully</string>
+    <string name="verifyEmail">Verify Email Address</string>
+    <string name="verifyPhoneNumber">Verify Phone Number</string>
+    <string name="otpSentEmail">OTP sent to email</string>
+    <string name="waitForTime">Wait for time to elapse</string>
+
+    <string name="displayNameError">Display name must be greater than four (4)</string>
+    <string name="userNameError">Username must be greater than three (3)</string>
+    <string name="phoneError">Phone number must be greater than nine (10)</string>
+    <string name="emailError">Invalid email</string>
+    <string name="invalidOTP">Invalid OTP</string>
+    <string name="invalidPassword">Invalid password</string>
+    <string name="sendOTP">Send OTP</string>
+    <string name="enterOTP">Enter OTP</string>
+    <string name="pressAgain">Press again to exit</string>
+    <string name="inProgress">Work in progress</string>
+
+    <string name="sendingOtp">Sending OTP…</string>
+    <string name="otpSent">OTP send successfully</string>
+
+
     <string name="transfer_from">Transfer from:</string>
     <string name="withdraw_from">Withdraw from:</string>
     <string name="convert_from">Convert from:</string>
@@ -187,6 +267,7 @@
     <string name="convertForUSDTAsset">USDT asset will receive: </string>
     <string name="convertForGameAsset">Game asset will receive: </string>
     <string name="convertForBonus">Bonus asset will receive: </string>
+    <string name="USDT_Deposit">USDT Deposit</string>
 
     <string name="zeroFee">Zero (0) fee! 😍</string>
     <string name="withdrawWithCaution">Ensure all details are correct</string>
@@ -334,7 +415,10 @@
     <string name="awaitingTrader">Ndifreke Sunday will send 50,000 NGN to your:</string>
     <string name="invalidAmount">Invalid Amount</string>
 
-    <string name="forgetPin">Forget Pin?</string>
+    <string name="forgetPin">Forget pin?</string>
+    <string name="forgetPassword">Forget password?</string>
+    <string name="passwordInfo">This is your login password required. Not your pin.</string>
+
 
     <string name="confirmPayment">Please confirm payment first. </string>
     <string name="confirm_Withd_Trans">Please ensure all details are correct before entering PIN. </string>

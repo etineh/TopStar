@@ -44,7 +44,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayerConstraint"
-        style="@style/mainBackground"
+        style="@style/cardTopOrange"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="3dp"
@@ -55,11 +55,11 @@
 
         <ImageView
             android:id="@+id/resetPin_IV"
-            style="@style/Tint_Orange_CoolOrange"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="15dp"
             android:padding="5dp"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/support_IV"
             app:layout_constraintTop_toTopOf="parent"
@@ -68,11 +68,11 @@
 
         <TextView
             android:id="@+id/photoSelected_TV"
-            style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@string/myAssets"
+            android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/arrowBack_IV"
@@ -80,11 +80,11 @@
 
         <ImageView
             android:id="@+id/support_IV"
-            style="@style/Tint_Orange_CoolOrange"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:padding="5dp"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -99,6 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:padding="10dp"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

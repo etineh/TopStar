@@ -7,10 +7,17 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public interface AllConstants {
 
 //    FirebaseUser user = null;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8080/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
 
     String MYUSERNAME = "MYUSERNAME";
     String USERNAME = "USERNAME";

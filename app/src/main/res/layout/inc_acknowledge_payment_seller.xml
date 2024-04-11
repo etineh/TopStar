@@ -15,6 +15,18 @@
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteY="341dp">
 
+        <TextView
+            android:id="@+id/forgetPin_Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:text="@string/forgetPin"
+            android:textColor="@color/white"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="@+id/pinContainerAck"
+            app:layout_constraintTop_toBottomOf="@+id/pinContainerAck" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/pinContainerAck"
             style="@style/roundRadiusBackground2"
