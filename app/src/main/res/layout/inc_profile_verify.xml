@@ -9,156 +9,251 @@
     android:elevation="5dp"
     android:padding="10dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/pinOptionContainer"
-        style="@style/roundRadiusBackground2"
-        android:layout_width="match_parent"
+    <ScrollView
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/cancelPinOption_IV"
-            style="@style/Tint_Orange_CoolOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_cancel_24" />
-
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/inputDetails"
+            android:id="@+id/pinOptionContainer"
             style="@style/roundRadiusBackground2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cancelPinOption_IV">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/spinnerCountryCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="2dp"
+                app:layout_constraintBottom_toBottomOf="@+id/inputDetails"
+                app:layout_constraintStart_toStartOf="@+id/inputDetails"
+                app:layout_constraintTop_toTopOf="@+id/inputDetails" />
+
+            <ImageView
+                android:id="@+id/cancelPinOption_IV"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_cancel_24" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/inputDetails"
+                style="@style/roundRadiusBackground2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginEnd="20dp"
+                android:clickable="true"
+                android:padding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/previous_data_TV">
 
 
-            <EditText
-                android:id="@+id/newDetails_ET"
+                <ProgressBar
+                    android:id="@+id/progressBarSearch"
+                    style="@style/progressBarColour"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/openCountryCode_Click"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="25dp"
+                    android:paddingEnd="1dp"
+                    android:text="(US) +1"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/arrowCountryCode"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_arrow_drop_down_24" />
+
+                <EditText
+                    android:id="@+id/newDetails_ET"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@color/fullTransparent"
+                    android:hint="@string/displayName"
+                    android:textCursorDrawable="@drawable/cursor_drawable"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/openCountryCode_Click"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/checkUsername_TV"
+                style="@style/textDeepGreenAndLightGreen"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/fullTransparent"
-                android:ems="10"
-                android:hint="@string/newDisplayName"
-                android:maxLines="1"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginTop="2dp"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@+id/spinnerCountryCode"
+                app:layout_constraintTop_toBottomOf="@+id/inputDetails" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/pinContainerHome"
-            style="@style/roundRadiusBackground2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/inputDetails">
-
-
-            <EditText
-                android:id="@+id/enterPassword_ET"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/pinContainerHome"
+                style="@style/roundRadiusBackground2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/fullTransparent"
-                android:ems="10"
-                android:hint="@string/enterPassword"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="70dp"
+                android:layout_marginEnd="20dp"
+                android:padding="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/inputDetails">
+
+
+                <EditText
+                    android:id="@+id/enterPassword_ET"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@color/fullTransparent"
+                    android:ems="10"
+                    android:hint="@string/enterPassword"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:textCursorDrawable="@drawable/cursor_drawable"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/saveButton"
+                style="@style/roundRadiusBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:layout_marginBottom="40dp"
+                android:fontFamily="monospace"
+                android:paddingStart="25dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="25dp"
+                android:paddingBottom="8dp"
+                android:text="@string/save"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@id/errorStatus_TV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/pinContainerHome" />
+
+            <TextView
+                android:id="@+id/infoPassword"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:layout_marginBottom="2dp"
+                android:text="@string/passwordInfo"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@+id/pinContainerHome"
+                app:layout_constraintEnd_toEndOf="@+id/inputDetails"
+                app:layout_constraintStart_toStartOf="@+id/inputDetails" />
+
+            <ProgressBar
+                android:id="@+id/progressBarProfile"
+                style="@style/progressBarColour"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/inputDetails"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/previous_data_TV" />
+
+            <TextView
+                android:id="@+id/forgetPassword_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="@string/forgetPassword"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="@+id/pinContainerHome"
+                app:layout_constraintTop_toBottomOf="@+id/pinContainerHome" />
+
+            <TextView
+                android:id="@+id/errorStatus_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/accountDisable"
+                android:textColor="@color/orange"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/changeTitle_TV"
+                style="@style/textColorFullBlack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/changeDisplayName"
+                app:layout_constraintBottom_toBottomOf="@+id/cancelPinOption_IV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/cancelPinOption_IV" />
+
+            <TextView
+                android:id="@+id/previous_data_TV"
+                style="@style/textColorFullBlack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/Username"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/changeTitle_TV" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
-        <TextView
-            android:id="@+id/saveButton"
-            style="@style/roundRadiusBackground"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="30dp"
-            android:fontFamily="monospace"
-            android:paddingStart="25dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="25dp"
-            android:paddingBottom="8dp"
-            android:text="@string/save"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainerHome" />
-
-        <TextView
-            android:id="@+id/infoPassword"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginBottom="2dp"
-            android:text="@string/passwordInfo"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@+id/pinContainerHome"
-            app:layout_constraintEnd_toEndOf="@+id/inputDetails"
-            app:layout_constraintStart_toStartOf="@+id/inputDetails" />
-
-        <ProgressBar
-            android:id="@+id/progressBarProfile"
-            style="@style/progressBarColour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/inputDetails"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/forgetPassword_TV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:text="@string/forgetPassword"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="@+id/pinContainerHome"
-            app:layout_constraintTop_toBottomOf="@+id/pinContainerHome" />
-
-        <TextView
-            android:id="@+id/errorStatus_TV"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="5dp"
-            android:text="@string/accountDisable"
-            android:textColor="@color/orange"
-            android:textSize="12sp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/cancelPinOption_IV"
-            app:layout_constraintEnd_toStartOf="@+id/cancelPinOption_IV"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/cancelPinOption_IV" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

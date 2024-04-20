@@ -55,6 +55,10 @@
 <!--        <item name="android:background">#121111</item>-->
     </style>
 
+    <style name="backgroundOrangeAndCoolOrange">
+        <item name="android:background">@color/cool_orange</item>
+    </style>
+
     <style name="cardTop2">
         <item name="android:background">#070707</item>
     </style>
@@ -118,6 +122,9 @@
         <item name="android:tint">@color/white</item>
     </style>
 
+    <style name="backgroundTint_orange_coolOrange">
+        <item name="android:backgroundTint">@color/cool_orange</item>
+    </style>
 
     <style name="CardViewBackground">
         <item name="android:backgroundTint">@color/black</item>
@@ -195,6 +202,10 @@
     <style name="drawableText">
         <item name="android:background">@drawable/black_circle_round</item>
         <item name="android:textColor">@color/cool_orange</item>
+    </style>
+
+    <style name="textDeepGreenAndLightGreen">
+        <item name="android:textColor">@color/green</item>
     </style>
 
     <style name="TextAndBackground">

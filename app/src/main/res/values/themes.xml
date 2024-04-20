@@ -52,6 +52,10 @@
         <item name="android:background">@color/orange</item>
     </style>
 
+    <style name="backgroundOrangeAndCoolOrange">
+        <item name="android:background">@color/orange</item>
+    </style>
+
     <style name="appName">
         <item name="android:textColor">@color/orange</item>
     </style>
@@ -107,6 +111,10 @@
     </style>
 
     <style name="CardViewBackground">
+        <item name="android:backgroundTint">@color/orange</item>
+    </style>
+
+    <style name="backgroundTint_orange_coolOrange">
         <item name="android:backgroundTint">@color/orange</item>
     </style>
 
@@ -190,6 +198,10 @@
     <style name="drawableText">
         <item name="android:background">@drawable/msg_count</item>
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="textDeepGreenAndLightGreen">
+        <item name="android:textColor">@color/deepGreen</item>
     </style>
 
     <style name="TextAndBackground">

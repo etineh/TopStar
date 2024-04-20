@@ -605,7 +605,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         // set load image progress bar
-        if(holder.loadProgressTV != null){
+        if(holder.loadProgressTV != null && modelChats.getPhotoUriOriginal() != null){
             if(!modelChats.getFromUid().equals(myId) &&
                     ( modelChats.getPhotoUriOriginal().startsWith("media/photo") || modelChats.getPhotoUriOriginal().startsWith("media/document") )
                     || modelChats.getMsgStatus() == 700033){

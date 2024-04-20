@@ -19,8 +19,10 @@
     <string name="forward">Forward to...</string>
     <string name="file">File</string>
     <string name="chat">Topper...</string>
-    <string name="hint">Hint: Hello! Let\'s chat and play live stream game together.</string>
-    <string name="hint2">Hello! Let\'s chat and play live stream game!</string>
+    <string name="hintTitle">Hint</string>
+    <!--    <string name="changeHint">Change Hint</string>-->
+    <string name="hint">Hint: Hello! Alert me let\'s play live stream game together.</string>
+    <string name="hint2">Hello! Alert me let\'s play live stream game together!</string>
     <string name="add_message">Add message</string>
     <string name="online">Online</string>
     <string name="more">Open\nGallery</string>
@@ -29,8 +31,39 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
 
+    <!--    quick set up    -->
+    <string name="newEmail__">New email *</string>
+    <string name="email__">Email *</string>
+    <string name="createPassword__">Create login password *</string>
+    <string name="newPassword">New password *</string>
+    <string name="displayName">Display name</string>
+    <string name="username__">Username *</string>
+    <string name="setUp">Set Up</string>
+    <string name="setUpProfile">Set Up Profile</string>
+    <string name="passwordNeed">For security, this password will be needed on your next login.</string>
+    <string name="confirmPassword">Confirm password *</string>
+
+    <string name="imageUploadError">Error occur uploading image</string>
+    <string name="profileSetUpSuccess">Profile setup successful</string>
+
+    <string name="resetPassword">Reset Password</string>
+    <string name="resetPasswordSent">Password reset sent to your email.</string>
+
+    <string name="loginPage">Go to login page.</string>
+
+    <string name="usernameExist">Username already exist.</string>
+    <string name="usernameAvailable">Username is available.</string>
+    <string name="fieldEmpty">Email &amp; password required.</string>
+    <!--    <string name="usernameAbove3">Username must be great than 3 length.</string>-->
+    <string name="passwordAbove5">Password length must be 6 above.</string>
+    <string name="passwordDontMatch">Password do not match.</string>
+    <string name="newEmailRequired">Can not use previous email. Use new email…</string>
+
     <string name="terms">Read TopStar full terms</string>
     <string name="logOut">Logout</string>
+    <string name="logIn">Login</string>
+    <string name="loginSuccessful">Login Successful</string>
+    <string name="accountCreated">Account created successfully.</string>
 
     <!--    tap layout name-->
     <string name="alert">Alert</string>
@@ -72,20 +105,30 @@
     <!--    profile side bar    -->
     <string name="profile">Profile</string>
     <string name="display_name">Display Name</string>
-    <string name="displayNameIn">Sunday Ndifreke</string>
+    <string name="dash">---</string>
     <string name="Username">Username</string>
-    <string name="usernameIn">\@Ndifreke</string>
     <string name="email">Email</string>
-    <string name="userEmail">sundayndifreke@gmail.com</string>
     <string name="phoneNumber">Phone Number</string>
-    <!--    <string name="photo">Photo Ndifreke</string>-->
+    <string name="number">7010000000</string>
+
+    <string name="clickAgain">Click again</string>
+
     <string name="photo_">Photo</string>
     <string name="KYC">KYC Verification</string>
     <string name="KYCin">Your details are secured and encrypted.</string>
     <string name="verifyNow">Verify now</string>
+    <string name="verifyAccount">Verify account</string>
+    <string name="create_instant">Create Instant Account!</string>
     <string name="legalName">Legal Name</string>
     <string name="usedForP2p">This is used for your P2P trading once you are verified (KYC).</string>
     <string name="oneMinute">(1 minute process)</string>
+    <string name="welcomeBack">Welcome back</string>
+    <string name="privacyValue">We value your privacy!</string>
+    <string name="app_slang">Chat, Game &amp; Earn!</string>
+    <string name="resetLogin">Reset login details</string>
+
+    <string name="numberInfo">For privacy, your number is automatically hidden from non-contacts.
+        You can choose to make it public via setting after login. We value your privacy 😊.</string>
 
     <!--    calls -->
     <string name="videoCall">Video call from</string>
@@ -119,9 +162,12 @@
     <string name="subscribe">Subscribe to Premium to enjoy high features</string>
     <string name="isNetwork">No network connectivity</string>
     <string name="errorOccur">Error occur.</string>
-    <string name="errorWithOtp">Error with OTP. Resend again.</string>
+    <string name="serverError">Server error.</string>
+    <string name="invalidDetails">Incorrect details.</string>
+
+    <string name="errorWithOtp">Error with code. Resend again.</string>
     <string name="timeout">timeout</string>
-    <string name="timeoutResendOtp">Timeout, resend OTP.</string>
+    <string name="timeoutResendOtp">Timeout, resend code.</string>
 
     <string name="emailExist">"Email already exists "</string>
     <string name="corrupt">File corrupt or poor network</string>
@@ -130,6 +176,8 @@
     <string name="empty">Can not send empty file 🙌</string>
     <string name="notFound">file not found…</string>
     <string name="dCancel">Download cancel</string>
+    <string name="userNotFound">user not found</string>
+
     <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>
     <string name="permissionCall">Go to setting and grant camera | record permission</string>
@@ -187,6 +235,7 @@
 
     <!--    //  wallet-->
     <string name="myAssets">My Assets</string>
+    <string name="create">Create</string>
     <string name="totalAsset">Total Asset</string>
     <string name="totalGameAsset">Total Game Asset</string>
     <string name="totalLocalAsset">Total Local Asset</string>
@@ -221,7 +270,21 @@
     <!--    <string name="searchAmount">Search Amount</string>-->
     <string name="enterPin">Enter 4 digit PIN</string>
     <string name="enterPassword">Enter login password</string>
+    <string name="password">Password</string>
+    <string name="signup">Sign Up</string>
+    <string name="linkNumber">Link Number</string>
+    <string name="link">Link</string>
+    <string name="link_info">Link your phone number to enjoy seamless high features</string>
 
+    <string name="changeDisplayName">Change Display Name</string>
+    <string name="changeHint">Change Hint</string>
+    <string name="hintInfo">Be precise</string>
+    <string name="changeUserName">Change Username</string>
+    <string name="changeEmail">Change Email Address</string>
+    <string name="changePhoneNumber">Change Phone Number</string>
+    <string name="change">Change</string>
+
+    <string name="alreadyHaveAccount">I already have an account…</string>
 
     <string name="newUsername">New username</string>
     <string name="newDisplayName"> New display name </string>
@@ -229,29 +292,47 @@
     <string name="newPhoneNumber">New phone number</string>
     <string name="save">Save</string>
     <string name="saved">Saved</string>
-    <string name="enterOTPEmail">Enter OTP sent to the new Email address</string>
-    <string name="enterOTPNumber">Enter OTP sent to the new phone number</string>
+    <string name="photoSaved">Photo saved</string>
+    <string name="enterOTPEmail">Enter code sent to the new email address</string>
+    <string name="enterOTPNumber">Enter code sent to the new phone number</string>
     <string name="resend_">Resend</string>
     <string name="phoneNumberUpdated">Phone number updated successfully</string>
     <string name="emailNumberUpdated">Email address updated successfully</string>
     <string name="verifyEmail">Verify Email Address</string>
     <string name="verifyPhoneNumber">Verify Phone Number</string>
-    <string name="otpSentEmail">OTP sent to email</string>
+    <string name="verify">Verify</string>
+    <string name="loginReset">Reset successfully.</string>
+
+    <string name="otpSentEmail">Code sent to email</string>
     <string name="waitForTime">Wait for time to elapse</string>
+    <string name="phoneNumberExist">You can\'t use same number.</string>
+    <string name="phoneNumberExist__">Phone number already exist</string>
+
+    <string name="uploadPhoto">Upload Photo</string>
 
     <string name="displayNameError">Display name must be greater than four (4)</string>
-    <string name="userNameError">Username must be greater than three (3)</string>
-    <string name="phoneError">Phone number must be greater than nine (10)</string>
+    <string name="fieldInputError">Field must be greater than four (4)</string>
+
+    <string name="userNameError">Username must be greater than three (3) length</string>
+    <string name="phoneError">Invalid phone number</string>
     <string name="emailError">Invalid email</string>
-    <string name="invalidOTP">Invalid OTP</string>
+    <string name="invalidOTP">Invalid verification code</string>
     <string name="invalidPassword">Invalid password</string>
-    <string name="sendOTP">Send OTP</string>
-    <string name="enterOTP">Enter OTP</string>
-    <string name="pressAgain">Press again to exit</string>
+    <string name="invalidUsername">Invalid Username</string>
+
+    <string name="smsCodeExpired">The sms code has expired</string>
+    <string name="numberExist">Phone number already exist.</string>
+    <string name="userExist">User already exist. Login!</string>
+
+    <string name="anotherUserNumber">Another user is already using this number.</string>
+
+    <string name="sendOTP">Send Code</string>
+    <string name="enterOTP">Enter Code</string>
+    <string name="pressAgain">Press again to close</string>
     <string name="inProgress">Work in progress</string>
 
-    <string name="sendingOtp">Sending OTP…</string>
-    <string name="otpSent">OTP send successfully</string>
+    <string name="sendingOtp">Sending Code…</string>
+    <string name="otpSent">Code sent successfully</string>
 
 
     <string name="transfer_from">Transfer from:</string>
@@ -417,7 +498,7 @@
 
     <string name="forgetPin">Forget pin?</string>
     <string name="forgetPassword">Forget password?</string>
-    <string name="passwordInfo">This is your login password required. Not your pin.</string>
+    <string name="passwordInfo">This is different from your transaction pin.</string>
 
 
     <string name="confirmPayment">Please confirm payment first. </string>

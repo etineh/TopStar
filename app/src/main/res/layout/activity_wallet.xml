@@ -73,7 +73,7 @@
             android:layout_marginStart="10dp"
             android:text="@string/myAssets"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/arrowBack_IV"
             app:layout_constraintTop_toTopOf="parent" />

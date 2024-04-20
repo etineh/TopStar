@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.CAMERA" />
 
@@ -10,6 +10,9 @@
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" /> <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -17,6 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -46,12 +50,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31">
+        tools:targetApi="31" >
+        <activity
+            android:name=".side_bar_menu.settings.KycActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.ResetAccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.LinkNumberActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.NumberWithoutEmailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.PasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.CreateAccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".signup_login.PhoneLoginActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.OTPActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.ProfilesActivity"
+            android:name=".side_bar_menu.settings.ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".activities.CreatePinActivity"
@@ -101,7 +126,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.pixel.chatapp.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true" >
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
@@ -110,7 +135,7 @@
         <activity
             android:name=".activities.RedirectHome"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <action android:name="android.intent.action.SEND" />
@@ -181,22 +206,19 @@
             android:name=".chats.MessageActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.ProfileActivity"
-            android:exported="false" />
-        <activity
             android:name=".signup_login.ForgetActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.LoginActivity"
+            android:name=".signup_login.EmailOrPhoneLoginActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.SignUpActivity"
+            android:name=".signup_login.SetUpProfileActivity"
             android:exported="true" />
         <activity
             android:name=".home.MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="true"
-            android:launchMode="standard">
+            android:launchMode="standard" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

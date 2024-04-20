@@ -21,6 +21,13 @@ public interface AllConstants {
 
     String MYUSERNAME = "MYUSERNAME";
     String USERNAME = "USERNAME";
+
+    String PROFILE_USERNAME = "USERNAME";
+    String PROFILE_DISNAME = "DISPLAY-NAME";
+    String PROFILE_HINT = "HINT";
+    String PROFILE_NUMBER = "NUMBER";
+    String RESET_LOGIN = "RESETLOGINDEATILS";
+
     String SCROLLPOSITION = "lastScrollPosition";
     String OFFLINECHAT = "offlineChat";
     String PHOTO_OTHERUID = "PHOTO_UID";

@@ -66,8 +66,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     private static Activity activity;
     private static String userName;
 
-    private DatabaseReference referenceUsers, refUsersLast, referenceCheck, refChatList, refChat,
-            refMsgFast, refPinPublic, refPinPrivate;
+    private final DatabaseReference referenceUsers;
+    private final DatabaseReference refUsersLast;
+    private final DatabaseReference referenceCheck;
+    private DatabaseReference refChatList;
+    private DatabaseReference refChat;
+    private DatabaseReference refMsgFast;
+    private DatabaseReference refPinPublic;
+    private DatabaseReference refPinPrivate;
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
@@ -393,12 +399,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 //  get all other-user name and photo  and onClick to chat room-----------------------
         referenceUsers.keepSynced(true);
-        referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+        referenceUsers.child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 // Will later change it to Display Names
-                String otherName = snapshot.child(otherUid).child("userName")
+                String otherName = snapshot.child("general").child("userName")
                         .getValue().toString();
 
                 holder.textViewUser.setText(otherName);     //set users display name
@@ -971,14 +977,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     .child("typing").onDisconnect().setValue(0);
             // set my online presence
 //        referenceCheck.child(user.getUid()).child(otherUid).child("presence").setValue(1);
-            referenceUsers.child(user.getUid()).child("presence").setValue(1);
+            referenceUsers.child(user.getUid()).child("general").child("presence").setValue(1);
 
             // set my online presence off when I'm disconnected
-            referenceUsers.child(user.getUid()).child("presence").onDisconnect().setValue(ServerValue.TIMESTAMP);
+            referenceUsers.child(user.getUid()).child("general").child("presence")
+                    .onDisconnect().setValue(ServerValue.TIMESTAMP);
 
             // set offline details automatic
-            offlinePresenceAndStatus.put("presence", ServerValue.TIMESTAMP);
             offlinePresenceAndStatus.put("status", false);
+//            offlinePresenceAndStatus.put("presence", ServerValue.TIMESTAMP);
             offlinePresenceAndStatus.put("onChat", false);
             referenceCheck.child(user.getUid()).child(otherUid).onDisconnect()
                     .updateChildren(offlinePresenceAndStatus);

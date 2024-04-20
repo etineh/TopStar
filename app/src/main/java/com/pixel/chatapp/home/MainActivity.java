@@ -95,7 +95,8 @@ import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreatePinActivity;
-import com.pixel.chatapp.api.Dao_interface.WalletListener;
+import com.pixel.chatapp.all_utils.IdTokenUtil;
+import com.pixel.chatapp.all_utils.NumberSpacing;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
@@ -124,7 +125,11 @@ import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
 import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
-import com.pixel.chatapp.signup_login.LoginActivity;
+import com.pixel.chatapp.signup_login.LinkNumberActivity;
+import com.pixel.chatapp.signup_login.NumberWithoutEmailActivity;
+import com.pixel.chatapp.signup_login.PhoneLoginActivity;
+import com.pixel.chatapp.signup_login.ResetAccountActivity;
+import com.pixel.chatapp.signup_login.SetUpProfileActivity;
 import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
 
@@ -146,6 +151,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -153,19 +159,24 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     private static TabLayout tabLayoutGeneral;
     private static ViewPager2 viewPager2General;
+    int close = 0;
 
     //  ---------   SideBar Menu     -----------------
     private ImageView imageViewUserPhoto;
 
     private ConstraintLayout sideBarMenuContainer;
-    private TextView textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV;
+    private TextView textLightAndDay, textViewDisplayName, textViewUserName, tapImage_TV, phoneNumber_TV, hint_TV;
+    ImageView copyNumberIV, copyUserNameIV;
+
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch darkMoodSwitch;
     CardView cardViewSettings;
     String imageLink;
 
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
-            offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef;
+            offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef, myProfileShareRef,
+            resetLoginSharePref;
     public static String getMyUserName;
     private Boolean nightMood;
 
@@ -396,6 +407,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     String newToken;
 
     private Executor executor;
+    private final Executor excutorSendDB = Executors.newSingleThreadExecutor();
+
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
 
@@ -502,7 +515,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         textViewDisplayName = sideBarMenuContainer.findViewById(R.id.textViewDisplayName2);
         textViewUserName = sideBarMenuContainer.findViewById(R.id.textViewUserName2);
         cardViewSettings = sideBarMenuContainer.findViewById(R.id.cardViewSettings);
-
+        phoneNumber_TV = sideBarMenuContainer.findViewById(R.id.phoneNumber_TV);
+        copyUserNameIV = sideBarMenuContainer.findViewById(R.id.copyUserNameIV);
+        copyNumberIV = sideBarMenuContainer.findViewById(R.id.copyNumberIV);
+        hint_TV = sideBarMenuContainer.findViewById(R.id.hint_TV);
 
         // delete ids
         constraintDelBody = findViewById(R.id.constDelBody);
@@ -699,11 +715,40 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         callUtils = new CallUtils(this);
 
+        resetLoginSharePref = this.getSharedPreferences(AllConstants.RESET_LOGIN, Context.MODE_PRIVATE);
+        boolean isResetMood = user != null && resetLoginSharePref.getBoolean(user.getUid(), false);
+
         if(user == null){
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            Toast.makeText(this, "User is null (M540) " + user, Toast.LENGTH_SHORT).show();
-        }
-        else{
+//            startActivity(new Intent(MainActivity.this, EmailOrPhoneLoginActivity.class));
+            startActivity(new Intent(MainActivity.this, PhoneLoginActivity.class));
+
+            Toast.makeText(this, "User is null (M740) ", Toast.LENGTH_SHORT).show();
+            finish();
+
+        } else if ( (user.getEmail() != null && user.getEmail().isEmpty()) || user.getEmail() == null)
+        {
+            // redirect to setup account
+            startActivity(new Intent(MainActivity.this, SetUpProfileActivity.class));
+            finish();
+
+//FirebaseAuth auth = FirebaseAuth.getInstance();
+//auth.signOut();
+
+        } else if ((user.getPhoneNumber() != null && user.getPhoneNumber().isEmpty()) || user.getPhoneNumber() == null)
+        {
+            startActivity(new Intent(MainActivity.this, LinkNumberActivity.class));
+            Toast.makeText(this, "Link your phone number! ", Toast.LENGTH_SHORT).show();
+//FirebaseAuth auth = FirebaseAuth.getInstance();
+//auth.signOut();
+        } else if (isResetMood)
+        {
+            startActivity(new Intent(MainActivity.this, ResetAccountActivity.class));
+//            finish();
+        } else{
+
+            IdTokenUtil.generateToken(token -> {
+                System.out.println("what is token " + token);
+            });
 
             myId = user.getUid();
 
@@ -713,11 +758,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             myUserNamePreferences = this.getSharedPreferences(AllConstants.MYUSERNAME, Context.MODE_PRIVATE);
             getMyUserName = myUserNamePreferences.getString(AllConstants.USERNAME, null);
             if(getMyUserName == null){
-                refUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        String fetchUserName = snapshot.child(myId).child("userName").getValue().toString();
+                        String fetchUserName = snapshot.child("userName").getValue().toString();
                         myUserNamePreferences.edit().putString(AllConstants.USERNAME, fetchUserName).apply();
                     }
 
@@ -733,6 +778,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // store each photo with their user uid
             documentIdShareRef = getSharedPreferences(AllConstants.PHOTO_OTHERUID, Context.MODE_PRIVATE);
             voiceNoteIdShareRef = getSharedPreferences(AllConstants.VOICENOTE_UID, Context.MODE_PRIVATE);
+            if(user != null) myProfileShareRef = getSharedPreferences(user.getUid(), Context.MODE_PRIVATE);
 
             // Register the NetworkChangeReceiver to receive network connectivity changes
             networkChangeReceiver = new NetworkChangeReceiver(this);
@@ -783,7 +829,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 
             // set my online presence to be true
-            refUsers.child(myId).child("presence").setValue(1);
+            refUsers.child(myId).child("general").child("presence").setValue(1);
 
             //  Return back, close msg container
             imageViewBack.setOnClickListener(view -> {
@@ -884,50 +930,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
 
-            WalletListener walletListener = AllConstants.retrofit.create(WalletListener.class);
 
             //  ==================      side bar menu option     ===========================
 
             sideBarMenuOpen.setOnClickListener(view -> {    // open the side bar menu option
                 sideBarMenuContainer.setVisibility(View.VISIBLE);
-
-
-//                walletListener.getName().enqueue(new Callback<List<String>>() {
-//                    @Override
-//                    public void onResponse(Call<List<String>> call, Response<List<String>> response) {
-//                        if (response.isSuccessful()) {
-//                            List<String> names = response.body();
-//                            if (names != null && !names.isEmpty()) {
-//                                String firstName = names.get(0); // Assuming the first name is at index 0
-//                                System.out.println("First name: " + names);
-//                            } else {
-//                                System.out.println("No names returned");
-//                            }
-//                        } else {
-//                            System.out.println("Failed to get names. Response code: " + response.code());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<List<String>> call, Throwable t) {   // when the server is down
-//                        System.out.println("Failed to get names. Error: " + t.getMessage());
-//                    }
-//                });
-
-                // Generate a new authentication token (e.g., ID token) using Firebase Authentication
-                FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
-                        .addOnSuccessListener(result -> {
-                            // New authentication token obtained successfully
-                            newToken = result.getToken();
-
-                        })
-                        .addOnFailureListener(e -> {
-                            // Handle token generation failure
-                            System.out.println("what is token : fail to gen");
-
-                        });
-
-
             });
 
             // open menu option via logo too
@@ -936,11 +943,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // close the side bar menu option
             sideBarMenuClose.setOnClickListener(view -> {
                 sideBarMenuContainer.setVisibility(View.GONE);
-
-                System.out.println("what is token : " + newToken);
-//                FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-
             });
+
             sideBarMenuContainer.setOnClickListener(view -> {
                 sideBarMenuContainer.setVisibility(View.GONE);
             });
@@ -1031,6 +1035,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }, 1000);
 
             });
+
+            copyUserNameIV.setOnClickListener(v -> PhoneUtils.copyText(this, textViewUserName));
+
+            copyNumberIV.setOnClickListener(v -> PhoneUtils.copyText(this, phoneNumber_TV));
 
 
             //  ==============  chat box user menu options onClicks---------------------------
@@ -2017,14 +2025,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 clearOnlyChatHistory = false;
             });
 
+            getProfileSharePref();
 
-            setUserDetails();
+            new Handler().postDelayed(this::setUserDetails, 5000);
 
             fiveSecondsDelay();
             swipeReply();
-            new Handler().postDelayed(()-> {
-                deleteUnusedPhotoFromSharePrefsAndAppMemory(this);
-            }, 5000);
+            new Handler().postDelayed(()-> deleteUnusedPhotoFromSharePrefsAndAppMemory(this), 5000);
 
             // call the method last so as to give room for all user list to finish load
             if(sharingPhotoActivated){
@@ -2384,7 +2391,12 @@ scNum = 20;
         // delay for 3 secs to allow user chatList to load users first
         new Handler().postDelayed(()-> {
 
-            retrieveMessages(userName, otherUID, mContext_);
+            try {
+                retrieveMessages(userName, otherUID, mContext_);
+            } catch (Exception e){
+                Toast.makeText(this, "error occur retriever M2410", Toast.LENGTH_SHORT).show();
+                System.out.println("what is error M2390: " + e.getMessage());
+            }
 
             // get pinMessage once
             getPinChats(otherUID);
@@ -2634,7 +2646,7 @@ scNum = 20;
 
         // get last seen
         try{
-            refUsers.child(otherUid).addValueEventListener(new ValueEventListener() {
+            refUsers.child(otherUid).child("general").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -2752,10 +2764,9 @@ scNum = 20;
 
         }catch (Exception e){
             textViewLastSeen.setText(getString(R.string.app_name));
-
+            Toast.makeText(context, "Error occur oon last seen", Toast.LENGTH_SHORT).show();
         }
 
-        refUsers.child(otherUid).keepSynced(true);
     }
 
     // This method will be called by NetworkChangeReceiver whenever network status changes   // reload message loadStatus
@@ -2845,8 +2856,8 @@ scNum = 20;
 
     public static Map<String, Object> setMessageMap(
             String text, String emojiOnly, int type, String chatKey,
-            int msgStatus, String vnPath, String vnDuration /*String photoPath*/
-    ){
+            int msgStatus, String vnPath, String vnDuration /*String photoPath*/)
+    {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         Map<String, Object> messageMap = new HashMap<>();
@@ -2939,10 +2950,18 @@ scNum = 20;
             networkTypingOk = true;
 
             // send only text chat to other user -- not photo nor file yet
-            if(!isSendingVoiceNote){
-                sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
-                        vnPath_, durationOrSizeVN, chatKey, otherId);
-            }
+//            if(!isSendingVoiceNote){
+//                sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
+//                        vnPath_, durationOrSizeVN, chatKey, otherId);
+//            }
+            excutorSendDB.execute(() -> {
+
+                if(!isSendingVoiceNote){
+                    sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
+                            vnPath_, durationOrSizeVN, chatKey, otherId);
+                }
+
+            });
 
             // save to local ROOM database
             chatViewModel.insertChat(otherId, messageModel);
@@ -5446,14 +5465,14 @@ scNum = 20;
         return false;
     }
 
-    public static boolean deleteSingleUriFromAppMemory(String uriToDelete){   // the list contain both low and hugh quality uri path
+    public static void deleteSingleUriFromAppMemory(String uriToDelete){   // the list contain both low and hugh quality uri path
         Uri uriPhoto = Uri.parse(uriToDelete);
         File searchPhotoPath = new File(uriPhoto.getPath());
 
         if(searchPhotoPath.exists()) {
-            return searchPhotoPath.delete();
+            searchPhotoPath.delete();
         }
-        return false;
+//        return false;
     }
 
     public static void deleteUnusedPhotoFromSharePrefsAndAppMemory(Context context){
@@ -5569,22 +5588,34 @@ scNum = 20;
 
     // set user image on settings
     private void setUserDetails(){
-        refUsers.child(myId).addValueEventListener(new ValueEventListener() {
+        refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener()
+        {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                imageLink = snapshot.child("image").getValue().toString();
-                String userName = snapshot.child("userName").getValue().toString();
+                imageLink = snapshot.child("image").exists() && !snapshot.child("image").getValue().toString().equals("null")
+                        ? snapshot.child("image").getValue().toString() : null;
 
-                if (imageLink == null || imageLink.equals("null")) {
-                    imageViewUserPhoto.setImageResource(R.drawable.person_round);
-                }
-                else {
-                    Picasso.get().load(imageLink).into(imageViewUserPhoto);
-                }
+                String displayName = snapshot.child("displayName").exists() ?
+                        snapshot.child("displayName").getValue().toString() : null;
 
-                textViewDisplayName.setText(userName);      // change later to Display name
-                textViewUserName.setText("@"+userName);
+                String userName = snapshot.child("userName").exists() ?
+                        snapshot.child("userName").getValue().toString() : null;
+
+                String hint = snapshot.child("hint").exists() && !snapshot.child("userName").getValue().toString().isEmpty()
+                        ? snapshot.child("hint").getValue().toString() : getString(R.string.hint2);
+
+                if(imageLink != null) Picasso.get().load(imageLink).into(imageViewUserPhoto);
+
+                textViewDisplayName.setText(displayName);
+                phoneNumber_TV.setText(NumberSpacing.formatPhoneNumber(user.getPhoneNumber(), 3, 3));
+                textViewUserName.setText("@"+ userName);
+                hint_TV.setText(hint);
+
+                // update share_preference
+                myProfileShareRef.edit().putString(AllConstants.PROFILE_USERNAME, userName).apply();
+                myProfileShareRef.edit().putString(AllConstants.PROFILE_DISNAME, displayName).apply();
+                myProfileShareRef.edit().putString(AllConstants.PROFILE_HINT, hint).apply();
             }
 
             @Override
@@ -5594,6 +5625,20 @@ scNum = 20;
         });
     }
 
+    private void getProfileSharePref(){
+
+        // update share_preference
+        String username = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "---");
+        String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "---");
+        String hint = myProfileShareRef.getString(AllConstants.PROFILE_HINT, getString(R.string.hint2));
+//        String email = myProfileShareRef.getString(AllConstants.PROFILE_EMAIL, "---");
+
+        textViewDisplayName.setText(displayName);
+        textViewUserName.setText("@"+ username);       // display the database userName to the input field
+//        setEmailTV.setText(user.getEmail());
+        phoneNumber_TV.setText(NumberSpacing.formatPhoneNumber(user.getPhoneNumber(), 3, 3));
+        hint_TV.setText(hint);
+    }
 
     @Override
     protected void onPause() {
@@ -5608,7 +5653,7 @@ scNum = 20;
             PhoneUtils.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
 
             // turn off my online and set my last seen date/time
-            refUsers.child(myId).child("presence").setValue(ServerValue.TIMESTAMP);
+//            refUsers.child(myId).child("general").child("presence").setValue(ServerValue.TIMESTAMP);
 
             AllConstants.executors.execute(()->{
 
@@ -5649,7 +5694,7 @@ scNum = 20;
 
             toggleCallButtonVisibility();
 
-            refUsers.child(user.getUid()).child("presence").setValue(1);
+            refUsers.child(user.getUid()).child("general").child("presence").setValue(1);
             //  reverse the emoji initialization back to the emoji button icon
             popup = EmojiPopup.Builder.fromRootView( recyclerContainer).build(editTextMessage);
 
@@ -5820,7 +5865,14 @@ scNum = 20;
             callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(callIntentActivity);
         } else {
-            super.onBackPressed();
+
+            if(close == 0){
+                Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 

@@ -76,12 +76,12 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textSize="15sp"
-                    app:layout_constraintBottom_toTopOf="@+id/textViewHint"
+                    app:layout_constraintBottom_toTopOf="@+id/hint_TV"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewPhoneNum" />
+                    app:layout_constraintTop_toBottomOf="@+id/phoneNumber_TV" />
 
                 <TextView
-                    android:id="@+id/textViewHint"
+                    android:id="@+id/hint_TV"
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -97,23 +97,23 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayout6"
+                    style="@style/backgroundOrangeAndCoolOrange"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     android:layout_marginBottom="3dp"
                     android:background="@color/orange"
-                    app:layout_constraintBottom_toTopOf="@+id/textViewHint"
+                    app:layout_constraintBottom_toTopOf="@+id/hint_TV"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
-                    android:id="@+id/textViewPhoneNum"
+                    android:id="@+id/phoneNumber_TV"
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:text="+234 703 281 6934"
                     android:textSize="15sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textViewDisplayName2" />
@@ -124,9 +124,9 @@
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginStart="15dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textViewPhoneNum"
+                    app:layout_constraintBottom_toBottomOf="@+id/phoneNumber_TV"
                     app:layout_constraintStart_toEndOf="@+id/imageViewPhoneHid"
-                    app:layout_constraintTop_toTopOf="@+id/textViewPhoneNum"
+                    app:layout_constraintTop_toTopOf="@+id/phoneNumber_TV"
                     app:srcCompat="@drawable/copy" />
 
                 <ImageView
@@ -146,9 +146,9 @@
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_marginStart="5dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textViewPhoneNum"
-                    app:layout_constraintStart_toEndOf="@+id/textViewPhoneNum"
-                    app:layout_constraintTop_toTopOf="@+id/textViewPhoneNum"
+                    app:layout_constraintBottom_toBottomOf="@+id/phoneNumber_TV"
+                    app:layout_constraintStart_toEndOf="@+id/phoneNumber_TV"
+                    app:layout_constraintTop_toTopOf="@+id/phoneNumber_TV"
                     app:srcCompat="@drawable/lock" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -663,12 +663,12 @@
 
             <TextView
                 android:id="@+id/textView21"
+                style="@style/appName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="20dp"
                 android:text="@string/app_name"
-                android:textColor="@color/orange"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -678,10 +678,10 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout5"
+                style="@style/backgroundOrangeAndCoolOrange"
                 android:layout_width="328dp"
                 android:layout_height="2dp"
                 android:layout_marginTop="20dp"
-                android:background="@color/orange"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"

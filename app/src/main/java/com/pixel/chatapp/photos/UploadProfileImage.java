@@ -18,7 +18,6 @@ import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.ImageListener;
-import com.pixel.chatapp.side_bar_menu.settings.ProfileActivity;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -28,7 +27,7 @@ public class UploadProfileImage extends AppCompatActivity {
 
     ImageView arrowBack, cropper;
     PhotoView zoomPhoto;
-    ImageListener imageListener;
+    public static ImageListener imageListener;
     Button buttonSave;
     Permission permissions = new Permission();
 
@@ -37,7 +36,7 @@ public class UploadProfileImage extends AppCompatActivity {
     Uri imageUriPath;
     String oldUriPath;
     Boolean backPress = true;
-    ProfileActivity profileActivityInstance = new ProfileActivity();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,11 +52,6 @@ public class UploadProfileImage extends AppCompatActivity {
 
         Intent intent = getIntent();
         imageUriPath = Uri.parse(intent.getStringExtra(AllConstants.PICKED_IMAGE_URI_PATH));
-
-        // Get the ImageListener instance from MainActivity
-        if (profileActivityInstance.profileActivity instanceof ImageListener) {
-            imageListener = (ImageListener) profileActivityInstance.profileActivity;
-        }
 
         activateCrop();
 

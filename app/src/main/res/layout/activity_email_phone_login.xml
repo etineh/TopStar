@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".signup_login.PhoneLoginActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:id="@+id/progressBarLogin"
+            style="@style/progressBarColour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/buttonSignIn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/buttonSignIn" />
+
+        <Spinner
+            android:id="@+id/spinnerCountryCode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="2dp"
+            app:layout_constraintBottom_toBottomOf="@+id/inputDetails"
+            app:layout_constraintStart_toStartOf="@+id/inputDetails"
+            app:layout_constraintTop_toTopOf="@+id/inputDetails" />
+
+        <ImageView
+            android:id="@+id/imageView19"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="14dp"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/customer_care" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/inputDetails"
+            style="@style/roundRadiusBackground2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginEnd="40dp"
+            android:clickable="true"
+            android:padding="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView2">
+
+
+            <TextView
+                android:id="@+id/openCountryCode_Click"
+                style="@style/textColorFullBlack"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                android:paddingStart="25dp"
+                android:paddingEnd="1dp"
+                android:text="(NG) +234"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/arrowCountryCode"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_drop_down_24" />
+
+            <EditText
+                android:id="@+id/emailOrNumber_ET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/fullTransparent"
+                android:ems="10"
+                android:hint="@string/email"
+                android:maxLines="1"
+                android:textColorHighlight="@color/orange"
+                android:textColorLink="#FF5722"
+                android:textCursorDrawable="@drawable/cursor_drawable"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/openCountryCode_Click"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/textInputPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:backgroundTint="#FF5722"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputDetails">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextPassword"
+                style="@style/backgroundTint_orange_coolOrange"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/password"
+                android:inputType="text|textPassword"
+                android:textColorHighlight="@color/orange"
+                android:textColorLink="@color/orange"
+                android:textCursorDrawable="@drawable/cursor_drawable"
+                tools:layout_editor_absoluteX="40dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Button
+            android:id="@+id/buttonSignIn"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:backgroundTint="#ED7014"
+            android:text="@string/logIn"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewForgetPassword" />
+
+        <TextView
+            android:id="@+id/textViewForgetPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="50dp"
+            android:padding="5dp"
+            android:text="@string/forgetPassword"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="@+id/textInputPassword"
+            app:layout_constraintTop_toBottomOf="@id/textInputPassword" />
+
+        <TextView
+            android:id="@+id/buttonSignUp"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:layout_marginBottom="70dp"
+            android:padding="10dp"
+            android:text="@string/signup"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonSignIn" />
+
+        <TextView
+            android:id="@+id/phoneOption_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:padding="5dp"
+            android:text="@string/phoneNumber"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/emailOption_TV"
+            app:layout_constraintStart_toEndOf="@+id/tvLine"
+            app:layout_constraintTop_toTopOf="@+id/emailOption_TV" />
+
+        <TextView
+            android:id="@+id/emailOption_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="70dp"
+            android:layout_marginBottom="9dp"
+            android:padding="5dp"
+            android:text="@string/email"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/inputDetails"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvLine"
+            style="@style/Background"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/emailOption_TV"
+            app:layout_constraintStart_toEndOf="@+id/emailOption_TV"
+            app:layout_constraintTop_toTopOf="@+id/emailOption_TV" />
+
+        <TextView
+            android:id="@+id/markPhone_TV"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/orange"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/phoneOption_TV"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/phoneOption_TV"
+            app:layout_constraintTop_toBottomOf="@+id/phoneOption_TV" />
+
+        <TextView
+            android:id="@+id/markEmail_TV"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/orange"
+            app:layout_constraintEnd_toEndOf="@+id/emailOption_TV"
+            app:layout_constraintStart_toStartOf="@+id/emailOption_TV"
+            app:layout_constraintTop_toBottomOf="@+id/emailOption_TV" />
+
+        <ImageView
+            android:id="@+id/closePage_IV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_cancel_24" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,10 +1,10 @@
 package com.pixel.chatapp.api.model;
 
-public class ResultApiModel {
+public class ResultApiM {
 
     private String result;
 
-    public ResultApiModel(String result) {
+    public ResultApiM(String result) {
         this.result = result;
     }
 

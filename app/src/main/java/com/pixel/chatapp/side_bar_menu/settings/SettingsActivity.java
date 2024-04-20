@@ -20,8 +20,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
-import com.pixel.chatapp.signup_login.LoginActivity;
+import com.pixel.chatapp.all_utils.CountryNumCodeUtils;
+import com.pixel.chatapp.signup_login.EmailOrPhoneLoginActivity;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -46,16 +46,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         DatabaseReference walletRef = FirebaseDatabase.getInstance().getReference("WalletApi");
 
-
-
-
-
         arrowBackS.setOnClickListener(v -> onBackPressed());
 
         profileClick.setOnClickListener(v -> {
             v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
             {
-                Intent intent = new Intent(this, ProfilesActivity.class);
+                Intent intent = new Intent(this, ProfileActivity.class);
                 startActivity(intent);
 
                 // Reset the scale
@@ -95,7 +91,10 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         soundClick.setOnClickListener(v -> {
-            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+            String countryCode = CountryNumCodeUtils.getUserCountry(getApplicationContext());
+
+            System.out.println("what is coun " + countryCode);
+            Toast.makeText(this, "test countryCode" + countryCode, Toast.LENGTH_SHORT).show();
 
         });
 
@@ -135,7 +134,7 @@ public class SettingsActivity extends AppCompatActivity {
         builder.setCancelable(false);
         builder.setNegativeButton("Logout", (dialogInterface, i) -> {
             auth.signOut();
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, EmailOrPhoneLoginActivity.class));
             finish();
         });
         builder.setPositiveButton("Back", (dialogInterface, i) -> dialogInterface.cancel());

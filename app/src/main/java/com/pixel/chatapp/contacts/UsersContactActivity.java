@@ -31,7 +31,6 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
     RecyclerView recyclerView;
     FirebaseAuth auth;
     FirebaseUser user;
-    FirebaseDatabase database;
     DatabaseReference refUsers;
 
     List<ContactModel> list;
@@ -62,8 +61,7 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        refUsers = database.getReference();
+        refUsers = FirebaseDatabase.getInstance().getReference("Users");
 
         imageViewBack.setOnClickListener(view -> onBackPressed());
 
@@ -92,7 +90,7 @@ public class UsersContactActivity extends AppCompatActivity implements UsersAdap
     // -----------  methods -----------
     public void getUsers(){
 
-        refUsers.child("Users").addValueEventListener(new ValueEventListener() {
+        refUsers.child("general").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
