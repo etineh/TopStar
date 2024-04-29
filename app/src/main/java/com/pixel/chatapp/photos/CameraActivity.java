@@ -34,6 +34,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -140,6 +141,7 @@ public class CameraActivity extends AppCompatActivity {
         previewView = findViewById(R.id.previewView);
 
         photoRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//        photoRecycler.setLayoutManager(new GridLayoutManager(this, 3));
 
         refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
 

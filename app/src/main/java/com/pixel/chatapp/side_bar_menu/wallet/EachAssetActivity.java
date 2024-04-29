@@ -25,7 +25,7 @@ public class EachAssetActivity extends AppCompatActivity {
 
     private LinearLayout convertLayout;
     private ImageView arrowClose;
-    private TextView eachAssetTotalAmount, setEachAssetName_TV;
+    private TextView eachAssetTotalAmount, setEachAssetName_TV, historyRecord_TV;
     private RecyclerView recyclerAssetHistory;
     private List<WalletHistory> historyList;
     private ProgressBar progressBarH;
@@ -42,6 +42,7 @@ public class EachAssetActivity extends AppCompatActivity {
         eachAssetTotalAmount = findViewById(R.id.eachAssetTotalAmount);
         setEachAssetName_TV = findViewById(R.id.setEachAssetName_TV);
         progressBarH = findViewById(R.id.progressBarH);
+        historyRecord_TV = findViewById(R.id.historyRecord_TV);
 
         recyclerAssetHistory = findViewById(R.id.recyclerAssetHistory);
         recyclerAssetHistory.setLayoutManager(new LinearLayoutManager(this));
@@ -53,36 +54,29 @@ public class EachAssetActivity extends AppCompatActivity {
         {
             setEachAssetName_TV.setText(getString(R.string.totalGameAsset));
             eachAssetTotalAmount.setText("N 5,000");
-            
+            historyRecord_TV.setText(getString(R.string.gameRewardHistory));
+
         } else if (getAssetType.equals("localAsset")) 
         {
             setEachAssetName_TV.setText(getString(R.string.totalLocalAsset));
             eachAssetTotalAmount.setText("N 25,000");
-            
+            historyRecord_TV.setText(getString(R.string.localAssetHistory));
+
         } else if (getAssetType.equals("USDTAsset")) 
         {
             setEachAssetName_TV.setText(getString(R.string.totalUSDTAsset));
             eachAssetTotalAmount.setText("$ 20");
-            
+            historyRecord_TV.setText(getString(R.string.USDTHistory));
+
         } else if (getAssetType.equals("BonusAsset")) 
         {
             setEachAssetName_TV.setText(getString(R.string.totalBonusAsset));
             eachAssetTotalAmount.setText("0.00");
-            
+            historyRecord_TV.setText(getString(R.string.bonusRewardHistory));
+
         }
 
-        historyList.add(new WalletHistory("", "@ndifreke" ,
-                "Ndifreke Sunday", getString(R.string.winPoker)
-                + " @ndifreke", new Date(), "+3000","received"));
-
-        historyList.add(new WalletHistory("", "@frank" ,
-                "Frank Umoro", getString(R.string.loseWhot)
-                + " Frank", new Date(), "-200","sent"));
-
-        historyList.add(new WalletHistory("", "@maro" ,
-                " Maro Princess", "Received from Local Asset",
-                new Date(), "+600","convert"));
-
+        addHistory();
 
         new Handler().postDelayed( ()-> {
 
@@ -115,6 +109,209 @@ public class EachAssetActivity extends AppCompatActivity {
 
 
         arrowClose.setOnClickListener(v -> onBackPressed());
+
+    }
+
+    private void addHistory(){
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
+        historyList.add(new WalletHistory("", "@ndifreke" ,
+                "Ndifreke Sunday", getString(R.string.winPoker)
+                + " @ndifreke", new Date(), "+3000","received"));
+
+        historyList.add(new WalletHistory("", "@frank" ,
+                "Frank Umoro", getString(R.string.loseWhot)
+                + " Frank", new Date(), "-200","sent"));
+
+        historyList.add(new WalletHistory("", "@maro" ,
+                " Maro Princess", "Received from Local Asset",
+                new Date(), "+600","convert"));
 
     }
 

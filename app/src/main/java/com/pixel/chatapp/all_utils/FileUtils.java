@@ -5,9 +5,11 @@ import static com.pixel.chatapp.all_utils.FolderUtils.getDocumentFolder;
 import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.all_utils.FolderUtils.getVideoFolder;
 
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +20,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.widget.Toast;
+
+import androidx.core.content.FileProvider;
 
 import com.iceteck.silicompressorr.SiliCompressor;
 import com.pixel.chatapp.R;
@@ -33,8 +37,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -628,5 +634,78 @@ public class FileUtils {
 
     }
 
+    public static String getMediaDuration(File file) {
+        String mediaDuration = "0";
+
+        try {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(file.getAbsolutePath());
+            String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            if (durationStr != null) {
+                int duration = Integer.parseInt(durationStr);
+                mediaDuration = FileUtils.formatDuration(duration);
+
+                return mediaDuration;
+            }
+            retriever.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return mediaDuration;
+    }
+
+    public static void openDocumentFromUrl(Context mContext, String documentUri) throws URISyntaxException {
+        System.out.println("what is doc ur " + documentUri);
+        if(documentUri != null){
+            if(documentUri.startsWith("file:/") || documentUri.startsWith("/storage")) {
+                File docFile;
+                if(documentUri.startsWith("/storage")) {
+                    docFile = new File(documentUri);
+                } else {    // starts with file/
+                    docFile = new File(new URI(documentUri));
+                }
+
+                Uri docContentUri = FileProvider.getUriForFile(mContext, "com.pixel.chatapp.fileprovider", docFile);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String mimeType = mContext.getContentResolver().getType(docContentUri); // get the type -> pdf, docx jpeg etc
+                intent.setDataAndType(docContentUri, mimeType);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                try {
+//                    mContext.startActivity(Intent.createChooser(intent, "Open Document with"));
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    // Handle no PDF viewer installed case
+                    Toast.makeText(mContext, "No document viewer installed", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
+            }
+        } else Toast.makeText(mContext, mContext.getString(R.string.corrupt), Toast.LENGTH_SHORT).show();
+
+    }
+
+    public static String getFileCreationDate(Uri uri) {
+        String path = uri.getPath();
+        if (path != null) {
+            File file = new File(path);
+            if (file.exists()) {
+                long lastModified = file.lastModified();
+
+                return formatFileCreationDate( new Date(lastModified) );
+            }
+        }
+        return null;
+    }
+
+    public static String formatFileCreationDate(Date creationDate) {
+        if (creationDate != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            return dateFormat.format(creationDate);
+        } else {
+            return "Unknown";
+        }
+    }
 
 }

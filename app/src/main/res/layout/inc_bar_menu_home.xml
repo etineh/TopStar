@@ -166,7 +166,7 @@
                 app:layout_constraintTop_toBottomOf="@id/cardViewWallet">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -226,7 +226,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout4">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -298,7 +298,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardViewDashboard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -359,7 +359,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardViewSettings">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -420,7 +420,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardViewP2P">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -480,7 +480,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardViewPremium">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -541,7 +541,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardAdvert">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -602,7 +602,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/cardViewInvite2">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    style="@style/userCard"
+                    style="@style/mainBackground"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -748,6 +748,17 @@
                 android:textSize="12sp"
                 app:layout_constraintBottom_toTopOf="@+id/textViewJoinDate"
                 app:layout_constraintEnd_toEndOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progressBarMood"
+                style="@style/progressBarColour"
+                android:layout_width="@dimen/_30dp"
+                android:layout_height="@dimen/_30dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/switch1"
+                app:layout_constraintEnd_toEndOf="@+id/switch1"
+                app:layout_constraintStart_toStartOf="@+id/switch1"
+                app:layout_constraintTop_toTopOf="@+id/switch1" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

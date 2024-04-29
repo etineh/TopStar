@@ -17,7 +17,20 @@ public class CacheUtils {
                 }
             }
         }
-        return cacheSize;
+        return cacheSize / 1024 / 1024; // in MB
     }
+
+    public static void clearCache(Context context) {
+        File cacheDir = context.getCacheDir();
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] cacheFiles = cacheDir.listFiles();
+            if (cacheFiles != null) {
+                for (File file : cacheFiles) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
 
 }

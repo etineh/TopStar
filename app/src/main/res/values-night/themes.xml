@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.ChatApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimary">#111111</item>
 <!--        change bar color here-->
         <item name="colorPrimaryVariant">#070707</item> <!-- For the top bar color -->
         <item name="colorOnPrimary">@color/black</item>
@@ -47,7 +47,8 @@
     </style>
 
     <style name="mainBackground">
-        <item name="android:background">#0E0E0E</item>
+<!--        <item name="android:background">#0E0E0E</item>-->
+        <item name="android:background">@color/blackApp</item>
     </style>
 
     <style name="cardTopOrange">

@@ -78,7 +78,7 @@ public class ConvertFundActivity extends AppCompatActivity {
 
         convertAssetButton.setOnClickListener(v -> {
             // hide keyboard
-            onBackPressed();
+//            onBackPressed();
             Toast.makeText(this, getString(R.string.convertSuccessfully), Toast.LENGTH_SHORT).show();
         });
 

@@ -58,6 +58,7 @@
     <include
         android:id="@+id/acknowledge_payment_layout"
         layout="@layout/inc_acknowledge_payment_seller"
+        android:visibility="gone"
         tools:layout_editor_absoluteX="15dp"
         tools:layout_editor_absoluteY="15dp" />
 

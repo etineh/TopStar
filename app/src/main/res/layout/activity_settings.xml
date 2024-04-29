@@ -18,15 +18,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView68"
+            android:id="@+id/headingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:text="@string/setting"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="@+id/arrowBackS"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/arrowBackS"
             app:layout_constraintTop_toTopOf="@+id/arrowBackS" />
 
         <ImageView
@@ -85,7 +85,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/profileInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4"
                     app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -144,7 +144,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/privacyInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4p"
                     app:layout_constraintTop_toBottomOf="@+id/textView4p" />
@@ -203,7 +203,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/soundsInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4ss"
                     app:layout_constraintTop_toBottomOf="@+id/textView4ss" />
@@ -262,7 +262,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/storageInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4so"
                     app:layout_constraintTop_toBottomOf="@+id/textView4so" />
@@ -321,7 +321,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/P2PInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4p2"
                     app:layout_constraintTop_toBottomOf="@+id/textView4p2" />
@@ -380,7 +380,7 @@
                     android:maxLines="1"
                     android:paddingBottom="5dp"
                     android:text="@string/securityInfo"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView4se"
                     app:layout_constraintTop_toBottomOf="@+id/textView4se" />

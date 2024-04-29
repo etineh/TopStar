@@ -9,7 +9,7 @@
     android:padding="30dp">
 
     <LinearLayout
-        style="@style/BackgroundW_B"
+        style="@style/roundRadiusBackground2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"

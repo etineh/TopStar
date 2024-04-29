@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintCover"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".home.MainActivity">
@@ -128,7 +129,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/HomeTopConstr"
-            style="@style/card"
+            style="@style/mainBackground"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:clickable="true"
@@ -348,16 +349,16 @@
                 <ImageView
                     android:id="@+id/imageViewPlayers"
                     style="@style/BackgroundTint"
-                    android:layout_width="36dp"
-                    android:layout_height="33dp"
-                    android:layout_marginTop="13dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="5dp"
                     android:adjustViewBounds="false"
                     android:scaleY="1.5"
                     android:tint="@color/orange"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewGames"
                     app:layout_constraintStart_toEndOf="@+id/imageViewHome"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/players" />
+                    app:layout_constraintTop_toBottomOf="@+id/constraintLine"
+                    app:srcCompat="@drawable/baseline_live_tv_24" />
 
                 <TextView
                     android:id="@+id/textView6"
@@ -427,11 +428,11 @@
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-3dp"
+                    android:layout_marginTop="3dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
                     android:scrollIndicators="bottom"
-                    android:text="Hosts"
+                    android:text="Watch"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewPlayers"
@@ -498,6 +499,16 @@
                     android:textSize="11sp"
                     app:layout_constraintStart_toEndOf="@+id/p2pHome_IV"
                     app:layout_constraintTop_toTopOf="@+id/p2pHome_IV" />
+
+                <TextView
+                    android:id="@+id/textView87"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-2dp"
+                    android:text="Live"
+                    android:textSize="11sp"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewPlayers"
+                    app:layout_constraintTop_toTopOf="@+id/imageViewPlayers" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -1503,9 +1514,11 @@
                             android:backgroundTint="@color/orange"
                             android:focusableInTouchMode="false"
                             android:gravity="start|top"
-                            android:hint="@string/chat"
+                            android:hint="@string/app_name..."
                             android:inputType="textMultiLine"
                             android:maxLines="6"
+                            android:textColorHighlight="@color/orange"
+                            android:textCursorDrawable="@drawable/cursor_drawable"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/files_IV"
                             app:layout_constraintStart_toEndOf="@+id/emoji_IV" />

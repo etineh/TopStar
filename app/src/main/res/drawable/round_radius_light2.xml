@@ -10,7 +10,7 @@
     <item android:top="1dp" android:bottom="1dp" android:left="1dp" android:right="1dp">
         <shape android:shape="rectangle">
             <corners android:radius="15dp" /> <!-- Adjust the corner radius as needed -->
-            <solid android:color="@color/white" /> <!-- Transparent or other background color -->
+            <solid android:color="@color/whitePure" /> <!-- Transparent or other background color -->
         </shape>
     </item>
 </layer-list>

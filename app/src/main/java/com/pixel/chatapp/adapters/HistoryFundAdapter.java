@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.all_utils.OpenActivityUtil;
 import com.pixel.chatapp.model.WalletHistory;
 import com.pixel.chatapp.side_bar_menu.wallet.TransactionReceiptActivity;
 
@@ -70,8 +71,10 @@ public class HistoryFundAdapter extends RecyclerView.Adapter<HistoryFundAdapter.
 
 
         // onClick -- view transact details
-        holder.itemView.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v ->
+        {
             Intent intent = new Intent(context, TransactionReceiptActivity.class);
+            intent.putExtra("from", "asset");
             context.startActivity(intent);
         });
 

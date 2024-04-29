@@ -95,6 +95,7 @@ import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreatePinActivity;
+import com.pixel.chatapp.all_utils.CacheUtils;
 import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
 import com.pixel.chatapp.calls.CallPickUpCenter;
@@ -123,10 +124,10 @@ import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
+import com.pixel.chatapp.side_bar_menu.dashboard.DashboardActivity;
 import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
 import com.pixel.chatapp.signup_login.LinkNumberActivity;
-import com.pixel.chatapp.signup_login.NumberWithoutEmailActivity;
 import com.pixel.chatapp.signup_login.PhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
 import com.pixel.chatapp.signup_login.SetUpProfileActivity;
@@ -170,7 +171,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch darkMoodSwitch;
-    CardView cardViewSettings;
+    ProgressBar progressBarMood;
+    CardView cardViewSettings, dashboard, premium, advertise, invite, support;
     String imageLink;
 
     //  ---------   sharepreference     -----------------
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef, myProfileShareRef,
             resetLoginSharePref;
     public static String getMyUserName;
-    private Boolean nightMood;
+    public static Boolean nightMood;
 
     private final MainActivity mainActivityContext = MainActivity.this;
 
@@ -404,8 +406,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static CallsListener callsListener;
 
-    String newToken;
-
     private Executor executor;
     private final Executor excutorSendDB = Executors.newSingleThreadExecutor();
 
@@ -430,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         textLightAndDay = findViewById(R.id.lightAndDark_TV);
         darkMoodSwitch = findViewById(R.id.switch1);
+        progressBarMood = findViewById(R.id.progressBarMood);
 
         if(nightMood){
             darkMoodSwitch.setChecked(true);
@@ -440,15 +441,24 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         };
 
-        darkMoodSwitch.setOnClickListener(view -> {
-            if(nightMood){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                moodPreferences.edit().putBoolean("MoodStatus", false).apply();
-            } else{
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                moodPreferences.edit().putBoolean("MoodStatus", true).apply();
-            }
-            recreate();
+        darkMoodSwitch.setOnClickListener(view ->
+        {
+            progressBarMood.setVisibility(View.VISIBLE);
+            darkMoodSwitch.setVisibility(View.INVISIBLE);
+            textLightAndDay.setText(getString(R.string.initialising));
+
+            new Handler().postDelayed(()->
+            {
+                if(nightMood){
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    moodPreferences.edit().putBoolean("MoodStatus", false).apply();
+                } else{
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    moodPreferences.edit().putBoolean("MoodStatus", true).apply();
+                }
+                recreate();
+
+            }, 10);
         });
 
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -515,6 +525,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         textViewDisplayName = sideBarMenuContainer.findViewById(R.id.textViewDisplayName2);
         textViewUserName = sideBarMenuContainer.findViewById(R.id.textViewUserName2);
         cardViewSettings = sideBarMenuContainer.findViewById(R.id.cardViewSettings);
+        dashboard = sideBarMenuContainer.findViewById(R.id.cardViewDashboard);
+        premium = sideBarMenuContainer.findViewById(R.id.cardViewPremium);
+        advertise = sideBarMenuContainer.findViewById(R.id.cardAdvert);
+        invite = sideBarMenuContainer.findViewById(R.id.cardViewInvite2);
+        support = sideBarMenuContainer.findViewById(R.id.cardViewCustomerCare);
+
         phoneNumber_TV = sideBarMenuContainer.findViewById(R.id.phoneNumber_TV);
         copyUserNameIV = sideBarMenuContainer.findViewById(R.id.copyUserNameIV);
         copyNumberIV = sideBarMenuContainer.findViewById(R.id.copyNumberIV);
@@ -818,10 +834,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 tab.setText(getString(R.string.players));
                                 break;
                             case 2:
-                                tab.setText(getString(R.string.team));
+                                tab.setText(getString(R.string.tour) + " 🏆");
                                 break;
                             case 3:
-                                tab.setText(getString(R.string.tour) + " 🏆");
+                                tab.setText(getString(R.string.hosts));
                                 break;
                         }
                     });
@@ -985,7 +1001,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
             });
 
-            // down buttons at home
+            // down buttons at home (deposit)
             p2pHome_IV.setOnClickListener(v -> {
                 v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
                 {
@@ -1012,29 +1028,91 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             imageViewUserPhoto.setOnClickListener(viewImage);
             tapImage_TV.setOnClickListener(viewImage);
 
-            // settings
-            cardViewSettings.setOnClickListener(view -> {
-
-//                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-
-                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20)
-                        .withEndAction(() -> {
-
-                            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-
-                            cardViewSettings.setClickable(false);
-
-                        }).start();
+            // dashboard side bar
+            dashboard.setOnClickListener(view ->
+            {
+                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                        startActivity(new Intent(MainActivity.this, DashboardActivity.class))).start();
 
                 new Handler().postDelayed(() -> {
                     sideBarMenuContainer.setVisibility(View.GONE);
-                    cardViewSettings.setClickable(true);
-                    // Reset the scale
                     view.setScaleX(1.0f);
                     view.setScaleY(1.0f);
                 }, 1000);
+            });
+
+
+            // settings
+            cardViewSettings.setOnClickListener(v -> {
+
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                        startActivity(new Intent(MainActivity.this, SettingsActivity.class))).start();
+
+                new Handler().postDelayed(() -> {
+                    sideBarMenuContainer.setVisibility(View.GONE);
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 1000);
 
             });
+
+            premium.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                });
+
+                new Handler().postDelayed(() -> {
+//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 1000);
+            });
+
+            advertise.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                });
+
+                new Handler().postDelayed(() -> {
+//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 1000);
+            });
+
+
+            invite.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                });
+
+                new Handler().postDelayed(() -> {
+//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 1000);
+            });
+
+            support.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                });
+
+                new Handler().postDelayed(() -> {
+//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 1000);
+            });
+
 
             copyUserNameIV.setOnClickListener(v -> PhoneUtils.copyText(this, textViewUserName));
 
@@ -5582,7 +5660,9 @@ scNum = 20;
     private void clearGlideCache(){
         new Thread(() -> {
             // This method must be called in a background thread
-            Glide.get(getApplicationContext()).clearDiskCache();
+            if(CacheUtils.getCacheSize(this) > 60) {
+                Glide.get(getApplicationContext()).clearDiskCache();
+            }
         }).start();
     }
 
@@ -5866,13 +5946,13 @@ scNum = 20;
             startActivity(callIntentActivity);
         } else {
 
-            if(close == 0){
-                Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-                close = 1;
-                new Handler().postDelayed( ()-> close = 0, 5_000);
-            } else {
-                super.onBackPressed();
-            }
+//            if(close == 0){
+//                Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+//                close = 1;
+//                new Handler().postDelayed( ()-> close = 0, 5_000);
+//            } else {
+//            }
+            super.onBackPressed();
         }
     }
 

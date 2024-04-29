@@ -1,5 +1,7 @@
 package com.pixel.chatapp.signup_login;
 
+import static com.pixel.chatapp.home.MainActivity.nightMood;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -101,10 +103,12 @@ public class LinkNumberActivity extends AppCompatActivity {
 
         new Handler().postDelayed(()-> number_ET.requestFocus(), 500);
 
-        openCountryCode_TV.setOnClickListener(v -> {
+        openCountryCode_TV.setOnClickListener(v ->
+        {
+            if(nightMood) v.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_orange2));
+            else v.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_orange));
 
-            v.setBackgroundColor(ContextCompat.getColor(this, R.color.cool_orange));
-            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(()->{
+            new Handler().postDelayed(()-> {
 
                 if(allCountryCode.size() == 0){
                     Toast.makeText(this,  getString(R.string.clickAgain), Toast.LENGTH_SHORT).show();
@@ -116,9 +120,10 @@ public class LinkNumberActivity extends AppCompatActivity {
                     spinnerCountryCode.setOnItemSelectedListener(addSpinnerListener);
                 }
 
-                v.setBackgroundColor(0);
+                new Handler().postDelayed(()-> v.setBackgroundColor(0), 50);
 
-            });
+            }, 1);
+
         });
 
         sendCode_TV.setOnClickListener(v -> {
@@ -153,6 +158,7 @@ public class LinkNumberActivity extends AppCompatActivity {
         support_IV.setOnClickListener(v -> {
             Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
         });
+
     }
 
 

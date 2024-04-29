@@ -193,13 +193,13 @@
 
     <TextView
         android:id="@+id/cancelNow_TV"
-        style="@style/textColorFullBlack"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/round_radius_orange"
         android:gravity="center"
         android:padding="10dp"
         android:text="@string/cancelNow"
+        android:textColor="@color/whitePure"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

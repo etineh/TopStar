@@ -165,8 +165,8 @@
                 android:backgroundTint="#FF5722"
                 android:buttonTint="@color/orange"
                 android:ellipsize="end"
-                android:text="NGN 20,000"
-                android:textSize="13sp" />
+                android:text="NGN 20,000,000"
+                android:textSize="14sp" />
 
             <RadioButton
                 android:id="@+id/usdtRadioButton"
@@ -175,8 +175,8 @@
                 android:backgroundTint="@color/orange"
                 android:buttonTint="@color/orange"
                 android:ellipsize="end"
-                android:text="USDT 150"
-                android:textSize="13sp" />
+                android:text="USDT 150,000"
+                android:textSize="14sp" />
         </RadioGroup>
 
         <androidx.constraintlayout.widget.ConstraintLayout

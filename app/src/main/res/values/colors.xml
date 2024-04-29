@@ -6,7 +6,11 @@
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="whitePure">#FFFFFFFF</color>
+
+    <color name="white">#FFFBEF</color>
+    <color name="blackApp">#111111</color>
+
     <color name="orange">#ED7014</color>
     <color name="black2">#191818</color>
     <color name="trans">#55000000</color><!-- 33% transparent -->

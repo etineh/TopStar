@@ -890,7 +890,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
             if(textWatcher != null) newDetails_ET.removeTextChangedListener(textWatcher);
 
         } else {
-//            super.onBackPressed();
+            super.onBackPressed();
             if(profileListener != null){
                 myDataRef.child(user.getUid()).child("general").removeEventListener(profileListener);
             }

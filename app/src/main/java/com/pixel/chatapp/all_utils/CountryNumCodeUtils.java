@@ -17,7 +17,7 @@ import java.util.TreeMap;
 
 public class CountryNumCodeUtils {
 
-    public static void getCountryCode(final CountryCodeCallback callback) {
+    public static void getCountryCode(final CountryCodeCallback callback) { // Nigeria (NG) +234
 
         new Thread(() -> {
 
@@ -49,15 +49,7 @@ public class CountryNumCodeUtils {
         void onCountryCodeLoaded(List<String> countryCodes);
     }
 
-//    public static String getUserCountry(Context context) {
-//        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-//        if (telephonyManager != null) {
-//            return telephonyManager.getNetworkCountryIso();
-//        }
-//        return null;
-//    }
-
-    public static String getUserCountry(Context context) {
+    public static String getUserCountry(Context context) {  // (NG) +234
         PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
@@ -68,7 +60,7 @@ public class CountryNumCodeUtils {
         return null;
     }
 
-    private static String getCountryDialingCode(String countryCode, PhoneNumberUtil phoneNumberUtil) {
+    private static String getCountryDialingCode(String countryCode, PhoneNumberUtil phoneNumberUtil) {  // +234
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.getExampleNumberForType(countryCode, PhoneNumberUtil.PhoneNumberType.MOBILE);
             return "+" + phoneNumber.getCountryCode();

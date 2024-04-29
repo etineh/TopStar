@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/cardTop"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="15dp"
@@ -21,7 +21,7 @@
             android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView35" />
+            app:layout_constraintTop_toBottomOf="@+id/historyRecord_TV" />
 
         <ImageView
             android:id="@+id/arrowClose"
@@ -79,6 +79,7 @@
 
             <TextView
                 android:id="@+id/setEachAssetName_TV"
+                style="@style/textColorFullBlack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
@@ -89,6 +90,7 @@
 
             <TextView
                 android:id="@+id/eachAssetTotalAmount"
+                style="@style/textColorFullBlack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
@@ -116,23 +118,23 @@
             android:id="@+id/recyclerAssetHistory"
             style="@style/roundRadiusBackground2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="50dp"
             android:padding="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView35"
+            app:layout_constraintTop_toBottomOf="@+id/historyRecord_TV"
             tools:listitem="@layout/fund_history_card">
 
         </androidx.recyclerview.widget.RecyclerView>
 
         <TextView
-            android:id="@+id/textView35"
+            android:id="@+id/historyRecord_TV"
+            style="@style/textOrangeAndCoolOrange"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="40dp"
             android:ellipsize="end"
             android:maxLines="1"

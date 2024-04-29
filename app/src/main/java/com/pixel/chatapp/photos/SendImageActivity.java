@@ -132,7 +132,6 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     Gson gson = new Gson();
     private boolean isSendingPause;
     TextView fileNameAtTop_TV;
-ImageView imageView3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -285,6 +285,7 @@
                     android:hint="@string/add_message"
                     android:inputType="textMultiLine"
                     android:maxLines="6"
+                    android:textCursorDrawable="@drawable/cursor_drawable"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/oneTimeView_IV"
                     app:layout_constraintStart_toEndOf="@+id/emojiPaint_IV" />
@@ -327,7 +328,6 @@
         android:elevation="5dp"
         android:max="360"
         android:progress="0"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/displayNames_TV"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

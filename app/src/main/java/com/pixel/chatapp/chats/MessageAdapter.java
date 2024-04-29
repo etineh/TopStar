@@ -812,7 +812,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(holder.photoChatTV != null ) holder.photoChatTV.setOnLongClickListener(longClick);
         if(holder.textViewShowMsg != null ) holder.textViewShowMsg.setOnLongClickListener(longClick);
 
-        //  image and progressLoad bar onClick settings
+        //  image, document and progressLoad bar onClick settings
         if(holder.showImage != null){
 
             // for long press
@@ -823,8 +823,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // for single onClick =>    type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
             View.OnClickListener imageOrDocOnClick = view -> {
                 // check if longPress is activated yet or not
-                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
-
+                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE
+                ){
                     // open image if I was the one that sent them photo
                     if(modelChats.getFromUid().equals(myId) ||
                             (!modelChats.getFromUid().equals(myId) && holder.progressBarLoad.getVisibility() == View.GONE) )
@@ -837,7 +837,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         {
                             // open document
                             try {
-                                openDocumentFromUrl(modelChats.getPhotoUriOriginal());
+                                FileUtils.openDocumentFromUrl(mContext, modelChats.getPhotoUriOriginal());
                             } catch (URISyntaxException e) {
                                 throw new RuntimeException(e);
                             }
@@ -1957,36 +1957,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    private void openDocumentFromUrl(String documentUri) throws URISyntaxException {
-        System.out.println("what is doc ur " + documentUri);
-        if(documentUri != null){
-                if(documentUri.startsWith("file:/") || documentUri.startsWith("/storage")) {
-                    File docFile;
-                    if(documentUri.startsWith("/storage")) {
-                        docFile = new File(documentUri);
-                    } else {    // starts with file/
-                        docFile = new File(new URI(documentUri));
-                    }
-
-                    Uri docContentUri = FileProvider.getUriForFile(mContext, "com.pixel.chatapp.fileprovider", docFile);
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    String mimeType = mContext.getContentResolver().getType(docContentUri); // get the type -> pdf, docx jpeg etc
-                    intent.setDataAndType(docContentUri, mimeType);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    try {
-//                    mContext.startActivity(Intent.createChooser(intent, "Open Document with"));
-                        mContext.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        // Handle no PDF viewer installed case
-                        Toast.makeText(mContext, "No document viewer installed", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
-                }
-            } else Toast.makeText(mContext, mContext.getString(R.string.corrupt), Toast.LENGTH_SHORT).show();
-
-    }
 
     // save small image (thumbnail) to phone on photo first appearance from other other user
     public static File saveThumbnailFromOtherUser(Bitmap bitmap, int quality, Context mContext){

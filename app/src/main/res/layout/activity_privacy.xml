@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/mainBackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".side_bar_menu.settings.PrivacyActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout14"
+        style="@style/cardTopOrange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/headingTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/privacy"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/arrowBackS"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/arrowBackS" />
+
+        <ImageView
+            android:id="@+id/arrowBackS"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:padding="10dp"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout14">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/_25dp"
+            android:paddingTop="15dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="@dimen/_20dp">
+
+            <TextView
+                android:id="@+id/lastSeenTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="@string/lastSeen_"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/valuePrivacy" />
+
+            <TextView
+                android:id="@+id/valuePrivacy"
+                style="@style/textOrangeAndCoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/privacyValue"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lastSeenInfoTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/everyone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/lastSeenTV"
+                app:layout_constraintTop_toBottomOf="@+id/lastSeenTV" />
+
+            <TextView
+                android:id="@+id/hintTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/hint"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lastSeenInfoTV" />
+
+            <TextView
+                android:id="@+id/hintInfoTv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/nobodyExcept"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hintTV" />
+
+            <TextView
+                android:id="@+id/profilePhotoTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/profilePhoto"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hintInfoTv" />
+
+            <TextView
+                android:id="@+id/profilePhotoInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/contactExcept"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/profilePhotoTV"
+                app:layout_constraintTop_toBottomOf="@+id/profilePhotoTV" />
+
+            <TextView
+                android:id="@+id/phoneNumberTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/phoneNumber"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profilePhotoInfo" />
+
+            <TextView
+                android:id="@+id/photoNumberInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/privateNumber"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/phoneNumberTV"
+                app:layout_constraintTop_toBottomOf="@+id/phoneNumberTV" />
+
+            <TextView
+                android:id="@+id/societyTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/societies"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/photoNumberInfo" />
+
+            <TextView
+                android:id="@+id/societyInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/onlyContact"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/societyTV"
+                app:layout_constraintTop_toBottomOf="@+id/societyTV" />
+
+            <TextView
+                android:id="@+id/readAlertTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/readAlert"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/societyInfo" />
+
+            <TextView
+                android:id="@+id/readAlertInfo_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/off"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/readAlertTV"
+                app:layout_constraintTop_toBottomOf="@+id/readAlertTV" />
+
+            <TextView
+                android:id="@+id/callsTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/calls"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/readAlertInfo_TV" />
+
+            <TextView
+                android:id="@+id/callInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/whoCanCall"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/callsTV"
+                app:layout_constraintTop_toBottomOf="@+id/callsTV" />
+
+            <TextView
+                android:id="@+id/gameTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/games"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/callInfo" />
+
+            <TextView
+                android:id="@+id/gameInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/whoCanHost"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/gameTV"
+                app:layout_constraintTop_toBottomOf="@+id/gameTV" />
+
+            <TextView
+                android:id="@+id/alertTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/alert"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gameInfo" />
+
+            <TextView
+                android:id="@+id/alertInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/whoCanAlert"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/alertTV"
+                app:layout_constraintTop_toBottomOf="@+id/alertTV" />
+
+            <TextView
+                android:id="@+id/blockChatsTV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/blockContact"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/alertInfo" />
+
+            <TextView
+                android:id="@+id/blockChatInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/none"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/blockChatsTV"
+                app:layout_constraintTop_toBottomOf="@+id/blockChatsTV" />
+
+            <TextView
+                android:id="@+id/prem3"
+                style="@style/roundRadiusBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="70dp"
+                android:layout_marginBottom="3dp"
+                android:paddingStart="@dimen/_10dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="@dimen/_10dp"
+                android:paddingBottom="2dp"
+                android:text="@string/premium"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@+id/alertInfo"
+                app:layout_constraintStart_toStartOf="@id/alertTV"
+                app:layout_constraintTop_toTopOf="@+id/alertTV" />
+
+            <TextView
+                android:id="@+id/prem2"
+                style="@style/roundRadiusBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="70dp"
+                android:layout_marginBottom="3dp"
+                android:paddingStart="@dimen/_10dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="@dimen/_10dp"
+                android:paddingBottom="2dp"
+                android:text="@string/premium"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@+id/gameInfo"
+                app:layout_constraintStart_toStartOf="@id/gameTV"
+                app:layout_constraintTop_toTopOf="@id/gameTV" />
+
+            <TextView
+                android:id="@+id/prem1"
+                style="@style/roundRadiusBackground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="70dp"
+                android:layout_marginBottom="3dp"
+                android:paddingStart="@dimen/_10dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="@dimen/_10dp"
+                android:paddingBottom="2dp"
+                android:text="@string/premium"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@+id/callInfo"
+                app:layout_constraintStart_toStartOf="@+id/callsTV"
+                app:layout_constraintTop_toTopOf="@+id/callsTV" />
+
+            <TextView
+                android:id="@+id/dispalyMsg_TV"
+                style="@style/textColorFullBlack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/disappear_msg"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/blockChatInfo" />
+
+            <TextView
+                android:id="@+id/dispalyMsgInfo_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="120dp"
+                android:text="@string/off"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/dispalyMsg_TV"
+                app:layout_constraintTop_toBottomOf="@+id/dispalyMsg_TV" />
+
+            <TextView
+                android:id="@+id/textView35"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="47dp"
+                android:text="@string/fromApp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

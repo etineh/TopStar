@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,12 +68,12 @@ public class ViewImageAdapter extends PagerAdapter {
         TextView durationTV = itemView.findViewById(R.id.duration_TV);
         ImageView playV_IV = itemView.findViewById(R.id.playV_IV);
         TextView fileSize_TV = itemView.findViewById(R.id.fileSize_TV);
-        FrameLayout frameLayout = itemView.findViewById(R.id.frameLayout);
+        LinearLayout videoContainer = itemView.findViewById(R.id.videoContainer);
         Map<String, VideoView> videoViewMap = new HashMap<>();
 
         // reset
         fileDetailsContainer.setVisibility(View.GONE);
-        frameLayout.setVisibility(View.GONE);
+        videoContainer.setVisibility(View.GONE);
         playButton_IV.setVisibility(View.GONE);
         videoSeekBarContainer.setVisibility(View.GONE);
 
@@ -114,7 +115,7 @@ public class ViewImageAdapter extends PagerAdapter {
 
         // -------------     onClicks
         View.OnClickListener playAndPause = v -> {
-            frameLayout.setVisibility(View.VISIBLE);
+            videoContainer.setVisibility(View.VISIBLE);
 
             if(videoViewMap.get(model.getIdKey()) != null){
                 VideoView getVideoView = videoViewMap.get(model.getIdKey());
@@ -156,7 +157,7 @@ public class ViewImageAdapter extends PagerAdapter {
         playButton_IV.setOnClickListener(playAndPause);
         playV_IV.setOnClickListener(playAndPause);
 
-        frameLayout.setOnClickListener(v -> {
+        videoContainer.setOnClickListener(v -> {
             fadeInAndOut(videoSeekBarContainer);
         });
 

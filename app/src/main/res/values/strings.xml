@@ -16,12 +16,11 @@
     <string name="disappear_msg">Set disappear message</string>
     <string name="search">Search</string>
     <string name="join_tour">Join Tournament</string>
-    <string name="forward">Forward to...</string>
+    <string name="forward">Forward to…</string>
     <string name="file">File</string>
-    <string name="chat">Topper...</string>
     <string name="hintTitle">Hint</string>
     <!--    <string name="changeHint">Change Hint</string>-->
-    <string name="hint">Hint: Hello! Alert me let\'s play live stream game together.</string>
+    <string name="hint">Hint</string>
     <string name="hint2">Hello! Alert me let\'s play live stream game together!</string>
     <string name="add_message">Add message</string>
     <string name="online">Online</string>
@@ -30,12 +29,34 @@
     <string name="multiple">Multiple</string>
     <string name="send">Send</string>
     <string name="done">Done</string>
+    <string name="close">Close</string>
+
+    <string name="confirmMsg_">Are you sure you want to delete? Item(s) deleted will no longer appear on your chats.</string>
+    <string name="thumbDelMsg">Are you sure you want to delete? This might result to irresponsive user interface on previous chats</string>
+    <string name="cacheDelMsg">Not to worry, our system automatically cleans up the cache when it reaches 50MB ~ 100MB. Do you clear wish to clear it?</string>
+
+    <string name="localDatabaseMsg">To prevent losing your chats, data and important records, we have disabled deleting app database.
+        You can do it manually from your phone setting if you still insist.</string>
+
+    <string name="clear">Clear</string>
+    <string name="clearCache">Clear cache?</string>
+    <string name="clearDatabase">Can\'t clear database</string>
+
+    <string name="deleteNow">Delete now?</string>
+    <string name="deleteAllThumbNow">Delete all thumbnails?</string>
+    <string name="delete_">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="deleteSuccessful">item(s) deleted</string>
+    <string name="cacheClear">Cache cleared!</string>
 
     <!--    quick set up    -->
     <string name="newEmail__">New email *</string>
     <string name="email__">Email *</string>
     <string name="createPassword__">Create login password *</string>
     <string name="newPassword">New password *</string>
+    <string name="newPin">New Pin *</string>
+    <string name="oldPin">Old Pin *</string>
+    <string name="oldPassword">Old password *</string>
     <string name="displayName">Display name</string>
     <string name="username__">Username *</string>
     <string name="setUp">Set Up</string>
@@ -66,40 +87,42 @@
     <string name="accountCreated">Account created successfully.</string>
 
     <!--    tap layout name-->
-    <string name="alert">Alert</string>
+    <string name="alert">Alerts</string>
     <string name="players">Players</string>
-    <string name="team">Team</string>
+    <string name="hosts">Hosts</string>
     <string name="tour">Tour.</string>
 
     <!--    side bar    -->
     <string name="wallet">Wallet</string>
-    <string name="walletSub">Asset ~ Withdraw ~ Transfer ~ P2P…</string>
+    <string name="walletSecurity">Wallet Security</string>
+    <string name="gameSecurity">Games Security</string>
+    <string name="walletSub">Asset ~ Withdraw ~ Transfer ~ Convert…</string>
     <string name="dashboard">Dashboard</string>
-    <string name="dashboardSub">P2P setup ~ Rank ~ Tournaments…</string>
+    <string name="dashboardSub">P2P ~ World Rank ~ Tournaments…</string>
     <string name="setting">Settings</string>
-    <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Games…</string>
+    <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Security ~ Games…</string>
     <string name="premium">Premium</string>
     <string name="premiumSub">Orange tick ~ Create team ~ More features…</string>
     <string name="advertise">Advertise</string>
     <string name="advertiseSub">Run ads and reach more people…</string>
     <string name="invite_friends">Invite Friends</string>
-    <string name="invite_friendSub">Refer friends and earn cash bonus…</string>
+    <string name="invite_friendSub">Refer friends and earn bonus…</string>
     <string name="support">Support</string>
     <string name="supportSub">Live chat ~ Community ~ Contacts…</string>
     <string name="language">Language +</string>
 
     <!--    settings bar    -->
-    <string name="profileInfo">KYC verification, change photo, username, display name</string>
+    <string name="profileInfo">KYC, change photo, username, display name</string>
     <string name="privacy">Privacy</string>
-    <string name="privacyInfo">Last seen, alert, calls, society &amp; block user.</string>
+    <string name="privacyInfo">Last seen, alert, calls, comm. &amp; block user.</string>
     <string name="sounds">Sounds</string>
-    <string name="soundsInfo">Alert, society, calls, p2p notify &amp; game.</string>
+    <string name="soundsInfo">Alert, community, calls, p2p notify &amp; game.</string>
     <string name="storage">Storage</string>
-    <string name="storageInfo">Free space, network usage.</string>
+    <string name="storageInfo">Media and Files.</string>
     <string name="security">Security</string>
     <string name="securityInfo">Change password, pin &amp; un/activate fingerprint.</string>
     <string name="Games">Account</string>
-    <string name="P2PInfo">Setup payment account, register as P2P trader.</string>
+    <string name="P2PInfo">Setup payment account, register as P2P Merchant.</string>
 
 
     <!--    profile side bar    -->
@@ -127,8 +150,119 @@
     <string name="app_slang">Chat, Game &amp; Earn!</string>
     <string name="resetLogin">Reset login details</string>
 
+    <!--    <string name="resetLogin">Reset login details</string>-->
+    <!--    <string name="resetLogin">Reset login details</string>-->
+
     <string name="numberInfo">For privacy, your number is automatically hidden from non-contacts.
         You can choose to make it public via setting after login. We value your privacy 😊.</string>
+
+    <!--    sounds and notification -->
+    <string name="controlNotify">Control your notification!</string>
+    <string name="phoneSetting">Phone settings (default)</string>
+    <string name="vibrate">Vibrate only</string>
+    <string name="appRingtone">App ringtone</string>
+    <string name="ringtone">Phone ringtone</string>
+    <string name="privateAlert">Private Alerts (chats)</string>
+    <string name="privateAlert__">Private Alerts</string>
+
+    <string name="notePrvAlert">Set the sound you desire when user alert/chat you up</string>
+    <string name="noteSocieties">Set the sound you desire when a message drops from community</string>
+    <string name="noteTeam">Set the sound you desire when you get a message from your team</string>
+    <string name="noteCalls__">Set the sound you desire when receiving a call from anyone</string>
+    <string name="noteTrading">Set the sound you desire when receiving a call from P2P auto call reminder</string>
+    <string name="noteGame">Set the sound you desire when playing game</string>
+    <string name="noteMSG">Set the sound you desire for general new message</string>
+
+    <string name="noteNewMsg">Private Alerts</string>
+
+
+    <string name="newMessage">New message</string>
+    <string name="p2pTradeCall">P2P trade calls</string>
+    <!--    <string name="gameSound">Game </string>-->
+
+    <!--    privacy -->
+    <string name="lastSeen_">Last seen and online</string>
+    <string name="everyone">Everyone</string>
+    <string name="nobody">Nobody</string>
+    <string name="contactExcept">My contacts except…</string>
+    <string name="nobodyExcept">Nobody except…</string>
+    <string name="onlyContact">My contacts</string>
+    <string name="profilePhoto">Profile photo</string>
+    <string name="blockContact">Block contact(s)</string>
+    <string name="societies">Communities</string>
+    <string name="readAlert">Read alerts receipt</string>
+    <string name="calls">Calls</string>
+    <string name="none">None</string>
+    <string name="alertChat">Alerts (chats)</string>
+    <string name="alertCalls">Alerts calls</string>
+
+    <string name="unlessPremiumLastSeen">You won\'t be able to see other people last seen and online
+        status if you set it at "nobody", unless you are a Premium user.</string>
+    <string name="unlessPremiumReadReceipt">You won\'t know when other people read your alert(chats)
+        if you turn off read receipt unless you are a Premium user.</string>
+
+    <string name="goPremium">Go Premium >></string>
+
+    <string name="noteLastSeen">Who can see my last seen and online</string>
+    <string name="noteLastPhoto">Who can see my Profile Photo</string>
+    <string name="noteHint">Who can see my Hint</string>
+    <string name="noteNumber">Who can see and find my Number</string>
+    <string name="noteSociety">Who can add me to Community</string>
+    <string name="noteAlertReceipt">Notify users when I read their alert (chat)</string>
+    <string name="whoCanAlert">Who can alert (chat) me >> everyone</string>
+    <string name="whoCanHost">Who can host me  >> everyone</string>
+    <string name="whoCanCall">Who can call me >> everyone</string>
+    <string name="noteAlertChat">Hey Premium 😊! \nControl who can alert/chat you </string>
+    <string name="noteGames">Hey Premium 😊! \nControl who can host games with you </string>
+    <string name="noteCalls">Hey Premium 😊! \nControl who can call you </string>
+    <string name="noteDisappear_msg">Auto delete alerts (chats) after: </string>
+
+    <string name="walletSec">How do you wish to open your wallet?</string>
+    <string name="gameSec">How do you wish to kick start your game?</string>
+    <string name="usdtSec">How do you wish to approve your USDT withdrawal?</string>
+    <string name="p2pSec">How do you wish to approve your P2P withdrawal?</string>
+    <string name="fingerprint">Fingerprint</string>
+    <string name="fingerprintDefault">Fingerprint (default)</string>
+    <string name="pinDefault">PIN (default)</string>
+    <string name="emailOTP">Email OTP</string>
+    <string name="fingerprint_pin">Fingerprint &amp; PIN</string>
+    <string name="fingerprint_email">Fingerprint &amp; Email OTP</string>
+    <string name="pin_email">PIN and Email OTP</string>
+
+    <string name="privateNumber">Private (my contacts)</string>
+    <string name="publicNumber">Public (everyone)</string>
+
+    <string name="fromApp">from, Pixel Planet</string>
+
+    <string name="off">Off</string>
+    <string name="on">On</string>
+
+    <string name="hour24">24 hours</string>
+    <string name="hour90">3 days</string>
+    <string name="hour180">7 days</string>
+
+    <!--    storage    -->
+    <string name="total">Total >> </string>
+    <string name="localDb">Local Database</string>
+    <string name="cache">Cache</string>
+    <string name="others">Others</string>
+    <string name="items">items</string>
+
+    <string name="photos">Photos</string>
+    <string name="audio_">Audio</string>
+    <string name="videos">Videos</string>
+    <string name="audioCap">Audio</string>
+    <string name="voice_note">Voice Notes</string>
+    <string name="documents">Documents</string>
+    <string name="thumbnail">Thumbnails</string>
+
+    <string name="p2pTrans">P2P transactions</string>
+    <string name="usdtTrans">USDT Transactions</string>
+    <string name="games_">Games</string>
+    <string name="changePassword">Change Password</string>
+    <string name="changePin">Change Pin</string>
+
+    <string name="protect_your_account">Protect Your Account!</string>
 
     <!--    calls -->
     <string name="videoCall">Video call from</string>
@@ -178,6 +312,8 @@
     <string name="dCancel">Download cancel</string>
     <string name="userNotFound">user not found</string>
 
+    <string name="fileNotExist">File does not exist.</string>
+
     <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>
     <string name="permissionCall">Go to setting and grant camera | record permission</string>
@@ -202,6 +338,7 @@
     <string name="audio">Audio</string>
     <string name="contact">Contact</string>
     <string name="game">Game</string>
+    <string name="games">Games</string>
 
 
     <string name="connect">connecting…</string>
@@ -223,6 +360,7 @@
     <string name="createIn5sec">Create new Pin in 10 secs</string>
     <string name="enterNewPin">Enter 4 new digit PIN</string>
     <string name="confirmPin">Confirm PIN</string>
+    <string name="confirmPin_">Confirm Pin *</string>
     <string name="createPinInfo">1. On pin complexion, if device supports fingerprint (biometric), it will be enabled automatically. \n2. This is
     to enable you have access to your wallet quickly, and also prevent other party from seeing your PIN when typing it.
     \n3. If you don\'t need the fingerprint, you can disable it via app settings to continue using only PIN.\n4. TopStar Team will never ask
@@ -260,6 +398,17 @@
     <string name="depositVia">Deposit via:</string>
     <string name="usdt">USDT (Crypto Network)</string>
     <string name="peer2peer">Peer-To-Peer (p2p)</string>
+    <string name="peerTopeer">Peer-To-Peer</string>
+    <string name="becomeP2PMerchant">Become P2P Merchant.</string>
+    <string name="addAccount">Add Payment Account.</string>
+    <string name="requirement">Requirements</string>
+    <string name="number_email_ver">1. Phone number and Email verification.</string>
+    <string name="KYCAndAddress">2. KYC and Address verification.</string>
+    <string name="minAmount">3. Minimum of $500 (or its equivalent in your local currency) into your P2P Trading account.</string>
+    <string name="add">Add</string>
+    <string name="paymentInfo">Add a bank account you want to receive payment to. We recommend banks with good network for smooth transactions between peers.</string>
+    <string name="apply">Apply</string>
+
     <string name="usdtDepositInfo">Receive funds via your usdt address instantly</string>
     <string name="p2pDepositInfo">Interact with a verified TopStar user to fund your wallet via bank transaction</string>
     <string name="p2pWithdrawInfo">Withdraw directly to your bank account via p2p</string>
@@ -275,6 +424,10 @@
     <string name="linkNumber">Link Number</string>
     <string name="link">Link</string>
     <string name="link_info">Link your phone number to enjoy seamless high features</string>
+
+    <string name="account_name">Account Name:</string>
+    <!--    <string name="bank_name">Transferring to:</string>-->
+    <!--    <string name="transferringto">Transferring to:</string>-->
 
     <string name="changeDisplayName">Change Display Name</string>
     <string name="changeHint">Change Hint</string>
@@ -368,7 +521,7 @@
     <string name="address">USDT address</string>
     <string name="enterUsdtAddress">Enter correct usdt address </string>
     <string name="network">Network </string>
-    <string name="choseNetwork">Select network </string>
+    <string name="choseNetwork">Select USDT network </string>
     <string name="usdtMin"> Minimum withdrawal 10 usdt </string>
     <string name="localMin">Enter amount </string>
     <string name="tron">Tron (TRC20) </string>
@@ -391,7 +544,7 @@
     <string name="gameRewardHistory">Game Reward History </string>
     <string name="bonusRewardHistory">Bonus/Airdrop History </string>
     <string name="USDTHistory">USDT History </string>
-    <string name="LocalAssetHistory">Local Asset History </string>
+    <string name="localAssetHistory">Local Asset History </string>
 
     <string name="winPoker">Win Poker game against </string>
     <string name="losePoker">Lost Poker game against</string>
@@ -449,6 +602,11 @@
     <string name="name">Name: </string>
     <string name="account_number">Account Number: </string>
     <string name="bank_name">Bank Name: </string>
+    <string name="bank_nameMore">Bank / MFB / Mobile Money: </string>
+    <string name="selectBank">Select banks </string>
+    <string name="selected">Selected </string>
+    <string name="branch">Branch (optional) </string>
+
     <string name="tpInfo">Trader asset for the order amount has been locked. You can go ahead with payment within the above time frame! </string>
     <string name="tpInfo2">If trader\'s real name above doesn\'t match with the payment name, don\'t release the fund yet until you have reached
         out to TopStar Support.  Protect your account! </string>

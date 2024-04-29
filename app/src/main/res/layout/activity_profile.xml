@@ -7,10 +7,10 @@
     android:layout_height="match_parent"
     tools:context=".side_bar_menu.settings.ProfileActivity">
 
-    <include layout="@layout/inc_profile_verify"
+    <include
         android:id="@+id/profile_verifyLayout"
-        android:visibility="gone"
-        />
+        layout="@layout/inc_profile_verify"
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout14"
@@ -23,12 +23,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView68"
+            android:id="@+id/headingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/profile"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="@+id/arrowBackP"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
