@@ -59,7 +59,7 @@ public class SoundActivity extends AppCompatActivity {
         TeamLayout.setOnClickListener(v ->
         {
             Intent intent = new Intent(this, SoundOptionsActivity.class);
-            intent.putExtra("heading", getString(R.string.team));
+            intent.putExtra("heading", getString(R.string.players));
             intent.putExtra("subHeading", getString(R.string.noteTeam));
 
             OpenActivityUtil.openColorHighlight(v, this, intent);

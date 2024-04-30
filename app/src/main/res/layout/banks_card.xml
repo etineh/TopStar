@@ -27,13 +27,13 @@
         android:layout_marginEnd="5dp"
         android:text="United Bank for Africa "
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView89"
+        app:layout_constraintBottom_toTopOf="@+id/line_2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/checkBoxTerms"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView89"
+        android:id="@+id/line_2"
         style="@style/backgroundOrangeAndCoolOrange"
         android:layout_width="0dp"
         android:layout_height="2dp"

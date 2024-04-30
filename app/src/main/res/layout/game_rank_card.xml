@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/roundRadiusBackground"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:padding="@dimen/_10dp">
+
+    <TextView
+        android:id="@+id/line_2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalLoss_TV" />
+
+    <TextView
+        android:id="@+id/gameHeading"
+        style="@style/roundRadiusBackground3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="@dimen/_15dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="@dimen/_15dp"
+        android:paddingBottom="2dp"
+        android:text="@string/poker"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/totalPlay_TV"
+        style="@style/textColorWhiteAndCoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/totalPlay"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/gameHeading"
+        app:layout_constraintStart_toStartOf="@+id/gameHeading"
+        app:layout_constraintTop_toBottomOf="@+id/gameHeading" />
+
+    <TextView
+        android:id="@+id/totalWin_TV"
+        style="@style/textColorWhiteAndCoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/win"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/totalPlay_TV"
+        app:layout_constraintStart_toStartOf="@+id/totalPlay_TV"
+        app:layout_constraintTop_toBottomOf="@+id/totalPlay_TV" />
+
+    <TextView
+        android:id="@+id/totalLoss_TV"
+        style="@style/textColorWhiteAndCoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/loss"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/totalWin_TV"
+        app:layout_constraintStart_toStartOf="@+id/totalWin_TV"
+        app:layout_constraintTop_toBottomOf="@+id/totalWin_TV" />
+
+    <TextView
+        android:id="@+id/worldRank_TV"
+        style="@style/textColorWhiteAndCoolOrange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="World Rank: \n24th / 102,390"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/totalLoss_TV"
+        app:layout_constraintStart_toStartOf="@+id/totalLoss_TV"
+        app:layout_constraintTop_toBottomOf="@+id/line_2"
+        app:lineHeight="20dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

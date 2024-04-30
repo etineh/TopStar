@@ -129,12 +129,11 @@
 
     <ProgressBar
         android:id="@+id/progressBarCamera"
-        style="?android:attr/progressBarStyle"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:background="@drawable/black_circle_round"
+        android:background="@drawable/white_circle_bg"
         android:elevation="3dp"
-        android:indeterminateTint="@color/cool_orange"
+        android:indeterminateTint="@color/orange"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -74,6 +74,11 @@ public class EachAssetActivity extends AppCompatActivity {
             eachAssetTotalAmount.setText("0.00");
             historyRecord_TV.setText(getString(R.string.bonusRewardHistory));
 
+        } else if (getAssetType.equals("MerchantAsset"))
+        {
+            setEachAssetName_TV.setText(getString(R.string.totalMerchantAsset));
+            eachAssetTotalAmount.setText("N 220,000.00");
+            historyRecord_TV.setText(getString(R.string.merchantRewardHistory));
         }
 
         addHistory();

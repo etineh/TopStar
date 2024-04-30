@@ -98,9 +98,9 @@
     <string name="gameSecurity">Games Security</string>
     <string name="walletSub">Asset ~ Withdraw ~ Transfer ~ Convert…</string>
     <string name="dashboard">Dashboard</string>
-    <string name="dashboardSub">P2P ~ World Rank ~ Tournaments…</string>
+    <string name="dashboardSub">Tournaments ~ World Rank ~ Upcoming game…</string>
     <string name="setting">Settings</string>
-    <string name="settingSub">Privacy ~ Profile ~ Sounds ~ Security ~ Games…</string>
+    <string name="settingSub">Privacy ~ Profile ~ P2P ~ Sounds ~ Security…</string>
     <string name="premium">Premium</string>
     <string name="premiumSub">Orange tick ~ Create team ~ More features…</string>
     <string name="advertise">Advertise</string>
@@ -264,6 +264,19 @@
 
     <string name="protect_your_account">Protect Your Account!</string>
 
+    <!--    dashboard    -->
+    <string name="upcoming_match">Upcoming joined game</string>
+    <string name="myHost">My host / tournaments</string>
+    <string name="gameRank">Game rank (multiplayer)</string>
+    <string name="totalPlay">Play : </string>
+    <string name="win">Win : </string>
+    <string name="loss">Loss : </string>
+    <string name="worldRank">World Rank</string>
+    <string name="poker">Poker</string>
+    <string name="whot">Whot</string>
+    <string name="chess">Chess</string>
+    <string name="scrabble">Scrabble</string>
+
     <!--    calls -->
     <string name="videoCall">Video call from</string>
     <string name="audioCall">Audio call from</string>
@@ -379,12 +392,14 @@
     <string name="totalLocalAsset">Total Local Asset</string>
     <string name="totalUSDTAsset">Total USDT Asset</string>
     <string name="totalBonusAsset">Total Bonus/Airdrop Asset</string>
+    <string name="totalMerchantAsset">Total P2P Merchant Asset</string>
 
     <string name="localAsset">Local Asset</string>
     <string name="usdtAsset">USDT Asset</string>
     <string name="gameAsset">Game Rewards</string>
+    <string name="p2pMerchant">P2P Merchant</string>
     <string name="bonusAsset">Bonus/Airdrop</string>
-    <string name="uniCountryCurrencySymbol">₦ 25,000.00</string>
+    <string name="uniCountryCurrencySymbol">₦ 250,000.00</string>
     <string name="uniCountryCurrencySymbol_">＄ 20.00</string>
     <string name="transfer">Transfer</string>
     <string name="deposit">Deposit</string>
@@ -397,7 +412,7 @@
     <string name="withdrawVia">Withdraw via:</string>
     <string name="depositVia">Deposit via:</string>
     <string name="usdt">USDT (Crypto Network)</string>
-    <string name="peer2peer">Peer-To-Peer (p2p)</string>
+    <string name="peer2peer">Peer-To-Peer (P2P)</string>
     <string name="peerTopeer">Peer-To-Peer</string>
     <string name="becomeP2PMerchant">Become P2P Merchant.</string>
     <string name="addAccount">Add Payment Account.</string>
@@ -545,6 +560,7 @@
     <string name="bonusRewardHistory">Bonus/Airdrop History </string>
     <string name="USDTHistory">USDT History </string>
     <string name="localAssetHistory">Local Asset History </string>
+    <string name="merchantRewardHistory">Bonus/Airdrop History </string>
 
     <string name="winPoker">Win Poker game against </string>
     <string name="losePoker">Lost Poker game against</string>

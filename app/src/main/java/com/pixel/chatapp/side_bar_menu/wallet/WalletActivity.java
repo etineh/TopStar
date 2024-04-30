@@ -52,9 +52,9 @@ import java.util.concurrent.Executor;
 public class WalletActivity extends AppCompatActivity implements FundTransferUserAdapter.ProceedToTransferPage {
 
     private ImageView resetPinButton, customerCareButton, arrowBack, hideAmount_IV;
-    private TextView totalAssetAmount_TV, localCurrencyAmount_TV,dollarAmount_TV, gameAmount_TV,bonusAmount_TV;
+    private TextView totalAssetAmount_TV, localCurrencyAmount_TV,dollarAmount_TV, gameAmount_TV, bonusAmount_TV, merchantAmount_TV;
     private CardView depositCardView,withdrawCardView, transferCardView, convertCardView, p2pCardView;
-    private CardView cardViewLocalAmount, cardViewUDSTAmount, cardViewGameAmount, cardViewBonusAmount;
+    private CardView cardViewLocalAmount, cardViewUDSTAmount, cardViewGameAmount, cardViewBonusAmount, cardViewP2PMerchant;
 
     private ConstraintLayout usdtPaymentOption, p2pPaymentOption, withdrawOrDepositContainer, trans_background;
     private TextView withdrawOrDeposit_TV, p2pInfo_TV, usdtInfo_TV, gameCurrency_TV;
@@ -123,6 +123,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         dollarAmount_TV = findViewById(R.id.dollarAmount_TV);
         gameAmount_TV = findViewById(R.id.gameAmount_TV);
         bonusAmount_TV = findViewById(R.id.bonusAmount_TV);
+        merchantAmount_TV = findViewById(R.id.merchantAmount_TV);
 
         // asset containers
         depositCardView = findViewById(R.id.depositCardView);
@@ -136,6 +137,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         cardViewUDSTAmount = findViewById(R.id.cardViewUDSTAsset);
         cardViewGameAmount = findViewById(R.id.cardViewGameAsset);
         cardViewBonusAmount = findViewById(R.id.cardViewBonusAsset);
+        cardViewP2PMerchant = findViewById(R.id.cardViewP2PMerchantAsset);
         p2pInfo_TV = findViewById(R.id.p2pInfo_TV);
         usdtInfo_TV = findViewById(R.id.usdtInfo_TV);
         gameCurrency_TV = findViewById(R.id.gameCurrency_TV);
@@ -641,6 +643,22 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
                 Intent intent = new Intent(this, EachAssetActivity.class);
                 intent.putExtra("assetType", "BonusAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
+        });
+
+        cardViewP2PMerchant.setOnClickListener(v -> {
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "MerchantAsset");
                 startActivity(intent);
 
                 new Handler().postDelayed( ()-> {

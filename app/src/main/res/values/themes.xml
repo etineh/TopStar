@@ -178,6 +178,11 @@
     <style name="roundRadiusBackground2">
         <item name="android:background">@drawable/round_radius_light2</item>
     </style>
+    <style name="roundRadiusBackground3">
+        <item name="android:background">@drawable/round_radius_light2</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
     <!--    chat box msg background-->
     <style name="ChatMsgContainer">
         <item name="android:background">@drawable/view_card_send_day</item>

@@ -182,7 +182,10 @@
     <style name="roundRadiusBackground2">
         <item name="android:background">@drawable/round_radius_dark</item>
     </style>
-
+    <style name="roundRadiusBackground3">
+        <item name="android:background">@drawable/round_radius_dark</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
     <!--    chat box msg background.  dark orange   #281600-->
     <style name="ChatMsgContainer">
         <item name="android:background">@drawable/view_card_receive_dark</item>
