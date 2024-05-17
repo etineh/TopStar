@@ -8,6 +8,8 @@ import retrofit2.http.GET;
 
 public interface WalletListener {
 
-    @GET("/dailywork")
-    Call<List<String>> getName();
+    @GET("/wallet/test")
+    Call<Long> test();
+
+
 }

@@ -2,6 +2,7 @@ package com.pixel.chatapp.signup_login;
 
 import static com.pixel.chatapp.home.MainActivity.nightMood;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -152,12 +153,14 @@ public class LinkNumberActivity extends AppCompatActivity {
 
         arrowBack_IV.setOnClickListener(v -> {
             cancelOTP = 0;
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
         });
         
         support_IV.setOnClickListener(v -> {
             Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
         });
+
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -288,7 +291,7 @@ public class LinkNumberActivity extends AppCompatActivity {
                 if(response.isSuccessful()){
 
                     close = 0;
-                    onBackPressed();
+                    getOnBackPressedDispatcher().onBackPressed();
                     Toast.makeText(LinkNumberActivity.this, getString(R.string.loginSuccessful), Toast.LENGTH_SHORT).show();
 
                 } else {
@@ -437,15 +440,19 @@ public class LinkNumberActivity extends AppCompatActivity {
         }.start();
     }
 
-    @Override
-    public void onBackPressed() {
-        if(close == 0){
-            Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-            close = 1;
-            new Handler().postDelayed( ()-> close = 0, 5_000);
-        } else {
-            super.onBackPressed();
-            finish();
+
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(close == 0){
+                Toast.makeText(LinkNumberActivity.this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
+            } else {
+                finish();
+            }
         }
-    }
+    };
+
+
 }

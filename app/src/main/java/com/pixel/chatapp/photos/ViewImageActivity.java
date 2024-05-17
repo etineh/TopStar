@@ -1,7 +1,6 @@
 package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
-import static com.pixel.chatapp.home.MainActivity.uniqueUriForSharingPhotoOrDoc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
+import com.pixel.chatapp.all_utils.SharePhotoUtil;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
@@ -129,20 +129,11 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
     private void sharePhoto(View view) {    // send photo to another app
         view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
         {
-                System.out.println("what is path : " + currentModelChat.getPhotoUriOriginal());
+//                System.out.println("what is path : " + currentModelChat.getPhotoUriOriginal());
             if (currentModelChat != null && currentModelChat.getPhotoUriOriginal() != null) {
 
-                Uri photoUri = uniqueUriForSharingPhotoOrDoc(currentModelChat, this);
+                SharePhotoUtil.shareImageUsingContentUri(this, currentModelChat, null, null);
 
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("image/*");
-                shareIntent.putExtra(Intent.EXTRA_STREAM, photoUri);
-                if(currentModelChat.getMessage() != null)
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, currentModelChat.getMessage());
-
-                //  content://media/external/images/media/1000143399  -- from device
-                //  file:///storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Photos/WinnerChat_1707594880207.jpg -- from app storage
-                startActivity(Intent.createChooser(shareIntent, getString(R.string.app_name)));
                 // Reset the scale
                 new Handler().postDelayed(() ->{
                     view.setScaleX(1.0f);

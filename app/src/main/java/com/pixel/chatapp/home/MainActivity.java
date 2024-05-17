@@ -58,6 +58,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -68,7 +69,6 @@ import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,13 +94,20 @@ import com.google.gson.Gson;
 import com.pixel.chatapp.NetworkChangeReceiver;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.activities.CreateLeagueActivity;
 import com.pixel.chatapp.activities.CreatePinActivity;
 import com.pixel.chatapp.all_utils.CacheUtils;
 import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
+import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.all_utils.SharePhotoUtil;
+import com.pixel.chatapp.api.Dao_interface.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
+import com.pixel.chatapp.contacts.FetchContacts;
+import com.pixel.chatapp.home.fragments.AlertFragment;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
+import com.pixel.chatapp.model.ContactModel;
 import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
 import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.calls.CallCenterActivity;
@@ -118,14 +125,15 @@ import com.pixel.chatapp.interface_listeners.DataModelType;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.interface_listeners.NewEventCallBack;
 import com.pixel.chatapp.model.CallModel;
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
 import com.pixel.chatapp.side_bar_menu.dashboard.DashboardActivity;
+import com.pixel.chatapp.side_bar_menu.premium.PremiumActivity;
 import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;
+import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
 import com.pixel.chatapp.signup_login.LinkNumberActivity;
 import com.pixel.chatapp.signup_login.PhoneLoginActivity;
@@ -155,6 +163,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext {
 
@@ -162,6 +173,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static ViewPager2 viewPager2General;
     int close = 0;
 
+    ConstraintLayout moreOptionHomeLayout;
+    ConstraintLayout moreHomeCont2;
+
+    
     //  ---------   SideBar Menu     -----------------
     private ImageView imageViewUserPhoto;
 
@@ -262,9 +277,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  -------------- database ------------
     public static UserChatViewModel chatViewModel;
     private static MessageModel messageModel;
-    private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks, refUsers,
+    private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign,
             refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls, refWallet;
+
+    public static DatabaseReference refUsers;
 
     private ValueEventListener chatReadListener; // Declare the listener as a class variable
 
@@ -412,6 +429,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
 
+    public static List<ContactModel> contactList;
+    public static List<ContactModel> contactListFile;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -491,6 +512,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         typeMsgContainer = findViewById(R.id.typeMsgContainer);
         viewWalletIcon = findViewById(R.id.viewWalletIcon);
         p2pHome_IV = findViewById(R.id.p2pHome_IV);
+        ImageView homeOpenMore = findViewById(R.id.imageViewMore);
+
+        // home more option
+        moreOptionHomeLayout = findViewById(R.id.moreHomeContainer);
+        moreHomeCont2 = moreOptionHomeLayout.findViewById(R.id.moreHomeCont2);
+        TextView hostPlayerClick = moreOptionHomeLayout.findViewById(R.id.hostPlayerClick);
+        TextView createLeagueClick = moreOptionHomeLayout.findViewById(R.id.createLeagueClick);
+        TextView createCommunityClick = moreOptionHomeLayout.findViewById(R.id.createCommunityClick);
+        TextView inviteFriendsClick = moreOptionHomeLayout.findViewById(R.id.inviteFriendsClick);
+        TextView goPremiumClick = moreOptionHomeLayout.findViewById(R.id.goPremiumClick);
 
         // calls
         incomingCallLayout = findViewById(R.id.incomingCallLayout);
@@ -695,6 +726,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         adapterMap = new HashMap<>();
         recyclerMap = new HashMap<>();
         readDatabase = 0;  // 0 is read, 1 is no_read
+        contactListFile = new ArrayList<>();
 
         // pins
         pinNextPublic = 1;
@@ -708,6 +740,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         forwardChatUserId = new ArrayList<>();
         selectedUserNames = new ArrayList<>();
         selectCount = 0;
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
         // video and audio calls
         handlerOnAnotherCall = new Handler();
@@ -853,7 +887,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 insideChat = false;      // back button
 
                 clearEmojiReactSetting();
-                onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
             });
 
             //  ==================      top chat layer button     ===========================
@@ -1001,7 +1035,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
             });
 
-            // down buttons at home (deposit)
+            // =========    down buttons at home    ==============
+            
             p2pHome_IV.setOnClickListener(v -> {
                 v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
                 {
@@ -1017,12 +1052,91 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }).start();
             });
 
+            homeOpenMore.setOnClickListener(v -> 
+            {
+                moreOptionHomeLayout.setVisibility(View.VISIBLE);
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
+                {
+                    // Start the animation to make it visible
+                    animateVisibility(moreHomeCont2, null);
 
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                    }, 300);
+                });
+            });
+            
+            moreOptionHomeLayout.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+            hostPlayerClick.setOnClickListener(v -> 
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+//                    readContacts();
+                    new Thread(() -> FetchContacts.readContacts(this)).start();
+
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                        getOnBackPressedDispatcher().onBackPressed();
+                    }, 300);
+                });
+            });
+
+            createLeagueClick.setOnClickListener(v ->
+            {
+                Intent intent = new Intent(this, CreateLeagueActivity.class);
+                OpenActivityUtil.openColorHighlight(v, this, intent);
+
+                new Handler().postDelayed(()-> getOnBackPressedDispatcher().onBackPressed(), 300);
+            });
+
+            createCommunityClick.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                        getOnBackPressedDispatcher().onBackPressed();
+                    }, 300);
+                });
+            });
+
+            inviteFriendsClick.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
+                {
+                    SharePhotoUtil.shareDrawableImage(this, R.drawable.logo, getString(R.string.appInvite) );
+
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                        getOnBackPressedDispatcher().onBackPressed();
+                    }, 500);
+                });
+            });
+
+            goPremiumClick.setOnClickListener(v ->
+            {
+                Intent intent = new Intent(this, PremiumActivity.class);
+                OpenActivityUtil.openColorHighlight(v, this, intent);
+
+                new Handler().postDelayed(()-> getOnBackPressedDispatcher().onBackPressed(), 300);
+
+            });
+            
+            
             // view my profile photo @sideBar menu
             View.OnClickListener viewImage = view -> {
                 Intent i = new Intent(this, ZoomImage.class);
                 i.putExtra("otherName", "My Profile Photo");
                 i.putExtra("imageLink", imageLink);
+                i.putExtra("from", "profilePix");
+
                 startActivity(i);
             };
             imageViewUserPhoto.setOnClickListener(viewImage);
@@ -1031,7 +1145,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // dashboard side bar
             dashboard.setOnClickListener(view ->
             {
-                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                         startActivity(new Intent(MainActivity.this, DashboardActivity.class))).start();
 
                 new Handler().postDelayed(() -> {
@@ -1045,7 +1159,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // settings
             cardViewSettings.setOnClickListener(v -> {
 
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                         startActivity(new Intent(MainActivity.this, SettingsActivity.class))).start();
 
                 new Handler().postDelayed(() -> {
@@ -1058,13 +1172,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             premium.setOnClickListener(v ->
             {
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                 {
-                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
-                });
+                    startActivity(new Intent(MainActivity.this, PremiumActivity.class));
+
+                }).start();
 
                 new Handler().postDelayed(() -> {
-//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    sideBarMenuContainer.setVisibility(View.GONE);
                     v.setScaleX(1.0f);
                     v.setScaleY(1.0f);
                 }, 1000);
@@ -1072,7 +1187,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             advertise.setOnClickListener(v ->
             {
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                 {
                     Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
                 });
@@ -1089,7 +1204,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             {
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
                 {
-                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                    SharePhotoUtil.shareDrawableImage(this, R.drawable.logo, getString(R.string.appInvite) );
                 });
 
                 new Handler().postDelayed(() -> {
@@ -1101,13 +1216,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             support.setOnClickListener(v ->
             {
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                 {
-                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(MainActivity.this, SupportActivity.class));
                 });
 
                 new Handler().postDelayed(() -> {
-//                    sideBarMenuContainer.setVisibility(View.GONE);
+                    sideBarMenuContainer.setVisibility(View.GONE);
                     v.setScaleX(1.0f);
                     v.setScaleY(1.0f);
                 }, 1000);
@@ -1151,7 +1266,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50)
                         .withEndAction(() -> {
 
-                            onBackPressed();
+                            getOnBackPressedDispatcher().onBackPressed();
 
                             // Reset the scale
                             view.setScaleX(1.0f);
@@ -1184,21 +1299,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                             // share
                             if (onShare){
-                                Uri photoOrDocUri = uniqueUriForSharingPhotoOrDoc(modelChatsOption, this);
-                                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                
-                                String mimeType = getContentResolver().getType(photoOrDocUri);
-                                if (mimeType != null) {
-                                    shareIntent.setType(mimeType);
-                                } else {
-                                    // Default to generic MIME type for documents if MIME type cannot be determined
-                                    shareIntent.setType("application/octet-stream");
-                                }
-//                                System.out.println("what is uri " + photoOrDocUri);
-                                shareIntent.putExtra(Intent.EXTRA_STREAM, photoOrDocUri);
-                                shareIntent.putExtra(Intent.EXTRA_TEXT, modelChatsOption.getMessage());
 
-                                startActivity(Intent.createChooser(shareIntent, getString(R.string.app_name)));
+                                SharePhotoUtil.shareImageUsingContentUri(this, modelChatsOption, null, null);
+
                                 firstTopUserDetailsContainer.setVisibility(View.VISIBLE);
                                 chatOptionsConstraints.setVisibility(View.GONE);
 
@@ -1390,7 +1493,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // set files(documents) -> camera - photo - documents
             file_IV.setOnClickListener(view -> {
                 fileAttachOptionContainer.setVisibility(View.VISIBLE);
-                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
                 {
                     // Start the animation to make it visible
                     animateVisibility(fileContainerAnim, null);
@@ -1607,7 +1710,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     adapter.deleteMessage(chatModel.getIdKey());
 
                     // update user UI chatList model
-                    ChatsListFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                    AlertFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
 
                     // delete the ROOM outside UI
                     chatViewModel.editOutsideChat( otherUserUid, AllConstants.DELETE_ICON + " ...",
@@ -1682,7 +1785,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 null, chatModel.getIdKey());
 
                         // update outside user UI chatList model
-                        ChatsListFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                        AlertFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
 
                         // delete from ROOM - inside chat room
                         chatViewModel.deleteChat(chatModel);
@@ -2032,7 +2135,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     refLastDetails.child(myId).child(otherUid_Del).removeValue();
                     refChecks.child(myId).child(otherUid_Del).removeValue();
                     // delete user from adapter list
-                    ChatsListFragment.findUserPositionByUID(otherUid_Del);
+                    AlertFragment.findUserPositionByUID(otherUid_Del);
                     // delete user from ROOM
                     chatViewModel.deleteUserById(otherUid_Del);
                 } else {
@@ -2068,7 +2171,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     refChecks.child(otherUid_Del).child(myId).removeValue();
 
                     // delete user from adapter list
-                    ChatsListFragment.findUserPositionByUID(otherUid_Del);
+                    AlertFragment.findUserPositionByUID(otherUid_Del);
                     // delete user from ROOM
                     chatViewModel.deleteUserById(otherUid_Del);
                 } else {
@@ -2105,6 +2208,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             getProfileSharePref();
 
+            devicePermission(); // fetch contactList and request for all permission
+
+//            new Thread(this::readContactFromFile).start();
+            FetchContacts.readContactFromFile(this);
+
             new Handler().postDelayed(this::setUserDetails, 5000);
 
             fiveSecondsDelay();
@@ -2123,6 +2231,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //        imageViewLogo.setImageURI(Uri.parse("content://media/external/images/media/1000124641"));
 // /external/images/media/1000123946
         //  content://media/external/images/media/1000124641
+
+        testingApi();
+
+    }       //      ============== create
+
+    private void testingApi(){
+
+        WalletListener walletListener = AllConstants.retrofit.create(WalletListener.class);
+
+        walletListener.test().enqueue(new Callback<Long>() {
+            @Override
+            public void onResponse(Call<Long> call, Response<Long> response) {
+                Toast.makeText(MainActivity.this, "Api test is : " + response.body(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Long> call, Throwable throwable) {
+                Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
     }
 
@@ -2238,6 +2367,242 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     //  --------------- methods && interface --------------------
 
+//    public static void readContacts(Context context) {
+//
+//        PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
+//        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+//        String countryCode = telephonyManager.getNetworkCountryIso().toUpperCase();
+//
+//        // Use a Map to store unique contacts (key: phone number, value: ContactModel)
+//        Map<String, ContactModel> contactMap = new HashMap<>();
+//
+//        // Query contacts
+//        Cursor cursor = context.getContentResolver().query(
+//                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+//                null,
+//                null,
+//                null,
+//                null
+//        );
+//
+//        if (cursor.moveToFirst()) {
+//            int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+//            int phoneNumberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+//
+//            do {
+//                // Check if the column indices are valid
+//                if (nameIndex != -1 && phoneNumberIndex != -1) {
+//
+//                    String name = cursor.getString(nameIndex);
+//                    String phoneNumber = cursor.getString(phoneNumberIndex).replaceAll("\\s+", "");
+//                    if(phoneNumber.startsWith("0")){
+//                        // remove the 0 and add the country code
+//                        phoneNumber = CountryNumCodeUtils.getCountryDialingCode(countryCode, phoneNumberUtil) + phoneNumber.substring(1);
+//                    }
+//
+//                    String sanitizedPhoneNumber = "+" + phoneNumber.replaceAll("[^\\d]", ""); // Remove non-numeric characters
+//
+//                    // Check if the phone number already exists in the map
+//                    if (!contactMap.containsKey(sanitizedPhoneNumber)) {
+//                        // Create a new ContactModel and add it to the map
+//                        name = sanitizedPhoneNumber.equals(user.getPhoneNumber()) ? context.getString(R.string.you) : name;
+//                        ContactModel contact = new ContactModel(null, null, name, null,
+//                                context.getString(R.string.invite_now), null, name, phoneNumber);
+//                        contactMap.put(sanitizedPhoneNumber, contact);
+//
+//                    }
+//
+//                } else {
+//                    // Handle the case when the column indices are not found
+//                    Toast.makeText(context, context.getString(R.string.contactNotFound), Toast.LENGTH_SHORT).show();
+//                }
+//            } while (cursor.moveToNext());
+//
+//            cursor.close(); // Close the cursor when done
+//
+//            // Convert the Map values to a List
+//            contactList = new ArrayList<>(contactMap.values());     // number and names
+//
+//            // Sort the list of ContactModel objects alphabetically by name
+//            Collections.sort(contactList, (contact1, contact2) -> contact1.getContactName().compareToIgnoreCase(contact2.getContactName()));
+//
+//            List<String> numberList = new ArrayList<>(contactMap.keySet());  // only the numbers
+//
+//            readContactFromAPI(numberList, context);
+//
+//        } else {
+//            // Handle the case when the cursor is empty
+//            handlerInternet.post(()->{
+//                Toast.makeText(context, context.getString(R.string.contactNotFound), Toast.LENGTH_SHORT).show();
+//            });
+//
+//        }
+//
+//    }
+//
+//    private static void readContactFromAPI(List<String> numberList, Context context)
+//    {
+//        ContactApiDao contactApiDao = AllConstants.retrofit.create(ContactApiDao.class);
+//
+//        contactApiDao.contacts(numberList).enqueue(new Callback<List<UserSearchM>>() {
+//            @Override
+//            public void onResponse(Call<List<UserSearchM>> call, Response<List<UserSearchM>> response) {
+//
+//                if(response.isSuccessful()){
+//                    List<UserSearchM> number = response.body();
+//
+//                    for (int i = 0; i < number.size(); i++)
+//                    {
+//                        UserSearchM userSearchM = number.get(i);
+////                        numberList.remove(userSearchM.getNumber());
+//
+//                        for (int j = 0; j < contactList.size(); j++)
+//                        {
+//                            ContactModel contactModel = contactList.get(j);
+//
+//                            if(contactModel.getNumber().equals(userSearchM.getNumber()))
+//                            {
+//                                contactList.remove(j);
+//
+//                                getContactDetailsFromDB(userSearchM.getUid(), contactModel, number.size(), context);
+//
+//                            }
+//
+//                        }
+//
+//                    }
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<UserSearchM>> call, Throwable throwable) {
+//                if (refreshContactListener != null) refreshContactListener.onFailure();
+//                System.out.println("what is err MA: L2520 " + throwable.getMessage());
+//
+//            }
+//        });
+//    }
+//
+//    private static AtomicInteger counter = new AtomicInteger(0);
+//
+//    private static void getContactDetailsFromDB(String contactUid, ContactModel contactModel, int contactSize, Context context)
+//    {
+//        refUsers.child(contactUid).child("general").addListenerForSingleValueEvent(new ValueEventListener()
+//        {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                String imageLink = snapshot.child("image").exists() && !snapshot.child("image").getValue().toString().equals("null")
+//                        ? snapshot.child("image").getValue().toString() : null;
+//
+//                String displayName = snapshot.child("displayName").exists() ?
+//                        snapshot.child("displayName").getValue().toString() : null;
+//
+//                String userName = snapshot.child("userName").exists() ?
+//                        snapshot.child("userName").getValue().toString() : null;
+//
+//                String hint = snapshot.child("hint").exists() && !snapshot.child("userName").getValue().toString().isEmpty()
+//                        ? snapshot.child("hint").getValue().toString() : context.getString(R.string.hint2);
+//
+//
+//                contactModel.setBio(hint);
+//                contactModel.setUserName(userName);
+//                contactModel.setImage(imageLink);
+//                contactModel.setOtherUid(contactUid);
+//
+//                contactList.add(0, contactModel);
+//
+//                // Increment the counter
+//                int count = counter.incrementAndGet();
+//
+//                // Check if 20 iterations have been completed
+//                if (count == contactSize) {
+//                    // Save contacts to local file
+//                    List<ContactModel> sortedSubList = contactList.subList(0, contactSize);
+//
+//                    // Sort the sublist alphabetically
+//                    Collections.sort(sortedSubList, (c1, c2) -> c1.getContactName().compareToIgnoreCase(c2.getContactName()));
+//
+//                    AllConstants.executors.execute(()-> saveContactToLocalFile(context));
+//                    counter.set(0);
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                if (refreshContactListener != null) refreshContactListener.onFailure();
+//            }
+//        });
+//    }
+//
+//    private static void saveContactToLocalFile(Context context)
+//    {
+//        Gson gson = new Gson();
+//        String json = gson.toJson(contactList);
+//
+//        contactListFile = contactList;
+//
+//        FileOutputStream fos = null;
+//        try {
+//            fos = context.openFileOutput("contacts.json", Context.MODE_PRIVATE);
+//            fos.write(json.getBytes());
+//
+//            if (refreshContactListener != null) refreshContactListener.onSuccess();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (fos != null) {
+//                try {
+//                    fos.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
+//
+//    public static RefreshContactListener refreshContactListener;
+//
+//    public interface RefreshContactListener {
+//        void onSuccess();
+//        void onFailure();
+//    }
+//
+//    public static void readContactFromFile(Context context)
+//    {
+//        FileInputStream fis = null;
+//        try {
+//            fis = context.openFileInput("contacts.json");
+//            InputStreamReader inputStreamReader = new InputStreamReader(fis);
+//            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+//            StringBuilder stringBuilder = new StringBuilder();
+//            String line;
+//            while ((line = bufferedReader.readLine()) != null) {
+//                stringBuilder.append(line);
+//            }
+//            String json = stringBuilder.toString();
+//            Gson gson = new Gson();
+//            Type listType = new TypeToken<List<ContactModel>>(){}.getType();
+//
+//            contactListFile = gson.fromJson(json, listType);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (fis != null) {
+//                try {
+//                    fis.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//    }
 
     @Override
     public void callAllMethods(String otherUid, Context context, Activity activity) {
@@ -2264,21 +2629,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         voiceNote(context, activity);
     }
 
-//    @Override
-//    public void onRequestPermission(MessageAdapter.MessageViewHolder holder, MessageModel modelChats) {
-//        if(!permissions.isStorageOk(this)){
-//            Picasso.get().load(modelChats.getPhotoUriPath()).into(holder.showImage);
-//            Toast.makeText(mContext, "Found " + modelChats.getPhotoUriPath(), Toast.LENGTH_SHORT).show();
-//        } else {
-//            // Request the permission again
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-//                    AllConstants.STORAGE_REQUEST_CODE);
-////            permissions.requestStorage(this);
-//            Toast.makeText(this, "need to request here", Toast.LENGTH_SHORT).show();
-//        }
-//
-//    }
 
     @Override
     public void firstCallLoadPage(String otherUid) {
@@ -2841,8 +3191,9 @@ scNum = 20;
 
 
         }catch (Exception e){
-            textViewLastSeen.setText(getString(R.string.app_name));
-            Toast.makeText(context, "Error occur oon last seen", Toast.LENGTH_SHORT).show();
+            System.out.println("what is error " + e.getMessage());
+            textViewLastSeen.setText(context.getString(R.string.app_name));
+//            Toast.makeText(context, "Error occur on last seen", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -3211,7 +3562,7 @@ scNum = 20;
         chatViewModel.updateChat(messageModel);
 
         // update user chatList model if it same last chat
-        ChatsListFragment.findUserAndEditChat(otherUserUid, idKey,
+        AlertFragment.findUserAndEditChat(otherUserUid, idKey,
                 text, emojiOnly);
 
         // update the ROOM outside UI
@@ -3416,48 +3767,6 @@ scNum = 20;
     public static String getRecordFilePath(Context mContext){
         File file = new File(getVoiceNoteFolder(mContext), "voice_note_" + System.currentTimeMillis() + ".opus");
         return file.getPath();
-    }
-
-    public static Uri uniqueUriForSharingPhotoOrDoc(MessageModel model, Context context){
-        // send app logo in case any error getting the photo uri path
-        Uri photoUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.drawable.logo);
-
-        if(model.getPhotoUriOriginal() != null){
-            if(model.getPhotoUriOriginal().startsWith("file:/")) {
-                try {
-                    File file = new File(new URI( model.getPhotoUriOriginal() ));
-                    photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else if(model.getPhotoUriOriginal().startsWith("/storage")) {
-                File file = new File( model.getPhotoUriOriginal() );
-                photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-
-            }else if (model.getPhotoUriOriginal().startsWith("content:/"))
-            {
-                photoUri = Uri.parse(model.getPhotoUriOriginal());
-            }
-        } else if (model.getVoiceNote() != null) {
-            if(model.getVoiceNote().startsWith("file:/")) {
-                try {
-                    File file = new File(new URI( model.getVoiceNote() ));
-                    photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-
-            }
-            else if(model.getVoiceNote().startsWith("/storage")) {
-                File file = new File( model.getVoiceNote() );
-                photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-            }else if (model.getVoiceNote().startsWith("content:/")) {
-                photoUri = Uri.parse(model.getVoiceNote());
-            }
-
-        }
-        return photoUri;
     }
 
     //  get the previous count of new msg and add to it from sendMessage
@@ -3773,7 +4082,7 @@ scNum = 20;
                                             .child("emojiOnly").setValue(editMessageModel.getEmojiOnly());
 
                                     // update user chatList model
-                                    ChatsListFragment.findUserAndEditChat(otherUid, editID,
+                                    AlertFragment.findUserAndEditChat(otherUid, editID,
                                             editMessageModel.getMessage(), editMessageModel.getEmojiOnly());
 
                                     // update the ROOM outside UI
@@ -3855,7 +4164,7 @@ scNum = 20;
                                         null, outSideChatID);
 
                                 // update user chatList model
-                                ChatsListFragment.findUserAndDeleteChat(otherUid, deleteChatID);
+                                AlertFragment.findUserAndDeleteChat(otherUid, deleteChatID);
 
                             }
                         }
@@ -5611,7 +5920,7 @@ scNum = 20;
                             // clear local list -- adapter
                             adapterMap.get(otherUid).clearChats();
                             //  remove user from chatList
-                            runOnUiThread(() -> ChatsListFragment.findUserPositionByUID(otherUid));
+                            runOnUiThread(() -> AlertFragment.findUserPositionByUID(otherUid));
                         }
                         //delete the sign from firebase DB
                         refDeleteUser.child(otherUid).child(myId).removeValue();
@@ -5720,6 +6029,22 @@ scNum = 20;
         hint_TV.setText(hint);
     }
 
+    private void devicePermission()
+    {
+        if(!permissionCheck.isContactOk(this))
+        {
+            permissionCheck.requestContact(this);
+        }
+
+        if(!permissionCheck.isStorageOk(this))
+        {
+            permissionCheck.requestStorage(this);
+        } else {
+            new Thread(() -> FetchContacts.readContacts(this)).start();   // permission
+        }
+
+    }
+
     @Override
     protected void onPause() {
 
@@ -5809,152 +6134,160 @@ scNum = 20;
        }
     }
 
-    @Override
-    public void onBackPressed() {
+    OnBackPressedCallback callback = new OnBackPressedCallback(true)
+    {
+        @Override
+        public void handleOnBackPressed() {
 
-        if(constraintMsgBody.getVisibility() == View.VISIBLE)
-        {
-            boolean isEmojiVisible_ = popup.isShowing();
-            if(isEmojiVisible_){
-                popup.dismiss();
-                isEmojiVisible = false;
-                typeMsgContainer.setVisibility(View.VISIBLE);
+            if (constraintMsgBody.getVisibility() == View.VISIBLE)
+            {
+                boolean isEmojiVisible_ = popup.isShowing();
+                if (isEmojiVisible_) {
+                    popup.dismiss();
+                    isEmojiVisible = false;
+                    typeMsgContainer.setVisibility(View.VISIBLE);
 
-            } else if(fileAttachOptionContainer.getVisibility() == View.VISIBLE)
+                } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE) {
+                    fileAttachOptionContainer.setVisibility(View.GONE);
+                    fileContainerAnim.setVisibility(View.GONE);
+                } else if (chatOptionsConstraints.getVisibility() == View.VISIBLE) {
+                    cancelChatOption();
+                    generalBackground.setVisibility(View.GONE);
+                    moreOptionContainer.setVisibility(View.GONE);
+
+                } else if (constraintDelBody.getVisibility() == View.VISIBLE) {
+                    cancelChatDeleteOption();
+                } else if (pinOptionBox.getVisibility() == View.VISIBLE) {
+                    pinOptionBox.setVisibility(View.GONE);
+                    cancelChatOption();
+                } else if (audioOrVideoOptionConatiner.getVisibility() == View.VISIBLE) {
+                    audioOrVideoOptionConatiner.setVisibility(View.GONE);
+                } else {
+
+                    emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
+                    handlerEmoji.removeCallbacks(emojiRunnable);
+                    et_emoji.clearFocus();
+                    editTextMessage.clearFocus();
+                    editTextMessage.setText("");    // store each user unsent typed msg later
+
+                    // General settings
+                    constraintMsgBody.setVisibility(View.INVISIBLE);
+                    topMainContainer.setVisibility(View.VISIBLE);
+                    firstTopUserDetailsContainer.setVisibility(View.INVISIBLE);
+                    emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
+                    constraintDelBody.setVisibility(View.GONE); // close delete options
+                    textViewLastSeen.setText(getString(R.string.app_name));   // clear last seen
+                    chatMenuProfile.setVisibility(View.GONE); // close profile menu
+                    isEmojiVisible = false;
+
+                    // remove the typingRunnable for checking network
+                    handlerTyping.removeCallbacks(runnableTyping);
+                    networkTypingOk = true;
+
+                    // edit and reply settings cancel
+                    clearInputFields();
+                    // cancel user or clear_chat container if visible
+                    cancelUserDeleteOption();
+                    // hide the pin icons
+                    closePinIcons();
+
+                    // highlight send message and new receive message indicator
+                    receiveIndicator.setVisibility(View.GONE);
+                    sendIndicator.setVisibility(View.GONE);
+
+                    // clear chat highlight position
+                    MessageAdapter.chatPositionList.clear();
+                    clearAllHighlights();
+
+                    // make previous view clickable if any
+                    if (ChatListAdapter.previousView != null) {
+                        ChatListAdapter.previousView.setClickable(true);
+                        ChatListAdapter.previousView = null;    // return it back to null
+                    }
+
+                    AllConstants.executors.execute(() -> {
+
+                        if (otherUserUid != null) {
+                            int scroll = 0;
+                            if (adapterMap.get(otherUserUid) != null) {
+                                scroll = scrollNum > 20 ? scrollNum : adapterMap.get(otherUserUid).getItemCount() - 1;
+                            }
+                            Map<String, Object> mapUpdate = new HashMap<>();
+                            mapUpdate.put("status", false);
+                            mapUpdate.put("newMsgCount", 0);
+                            refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
+                            if (scroll > 5) {
+                                // save last scroll position to local preference
+                                lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();
+
+                                System.out.println("M3052 I have saved scroll " + scroll);
+                            }
+
+                            // set responds to pend always      ------- will change later to check condition if user is still an active call
+//                    refChecks.child(myId).child(otherUserUid).child("vCallResp").setValue("pending");
+
+                            insideChatMap.put(otherUserUid, false);
+
+                            // Remove the ValueEventListener when the back button is pressed
+                            if (chatReadListener != null) {
+                                refOnReadRequest.child(myId).child(otherUserUid).removeEventListener(chatReadListener);
+                            }
+
+                            // call runnable to add views if list cache view layout is less than 100
+                            if (!isLoadViewRunnableRunning && MessageAdapter.viewCacheSend.size() < 50) {
+                                handlerLoadViewLayout.post(loadViewRunnable);
+                            }
+
+                            insideChat = false;  // onBackPress
+                            idKey = null;
+
+                        }
+
+                    });
+                }
+
+            } else if (onForward)
+            {
+                cancelForwardSettings(MainActivity.this);    // onBackPress
+            } else if (walletVerifyLayout.getVisibility() == View.VISIBLE)
+            {
+                walletVerifyLayout.setVisibility(View.GONE);
+
+            } else if (sideBarMenuContainer.getVisibility() == View.VISIBLE)
+            {
+                sideBarMenuContainer.setVisibility(View.GONE);
+            } else if (viewPager2General.getCurrentItem() != 0)
+            {
+                viewPager2General.setCurrentItem(0, true);
+            } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE)
             {
                 fileAttachOptionContainer.setVisibility(View.GONE);
                 fileContainerAnim.setVisibility(View.GONE);
-            } else if (chatOptionsConstraints.getVisibility() == View.VISIBLE)
+            } else if (run == 1)
             {
-                cancelChatOption();
-                generalBackground.setVisibility(View.GONE);
-                moreOptionContainer.setVisibility(View.GONE);
+                Intent callIntentActivity = new Intent(MainActivity.this, CallCenterActivity.class);
+                callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(callIntentActivity);
 
-            } else if(constraintDelBody.getVisibility() == View.VISIBLE)
+            } else if (moreOptionHomeLayout.getVisibility() == View.VISIBLE)
             {
-                cancelChatDeleteOption();
-            } else if (pinOptionBox.getVisibility() == View.VISIBLE)
+                moreOptionHomeLayout.setVisibility(View.GONE);
+                moreHomeCont2.setVisibility(View.GONE);
+
+            } else if(close == 0)
             {
-                pinOptionBox.setVisibility(View.GONE);
-                cancelChatOption();
-            } else if (audioOrVideoOptionConatiner.getVisibility() == View.VISIBLE){
-                audioOrVideoOptionConatiner.setVisibility(View.GONE);
-            } else{
+                Toast.makeText(MainActivity.this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
 
-                emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
-                handlerEmoji.removeCallbacks(emojiRunnable);
-                et_emoji.clearFocus();
-                editTextMessage.clearFocus();
-                editTextMessage.setText("");    // store each user unsent typed msg later
-
-                // General settings
-                constraintMsgBody.setVisibility(View.INVISIBLE);
-                topMainContainer.setVisibility(View.VISIBLE);
-                firstTopUserDetailsContainer.setVisibility(View.INVISIBLE);
-                emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
-                constraintDelBody.setVisibility(View.GONE); // close delete options
-                textViewLastSeen.setText(getString(R.string.app_name));   // clear last seen
-                chatMenuProfile.setVisibility(View.GONE); // close profile menu
-                isEmojiVisible = false;
-                
-                // remove the typingRunnable for checking network
-                handlerTyping.removeCallbacks(runnableTyping);
-                networkTypingOk = true;
-                
-                // edit and reply settings cancel
-                clearInputFields();
-                // cancel user or clear_chat container if visible
-                cancelUserDeleteOption();
-                // hide the pin icons
-                closePinIcons();
-
-                // highlight send message and new receive message indicator
-                receiveIndicator.setVisibility(View.GONE);
-                sendIndicator.setVisibility(View.GONE);
-
-                // clear chat highlight position
-                MessageAdapter.chatPositionList.clear();
-                clearAllHighlights();
-
-                // make previous view clickable if any
-                if(ChatListAdapter.previousView != null) {
-                    ChatListAdapter.previousView.setClickable(true);
-                    ChatListAdapter.previousView = null;    // return it back to null
-                }
-
-                AllConstants.executors.execute(() -> {
-
-                    if(otherUserUid != null){
-                        int scroll = 0;
-                        if(adapterMap.get(otherUserUid) != null){
-                            scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserUid).getItemCount() - 1;
-                        }
-                        Map<String, Object> mapUpdate = new HashMap<>();
-                        mapUpdate.put("status", false);
-                        mapUpdate.put("newMsgCount", 0);
-                        refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
-                        if(scroll > 5) {
-                            // save last scroll position to local preference
-                            lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();
-
-                            System.out.println("M3052 I have saved scroll " + scroll);
-                        }
-
-                        // set responds to pend always      ------- will change later to check condition if user is still an active call
-//                    refChecks.child(myId).child(otherUserUid).child("vCallResp").setValue("pending");
-
-                        insideChatMap.put(otherUserUid, false);
-
-                        // Remove the ValueEventListener when the back button is pressed
-                        if (chatReadListener != null) {
-                            refOnReadRequest.child(myId).child(otherUserUid).removeEventListener(chatReadListener);
-                        }
-
-                        // call runnable to add views if list cache view layout is less than 100
-                        if (!isLoadViewRunnableRunning && MessageAdapter.viewCacheSend.size() < 50) {
-                            handlerLoadViewLayout.post(loadViewRunnable);
-                        }
-
-                        insideChat = false;  // onBackPress
-                        idKey = null;
-
-                    }
-
-                });
+            } else
+            {
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+                setEnabled(true);
             }
-
-        } else if (onForward)
-        {
-            cancelForwardSettings(this);    // onBackPress
-        } else if (walletVerifyLayout.getVisibility() == View.VISIBLE)
-        {
-            walletVerifyLayout.setVisibility(View.GONE);
-
-        }else if (sideBarMenuContainer.getVisibility() == View.VISIBLE)
-        {
-            sideBarMenuContainer.setVisibility(View.GONE);
-        } else if (viewPager2General.getCurrentItem() != 0)
-        {
-            viewPager2General.setCurrentItem(0, true);
-        } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE)
-        {
-            fileAttachOptionContainer.setVisibility(View.GONE);
-            fileContainerAnim.setVisibility(View.GONE);
-        } else if (run == 1) {
-            Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
-            callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(callIntentActivity);
-        } else {
-
-//            if(close == 0){
-//                Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-//                close = 1;
-//                new Handler().postDelayed( ()-> close = 0, 5_000);
-//            } else {
-//            }
-            super.onBackPressed();
         }
-    }
+    };
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
@@ -6004,11 +6337,19 @@ scNum = 20;
                 permissionCheck.requestRecordingForCall(this);
             }
 
-        } else if(requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
-                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        }
+        else if(requestCode == AllConstants.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
+                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
             answerCall();
         }
-        else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        else if(requestCode == AllConstants.CONTACTS_REQUEST_CODE && grantResults.length > 0
+                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            new Thread(() -> FetchContacts.readContacts(this)).start();   // onRequestPermission
+        }
+        else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
             // Permission granted
             Toast.makeText(this, "I have verify!", Toast.LENGTH_SHORT).show();
             showFingerPrint();

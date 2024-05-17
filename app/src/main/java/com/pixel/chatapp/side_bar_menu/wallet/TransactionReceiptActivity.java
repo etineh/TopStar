@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,6 +36,8 @@ public class TransactionReceiptActivity extends AppCompatActivity {
         copyId = findViewById(R.id.copyId);
         trxId_TV = findViewById(R.id.transactionID_TV);
         trxType_TV = findViewById(R.id.transactionType_TV);
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
         String from = getIntent().getStringExtra("from");
 
@@ -68,7 +71,7 @@ public class TransactionReceiptActivity extends AppCompatActivity {
             Toast.makeText(this, "copied!", Toast.LENGTH_SHORT).show();
         });
 
-        back.setOnClickListener(v -> onBackPressed());
+        back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
     }
 
@@ -76,11 +79,14 @@ public class TransactionReceiptActivity extends AppCompatActivity {
     //  =======     methods
 
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
+
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            finish();
+        }
+    };
+
 }
 
 

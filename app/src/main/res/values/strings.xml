@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TopStar</string>
     <string name="app_name...">TopStar…</string>
+    <string name="fromApp">from, Pixel Planet</string>
     <string name="pin">PIN</string>
     <string name="pinChat">Pin</string>
     <string name="copied">Copied</string>
@@ -30,6 +31,9 @@
     <string name="send">Send</string>
     <string name="done">Done</string>
     <string name="close">Close</string>
+    <string name="more_">More</string>
+    <string name="live">Live</string>
+    <string name="home">Home</string>
 
     <string name="confirmMsg_">Are you sure you want to delete? Item(s) deleted will no longer appear on your chats.</string>
     <string name="thumbDelMsg">Are you sure you want to delete? This might result to irresponsive user interface on previous chats</string>
@@ -48,6 +52,8 @@
     <string name="cancel">Cancel</string>
     <string name="deleteSuccessful">item(s) deleted</string>
     <string name="cacheClear">Cache cleared!</string>
+
+    <!--    <string name="games_">Games</string>-->
 
     <!--    quick set up    -->
     <string name="newEmail__">New email *</string>
@@ -75,7 +81,7 @@
     <string name="usernameExist">Username already exist.</string>
     <string name="usernameAvailable">Username is available.</string>
     <string name="fieldEmpty">Email &amp; password required.</string>
-    <!--    <string name="usernameAbove3">Username must be great than 3 length.</string>-->
+    <string name="fieldEmpty_">Empty field!</string>
     <string name="passwordAbove5">Password length must be 6 above.</string>
     <string name="passwordDontMatch">Password do not match.</string>
     <string name="newEmailRequired">Can not use previous email. Use new email…</string>
@@ -102,14 +108,26 @@
     <string name="setting">Settings</string>
     <string name="settingSub">Privacy ~ Profile ~ P2P ~ Sounds ~ Security…</string>
     <string name="premium">Premium</string>
-    <string name="premiumSub">Orange tick ~ Create team ~ More features…</string>
+    <string name="premiumSub">Orange tick ~ Host globally ~ More features…</string>
     <string name="advertise">Advertise</string>
     <string name="advertiseSub">Run ads and reach more people…</string>
     <string name="invite_friends">Invite Friends</string>
+    <string name="invite_now">Invite now</string>
+    <string name="you">You</string>
+
     <string name="invite_friendSub">Refer friends and earn bonus…</string>
     <string name="support">Support</string>
-    <string name="supportSub">Live chat ~ Community ~ Contacts…</string>
+    <string name="supportSub">Live chat ~ Contacts ~ Q&amp;A…</string>
     <string name="language">Language +</string>
+
+    <!--    more home    -->
+    <string name="hostPlayer">Host Players</string>
+    <string name="createLeague">Create League</string>
+    <string name="createComm">Create Community</string>
+    <string name="buyDate">Buy Data</string>
+    <string name="unknow">Unknown</string>
+    <string name="unknown">Unknown</string>
+
 
     <!--    settings bar    -->
     <string name="profileInfo">KYC, change photo, username, display name</string>
@@ -123,6 +141,44 @@
     <string name="securityInfo">Change password, pin &amp; un/activate fingerprint.</string>
     <string name="Games">Account</string>
     <string name="P2PInfo">Setup payment account, register as P2P Merchant.</string>
+
+    <!--    premium bar    -->
+    <string name="whoCalls">Permit who can call you</string>
+    <string name="yes">Yes  ✔️</string>
+    <string name="no">No </string>
+    <string name="whoHost">Permit who can host you</string>
+    <string name="whoChat">Permit who can chat you</string>
+    <string name="numberChange">Change phone number</string>
+    <string name="day100">100 days</string>
+    <string name="day50">50 days</string>
+    <string name="anytime">Anytime</string>
+    <string name="global">Global</string>
+    <string name="hostVisibility">Host game visibility</string>
+    <string name="gameAdsControl">Game ads control</string>
+    <string name="comm_verify">Add Orange Tick to your Community</string>
+    <string name="hr24_7">24/7</string>
+
+    <string name="monthly">Monthly</string>
+    <string name="annually">Annually</string>
+
+    <string name="anyone">Anyone</string>
+    <string name="only">Only:</string>
+    <string name="ID_verify">ID verified users</string>
+    <string name="premiumUser">Premium users</string>
+    <string name="myCommMember">My community members</string>
+    <string name="selectThanOne"> PS: You can select more than one.</string>
+    <string name="myContact"> My contacts</string>
+
+    <string name="strike_100"> <strike>$500</strike> </string>
+    <string name="strike_1000"> <strike>$5000</strike> </string>
+    <string name="strike_10"> <strike>$10</strike> </string>
+    <string name="strike_110"> <strike>$110</strike> </string>
+
+    <string name="subscribe_">Subscribe</string>
+    <string name="premiumVip">Premium + VIP</string>
+    <string name="paid">Paid</string>
+    <string name="limited">Limited</string>
+    <string name="orangeTick">Verified Orange Tick</string>
 
 
     <!--    profile side bar    -->
@@ -150,8 +206,6 @@
     <string name="app_slang">Chat, Game &amp; Earn!</string>
     <string name="resetLogin">Reset login details</string>
 
-    <!--    <string name="resetLogin">Reset login details</string>-->
-    <!--    <string name="resetLogin">Reset login details</string>-->
 
     <string name="numberInfo">For privacy, your number is automatically hidden from non-contacts.
         You can choose to make it public via setting after login. We value your privacy 😊.</string>
@@ -232,14 +286,34 @@
     <string name="privateNumber">Private (my contacts)</string>
     <string name="publicNumber">Public (everyone)</string>
 
-    <string name="fromApp">from, Pixel Planet</string>
-
     <string name="off">Off</string>
     <string name="on">On</string>
 
     <string name="hour24">24 hours</string>
     <string name="hour90">3 days</string>
     <string name="hour180">7 days</string>
+
+    <!--    support    -->
+    <string name="liveSupport">Start live chat</string>
+    <string name="contact_ddress">Contact Address</string>
+    <string name="addres">9 Mutungo Parish, Kampala 24624, Uganda. \nsupport@topstar.com.ng \nwww.topstar.com.ng</string>
+    <string name="q_a">Q&amp;A</string>
+    <string name="previous_chats">Previous Chats</string>
+
+
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="day1ago">1 day ago</string>
+    <string name="day2ago">2 days ago</string>
+    <string name="day3ago">3 days ago</string>
+    <string name="day4ago">4 days ago</string>
+    <string name="day5ago">5 days ago</string>
+    <string name="day6ago">6 days ago</string>
+    <string name="week1ago">1wk ago</string>
+    <string name="week2ago">2wk ago</string>
+    <string name="week3ago">3wk ago</string>
+    <string name="monthsAgo">month ago</string>
+
 
     <!--    storage    -->
     <string name="total">Total >> </string>
@@ -255,6 +329,13 @@
     <string name="voice_note">Voice Notes</string>
     <string name="documents">Documents</string>
     <string name="thumbnail">Thumbnails</string>
+
+    <string name="downloadFails">Failed to download image</string>
+    <string name="sharePhotoFails">Failed to share image</string>
+    <string name="preparingPhoto">Preparing photo</string>
+
+    <string name="appInvite">Hey there! I\'m inviting you to join TopStar, an app where we can chat,
+        play various live stream multiplayer games, and earn rewards together.\nwww.topstar.com.ng</string>
 
     <string name="p2pTrans">P2P transactions</string>
     <string name="usdtTrans">USDT Transactions</string>
@@ -378,7 +459,7 @@
     to enable you have access to your wallet quickly, and also prevent other party from seeing your PIN when typing it.
     \n3. If you don\'t need the fingerprint, you can disable it via app settings to continue using only PIN.\n4. TopStar Team will never ask
         you for your PIN. Never disclose your PIN to anyone. Protect your funds! \n\n\n\n\n</string>
-    <string name="iUnderstand"> I have read and understood the terms below.</string>
+    <string name="iUnderstand"> I have read and agreed the terms below.</string>
     <string name="fingerprintTerms">Terms on PIN and fingerprint</string>
     <string name="pin_usage"> This pin is used for opening your wallet and processing transactions only.
         Hence, it should be different from your login password.</string>
@@ -523,6 +604,7 @@
     <string name="note">Note: when transferring funds from your local currency to an international user, it will be converted to and sent as "USDT".</string>
     <string name="incorrectPin">Pin incorrect</string>
     <string name="date">Date: </string>
+    <string name="start_date">Start Date: </string>
     <string name="time">Time: </string>
     <string name="fee">Fee: </string>
     <string name="amount">Amount: </string>
@@ -674,6 +756,11 @@
     <string name="forgetPassword">Forget password?</string>
     <string name="passwordInfo">This is different from your transaction pin.</string>
 
+    <string name="play">Play</string>
+<!--    <string name="forgetPin">Forget pin?</string>-->
+<!--    <string name="forgetPin">Forget pin?</string>-->
+<!--    <string name="forgetPin">Forget pin?</string>-->
+
 
     <string name="confirmPayment">Please confirm payment first. </string>
     <string name="confirm_Withd_Trans">Please ensure all details are correct before entering PIN. </string>
@@ -704,7 +791,38 @@
     <string name="stateReason">State the reason you are cancelling.</string>
 
     <string name="stateOtherReason">State other reason(s)</string>
+    <string name="moreSettings">More settings</string>
 
+    <string name="seachContact">Search contact</string>
+    <string name="contactUpdated">Contacts updated</string>
+    <string name="contactNotFound">Contacts not found</string>
+
+    <string name="joinComm">Join Community</string>
+    <string name="joinCommNote">Is it mandatory for players to join your preferred community first before they can join your League?</string>
+    <string name="commLink">Enter community link</string>
+    <string name="leagueTitle">League Title:</string>
+    <string name="sponsorBy">Sponsored by:</string>
+    <string name="yourContacts">Your contacts</string>
+    <string name="addContact">Add contact</string>
+    <string name="contactList">Contacts</string>
+
+    <string name="minFee">Entry fee ($1 min. per entry)</string>
+    <string name="winnerReward">Winner\'s reward (optional)</string>
+    <string name="minWinnerReward">Min winner\'s reward : </string>
+
+    <string name="winnerRewardNote">In case of paid fee entry, reward must be at least 2x greater than the entry fee</string>
+    <string name="whoParticipate">Who can participate</string>
+    <string name="entry_slot">Entry slot : 10 – 100</string>
+    <string name="more_setting">More settings (optional)</string>
+    <string name="createLeagueRule">1. If reward or entry fee is involved, the funds will be moved to your \"Lock Asset\" wallet. Meaning you can\'t have access
+        or withdraw the funds until the end of the league / tournament.
+        \n2. Rewards will be sent to the winner in 1 hour time after the end of the league. While the entry fees are moved from your \"Lock Asset\" to \"USDT Asset\".
+         \n3. If you have any complain on rewarding the winner, please reach out to support within the escalated time frame.
+        \n4. Reward already sent to winner can\'t be recovered back especially if the winner has moved the funds out of the platform.
+        \n5. In a situation you cancel the league and entry fee is involved, the system will automatically refund the entry fee to each user wallet.
+        \n6. If you cancel league more than 3 times within 30 days, the system will automatically block you from create any league in 40 days.
+        \n7. You can not cancel any on going league. If you have strong reason to cancel it, kindly reach out to support for assistance.
+    </string>
 
     <string-array name="paymentOption">
         <item>Choose payment method</item>
@@ -714,4 +832,31 @@
         <item>First Bank</item>
         <item>MoniePoint</item>
     </string-array>
+
+    <string-array name="selectGame">
+        <item>Select Game</item>
+        <item>Whot</item>
+        <item>Poker</item>
+        <item>Chess</item>
+        <item>Scrabble</item>
+        <item>Chess</item>
+        <item>Ludo</item>
+    </string-array>
+
+    <string-array name="whoParticipate">
+        <item>Who can participate?</item>
+        <item>Anyone</item>
+        <item>ID card verified user</item>
+        <item>My community only</item>
+        <item>My contacts</item>
+    </string-array>
+
+    <string-array name="entryMood">
+        <item>Entry Mode</item>
+        <item>Free</item>
+        <item>Pay Fee</item>
+
+    </string-array>
+
+
 </resources>

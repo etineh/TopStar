@@ -72,7 +72,7 @@ public class DashboardActivity extends AppCompatActivity {
         gameRankMList.add(new GameRankM(getString(R.string.whot), getString(R.string.totalPlay)+" 100x",
                 getString(R.string.win)+" 40", getString(R.string.loss)+" 60", getString(R.string.worldRank) +"\n262nd / 540,210"));
         gameRankMList.add(new GameRankM(getString(R.string.chess), getString(R.string.totalPlay)+" 80x",
-                getString(R.string.win)+" 60", getString(R.string.loss)+" 20", getString(R.string.worldRank) +"\n101nd / 540,210"));
+                getString(R.string.win)+" 60", getString(R.string.loss)+" 20", getString(R.string.worldRank) +"\n101st / 540,210"));
         gameRankMList.add(new GameRankM(getString(R.string.scrabble), getString(R.string.totalPlay)+" 52x",
                 getString(R.string.win)+" 45", getString(R.string.loss)+" 7", getString(R.string.worldRank) +"\n12th / 540,210"));
 

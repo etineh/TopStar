@@ -31,7 +31,7 @@ public class Permission {
         } else {    // for below SDK 33 or below android version 13
             permission = Manifest.permission.READ_EXTERNAL_STORAGE;
         }
-        ActivityCompat.requestPermissions(activity, new String[]{permission}, AllConstants.STORAGE_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{permission, Manifest.permission.WRITE_EXTERNAL_STORAGE}, AllConstants.STORAGE_REQUEST_CODE);
     }
 
     public boolean isContactOk(Context context) {

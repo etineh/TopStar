@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp"
+    app:cardCornerRadius="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constrainLast"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/checkBoxContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:elevation="5dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <CheckBox
+                android:id="@+id/checkBoxForward"
+                style="@style/checkBoxTint"
+                android:layout_width="100dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageViewUsers"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:src="@drawable/person_round"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/constrainLast" />
+
+        <TextView
+            android:id="@+id/textViewUser"
+            style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:ellipsize="end"
+            android:maxEms="13"
+            android:maxLines="1"
+            android:text="Sophia"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/textViewMsg"
+            app:layout_constraintStart_toEndOf="@+id/imageViewUsers" />
+
+        <TextView
+            android:id="@+id/textViewMsg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Check the inbox to determine it"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textViewMsgCount"
+            app:layout_constraintStart_toEndOf="@+id/imageViewUsers" />
+
+        <TextView
+            android:id="@+id/textViewTyping"
+            style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textViewMsgCount"
+            app:layout_constraintStart_toEndOf="@+id/imageViewUsers"
+            app:layout_constraintTop_toBottomOf="@+id/textViewUser" />
+
+        <TextView
+            android:id="@+id/textViewTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:text="1min ago"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewUser"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewUser" />
+
+        <TextView
+            android:id="@+id/textViewMsgCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/msg_count"
+            android:paddingStart="3sp"
+            android:paddingEnd="3dp"
+            android:text="2"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/textViewTime"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTime" />
+
+        <ImageView
+            android:id="@+id/imageViewVerify"
+            android:layout_width="0dp"
+            android:layout_height="14dp"
+            android:layout_marginStart="-2dp"
+            android:layout_marginTop="3dp"
+            app:layout_constraintStart_toEndOf="@+id/textViewUser"
+            app:layout_constraintTop_toTopOf="@+id/textViewUser"
+            app:srcCompat="@drawable/verified" />
+
+        <ImageView
+            android:id="@+id/imageViewDelivery"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewTime"
+            app:layout_constraintEnd_toStartOf="@id/textViewTime"
+            app:layout_constraintTop_toTopOf="@+id/textViewTime"
+            app:srcCompat="@drawable/message_tick_one"
+            app:tint="@color/orange" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

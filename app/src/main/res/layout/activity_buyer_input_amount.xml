@@ -243,7 +243,8 @@
             android:text="@string/topStarInfo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView48" />
+            app:layout_constraintTop_toBottomOf="@+id/textView48"
+            app:lineHeight="@dimen/_18dp" />
 
         <TextView
             android:id="@+id/textView50"
@@ -272,7 +273,7 @@
             android:padding="10dp"
             app:layout_constraintBottom_toTopOf="@+id/lineH"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/baseline_restart_alt_24" />
+            app:srcCompat="@drawable/baseline_refresh_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

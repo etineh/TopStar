@@ -25,16 +25,14 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- for android v13 above -->
-    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
@@ -51,6 +49,30 @@
         android:theme="@style/Theme.ChatApp"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.WhoCanParticipateActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.CreateLeagueActivity" />
+
+        <activity
+            android:name=".activities.LMoreSettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.CreateLeagueActivity" />
+        <activity
+            android:name=".activities.CreateLeagueActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.support.SupportChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.support.SupportUserActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.support.SupportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".side_bar_menu.premium.PremiumActivity"
+            android:exported="false" />
         <activity
             android:name=".side_bar_menu.dashboard.DashboardActivity"
             android:exported="false" />

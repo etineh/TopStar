@@ -1,5 +1,6 @@
 package com.pixel.chatapp.side_bar_menu.wallet;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -208,6 +209,8 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         recyclerViewTransfer = transferPayeeListLayout.findViewById(R.id.recyclerViewTransfer);
         recyclerViewTransfer.setLayoutManager(new LinearLayoutManager(this));
         userList = new ArrayList<>();
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
         // top buttons
         resetPinButton.setOnClickListener(v -> {
@@ -671,7 +674,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
         // onBackPress
         View.OnClickListener backPress = v -> {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
         };
         arrowBack.setOnClickListener(backPress);
         cancleTransferButton.setOnClickListener(backPress);
@@ -856,55 +859,62 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 //        biometricPrompt.authenticate(promptInfo);
 //    }
 
-    @Override
-    public void onBackPressed() {
-        if(trans_background.getVisibility() == View.VISIBLE)
-        {
-            trans_background.setVisibility(View.GONE);
-            withdrawOrDepositContainer.setVisibility(View.GONE);
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
 
-        } else if (acknowledgeLayout.getVisibility() == View.VISIBLE)
-        {
-            acknowledgeLayout.setVisibility(View.GONE);
-            enterPin_ET.setText(null);
+            if(trans_background.getVisibility() == View.VISIBLE)
+            {
+                trans_background.setVisibility(View.GONE);
+                withdrawOrDepositContainer.setVisibility(View.GONE);
 
-        } else if (transferPageLayout.getVisibility() == View.VISIBLE)
-        {
-            transferPageLayout.setVisibility(View.GONE);
-            transferAmount_ET.setText(null);
-            enterPin_ET.setText(null);
-            transferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
+            } else if (acknowledgeLayout.getVisibility() == View.VISIBLE)
+            {
+                acknowledgeLayout.setVisibility(View.GONE);
+                enterPin_ET.setText(null);
+
+            } else if (transferPageLayout.getVisibility() == View.VISIBLE)
+            {
+                transferPageLayout.setVisibility(View.GONE);
+                transferAmount_ET.setText(null);
+                enterPin_ET.setText(null);
+                transferAmount_ET.removeTextChangedListener(listenToConvertAmount("transfer"));
 //            errorInfo.setVisibility(View.GONE);
-            spinner.setSelection(0); // Set the default selection to the first item in the array
+                spinner.setSelection(0); // Set the default selection to the first item in the array
 
-        }  else if (usdtNetworkLayout.getVisibility() == View.VISIBLE)
-        {
-            usdtNetworkLayout.setVisibility(View.GONE);
+            }  else if (usdtNetworkLayout.getVisibility() == View.VISIBLE)
+            {
+                usdtNetworkLayout.setVisibility(View.GONE);
 
-        } else if (depositPageLayout.getVisibility() ==View.VISIBLE)
-        {
-            depositPageLayout.setVisibility(View.GONE);
+            } else if (depositPageLayout.getVisibility() ==View.VISIBLE)
+            {
+                depositPageLayout.setVisibility(View.GONE);
 
-        } else if (withdrawPageLayout.getVisibility() == View.VISIBLE)
-        {
-            trans_background.setVisibility(View.GONE);
-            withdrawOrDepositContainer.setVisibility(View.GONE);
-            withdrawPageLayout.setVisibility(View.GONE);
-            usdtWithdrawAddress_ET.setText(null);
-            withdrawAmount_ET.setText(null);
-            enterPin_ET.setText(null);
-            spinner.setSelection(0); // Set the default selection to the first item in the array
+            } else if (withdrawPageLayout.getVisibility() == View.VISIBLE)
+            {
+                trans_background.setVisibility(View.GONE);
+                withdrawOrDepositContainer.setVisibility(View.GONE);
+                withdrawPageLayout.setVisibility(View.GONE);
+                usdtWithdrawAddress_ET.setText(null);
+                withdrawAmount_ET.setText(null);
+                enterPin_ET.setText(null);
+                spinner.setSelection(0); // Set the default selection to the first item in the array
 
-            withdrawAmount_ET.removeTextChangedListener(listenToConvertAmount("withdraw"));
+                withdrawAmount_ET.removeTextChangedListener(listenToConvertAmount("withdraw"));
 
-        } else if (transferPayeeListLayout.getVisibility() == View.VISIBLE)
-        {
-            transferPayeeListLayout.setVisibility(View.GONE);
-        } else {
-            super.onBackPressed();
-            finish();
+            } else if (transferPayeeListLayout.getVisibility() == View.VISIBLE)
+            {
+                transferPayeeListLayout.setVisibility(View.GONE);
+            } else {
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+                setEnabled(true);
+                finish();
+            }
+
         }
-    }
+    };
+
 
 //    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 //        super.onRequestPermissionsResult(requestCode, permissions, grantResults);

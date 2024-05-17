@@ -1,5 +1,6 @@
 package com.pixel.chatapp.side_bar_menu.wallet;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -46,6 +47,8 @@ public class ConvertFundActivity extends AppCompatActivity {
         selectToAssetSpinner = findViewById(R.id.selectToAssetSpinner);
         selectToAssetSpinner.setSelection(1); // Set the default selection to the first item in the array
 
+        getOnBackPressedDispatcher().addCallback(this, callback);
+
         selectedAsset = getString(R.string.convertForUSDTAsset);
 
         enterConvertAmount_ET.addTextChangedListener(listenToConvertAmount());
@@ -53,8 +56,8 @@ public class ConvertFundActivity extends AppCompatActivity {
         convertSpinner();
         new Handler().postDelayed(()-> enterConvertAmount_ET.requestFocus(), 500);
 
-        switchBetweenAssets.setOnClickListener(v -> {
-
+        switchBetweenAssets.setOnClickListener(v ->
+        {
             int getChooseAssetSpinner = chooseAssetSpinner.getSelectedItemPosition();
             int getSelectToAssetSpinner = selectToAssetSpinner.getSelectedItemPosition();
             chooseAssetSpinner.setSelection(getSelectToAssetSpinner);
@@ -76,13 +79,12 @@ public class ConvertFundActivity extends AppCompatActivity {
 
         });
 
-        convertAssetButton.setOnClickListener(v -> {
-            // hide keyboard
-//            onBackPressed();
+        convertAssetButton.setOnClickListener(v ->
+        {
             Toast.makeText(this, getString(R.string.convertSuccessfully), Toast.LENGTH_SHORT).show();
         });
 
-        cancelConvert.setOnClickListener(v -> onBackPressed());
+        cancelConvert.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
 
     }
@@ -155,12 +157,15 @@ public class ConvertFundActivity extends AppCompatActivity {
         return textWatcher;
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        enterConvertAmount_ET.removeTextChangedListener(listenToConvertAmount());
-        finish();
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            enterConvertAmount_ET.removeTextChangedListener(listenToConvertAmount());
+            finish();
+        }
+    };
+
+
 }
 
 

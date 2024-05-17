@@ -35,12 +35,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.constants.AllConstants;
+import com.pixel.chatapp.home.fragments.AlertFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
 import com.squareup.picasso.Picasso;
@@ -101,7 +101,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         this.userName = userName;
 //        MainActivity.myHolder_ = new ArrayList<>();
 
-        UsersAdapter.setmContext(mContext);
+        ContactAdapter.setmContext(mContext);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         referenceCheck = FirebaseDatabase.getInstance().getReference("Checks");
@@ -136,6 +136,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
+
+        // reset data
+        holder.textViewMsgCount.setText(null);
+        holder.textViewTyping.setText(null);
+        holder.imageView.setImageResource(R.drawable.person_round);
+        holder.imageViewDeliver.setImageResource(0);
+        holder.textViewMsg.setText(null);
+        holder.textViewUser.setText(null);
+//        holder.imageView
 
         int position_ = position;
         String otherUid = otherUsersId.get(position_).getId();
@@ -449,6 +458,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             Intent i = new Intent(mContext, ZoomImage.class);
             i.putExtra("otherName", otherUserName);
             i.putExtra("imageLink", imageLink);
+            i.putExtra("from", "chatList");
             mContext.startActivity(i);
         });
 
@@ -501,7 +511,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 if( !forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);  // Add other user id to the List
                 if( !selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
             }
-            MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
+            String totalUser = MainActivity.selectCount + " " + mContext.getString(R.string.selected);
+            MainActivity.totalUser_TV.setText(totalUser);
 
             if(forwardChatUserId.size() > 0){           //  make send button invisible
                 MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
@@ -550,7 +561,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     if(getUser.getMsgStatus() == 700033){
                         getUser.setMsgStatus(700024);
                         // update the UI
-                        ChatsListFragment.notifyItemChanged(i);
+                        AlertFragment.notifyItemChanged(i);
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -573,7 +584,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        ChatsListFragment.notifyItemChanged(i);
+                        AlertFragment.notifyItemChanged(i);
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -636,9 +647,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     otherUsersId.add(0, getUser);
 
                     // notify the adapter of the item changes
-                    ChatsListFragment.notifyItemChanged(i);
+                    AlertFragment.notifyItemChanged(i);
                     // Notify the adapter that the user has moved.
-                    ChatsListFragment.notifyUserMoved(i);
+                    AlertFragment.notifyUserMoved(i);
 
                     // last user date and time
 //                    Date d = new Date(timeSent);    // convert the timestamp to current time
@@ -726,12 +737,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             if(MainActivity.onForward){
                 holder.get(i).checkBoxContainer.setVisibility(View.VISIBLE);
-                ChatsListFragment.openContactList.setVisibility(View.INVISIBLE);
+                AlertFragment.openContactList.setVisibility(View.INVISIBLE);
 
             } else {
                 holder.get(i).checkBoxContainer.setVisibility(View.GONE);
                 holder.get(i).checkBoxToWho.setChecked(false); // Toggle the checked state
-                ChatsListFragment.openContactList.setVisibility(View.VISIBLE);
+                AlertFragment.openContactList.setVisibility(View.VISIBLE);
             }
 
         }
@@ -861,43 +872,64 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             {
                 if(curDay - lastDay == 0)
                 {
-                    holder.textViewDay.setText("Today");
+                    holder.textViewDay.setText(mContext.getString(R.string.today));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 1) {
-                    holder.textViewDay.setText("Yesterday");
+
+                } else if (curDay - lastDay == 1)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.yesterday));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 2) {
-                    holder.textViewDay.setText("2days ago");
+
+                } else if (curDay - lastDay == 2)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.day2ago));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 3) {
-                    holder.textViewDay.setText("3days ago");
+
+                } else if (curDay - lastDay == 3)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.day3ago));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 4) {
-                    holder.textViewDay.setText("4days ago");
+
+                } else if (curDay - lastDay == 4)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.day4ago));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 5) {
-                    holder.textViewDay.setText("5days ago");
+
+                } else if (curDay - lastDay == 5)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.day5ago));
                     holder.textViewTime.setText(time.toLowerCase());
-                } else if (curDay - lastDay == 6) {
-                    holder.textViewDay.setText("6days ago");
+
+                } else if (curDay - lastDay == 6)
+                {
+                    holder.textViewDay.setText(mContext.getString(R.string.day6ago));
                     holder.textViewTime.setText(time.toLowerCase());
                 }
-            } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
+
+            } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14)
+            {
                 holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText("1wk ago");
-            } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
+                holder.textViewTime.setText(mContext.getString(R.string.week1ago));
+
+            } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21)
+            {
                 holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText("2wk ago");
-            } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
+                holder.textViewTime.setText(mContext.getString(R.string.week2ago));
+
+            } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27)
+            {
                 holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText("3wk ago");
+                holder.textViewTime.setText(mContext.getString(R.string.week3ago));
+
             } else {
                 holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText("month ago");
+                holder.textViewTime.setText(mContext.getString(R.string.monthsAgo));
             }
-        } else{
-//                    holder.textViewDay.setText(dateLast +" "+ lastMonth);
-            holder.textViewTime.setText(dateLast +"/"+ lastMonth+"/"+ lastYear);
+
+        } else
+        {
+            String lastD = dateLast +"/"+ lastMonth+"/"+ lastYear;
+            holder.textViewTime.setText(lastD);
         }
 
     }
@@ -1001,18 +1033,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     public class ChatViewHolder extends RecyclerView.ViewHolder{
 
-        private CircleImageView imageView;
-        private ImageView imageViewDeliver, imageViewMenu;
-        private ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
-        private ConstraintLayout constraintTop, constraintLast;
-        private TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
-        private TextView textViewDay;
-        private CardView cardView;
+        private final CircleImageView imageView;
+        private final ImageView imageViewDeliver, imageViewMenu;
+        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
+        private final ConstraintLayout constraintTop, constraintLast;
+        private final TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
+        private final TextView textViewDay;
+        private final CardView cardView;
         RecyclerView recyclerChat;
 
         // forward declares
-        private ConstraintLayout checkBoxContainer;
-        private CheckBox checkBoxToWho;
+        private final ConstraintLayout checkBoxContainer;
+        private final CheckBox checkBoxToWho;
 
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -117,7 +117,7 @@ dependencies {
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.12'
 
     // for kyc
-    implementation 'com.github.shuftipro:android-onsite-sdk:1.1.9'
+    implementation 'com.github.shuftipro:android-onsite-sdk:1.2.1'
 //    implementation 'com.github.shuftipro:ShuftiPro_SDK:0.2.'
 
     testImplementation 'junit:junit:4.13.2'

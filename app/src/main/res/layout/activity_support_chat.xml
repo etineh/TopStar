@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ChatBackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".side_bar_menu.support.SupportChatActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contraintTop"
+        style="@style/cardTopOrange"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/audioCall_IV"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewUserMenu2"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
+            app:layout_constraintTop_toTopOf="@+id/imageViewUserMenu2"
+            app:srcCompat="@drawable/baseline_add_ic_call_24"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/imageViewBackArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:padding="7dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_arrow_back_24"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/textViewName"
+            style="@style/textColorFullBlack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
+            app:layout_constraintStart_toEndOf="@+id/circleImageLogo"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewUserMenu2"
+            android:layout_width="30dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/baseline_more_vert_24"
+            app:tint="@color/white" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageLogo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/logo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageViewBackArrow"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/textViewBio"
+            style="@style/textColorWhiteAndCoolOrange"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="-5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/app_slang"
+            android:textSize="12.5sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewUserMenu2"
+            app:layout_constraintStart_toEndOf="@+id/circleImageLogo"
+            app:layout_constraintTop_toBottomOf="@+id/textViewName" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewChat"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/cardViewChatBox"
+        app:layout_constraintTop_toBottomOf="@+id/contraintTop"
+        tools:listitem="@layout/s_text_send_card" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewChatBox"
+        style="@style/BackgroundTintW_B"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="6dp"
+        android:elevation="2dp"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/fab"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="2dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewReply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="1dp"
+                android:visibility="gone"
+                app:cardCornerRadius="15dp"
+                app:layout_constraintBottom_toTopOf="@+id/editTextMessage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fromTV">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="2dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraintLay"
+                        android:layout_width="2dp"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:background="@color/orange"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/editOrReplyImage"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <TextView
+                        android:id="@+id/textViewReplyText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="4dp"
+                        android:ellipsize="end"
+                        android:fontFamily="monospace"
+                        android:maxLines="3"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/constraintLayout11"
+                        app:layout_constraintStart_toEndOf="@+id/constraintLay"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageViewCancleReply"
+                        android:layout_width="20dp"
+                        android:layout_height="0dp"
+                        android:paddingLeft="3dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/baseline_cancel_24"
+                        app:tint="#FF5722" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraintLayout11"
+                        android:layout_width="2dp"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="1dp"
+                        android:background="@color/orange"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/imageViewCancleReply"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <ImageView
+                        android:id="@+id/editOrReplyImage"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <EditText
+                android:id="@+id/editTextMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="-2dp"
+                android:backgroundTint="@color/orange"
+                android:gravity="start|top"
+                android:hint="@string/app_name..."
+                android:inputType="textMultiLine"
+                android:maxLines="6"
+                android:textCursorDrawable="@drawable/cursor_drawable"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+            <TextView
+                android:id="@+id/fromTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@+id/textReplying"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textReplying"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/fab"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginBottom="9dp"
+        android:background="@drawable/msg_count"
+        android:padding="5dp"
+        android:src="@drawable/baseline_send_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

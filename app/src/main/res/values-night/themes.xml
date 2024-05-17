@@ -118,6 +118,10 @@
         <item name="android:tint">#E6CBB7</item>
     </style>
 
+    <style name="BackgroundTintOrange_CoolOrange">
+        <item name="android:backgroundTint">@color/cool_orange</item>
+    </style>
+
     <!--    background Tink Dark orange and white-->
     <style name="BackgroundTintDarkOrange">
         <item name="android:tint">@color/white</item>
@@ -164,7 +168,10 @@
     <style name="BackgroundW_B">
         <item name="android:background">@color/black</item>
     </style>
-
+    <style name="BackgroundW_B2">
+        <item name="android:background">@color/black</item>
+        <item name="android:textColor">@color/green</item>
+    </style>
     <style name="BackgroundB_W">
         <item name="android:background">@color/white</item>
     </style>

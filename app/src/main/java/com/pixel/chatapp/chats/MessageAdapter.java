@@ -115,11 +115,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public  Context mContext;
 
     private int status;
-    private int send;
-    private int sendPhoto;
-    private int receive;
-    private int receivePhoto;
-    private String myId;
+    private final int send;
+    private final int sendPhoto;
+    private final int receive;
+    private final int receivePhoto;
+    private final String myId;
     FirebaseUser user;
     Map<String, Integer> dateMonth = new HashMap<>();
     DatabaseReference refCheck, refUsers, refMsgFast, refLastDetails, refOnReadRequest, refPinMessages;
@@ -454,7 +454,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             itemView = viewCacheReceive.remove(0);
             new PreloadViewsTask(viewType).execute();   // add a new view
 
-        } else {
+        } else
+        {
             // Inflate a new view if the cache is empty or the view type doesn't match
             int layer;
             if(viewType == send){
@@ -1296,7 +1297,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 if(holder != null){
                     holder.pinALL_IV.setVisibility(View.GONE);
                 }
-                MainActivity.pinTV.setText(mContext.getString(R.string.pin));
+                MainActivity.pinTV.setText(mContext.getString(R.string.pinChat));
 
                 MainActivity.pinMineTV.setText("Pin for me only");
                 MainActivity.pinEveryoneTV.setText("Pin for everyone");
@@ -2901,7 +2902,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
-            if(status == send){
+            if(status == send)
+            {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime);
                 seenMsg = itemView.findViewById(R.id.imageViewSeen);
                 textViewShowMsg = itemView.findViewById(R.id.senderChat_TV);
@@ -2945,7 +2947,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 totalMinute_TV = itemView.findViewById(R.id.minuteTV);
                 speedTV = itemView.findViewById(R.id.speedTV_S);
 
-            } else if (status == sendPhoto || status == receivePhoto) {
+            } else if (status == sendPhoto || status == receivePhoto)
+            {
 
                 constraintMsgContainer = itemView.findViewById(R.id.senderLayerContainer);
                 // photo and progress bar
@@ -3029,19 +3032,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         MessageModel chat = modelList.get(position);
         // check if the chat is from me via my uid
-        if(chat.getFromUid().equals(myId)){
-            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3){
+        if(chat.getFromUid().equals(myId))
+        {
+            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3)
+            {
                 status = sendPhoto;
                 return sendPhoto;
-            } else {
+            } else
+            {
                 status = send;
                 return send;
             }
-        } else {    //  chat is from other user
-            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3){
+
+        } else
+        {    //  chat is from other user
+            if(chat.getPhotoUriPath() != null || chat.getType() == 2 || chat.getType() == 3)
+            {
                 status = receivePhoto;
                 return receivePhoto;
-            } else {
+            } else
+            {
                 status = receive;
                 return receive;
             }

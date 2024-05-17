@@ -1,5 +1,6 @@
 package com.pixel.chatapp.side_bar_menu.wallet;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,6 +48,8 @@ public class EachAssetActivity extends AppCompatActivity {
         recyclerAssetHistory = findViewById(R.id.recyclerAssetHistory);
         recyclerAssetHistory.setLayoutManager(new LinearLayoutManager(this));
         historyList = new ArrayList<>();
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
         // each wallet amount
         String getAssetType = getIntent().getStringExtra("assetType");
@@ -113,7 +116,7 @@ public class EachAssetActivity extends AppCompatActivity {
         });
 
 
-        arrowClose.setOnClickListener(v -> onBackPressed());
+        arrowClose.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
     }
 
@@ -320,11 +323,16 @@ public class EachAssetActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+
+            setEnabled(false);
+            getOnBackPressedDispatcher().onBackPressed();
+            setEnabled(true);
+            finish();
+        }
+    };
 }
 
 

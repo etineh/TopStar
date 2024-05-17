@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".contacts.UsersContactActivity">
@@ -15,207 +16,191 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/searchContactContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="gone"
+            app:cardCornerRadius="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/searchContact_IV"
+            app:layout_constraintStart_toEndOf="@+id/imageViewBack"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/searchContact_ET"
+                android:layout_width="339dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/fullTransparent"
+                android:ems="10"
+                android:hint="@string/seachContact"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:textColorHighlight="@color/orange"
+                android:textCursorDrawable="@drawable/cursor_drawable" />
+        </androidx.cardview.widget.CardView>
+
         <ImageView
             android:id="@+id/imageViewBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            app:tint="#FFFFFF"
+            android:layout_marginStart="5dp"
+            android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_arrow_back_24" />
+            app:srcCompat="@drawable/baseline_arrow_back_24"
+            app:tint="#FFFFFF" />
 
         <ImageView
-            android:id="@+id/imageView4"
+            android:id="@+id/searchContact_IV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:tint="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageView5"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_search_24" />
-
-        <ImageView
-            android:id="@+id/imageView5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            app:tint="@color/white"
+            android:layout_marginEnd="10dp"
+            android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            app:srcCompat="@drawable/baseline_more_vert_24" />
+            app:srcCompat="@drawable/baseline_search_24"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/addContact_IV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/refresh__IV"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/add_contact"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/refresh__IV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/searchContact_IV"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/baseline_refresh_24"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="5dp"
             android:fontFamily="monospace"
-            android:text="Contact Lists"
+            android:text="@string/contactList"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageViewBack"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5" />
+
+        <ProgressBar
+            android:id="@+id/progressBarRefresh"
+            android:layout_width="23dp"
+            android:layout_height="25dp"
+            android:indeterminateTint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/refresh__IV"
+            app:layout_constraintEnd_toEndOf="@+id/refresh__IV"
+            app:layout_constraintStart_toStartOf="@+id/refresh__IV"
+            app:layout_constraintTop_toTopOf="@+id/refresh__IV" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardViewGroup"
-        style="@style/card"
+    <ScrollView
+        android:id="@+id/scrollView5"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        app:cardCornerRadius="10dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout2">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/card"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleImageView"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/msg_count"
-                android:padding="3dp"
-                android:src="@drawable/baseline_group_add_white"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <ProgressBar
+                android:id="@+id/progressBar7"
+                style="@style/progressBarColour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintTop_toTopOf="@+id/recyclerViewContacts" />
 
             <TextView
-                android:id="@+id/textView4"
-                style="@style/textColorFullBlack"
+                android:id="@+id/textView12"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="Create Group and Channel"
+                android:text="@string/yourContacts"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/circleImageView"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardViewAdd"
-        style="@style/card"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="2dp"
-        app:cardCornerRadius="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardViewGroup">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/card"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleImageView2"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/msg_count"
-                android:padding="3dp"
-                android:src="@drawable/add_contact"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintTop_toBottomOf="@+id/inviteFrdConst" />
 
-            <TextView
-                android:id="@+id/textView5"
-                style="@style/textColorFullBlack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="Add Contact or Username"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/circleImageView2"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardViewInvite"
-        style="@style/card"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="2dp"
-        app:cardCornerRadius="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardViewAdd">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/card"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleImageView6"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/msg_count"
-                android:padding="3dp"
-                android:src="@drawable/baseline_share_24"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewContacts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
-            <TextView
-                android:id="@+id/textView6"
-                style="@style/textColorFullBlack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="Invite Friends"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/circleImageView6"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/inviteFrdConst"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/circleImageView6"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/msg_count"
+                    android:padding="7dp"
+                    android:src="@drawable/baseline_share_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.5" />
+
+                <TextView
+                    android:id="@+id/textView6"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/invite_friends"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/circleImageView6"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.5" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewContacts"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        tools:listitem="@layout/users_card"
-        android:layout_marginTop="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView12"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <TextView
-        android:id="@+id/textView12"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="Your contatcs on GetMeh"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardViewInvite" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

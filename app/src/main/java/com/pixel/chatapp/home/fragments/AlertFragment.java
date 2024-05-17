@@ -3,6 +3,7 @@ package com.pixel.chatapp.home.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
@@ -37,15 +39,15 @@ import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatsListFragment extends Fragment {
+public class AlertFragment extends Fragment {
 
-    public static ChatsListFragment newInstance(){
-        return new ChatsListFragment();
+    public static AlertFragment newInstance(){
+        return new AlertFragment();
     }
 
     public static RecyclerView recyclerView;
     FirebaseUser user;
-    DatabaseReference fReference, refChecks, refUsers;
+    DatabaseReference refUsers;
 
     String myUserName;
     private UserChatViewModel userViewModel;
@@ -58,17 +60,15 @@ public class ChatsListFragment extends Fragment {
     public static List<UserOnChatUI_Model> mUsersID;
     private FragmentListener fragmentListener;
 
-    private Context mainContext;
+    Permission permissionCheck = new Permission();
 
-    public Context getMainContext() {
-        return mainContext;
-    }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
 
-        View view = inflater.inflate(R.layout.chats_list_fragment, container, false);
+        View view = inflater.inflate(R.layout.alert_fragment, container, false);
 
         openContactList = view.findViewById(R.id.openContactList);
         recyclerView = view.findViewById(R.id.recyclerViewChatList);
@@ -82,7 +82,6 @@ public class ChatsListFragment extends Fragment {
             openContactList.setVisibility(View.INVISIBLE);
         }
 
-        mainContext = getContext();
         chatListID = new ArrayList<>();
         mUsersID = new ArrayList<>();
 
@@ -106,10 +105,26 @@ public class ChatsListFragment extends Fragment {
         });
 
 
+
         // Go to contact
-        openContactList.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getContext(), UsersContactActivity.class);
-            startActivity(intent);
+        openContactList.setOnClickListener(v ->
+        {
+            if(permissionCheck.isContactOk(getContext()))
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+                {
+                    Intent intent = new Intent(getContext(), UsersContactActivity.class);
+                    startActivity(intent);
+                }).start();
+
+                new Handler().postDelayed(() -> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 500);
+
+            } else {
+                permissionCheck.requestContact(getActivity());
+            }
 
         });
 

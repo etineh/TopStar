@@ -3,20 +3,24 @@ package com.pixel.chatapp.photos;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.all_utils.SharePhotoUtil;
 import com.squareup.picasso.Picasso;
 
 public class ZoomImage extends AppCompatActivity {
 
     private PhotoView imageZoom;
     private TextView userNameDisplay;
-    private ImageView arrowBack;
+    private ImageView arrowBack, sharePhoto_Z;
     private String imageLink;
-    private String name;
+    private String name, from;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +30,25 @@ public class ZoomImage extends AppCompatActivity {
         imageZoom = findViewById(R.id.zoomPhoto_PView);
         userNameDisplay = findViewById(R.id.userNameDisplay);
         arrowBack = findViewById(R.id.arrowBack);
+        sharePhoto_Z = findViewById(R.id.sharePhoto_Z);
+
 
         name = getIntent().getStringExtra("otherName");
         imageLink = getIntent().getStringExtra("imageLink");
+        from = getIntent().getStringExtra("from");
+
+        if(!from.equals("profilePix")) {
+            sharePhoto_Z.setVisibility(View.GONE);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+
+        sharePhoto_Z.setOnClickListener(v -> {
+            Toast.makeText(this, getText(R.string.preparingPhoto), Toast.LENGTH_SHORT).show();
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+            {
+                SharePhotoUtil.downloadImageFromInternetAndShare(this, imageLink, getString(R.string.appInvite) );
+            });
+        });
 
         userNameDisplay.setText(name);
 

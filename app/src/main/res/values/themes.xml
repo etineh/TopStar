@@ -110,6 +110,10 @@
         <item name="android:tint">@color/orange</item>
     </style>
 
+    <style name="BackgroundTintOrange_CoolOrange">
+        <item name="android:backgroundTint">@color/orange</item>
+    </style>
+
     <style name="CardViewBackground">
         <item name="android:backgroundTint">@color/orange</item>
     </style>
@@ -159,6 +163,11 @@
 
     <style name="BackgroundW_B">
         <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="BackgroundW_B2">
+        <item name="android:background">@color/whitePure</item>
+        <item name="android:textColor">@color/deepGreen</item>
     </style>
 
     <style name="BackgroundB_W">

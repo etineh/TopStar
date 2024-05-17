@@ -48,6 +48,11 @@
         layout="@layout/inc_longpress_chats_moreoption"
         android:visibility="gone" />
 
+    <include
+        android:id="@+id/moreHomeContainer"
+        layout="@layout/inc_home_more"
+        android:visibility="gone" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainViewConstraint"
         android:layout_width="match_parent"
@@ -246,10 +251,8 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/constraintLastLayer"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tabLayerMain"
-            app:layout_constraintVertical_bias="1.0">
+            app:layout_constraintTop_toBottomOf="@+id/tabLayerMain">
 
         </androidx.viewpager2.widget.ViewPager2>
 
@@ -338,8 +341,8 @@
                 <ImageView
                     android:id="@+id/imageViewHome"
                     style="@style/BackgroundTintDarkOrange"
-                    android:layout_width="40dp"
-                    android:layout_height="33dp"
+                    android:layout_width="@dimen/_35dp"
+                    android:layout_height="30dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="13dp"
                     app:layout_constraintStart_toStartOf="parent"
@@ -349,16 +352,14 @@
                 <ImageView
                     android:id="@+id/imageViewPlayers"
                     style="@style/BackgroundTint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_width="@dimen/_35dp"
+                    android:layout_height="30dp"
                     android:adjustViewBounds="false"
-                    android:scaleY="1.5"
                     android:tint="@color/orange"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewGames"
                     app:layout_constraintStart_toEndOf="@+id/imageViewHome"
                     app:layout_constraintTop_toBottomOf="@+id/constraintLine"
-                    app:srcCompat="@drawable/baseline_live_tv_24" />
+                    app:srcCompat="@drawable/baseline_connected_tv_24" />
 
                 <TextView
                     android:id="@+id/textView6"
@@ -367,9 +368,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-5dp"
                     android:layout_marginBottom="3dp"
-                    android:editable="false"
                     android:fontFamily="monospace"
-                    android:text="Home"
+                    android:text="@string/home"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewHome"
@@ -385,7 +385,7 @@
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
-                    android:text="Games"
+                    android:text="@string/games_"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewGames"
@@ -400,7 +400,7 @@
                     android:layout_marginTop="-7dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
-                    android:text="More"
+                    android:text="@string/more_"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewMore"
@@ -415,7 +415,7 @@
                     android:layout_marginTop="-3dp"
                     android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
-                    android:text="Deposit"
+                    android:text="@string/deposit"
                     android:textSize="11sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/p2pHome_IV"
@@ -428,17 +428,13 @@
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:layout_marginBottom="3dp"
                     android:fontFamily="monospace"
                     android:scrollIndicators="bottom"
-                    android:text="Watch"
+                    android:text="@string/live"
                     android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/imageViewPlayers"
                     app:layout_constraintStart_toStartOf="@+id/imageViewPlayers"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewPlayers"
-                    app:layout_constraintVertical_bias="0.0" />
+                    app:layout_constraintTop_toBottomOf="@+id/imageViewPlayers" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/imageViewGames"
@@ -465,14 +461,14 @@
                 <ImageView
                     android:id="@+id/p2pHome_IV"
                     style="@style/BackgroundTint"
-                    android:layout_width="38dp"
-                    android:layout_height="32dp"
+                    android:layout_width="35dp"
+                    android:layout_height="30dp"
                     android:layout_marginTop="12dp"
-                    android:tint="@color/orange"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewMore"
                     app:layout_constraintStart_toEndOf="@+id/imageViewGames"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/money_round" />
+                    app:srcCompat="@drawable/money_round"
+                    app:tint="@color/orange" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayout12"
@@ -489,26 +485,16 @@
                     android:id="@+id/textView15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="-12dp"
+                    android:layout_marginStart="-10dp"
                     android:layout_marginTop="5dp"
                     android:background="@color/orange"
                     android:paddingRight="2dp"
                     android:paddingBottom="1dp"
-                    android:text="p2p"
+                    android:text="@string/p2p"
                     android:textColor="@color/white"
                     android:textSize="11sp"
                     app:layout_constraintStart_toEndOf="@+id/p2pHome_IV"
                     app:layout_constraintTop_toTopOf="@+id/p2pHome_IV" />
-
-                <TextView
-                    android:id="@+id/textView87"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="-2dp"
-                    android:text="Live"
-                    android:textSize="11sp"
-                    app:layout_constraintStart_toEndOf="@+id/imageViewPlayers"
-                    app:layout_constraintTop_toTopOf="@+id/imageViewPlayers" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

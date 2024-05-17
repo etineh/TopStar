@@ -1,5 +1,6 @@
 package com.pixel.chatapp.side_bar_menu.settings;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -7,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -16,6 +19,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -45,8 +49,11 @@ import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.all_utils.UsernameTextListener;
+import com.pixel.chatapp.api.Dao_interface.ApiService;
 import com.pixel.chatapp.api.Dao_interface.ProfileApiDao;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
+import com.pixel.chatapp.api.model.VerificationResponse;
+import com.pixel.chatapp.api.model.RequestBody;
 import com.pixel.chatapp.api.model.ResultApiM;
 import com.pixel.chatapp.api.model.TwoValueM;
 import com.pixel.chatapp.api.model.UserSearchM;
@@ -61,14 +68,18 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProfileActivity extends AppCompatActivity implements OTPActivity.UpdateFieldListener, ImageListener {
 
@@ -175,6 +186,8 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
         CountryNumCodeUtils.getCountryCode(countryCodes -> countryList = countryCodes);
         spinnerListener();
 
+        getOnBackPressedDispatcher().addCallback(this, callback);
+
         OTPActivity.updateFieldListener = this;
 
         // ======== photo update    =========
@@ -196,12 +209,13 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
             Intent i = new Intent(this, ZoomImage.class);
             i.putExtra("otherName", "My Profile Photo");
             i.putExtra("imageLink", imageLink);
+            i.putExtra("from", "profilePix");
             startActivity(i);
         });
 
         kycClick.setOnClickListener(v -> {
             startActivity(new Intent(this, KycActivity.class));
-            Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "verifying...", Toast.LENGTH_SHORT).show();
 
         });
 
@@ -426,12 +440,80 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
             startActivity(new Intent(this, ForgetActivity.class));
         });
 
-        backPress.setOnClickListener(v -> onBackPressed());
-        cancelPinOption_IV.setOnClickListener(v -> onBackPressed());
+        backPress.setOnClickListener(v ->  getOnBackPressedDispatcher().onBackPressed() );
+        cancelPinOption_IV.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+//        getResponse();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("KYC", Context.MODE_PRIVATE);
+
+//        String data = sharedPreferences.getString("data", "");
 
     }
 
+
+
     //  ========     methods
+
+    private void getResponse(){
+
+        String baseUrl = "https://api.shuftipro.com/";
+        String clientId = "82eeb940d3c995e3582d80721ecd042bced8fb54741bd21bab611fc5d565217e";
+        String secretKey = "iR7XCWIqQfQ7PtNyA1xqRR7rbpwXkRgZ";
+        String reference = "Unique-Reference7";
+
+        // Create OkHttpClient with basic authentication
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(chain -> {
+            String credentials = clientId + ":" + secretKey;
+            String basicAuth = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                basicAuth = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+            }
+            okhttp3.Request original = chain.request();
+            okhttp3.Request.Builder requestBuilder = original.newBuilder()
+                    .header("Authorization", basicAuth)
+                    .method(original.method(), original.body());
+            okhttp3.Request request = requestBuilder.build();
+            return chain.proceed(request);
+        });
+
+        // Build Retrofit instance
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(httpClient.build())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // Create ApiService instance
+        ApiService apiService = retrofit.create(ApiService.class);
+
+        // Create request body
+        RequestBody requestBody = new RequestBody(reference);
+        String authorization = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            authorization = "Basic " + Base64.getEncoder().encodeToString((clientId + ":" + secretKey).getBytes());
+        }
+
+        // Make API call
+        Call<VerificationResponse> call = apiService.getStatus(authorization, requestBody);
+        call.enqueue(new Callback<VerificationResponse>() {
+            @Override
+            public void onResponse(Call<VerificationResponse> call, Response<VerificationResponse> response) {
+                if (response.isSuccessful()) {
+
+                } else {
+                    Toast.makeText(ProfileActivity.this, "error here", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VerificationResponse> call, Throwable t) {
+                System.out.println("what is error : " + t.getMessage());
+            }
+        });
+    }
+
 
     private void registerActivityForSelectImage() {
 
@@ -862,46 +944,49 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
 
     }
 
-    @Override
-    public void onBackPressed() {
 
-        if(verifyLayout.getVisibility() == View.VISIBLE){
-            verifyLayout.setVisibility(View.GONE);
-            newDetails_ET.clearFocus();
-            newDetails_ET.setText(null);
-            enterPassword_ET.clearFocus();
-            enterPassword_ET.setText(null);
-            arrowCountryCode.setVisibility(View.GONE);
-            infoPassword.setVisibility(View.GONE);
-            openCountryCode_Click.setVisibility(View.GONE);
-            checkUsername_TV.setVisibility(View.GONE);
-            progressBarSearch.setVisibility(View.GONE);
-            previousData = null;
-            previous_data_TV.setText(null);
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
 
-            newDetails_ET.setError(null);
-            PhoneUtils.hideKeyboard(this, newDetails_ET);
+            if(verifyLayout.getVisibility() == View.VISIBLE){
+                verifyLayout.setVisibility(View.GONE);
+                newDetails_ET.clearFocus();
+                newDetails_ET.setText(null);
+                enterPassword_ET.clearFocus();
+                enterPassword_ET.setText(null);
+                arrowCountryCode.setVisibility(View.GONE);
+                infoPassword.setVisibility(View.GONE);
+                openCountryCode_Click.setVisibility(View.GONE);
+                checkUsername_TV.setVisibility(View.GONE);
+                progressBarSearch.setVisibility(View.GONE);
+                previousData = null;
+                previous_data_TV.setText(null);
 
-            // Remove drawable start
-            newDetails_ET.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
+                newDetails_ET.setError(null);
+                PhoneUtils.hideKeyboard(ProfileActivity.this, newDetails_ET);
 
-            spinnerCountryCode.setOnItemSelectedListener(null);
+                // Remove drawable start
+                newDetails_ET.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
 
-            if(textWatcher != null) newDetails_ET.removeTextChangedListener(textWatcher);
+                spinnerCountryCode.setOnItemSelectedListener(null);
 
-        } else {
-            super.onBackPressed();
-            if(profileListener != null){
-                myDataRef.child(user.getUid()).child("general").removeEventListener(profileListener);
+                if(textWatcher != null) newDetails_ET.removeTextChangedListener(textWatcher);
+
+            } else {
+                if(profileListener != null){
+                    myDataRef.child(user.getUid()).child("general").removeEventListener(profileListener);
+                }
+                // The next 3 lines replace: super.onBackPressed();
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+                setEnabled(true);
+                finish();
             }
-            finish();
+
         }
+    };
 
-//        if(textWatcher != null){
-//            newDetails_ET.removeTextChangedListener(textWatcher);
-//        }
-
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

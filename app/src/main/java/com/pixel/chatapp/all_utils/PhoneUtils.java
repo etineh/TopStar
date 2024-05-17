@@ -27,6 +27,18 @@ public class PhoneUtils {
         }
     }
 
+    public static void showKeyboard(Context context, View view) {
+        // Get a reference to the InputMethodManager
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            // Request focus for the view
+            view.requestFocus();
+            // Show the soft keyboard
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+
     public static void copyText(Context context, TextView textView)
     {
         ClipboardManager clipboard =  (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);

@@ -8,19 +8,21 @@ public class ContactModel {
     private Long presence;
     private String bio;
     private String myUserName;
-    private String displayName;
+    private String contactName;
+    private String number;
 
     public ContactModel() {
     }
 
-    public ContactModel(String otherUid, String image, String userName, Long presence, String bio, String myUserName, String displayName) {
+    public ContactModel(String otherUid, String image, String userName, Long presence, String bio, String myUserName, String contactName, String number) {
         this.otherUid = otherUid;
         this.image = image;
         this.userName = userName;
         this.presence = presence;
         this.bio = bio;
         this.myUserName = myUserName;
-        this.displayName = displayName;
+        this.contactName = contactName;
+        this.number = number;
     }
 
     public String getOtherUid() {
@@ -55,6 +57,10 @@ public class ContactModel {
         return bio;
     }
 
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
     public String getMyUserName() {
         return myUserName;
     }
@@ -63,8 +69,16 @@ public class ContactModel {
         this.myUserName = myUserName;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getContactName() {
+        return contactName;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 }
 

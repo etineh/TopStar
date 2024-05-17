@@ -6,8 +6,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.pixel.chatapp.home.fragments.ChatsListFragment;
+import com.pixel.chatapp.home.fragments.AlertFragment;
 import com.pixel.chatapp.home.fragments.Hosts_Game;
+import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.home.fragments.TournamentsFragment;
 
 public class ViewPagerMainAdapter extends FragmentStateAdapter {
@@ -24,22 +25,19 @@ public class ViewPagerMainAdapter extends FragmentStateAdapter {
 
         switch (position){
             case 0:
-                fragment = ChatsListFragment.newInstance();
+                fragment = AlertFragment.newInstance();
                 break;
+
             case 1:
-//                fragment = ChatsListFragment.newInstance();
-
-                fragment = Hosts_Game.newInstance(); // testing
+                fragment = PlayersFragment.newInstance(); // testing
                 break;
+
             case 2:
-//                fragment = ChatsListFragment.newInstance();
-
-                fragment = Hosts_Game.newInstance(); // testing
-                break;
-            case 3:
-//                fragment = ChatsListFragment.newInstance();
-
                 fragment = TournamentsFragment.newInstance();
+                break;
+
+            case 3:
+                fragment = Hosts_Game.newInstance();
                 break;
 
             default:

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="60dp"
+    android:paddingEnd="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainerS"
+        style="@style/ChatMsgContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/linearClickReply1"
+            style="@style/card"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayoutReplyBox"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/chat_TV"
+            app:layout_constraintTop_toTopOf="@+id/linearLayoutReplyBox"></LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutReplyBox"
+            style="@style/card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_default="percent">
+
+            <TextView
+                android:id="@+id/senderNameTV"
+                style="@style/appName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textViewReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="2dp"
+                android:text="No doubt at laa"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/chat_TV"
+            style="@style/textColorFullBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:autoLink="web|phone|email"
+            android:gravity="start"
+            android:paddingStart="@dimen/_10dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="@dimen/_30dp"
+            android:textColorLink="@color/orange"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/chatTime_TV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox" />
+
+
+        <ImageView
+            android:id="@+id/imageViewSeen"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="7dp"
+            app:layout_constraintBottom_toBottomOf="@+id/chatTime_TV"
+            app:layout_constraintEnd_toStartOf="@id/chatTime_TV"
+            app:tint="@color/orange" />
+
+        <TextView
+            android:id="@+id/chatTime_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text="11:20am"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chat_TV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -60,7 +60,7 @@ public class CountryNumCodeUtils {
         return null;
     }
 
-    private static String getCountryDialingCode(String countryCode, PhoneNumberUtil phoneNumberUtil) {  // +234
+    public static String getCountryDialingCode(String countryCode, PhoneNumberUtil phoneNumberUtil) {  // +234
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.getExampleNumberForType(countryCode, PhoneNumberUtil.PhoneNumberType.MOBILE);
             return "+" + phoneNumber.getCountryCode();
