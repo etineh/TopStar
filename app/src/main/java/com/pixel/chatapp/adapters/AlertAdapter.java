@@ -35,7 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.home.fragments.AlertFragment;
+import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.ZoomImage;
@@ -56,7 +56,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>  {
+public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHolder>  {
 
     private ChatViewHolder lastOpenViewHolder = null;
     private static List<UserOnChatUI_Model> otherUsersId;
@@ -90,10 +90,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         this.listener = listener;
     }
 
-    private static ChatListAdapter instance;
+    private static AlertAdapter instance;
 
     // constructor
-    public ChatListAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, String userName, Activity activity)
+    public AlertAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, String userName, Activity activity)
     {
         this.otherUsersId = otherUsersId;
         this.mContext = mContext;
@@ -118,9 +118,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         dateNum = new HashMap<>();
     }
 
-    public static ChatListAdapter getInstance() {
+    public static AlertAdapter getInstance() {
         if (instance == null) {
-            instance = new ChatListAdapter(otherUsersId, mContext, userName, activity);
+            instance = new AlertAdapter(otherUsersId, mContext, userName, activity);
         }
         return instance;
     }
@@ -199,7 +199,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
                 listener.getMessage(userName, otherUid, mContext);
             } catch (Exception e){
-                System.out.println("Error (ChatListAdapter L187)"+ e.getMessage());
+                System.out.println("Error (AlertAdapter L187)"+ e.getMessage());
             }
 
 
@@ -307,7 +307,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         MainActivity.offMainDatabase();
                         Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
+                        System.out.println("Error occur - WinnerChat Toast (AlertAdapter L222)" + e.getMessage());
                     }
 
                 } else {
@@ -363,7 +363,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         MainActivity.offMainDatabase();
                                         Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
+                                        System.out.println("Error occur - WinnerChat Toast (AlertAdapter L222)" + e.getMessage());
                                     }
 
                                 }
@@ -561,7 +561,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     if(getUser.getMsgStatus() == 700033){
                         getUser.setMsgStatus(700024);
                         // update the UI
-                        AlertFragment.notifyItemChanged(i);
+                        ChatsFragment.notifyItemChanged(i);
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -584,7 +584,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        AlertFragment.notifyItemChanged(i);
+                        ChatsFragment.notifyItemChanged(i);
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -647,9 +647,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     otherUsersId.add(0, getUser);
 
                     // notify the adapter of the item changes
-                    AlertFragment.notifyItemChanged(i);
+                    ChatsFragment.notifyItemChanged(i);
                     // Notify the adapter that the user has moved.
-                    AlertFragment.notifyUserMoved(i);
+                    ChatsFragment.notifyUserMoved(i);
 
                     // last user date and time
 //                    Date d = new Date(timeSent);    // convert the timestamp to current time
@@ -737,12 +737,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             if(MainActivity.onForward){
                 holder.get(i).checkBoxContainer.setVisibility(View.VISIBLE);
-                AlertFragment.openContactList.setVisibility(View.INVISIBLE);
+                ChatsFragment.openContactList.setVisibility(View.INVISIBLE);
 
             } else {
                 holder.get(i).checkBoxContainer.setVisibility(View.GONE);
                 holder.get(i).checkBoxToWho.setChecked(false); // Toggle the checked state
-                AlertFragment.openContactList.setVisibility(View.VISIBLE);
+                ChatsFragment.openContactList.setVisibility(View.VISIBLE);
             }
 
         }

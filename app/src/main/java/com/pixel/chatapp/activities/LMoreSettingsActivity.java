@@ -18,7 +18,7 @@ public class LMoreSettingsActivity extends AppCompatActivity {
 
     ImageView arrowBackS, doneClick, reload_TV;
     Switch joinCommunitySwitch;
-    EditText leagueTitle_ET, sponsorBy_ET, commLink_ET;
+    EditText leagueTitle_ET, sponsorBy_ET, commLink_ET, remarkET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class LMoreSettingsActivity extends AppCompatActivity {
         leagueTitle_ET = findViewById(R.id.leagueTitle_ET);
         sponsorBy_ET = findViewById(R.id.sponsorBy_ET);
         commLink_ET = findViewById(R.id.commLink_ET);
+        remarkET = findViewById(R.id.remarkET);
 
         getOnBackPressedDispatcher().addCallback(callback);
 
@@ -43,6 +44,7 @@ public class LMoreSettingsActivity extends AppCompatActivity {
             commLink_ET.clearFocus();
             leagueTitle_ET.setText(null);
             sponsorBy_ET.setText(null);
+            remarkET.setText(null);
         });
 
         doneClick.setOnClickListener(v -> {

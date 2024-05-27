@@ -50,10 +50,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activities.LiveGameActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.PlayerFragOptionsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.WhoCanParticipateActivity"
             android:exported="false"
             android:parentActivityName=".activities.CreateLeagueActivity" />
-
         <activity
             android:name=".activities.LMoreSettingsActivity"
             android:exported="false"

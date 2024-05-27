@@ -66,7 +66,7 @@ public class GameRankAdapter extends RecyclerView.Adapter<GameRankAdapter.RankVi
     public class RankViewHolder extends RecyclerView.ViewHolder {
 
 //        private CircleImageView gameLogo_IV;
-        private TextView gameHeading, totalPlay_TV, totalWin_TV, totalLoss_TV, worldRank_TV;
+        private final TextView gameHeading, totalPlay_TV, totalWin_TV, totalLoss_TV, worldRank_TV;
 
         public RankViewHolder(@NonNull View itemView) {
             super(itemView);

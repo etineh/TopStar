@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StorageRecyclerActivity extends AppCompatActivity implements StorageAdapter.OnItemSelected, PlayFileActivity.DeleteListerner {
+public class StorageRecyclerActivity extends AppCompatActivity implements StorageAdapter.OnItemSelected, PlayFileActivity.DeleteListener {
 
     private static ConstraintLayout constraintLayout1, constraintLayout2;
     CheckBox checkBoxAll, checkAll2;
@@ -76,7 +76,7 @@ public class StorageRecyclerActivity extends AppCompatActivity implements Storag
 
         fileList = new ArrayList<>();
 
-        PlayFileActivity.deleteListerner = this;
+        PlayFileActivity.deleteListener = this;
 
         title = getIntent().getStringExtra("title");
         title_size = getIntent().getStringExtra("titleSize");

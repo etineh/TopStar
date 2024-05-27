@@ -94,8 +94,9 @@
 
     <!--    tap layout name-->
     <string name="alert">Alerts</string>
+    <string name="chats">Chats</string>
     <string name="players">Players</string>
-    <string name="hosts">Hosts</string>
+    <string name="league">League</string>
     <string name="tour">Tour.</string>
 
     <!--    side bar    -->
@@ -314,6 +315,10 @@
     <string name="week3ago">3wk ago</string>
     <string name="monthsAgo">month ago</string>
 
+    <string name="created">Created: </string>
+    <string name="watch">Watch </string>
+    <string name="open">Open </string>
+    <string name="view">View </string>
 
     <!--    storage    -->
     <string name="total">Total >> </string>
@@ -522,8 +527,6 @@
     <string name="link_info">Link your phone number to enjoy seamless high features</string>
 
     <string name="account_name">Account Name:</string>
-    <!--    <string name="bank_name">Transferring to:</string>-->
-    <!--    <string name="transferringto">Transferring to:</string>-->
 
     <string name="changeDisplayName">Change Display Name</string>
     <string name="changeHint">Change Hint</string>
@@ -583,6 +586,10 @@
     <string name="sendingOtp">Sending Code…</string>
     <string name="otpSent">Code sent successfully</string>
 
+    <string name="entryFee">Entry fee: </string>
+    <string name="rewardPool">Reward pool: </string>
+    <string name="game_">Game: </string>
+
 
     <string name="transfer_from">Transfer from:</string>
     <string name="withdraw_from">Withdraw from:</string>
@@ -605,6 +612,7 @@
     <string name="incorrectPin">Pin incorrect</string>
     <string name="date">Date: </string>
     <string name="start_date">Start Date: </string>
+    <string name="starts">Starts: </string>
     <string name="time">Time: </string>
     <string name="fee">Fee: </string>
     <string name="amount">Amount: </string>
@@ -757,10 +765,27 @@
     <string name="passwordInfo">This is different from your transaction pin.</string>
 
     <string name="play">Play</string>
-<!--    <string name="forgetPin">Forget pin?</string>-->
-<!--    <string name="forgetPin">Forget pin?</string>-->
-<!--    <string name="forgetPin">Forget pin?</string>-->
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+    <string name="amount_icon">Amount ↓↓</string>
+    <string name="sort_icon">Sort ↓↓</string>
+    <string name="filterBy">Filter by</string>
+    <string name="sortBy">Sort by</string>
+    <string name="freeMode">Free mode</string>
+    <string name="stakeMode">Stake mode</string>
+    <string name="orangeTickPlayer">Orange tick players</string>
+    <string name="allPlayers">All players</string>
+    <string name="lowAmount">Lowest staking amount</string>
+    <string name="highAmount">Highest staking amount</string>
+    <string name="mostRecent">Most recent (time)</string>
+    <string name="stakeAmount">Stake Amount</string>
+    <string name="mode">Mode</string>
+    <string name="watchLive">Watch games</string>
+    <string name="watching">watching</string>
+    <string name="searchTitle">Search league title</string>
+    <string name="grandPrize">Grand prize:</string>
 
+    <string name="register">Register</string>
 
     <string name="confirmPayment">Please confirm payment first. </string>
     <string name="confirm_Withd_Trans">Please ensure all details are correct before entering PIN. </string>
@@ -806,6 +831,11 @@
     <string name="addContact">Add contact</string>
     <string name="contactList">Contacts</string>
 
+    <string name="ongoingTour">Ongoing Tournament</string>
+    <string name="upcomingTour">Upcoming Tournament</string>
+    <string name="ongoing">Ongoing Tournament</string>
+    <string name="upcoming">Upcoming Tournament</string>
+
     <string name="minFee">Entry fee ($1 min. per entry)</string>
     <string name="winnerReward">Winner\'s reward (optional)</string>
     <string name="minWinnerReward">Min winner\'s reward : </string>
@@ -813,6 +843,11 @@
     <string name="winnerRewardNote">In case of paid fee entry, reward must be at least 2x greater than the entry fee</string>
     <string name="whoParticipate">Who can participate</string>
     <string name="entry_slot">Entry slot : 10 – 100</string>
+    <string name="minimum_slot">Minimum slot : 10 </string>
+    <string name="remark">Remark: </string>
+    <string name="remarkHint">Be a part of this tournament </string>
+    <string name="join">Join</string>
+
     <string name="more_setting">More settings (optional)</string>
     <string name="createLeagueRule">1. If reward or entry fee is involved, the funds will be moved to your \"Lock Asset\" wallet. Meaning you can\'t have access
         or withdraw the funds until the end of the league / tournament.
@@ -839,7 +874,6 @@
         <item>Poker</item>
         <item>Chess</item>
         <item>Scrabble</item>
-        <item>Chess</item>
         <item>Ludo</item>
     </string-array>
 

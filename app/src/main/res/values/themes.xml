@@ -147,6 +147,10 @@
         <item name="android:textColor">@color/orange</item>
     </style>
 
+    <style name="TV_WhiteAndOrange">
+        <item name="android:textColor">@color/whitePure</item>
+    </style>
+
     <!--    Tint Orange and Cool orange -->
     <style name="Tint_Orange_CoolOrange">
         <item name="android:tint">@color/orange</item>

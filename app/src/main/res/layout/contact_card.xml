@@ -90,7 +90,7 @@
             app:layout_constraintStart_toEndOf="@+id/imageViewUsers" />
 
         <ImageView
-            android:id="@+id/imageViewVerify"
+            android:id="@+id/verifyIcon_IV"
             android:layout_width="0dp"
             android:layout_height="14dp"
             android:layout_marginStart="-2dp"

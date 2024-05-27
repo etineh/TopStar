@@ -332,14 +332,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     android:background="@color/orange"
-                    app:layout_constraintBottom_toTopOf="@+id/imageViewHome"
+                    app:layout_constraintBottom_toTopOf="@+id/homePage_IV"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ImageView
-                    android:id="@+id/imageViewHome"
+                    android:id="@+id/homePage_IV"
                     style="@style/BackgroundTintDarkOrange"
                     android:layout_width="@dimen/_35dp"
                     android:layout_height="30dp"
@@ -350,16 +350,16 @@
                     app:srcCompat="@drawable/baseline_home_24" />
 
                 <ImageView
-                    android:id="@+id/imageViewPlayers"
+                    android:id="@+id/liveWatch_IV"
                     style="@style/BackgroundTint"
                     android:layout_width="@dimen/_35dp"
                     android:layout_height="30dp"
                     android:adjustViewBounds="false"
-                    android:tint="@color/orange"
-                    app:layout_constraintEnd_toStartOf="@+id/imageViewGames"
-                    app:layout_constraintStart_toEndOf="@+id/imageViewHome"
+                    app:layout_constraintEnd_toStartOf="@+id/games_IV"
+                    app:layout_constraintStart_toEndOf="@+id/homePage_IV"
                     app:layout_constraintTop_toBottomOf="@+id/constraintLine"
-                    app:srcCompat="@drawable/baseline_connected_tv_24" />
+                    app:srcCompat="@drawable/baseline_connected_tv_24"
+                    app:tint="@color/orange" />
 
                 <TextView
                     android:id="@+id/textView6"
@@ -372,9 +372,9 @@
                     android:text="@string/home"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/imageViewHome"
-                    app:layout_constraintStart_toStartOf="@+id/imageViewHome"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewHome"
+                    app:layout_constraintEnd_toEndOf="@+id/homePage_IV"
+                    app:layout_constraintStart_toStartOf="@+id/homePage_IV"
+                    app:layout_constraintTop_toBottomOf="@+id/homePage_IV"
                     app:layout_constraintVertical_bias="1.0" />
 
                 <TextView
@@ -388,9 +388,9 @@
                     android:text="@string/games_"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/imageViewGames"
-                    app:layout_constraintStart_toStartOf="@+id/imageViewGames"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewGames" />
+                    app:layout_constraintEnd_toEndOf="@+id/games_IV"
+                    app:layout_constraintStart_toStartOf="@+id/games_IV"
+                    app:layout_constraintTop_toBottomOf="@+id/games_IV" />
 
                 <TextView
                     android:id="@+id/textView7"
@@ -432,12 +432,12 @@
                     android:scrollIndicators="bottom"
                     android:text="@string/live"
                     android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="@+id/imageViewPlayers"
-                    app:layout_constraintStart_toStartOf="@+id/imageViewPlayers"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewPlayers" />
+                    app:layout_constraintEnd_toEndOf="@+id/liveWatch_IV"
+                    app:layout_constraintStart_toStartOf="@+id/liveWatch_IV"
+                    app:layout_constraintTop_toBottomOf="@+id/liveWatch_IV" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/imageViewGames"
+                    android:id="@+id/games_IV"
                     android:layout_width="55dp"
                     android:layout_height="38dp"
                     android:layout_marginTop="3dp"
@@ -465,7 +465,7 @@
                     android:layout_height="30dp"
                     android:layout_marginTop="12dp"
                     app:layout_constraintEnd_toStartOf="@+id/imageViewMore"
-                    app:layout_constraintStart_toEndOf="@+id/imageViewGames"
+                    app:layout_constraintStart_toEndOf="@+id/games_IV"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/money_round"
                     app:tint="@color/orange" />
@@ -476,8 +476,8 @@
                     android:layout_width="60dp"
                     android:layout_height="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/imageViewHome"
-                    app:layout_constraintStart_toStartOf="@+id/imageViewHome">
+                    app:layout_constraintEnd_toEndOf="@+id/homePage_IV"
+                    app:layout_constraintStart_toStartOf="@+id/homePage_IV">
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -1301,7 +1301,7 @@
                 android:id="@+id/constraintLayoutAdjust"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="800dp"
+                android:layout_marginBottom="801dp"
                 android:background="@color/light_orange"
                 android:elevation="30dp"
                 android:visibility="invisible"

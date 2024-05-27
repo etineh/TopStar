@@ -121,14 +121,6 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
         },50);
-//        recyclerView.setAdapter(adapter);
-
-//        getUsers();
-
-//        new Thread( () -> {
-//            readContacts();
-//
-//        }).start();
 
         inviteFriends.setOnClickListener(v ->
         {
@@ -164,10 +156,7 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
            PhoneUtils.showKeyboard(this, searchContact_ET);
         });
 
-        refresh_IV.setOnClickListener(v ->
-        {
-           refreshContact();
-        });
+        refresh_IV.setOnClickListener(v -> refreshContact());
 
         getOnBackPressedDispatcher().addCallback(callback);
 
@@ -219,111 +208,6 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
         };
 
         searchContact_ET.addTextChangedListener(textWatcher);
-    }
-
-
-    private void readContacts() {
-
-        PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCode = telephonyManager.getNetworkCountryIso().toUpperCase();
-
-        // Use a Map to store unique contacts (key: phone number, value: ContactModel)
-        Map<String, ContactModel> contactMap = new HashMap<>();
-
-        // Query contacts
-        Cursor cursor = getContentResolver().query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null,
-                null,
-                null,
-                null
-        );
-
-        if (cursor.moveToFirst()) {
-            int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-            int phoneNumberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-            do {
-                // Check if the column indices are valid
-                if (nameIndex != -1 && phoneNumberIndex != -1) {
-
-                    String name = cursor.getString(nameIndex);
-                    String phoneNumber = cursor.getString(phoneNumberIndex).replaceAll("\\s+", "");
-                    if(phoneNumber.startsWith("0")){
-                        // remove the 0 and add the country code
-                        phoneNumber = CountryNumCodeUtils.getCountryDialingCode(countryCode, phoneNumberUtil) + phoneNumber.substring(1);
-                    }
-
-                    // Check if the phone number already exists in the map
-                    if (!contactMap.containsKey(phoneNumber)) {
-                        // Create a new ContactModel and add it to the map
-                        ContactModel contact = new ContactModel(null, null, name, null, phoneNumber, null, name, phoneNumber);
-                        contactMap.put(phoneNumber, contact);
-                    }
-
-                } else {
-                    // Handle the case when the column indices are not found
-                    Toast.makeText(this, "not found", Toast.LENGTH_SHORT).show();
-                }
-            } while (cursor.moveToNext());
-
-            cursor.close(); // Close the cursor when done
-
-            // Convert the Map values to a List
-            List<ContactModel> list_ = new ArrayList<>(contactMap.values());
-
-            // Sort the list of ContactModel objects alphabetically by name
-            Collections.sort(list_, (contact1, contact2) -> contact1.getContactName().compareToIgnoreCase(contact2.getContactName()));
-
-            // Set up RecyclerView
-            runOnUiThread(()->{
-
-                adapter = new ContactAdapter(list_, UsersContactActivity.this);
-                adapter.setListener(fragmentListener);
-                adapter.setBackButtonClickListener(UsersContactActivity.this); // "this" refers to the UserContactActivity
-                recyclerView.setAdapter(adapter);
-            });
-
-
-        } else {
-            // Handle the case when the cursor is empty
-            Toast.makeText(this, "No contacts found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void getUsers(){
-
-        refUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                list.clear();
-                // get my username
-                String myUserName = snapshot.child(user.getUid()).child("general").child("userName").getValue().toString();
-
-                for (DataSnapshot userDetails : snapshot.getChildren()) {
-
-                    // to get the uid all my contact user child
-                    String key = userDetails.getKey();
-
-                    if (!key.equals(user.getUid())){// if the key id is not mine, then it should fetch out other user id
-                        ContactModel contactModel = userDetails.child("general").getValue(ContactModel.class);
-                        contactModel.setOtherUid(key);
-                        contactModel.setMyUserName(myUserName);
-                        list.add(contactModel);
-                    }
-
-                    adapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
     }
 
 

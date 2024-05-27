@@ -96,6 +96,8 @@ import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreateLeagueActivity;
 import com.pixel.chatapp.activities.CreatePinActivity;
+import com.pixel.chatapp.activities.LiveGameActivity;
+import com.pixel.chatapp.adapters.AlertAdapter;
 import com.pixel.chatapp.all_utils.CacheUtils;
 import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
@@ -104,7 +106,7 @@ import com.pixel.chatapp.all_utils.SharePhotoUtil;
 import com.pixel.chatapp.api.Dao_interface.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.contacts.FetchContacts;
-import com.pixel.chatapp.home.fragments.AlertFragment;
+import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
 import com.pixel.chatapp.model.ContactModel;
@@ -115,7 +117,6 @@ import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.activities.AppLifecycleHandler;
 import com.pixel.chatapp.photos.CameraActivity;
 import com.pixel.chatapp.calls.MainRepository;
-import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.PhoneUtils;
@@ -238,8 +239,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static CircleImageView circleForwardSend;
     private static ProgressBar progressBarForward;
     public static boolean onForward;
-    public static List<ChatListAdapter.ChatViewHolder> myHolder_;
-    public static List<ChatListAdapter.ChatViewHolder> myHolderNew;
+    public static List<AlertAdapter.ChatViewHolder> myHolder_;
+    public static List<AlertAdapter.ChatViewHolder> myHolderNew;
     public static List <String> forwardChatUserId;
     public static List <String> selectedUserNames;
 
@@ -513,6 +514,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         viewWalletIcon = findViewById(R.id.viewWalletIcon);
         p2pHome_IV = findViewById(R.id.p2pHome_IV);
         ImageView homeOpenMore = findViewById(R.id.imageViewMore);
+        ImageView homePage = findViewById(R.id.homePage_IV);
+        ImageView liveWatch_IV = findViewById(R.id.liveWatch_IV);
+        ImageView games_IV = findViewById(R.id.games_IV);
+
 
         // home more option
         moreOptionHomeLayout = findViewById(R.id.moreHomeContainer);
@@ -862,16 +867,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                         switch (position){
                             case 0:
-                                tab.setText(getString(R.string.alert));
+                                tab.setText(getString(R.string.chats));
                                 break;
                             case 1:
                                 tab.setText(getString(R.string.players));
                                 break;
                             case 2:
-                                tab.setText(getString(R.string.tour) + " 🏆");
+                                tab.setText(getString(R.string.league));
                                 break;
                             case 3:
-                                tab.setText(getString(R.string.hosts));
+                                tab.setText(getString(R.string.tour) + " 🏆");
                                 break;
                         }
                     });
@@ -1066,7 +1071,38 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     }, 300);
                 });
             });
-            
+
+            homePage.setOnClickListener(v -> {
+                viewPager2General.setCurrentItem(0, true);
+            });
+
+            liveWatch_IV.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
+                {
+                    Intent intent = new Intent(this, LiveGameActivity.class);
+                    startActivity(intent);
+
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                    }, 300);
+                });
+            });
+
+            games_IV.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                    }, 300);
+                });
+            });
+
             moreOptionHomeLayout.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
             hostPlayerClick.setOnClickListener(v -> 
@@ -1074,8 +1110,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
                 {
                     Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
-//                    readContacts();
-                    new Thread(() -> FetchContacts.readContacts(this)).start();
 
                     new Handler().postDelayed(()-> {
                         v.setScaleX(1f);
@@ -1710,7 +1744,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     adapter.deleteMessage(chatModel.getIdKey());
 
                     // update user UI chatList model
-                    AlertFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                    ChatsFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
 
                     // delete the ROOM outside UI
                     chatViewModel.editOutsideChat( otherUserUid, AllConstants.DELETE_ICON + " ...",
@@ -1785,7 +1819,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 null, chatModel.getIdKey());
 
                         // update outside user UI chatList model
-                        AlertFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                        ChatsFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
 
                         // delete from ROOM - inside chat room
                         chatViewModel.deleteChat(chatModel);
@@ -2135,7 +2169,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     refLastDetails.child(myId).child(otherUid_Del).removeValue();
                     refChecks.child(myId).child(otherUid_Del).removeValue();
                     // delete user from adapter list
-                    AlertFragment.findUserPositionByUID(otherUid_Del);
+                    ChatsFragment.findUserPositionByUID(otherUid_Del);
                     // delete user from ROOM
                     chatViewModel.deleteUserById(otherUid_Del);
                 } else {
@@ -2171,7 +2205,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     refChecks.child(otherUid_Del).child(myId).removeValue();
 
                     // delete user from adapter list
-                    AlertFragment.findUserPositionByUID(otherUid_Del);
+                    ChatsFragment.findUserPositionByUID(otherUid_Del);
                     // delete user from ROOM
                     chatViewModel.deleteUserById(otherUid_Del);
                 } else {
@@ -2970,7 +3004,7 @@ scNum = 20;
         myHolderNew.addAll(myHolder_);  // add all users holder that was gotten from chatListAdapter
 
         // call forward setting method to add onForward checkBox container
-        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        AlertAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
 
         if(sharingPhotoActivated){
             circleForwardSend.setImageResource(R.drawable.baseline_arrow_forward_24);
@@ -3372,7 +3406,7 @@ scNum = 20;
             }
 
             // find position and move it to top as recent chat... also update the outside chat details
-            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, chatKey);
+            AlertAdapter.getInstance().findUserPositionByUID(otherId, messageModel, chatKey);
 
             // remove the typingRunnable for checking network
             handlerTyping.removeCallbacks(runnableTyping);
@@ -3526,7 +3560,7 @@ scNum = 20;
                 }
 
                 // find position and move it to top as recent chat... also update the outside chat and ROOM DB
-                ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
+                AlertAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
 
                 // cancel when all is done
                 if(i == userSize-1 && j == chatSize-1 ){
@@ -3562,7 +3596,7 @@ scNum = 20;
         chatViewModel.updateChat(messageModel);
 
         // update user chatList model if it same last chat
-        AlertFragment.findUserAndEditChat(otherUserUid, idKey,
+        ChatsFragment.findUserAndEditChat(otherUserUid, idKey,
                 text, emojiOnly);
 
         // update the ROOM outside UI
@@ -3979,7 +4013,7 @@ scNum = 20;
                             // add to room database
                             chatViewModel.insertChat(userId, messageModel);
                             // find position and move it to top as recent chat // add to outside ROOM
-                            ChatListAdapter.getInstance()
+                            AlertAdapter.getInstance()
                                     .findUserPositionByUID(userId, messageModel, snapshot1.getKey());
 
                             // delete after delivery the chat
@@ -4082,7 +4116,7 @@ scNum = 20;
                                             .child("emojiOnly").setValue(editMessageModel.getEmojiOnly());
 
                                     // update user chatList model
-                                    AlertFragment.findUserAndEditChat(otherUid, editID,
+                                    ChatsFragment.findUserAndEditChat(otherUid, editID,
                                             editMessageModel.getMessage(), editMessageModel.getEmojiOnly());
 
                                     // update the ROOM outside UI
@@ -4164,7 +4198,7 @@ scNum = 20;
                                         null, outSideChatID);
 
                                 // update user chatList model
-                                AlertFragment.findUserAndDeleteChat(otherUid, deleteChatID);
+                                ChatsFragment.findUserAndDeleteChat(otherUid, deleteChatID);
 
                             }
                         }
@@ -4295,7 +4329,7 @@ scNum = 20;
                                     adapter.notifyItemChanged(chatPosition, new Object());
 
                                     // update delivery status for outSide chat
-                                    ChatListAdapter.getInstance().updateDeliveryToRead(otherId);
+                                    AlertAdapter.getInstance().updateDeliveryToRead(otherId);
 
                                     // update ROOM for inside chat
                                     chatViewModel.updateDeliveryStatus(otherId, getChatId, 700016);
@@ -5158,7 +5192,7 @@ scNum = 20;
                             adapter.notifyItemChanged(chatPosition, new Object());
 
                             // update delivery status for outSide chat
-                            ChatListAdapter.getInstance().updateDeliveryStatus(otherUID_);
+                            AlertAdapter.getInstance().updateDeliveryStatus(otherUID_);
 
                             // update ROOM for inside chat
                             chatViewModel.updateDeliveryStatus(otherUID_, chatKey, 700024);
@@ -5691,7 +5725,7 @@ scNum = 20;
         // call forward setting method to remove the checkBox
         myHolderNew.clear();
         myHolderNew.addAll(myHolder_);  // add up all user holder
-        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        AlertAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
 
         // remove the typingRunnable for checking network
         handlerTyping.removeCallbacks(runnableTyping);
@@ -5920,7 +5954,7 @@ scNum = 20;
                             // clear local list -- adapter
                             adapterMap.get(otherUid).clearChats();
                             //  remove user from chatList
-                            runOnUiThread(() -> AlertFragment.findUserPositionByUID(otherUid));
+                            runOnUiThread(() -> ChatsFragment.findUserPositionByUID(otherUid));
                         }
                         //delete the sign from firebase DB
                         refDeleteUser.child(otherUid).child(myId).removeValue();
@@ -6200,9 +6234,9 @@ scNum = 20;
                     clearAllHighlights();
 
                     // make previous view clickable if any
-                    if (ChatListAdapter.previousView != null) {
-                        ChatListAdapter.previousView.setClickable(true);
-                        ChatListAdapter.previousView = null;    // return it back to null
+                    if (AlertAdapter.previousView != null) {
+                        AlertAdapter.previousView.setClickable(true);
+                        AlertAdapter.previousView = null;    // return it back to null
                     }
 
                     AllConstants.executors.execute(() -> {
@@ -6256,6 +6290,11 @@ scNum = 20;
             } else if (sideBarMenuContainer.getVisibility() == View.VISIBLE)
             {
                 sideBarMenuContainer.setVisibility(View.GONE);
+            } else if (moreOptionHomeLayout.getVisibility() == View.VISIBLE)
+            {
+                moreOptionHomeLayout.setVisibility(View.GONE);
+                moreHomeCont2.setVisibility(View.GONE);
+
             } else if (viewPager2General.getCurrentItem() != 0)
             {
                 viewPager2General.setCurrentItem(0, true);
@@ -6268,11 +6307,6 @@ scNum = 20;
                 Intent callIntentActivity = new Intent(MainActivity.this, CallCenterActivity.class);
                 callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(callIntentActivity);
-
-            } else if (moreOptionHomeLayout.getVisibility() == View.VISIBLE)
-            {
-                moreOptionHomeLayout.setVisibility(View.GONE);
-                moreHomeCont2.setVisibility(View.GONE);
 
             } else if(close == 0)
             {

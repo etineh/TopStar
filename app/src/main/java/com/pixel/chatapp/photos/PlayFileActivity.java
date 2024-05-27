@@ -1,5 +1,6 @@
 package com.pixel.chatapp.photos;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -107,16 +108,18 @@ public class PlayFileActivity extends AppCompatActivity {
 
             if(handler != null) handler.removeCallbacks(runnable);
 
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             finish();
         });
 
         del_IV.setOnClickListener(v -> {
             StorageRecyclerActivity.fileList.add( new File(getFile) );
-            deleteListerner.onDelete();
+            deleteListener.onDelete();
             Toast.makeText(this, getString(R.string.deleteSuccessful), Toast.LENGTH_SHORT).show();
             finish();
         });
+
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -233,15 +236,17 @@ public class PlayFileActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public void onBackPressed() {
-        if(mediaPlayer != null) mediaPlayer.stop();
-        finish();
-        super.onBackPressed();
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(mediaPlayer != null) mediaPlayer.stop();
+            finish();
+        }
+    };
 
-    public static DeleteListerner deleteListerner;
-    public interface DeleteListerner{
+
+    public static DeleteListener deleteListener;
+    public interface DeleteListener {
         void onDelete();
     }
 

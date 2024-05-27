@@ -43,7 +43,6 @@ public class CreateLeagueActivity extends AppCompatActivity {
         spinnerEntryMood = findViewById(R.id.spinnerEntryMood);
 
         arrowBackS = findViewById(R.id.arrowBackS);
-        startDate = findViewById(R.id.editTextDate);
         entryFee_ET = findViewById(R.id.entryFee_ET);
         entrySlot_ET = findViewById(R.id.entrySlot_ET);
         reward_ET = findViewById(R.id.reward_ET);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
@@ -23,34 +24,32 @@
             android:layout_marginTop="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paymentOptions_TV" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/playerPhoto_IV"
+            android:id="@+id/gamePhoto_IV"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="2dp"
-            android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:src="@drawable/person_round"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/constrainLast" />
+            app:layout_constraintTop_toBottomOf="@+id/hostTitle_TV" />
 
         <TextView
-            android:id="@+id/playerName_TV"
+            android:id="@+id/hostTitle_TV"
             style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="7dp"
             android:ellipsize="end"
-            android:maxEms="13"
-            android:text="Sophia Ibenyibonor Etinemiderhi "
+            android:maxEms="17"
+            android:text="Sophia Ibenyibonor Tournament"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/playerPhoto_IV"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -63,21 +62,22 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingBottom="10dp"
-            android:text="Game: Whot, Poker, Chess."
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Game: Whot"
+            app:layout_constraintEnd_toStartOf="@+id/timeCreated_TV"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/playerPhoto_IV"
-            app:layout_constraintTop_toBottomOf="@+id/stakeAmount_TV" />
+            app:layout_constraintStart_toEndOf="@+id/gamePhoto_IV"
+            app:layout_constraintTop_toBottomOf="@+id/reward_TV" />
 
         <TextView
-            android:id="@+id/mode_TV"
+            android:id="@+id/entryFee_TV"
             style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="3dp"
-            android:text="Mode: Free or Stake"
-            app:layout_constraintStart_toStartOf="@id/playerName_TV"
-            app:layout_constraintTop_toBottomOf="@+id/playerName_TV" />
+            android:text="Entry fee: $30"
+            app:layout_constraintStart_toEndOf="@+id/gamePhoto_IV"
+            app:layout_constraintTop_toBottomOf="@+id/hostTitle_TV" />
 
         <ImageView
             android:id="@+id/verifyIcon_IV"
@@ -85,8 +85,8 @@
             android:layout_height="14dp"
             android:layout_marginStart="-2dp"
             android:layout_marginTop="3dp"
-            app:layout_constraintStart_toEndOf="@+id/playerName_TV"
-            app:layout_constraintTop_toTopOf="@+id/playerName_TV"
+            app:layout_constraintStart_toEndOf="@+id/hostTitle_TV"
+            app:layout_constraintTop_toTopOf="@+id/hostTitle_TV"
             app:srcCompat="@drawable/verified" />
 
         <TextView
@@ -98,32 +98,42 @@
             android:padding="5dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
-            android:text="@string/play"
+            android:text="@string/join"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@+id/stakeAmount_TV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mode_TV" />
+            app:layout_constraintBottom_toTopOf="@+id/gameType_TV"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/timeCreated_TV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            android:text="Jan 12"
-            app:layout_constraintBottom_toTopOf="@+id/playOnclick"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:layout_marginEnd="20dp"
+            android:text="Created: 1:30 pm"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/gameType_TV" />
 
         <TextView
-            android:id="@+id/stakeAmount_TV"
+            android:id="@+id/reward_TV"
             style="@style/textColorFullBlack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
-            android:text="Amount : $0.3 - $100"
-            app:layout_constraintStart_toStartOf="@+id/mode_TV"
-            app:layout_constraintTop_toBottomOf="@+id/mode_TV" />
+            android:text="Prize pool: $450"
+            app:layout_constraintStart_toStartOf="@+id/entryFee_TV"
+            app:layout_constraintTop_toBottomOf="@+id/entryFee_TV" />
+
+        <ImageView
+            android:id="@+id/shareIV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="10dp"
+            android:padding="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_share_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

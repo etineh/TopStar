@@ -23,10 +23,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.Permission.Permission;
+import com.pixel.chatapp.adapters.AlertAdapter;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.contacts.UsersContactActivity;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
@@ -39,10 +39,10 @@ import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class AlertFragment extends Fragment {
+public class ChatsFragment extends Fragment {
 
-    public static AlertFragment newInstance(){
-        return new AlertFragment();
+    public static ChatsFragment newInstance(){
+        return new ChatsFragment();
     }
 
     public static RecyclerView recyclerView;
@@ -53,7 +53,7 @@ public class AlertFragment extends Fragment {
     private UserChatViewModel userViewModel;
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
-    static ChatListAdapter adapter;
+    static AlertAdapter adapter;
     public static CircleImageView openContactList;
 
     private List<UserOnChatUI_Model> chatListID;
@@ -95,7 +95,7 @@ public class AlertFragment extends Fragment {
             if(userViewModel.getAllUsers() != null){
                 mUsersID = userViewModel.getAllUsers();
 
-                adapter = new ChatListAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
+                adapter = new AlertAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
 
                 getActivity().runOnUiThread(() -> {
@@ -197,7 +197,7 @@ public class AlertFragment extends Fragment {
         adapter.notifyItemChanged(i, new Object());
     }
     private void chatList(){
-        adapter = new ChatListAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
+        adapter = new AlertAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
         adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
         recyclerView.setAdapter(adapter);
 

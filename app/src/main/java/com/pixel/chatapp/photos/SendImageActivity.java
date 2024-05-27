@@ -11,6 +11,7 @@ import static com.pixel.chatapp.home.MainActivity.runnableTyping;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 import static com.pixel.chatapp.home.MainActivity.sharingPhotoActivated;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -251,8 +252,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         paintPickColorListener();
 
         //  onClicks    ---- back press
-        arrowBack.setOnClickListener(view -> onBackPressed());  // onBackPress
-        arrowBackBrush.setOnClickListener(view -> onBackPressed());
+        arrowBack.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());  // onBackPress
+        arrowBackBrush.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         // pop up emoji
         emoji_IV.setOnClickListener(view ->{
@@ -456,6 +457,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
 
             secondModelMap.put(previousModel.getIdKey(), getNewPhotoUri.toString());    // update the uri map
         });
+
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -929,52 +932,53 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     }
 
 
-    @Override
-    public void onBackPressed() {
-        if(brushContainer.getVisibility() == View.VISIBLE){ // it's on painting mood
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(brushContainer.getVisibility() == View.VISIBLE){ // it's on painting mood
 
-            brushContainer.setVisibility(View.GONE);
-            imageView.setVisibility(View.GONE);
-            colorSeekBar.setVisibility(View.GONE);
+                brushContainer.setVisibility(View.GONE);
+                imageView.setVisibility(View.GONE);
+                colorSeekBar.setVisibility(View.GONE);
 
-            topLayerConstraint.setVisibility(View.VISIBLE);
-            typeMessageContainer.setVisibility(View.VISIBLE);
-            viewPager.setVisibility(View.VISIBLE);
+                topLayerConstraint.setVisibility(View.VISIBLE);
+                typeMessageContainer.setVisibility(View.VISIBLE);
+                viewPager.setVisibility(View.VISIBLE);
 
-            // make the recycler visible only when the photo on the list is above 1
-            if(chatModelList.size() > 1) {
-                recyclerPhoto.setVisibility(View.VISIBLE);
-            }
-
-            deleteOldUriFromAppMemory(tempUri, this); //  for onBackPress
-
-            new Handler().postDelayed(() -> message_ET.requestFocus(), 300);
-
-        } else {
-            if(sharingPhotoActivated){ // it's on sharing mood (photo or document)
-                if(isSharingDocument){
-                    forwardChatUserId.clear();
-                    selectedUserNames.clear();
-                    chatModelList.clear();
-                    sharingPhotoActivated = false;
-                    isSharingDocument = false;
+                // make the recycler visible only when the photo on the list is above 1
+                if(chatModelList.size() > 1) {
+                    recyclerPhoto.setVisibility(View.VISIBLE);
                 }
 
-                finish();
-//            super.onBackPressed();
+                deleteOldUriFromAppMemory(tempUri, SendImageActivity.this); //  for onBackPress
+
+                new Handler().postDelayed(() -> message_ET.requestFocus(), 300);
 
             } else {
-                deleteFile();   // for onBackPress
-                deleteUnusedPhotoFromSharePrefsAndAppMemory(this);    // for onBackPress
-                openOrLaunchGallery();   // go back to pick image gallery
-                message_ET.clearFocus();
+                if(sharingPhotoActivated){ // it's on sharing mood (photo or document)
+                    if(isSharingDocument){
+                        forwardChatUserId.clear();
+                        selectedUserNames.clear();
+                        chatModelList.clear();
+                        sharingPhotoActivated = false;
+                        isSharingDocument = false;
+                    }
+
+                    finish();
+//            super.onBackPressed();
+
+                } else {
+                    deleteFile();   // for onBackPress
+                    deleteUnusedPhotoFromSharePrefsAndAppMemory(SendImageActivity.this);    // for onBackPress
+                    openOrLaunchGallery();   // go back to pick image gallery
+                    message_ET.clearFocus();
+                }
             }
+
+            popup.dismiss();
+            emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
         }
-
-        popup.dismiss();
-        emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
-
-    }
+    };
 
     @Override
     protected void onPause() {

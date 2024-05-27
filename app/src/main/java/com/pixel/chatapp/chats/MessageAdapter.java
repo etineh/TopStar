@@ -19,7 +19,6 @@ import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.recyclerMap;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -48,7 +47,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -66,8 +64,8 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.pixel.chatapp.adapters.AlertAdapter;
 import com.pixel.chatapp.photos.ViewImageActivity;
-import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
@@ -84,7 +82,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -2608,7 +2605,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refOnReadRequest.child(otherUid).child(myId).push().setValue(modelChats.getIdKey());
 
         // update delivery status for outSide chat
-        ChatListAdapter.getInstance().updateDeliveryStatus(otherUid);
+        AlertAdapter.getInstance().updateDeliveryStatus(otherUid);
         // update delivery status ROOM for outside chat
         chatViewModel.updateOutsideDelivery(otherUid, 700024);
 

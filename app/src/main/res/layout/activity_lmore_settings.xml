@@ -163,6 +163,43 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/liveChatClick">
 
+                <EditText
+                    android:id="@+id/sponsorBy_ET"
+                    style="@style/backgroundTint_orange_coolOrange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="20dp"
+                    android:hint="\@prince_sunday"
+                    android:inputType="text|textMultiLine"
+                    android:textCursorDrawable="@drawable/cursor_drawable"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/imageView12ss"
+                    app:layout_constraintTop_toBottomOf="@+id/imageView12ss" />
+
+                <ImageView
+                    android:id="@+id/imageView12ss"
+                    style="@style/Tint_Orange_CoolOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="40dp"
+                    android:src="@drawable/baseline_label_important_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/leagueTitle_ET" />
+
+                <TextView
+                    android:id="@+id/textView4ss"
+                    style="@style/textColorFullBlack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/sponsorBy"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/imageView12ss"
+                    app:layout_constraintStart_toEndOf="@+id/imageView12ss"
+                    app:layout_constraintTop_toTopOf="@+id/imageView12ss" />
+
                 <TextView
                     android:id="@+id/textView4p"
                     style="@style/textColorFullBlack"
@@ -194,7 +231,6 @@
                     android:layout_marginTop="5dp"
                     android:layout_marginEnd="20dp"
                     android:drawableTint="@color/orange"
-                    android:ems="10"
                     android:hint="Prince Poker League"
                     android:inputType="text"
                     android:textCursorDrawable="@drawable/cursor_drawable"
@@ -203,42 +239,41 @@
                     app:layout_constraintTop_toBottomOf="@+id/textView4p" />
 
                 <EditText
-                    android:id="@+id/sponsorBy_ET"
+                    android:id="@+id/remarkET"
                     style="@style/backgroundTint_orange_coolOrange"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:layout_marginEnd="20dp"
-                    android:ems="10"
-                    android:hint="\@prince_sunday"
+                    android:hint="@string/remarkHint"
                     android:inputType="text|textMultiLine"
                     android:textCursorDrawable="@drawable/cursor_drawable"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/imageView12ss"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView12ss" />
+                    app:layout_constraintStart_toStartOf="@id/remarkIcon"
+                    app:layout_constraintTop_toBottomOf="@id/remarkIcon" />
 
                 <ImageView
-                    android:id="@+id/imageView12ss"
+                    android:id="@+id/remarkIcon"
                     style="@style/Tint_Orange_CoolOrange"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="40dp"
-                    android:src="@drawable/baseline_label_important_24"
+                    android:src="@drawable/baseline_lightbulb_24"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/leagueTitle_ET" />
+                    app:layout_constraintTop_toBottomOf="@id/sponsorBy_ET" />
 
                 <TextView
-                    android:id="@+id/textView4ss"
+                    android:id="@+id/remark_TV"
                     style="@style/textColorFullBlack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="@string/sponsorBy"
+                    android:text="@string/remark"
                     android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageView12ss"
-                    app:layout_constraintStart_toEndOf="@+id/imageView12ss"
-                    app:layout_constraintTop_toTopOf="@+id/imageView12ss" />
+                    app:layout_constraintBottom_toBottomOf="@id/remarkIcon"
+                    app:layout_constraintStart_toEndOf="@id/remarkIcon"
+                    app:layout_constraintTop_toTopOf="@id/remarkIcon" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

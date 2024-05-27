@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pixel.chatapp.home.fragments.AlertFragment;
+import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.home.MainActivity;
@@ -39,7 +39,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
     List<ContactModel> copyContacts = new ArrayList<>();
     DatabaseReference refUsers, refClearSign;
     FirebaseUser user;
-    AlertFragment alertFragment = new AlertFragment();
+    ChatsFragment chatsFragment = new ChatsFragment();
 
     public static Context mContext;
     Handler handler = new Handler();
@@ -139,7 +139,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
                             // activate adapter for user if null
                             if(MainActivity.adapterMap.get(otherUid) == null){
                                 // call getMessage() to add up new user adapter
-//                listener.getMessage(myUserName, otherName, otherUid, alertFragment.getMainContext());
+//                listener.getMessage(myUserName, otherName, otherUid, chatsFragment.getMainContext());
                                 listener.getMessage(myUserName, otherUid, getmContext());
                             }
                             // check if network is okay and remove the network bar constraint
