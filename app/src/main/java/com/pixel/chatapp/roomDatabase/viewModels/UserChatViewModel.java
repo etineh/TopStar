@@ -4,12 +4,10 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
-import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.repositories.UserChatRepository;
 
 import java.util.List;
@@ -37,8 +35,9 @@ public class UserChatViewModel extends AndroidViewModel {
         repository.updateOutsideDelivery(otherUid, statusNum);
     }
 
-    public void updateOtherNameAndPhoto(String id, String otherName, String imageUrl){
-        repository.updateOtherNameAndPhoto(id, otherName, imageUrl);
+    public void updateOtherNameAndPhoto(String id, String otherUsername, String otherDisplayName,
+                                        String otherContactName, String imageUrl){
+        repository.updateOtherNameAndPhoto(id, otherUsername, otherDisplayName, otherContactName, imageUrl);
     }
 
     public void updateOutsideChat(String id, String chat, String emojiOnly, int statusNum, long timeSent, String idKey){
@@ -97,14 +96,12 @@ public class UserChatViewModel extends AndroidViewModel {
     public void deleteChatByUserId(String otherId){
         repository.deleteChatsByUserId(otherId);
     }
-    public EachUserChats getEachUserChat(String id){
-        return repository.getEachUserChats(id);
-    }
 
     // get the chats of each user
-//    public List<MessageModel> getEachUserChat_(String userUid){
-//        return repository.getEachUserChats_(userUid);
-//    }
+    public List<MessageModel> getEachUserChat_(String userUid){
+        return repository.getEachUserChats_(userUid);
+    }
+
 }
 
 

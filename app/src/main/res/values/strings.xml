@@ -342,6 +342,9 @@
     <string name="appInvite">Hey there! I\'m inviting you to join TopStar, an app where we can chat,
         play various live stream multiplayer games, and earn rewards together.\nwww.topstar.com.ng</string>
 
+    <string name="chatClearForMe">Chats cleared for me!</string>
+    <string name="chatClearForEveryone">Chats cleared for everyone!</string>
+
     <string name="p2pTrans">P2P transactions</string>
     <string name="usdtTrans">USDT Transactions</string>
     <string name="games_">Games</string>

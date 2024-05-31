@@ -955,7 +955,7 @@
         style="@style/ChatBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -1301,7 +1301,7 @@
                 android:id="@+id/constraintLayoutAdjust"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="801dp"
+                android:layout_marginBottom="800dp"
                 android:background="@color/light_orange"
                 android:elevation="30dp"
                 android:visibility="invisible"
@@ -1321,6 +1321,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayoutAdjust">
 
+                <ProgressBar
+                    android:id="@+id/progressBarLoadChats"
+                    style="@style/progressBarColour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.499" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

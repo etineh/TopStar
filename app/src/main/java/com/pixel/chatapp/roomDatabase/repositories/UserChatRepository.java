@@ -1,14 +1,12 @@
 package com.pixel.chatapp.roomDatabase.repositories;
 
 import android.app.Application;
-
-import androidx.lifecycle.LiveData;
+import android.database.sqlite.SQLiteConstraintException;
 
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
 import com.pixel.chatapp.roomDatabase.dao.UserChatDao;
-import com.pixel.chatapp.roomDatabase.database.WinnerDatabase;
-import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
+import com.pixel.chatapp.roomDatabase.database.TopStarDatabase;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +21,7 @@ public class UserChatRepository {
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
     public UserChatRepository(Application application){
-        WinnerDatabase database = WinnerDatabase.getInstance(application);
+        TopStarDatabase database = TopStarDatabase.getInstance(application);
         userChatDao = database.userChatDao();
 //        users = userChatDao.getEachUser();
     }
@@ -32,7 +30,12 @@ public class UserChatRepository {
         executors.execute(new Runnable() {
             @Override
             public void run() {
-                userChatDao.insertUser(userOnChatUIModel);
+                try {
+                    userChatDao.insertUser(userOnChatUIModel);
+                } catch (SQLiteConstraintException e) {
+                    // Handle the unique constraint violation
+                    userChatDao.updateUser(userOnChatUIModel);
+                }
             }
         });
     }
@@ -55,11 +58,11 @@ public class UserChatRepository {
         });
     }
 
-    public void updateOtherNameAndPhoto(String id, String otherName, String imageUrl){
+    public void updateOtherNameAndPhoto(String id, String otherUsername, String otherDisplayName, String otherContactName, String imageUrl){
         executors.execute(new Runnable() {
             @Override
             public void run() {
-                userChatDao.updateOtherNameAndPhoto(id, otherName, imageUrl);
+                userChatDao.updateOtherNameAndPhoto(id, otherUsername, otherDisplayName, otherContactName, imageUrl);
             }
         });
     }
@@ -183,18 +186,15 @@ public class UserChatRepository {
 
     }
 
-    public EachUserChats getEachUserChats(String userId){
-        return userChatDao.getEachUserChat(userId);
-    }
-
     public List<UserOnChatUI_Model> getUsers(){
+//        System.out.println("what is the re " + userChatDao.getEachUser().size());
         return userChatDao.getEachUser();
     }
 
     // get all the chats of each user
-//    public List<MessageModel> getEachUserChats_(String userUID){
-//        return userChatDao.getEachUserChat_(userUID);
-//    }
+    public List<MessageModel> getEachUserChats_(String userUID){
+        return userChatDao.getEachUserChat_(userUID);
+    }
 
 }
 

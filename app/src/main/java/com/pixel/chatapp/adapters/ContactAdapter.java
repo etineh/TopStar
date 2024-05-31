@@ -1,5 +1,7 @@
 package com.pixel.chatapp.adapters;
 
+import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
+import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
@@ -99,7 +103,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
         //  get all other-user details -----------------------
         String otherUid = contactModel.getOtherUid();
-        String otherName = contactModel.getUserName();
+        String otherUsername = contactModel.getOtherUserName();
+        String otherDisplayname = contactModel.getOtherUserName();
         String myUserName = contactModel.getMyUserName();
         String imageUrl = contactModel.getImage();
         String hint = contactModel.getBio();
@@ -122,13 +127,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
         // what happen when the cardView is click
         holder.itemView.setOnClickListener(view -> {
+            String myUsername = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
 
             view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(50)
                     .withEndAction(() -> {
 
                         if(otherUid != null)
                         {
-                            listener.chatBodyVisibility(contactName , imageUrl, myUserName, otherUid, getmContext(), holder.recyclerChat);
+                            listener.chatBodyVisibility(contactName, imageUrl, myUsername, otherUid, getmContext(), holder.recyclerChat);
 
                             listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -139,8 +146,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
                             // activate adapter for user if null
                             if(MainActivity.adapterMap.get(otherUid) == null){
                                 // call getMessage() to add up new user adapter
-//                listener.getMessage(myUserName, otherName, otherUid, chatsFragment.getMainContext());
-                                listener.getMessage(myUserName, otherUid, getmContext());
+//                listener.getMessage(myUsername, otherName, otherUid, chatsFragment.getMainContext());
+                                listener.getMessage(myUsername, otherUid, getmContext());
                             }
                             // check if network is okay and remove the network bar constraint
                             new Handler().postDelayed(() -> {
@@ -288,8 +295,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
             textViewMsg = itemView.findViewById(R.id.textViewMsg);
 
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
-            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+//            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManagerWrapper(itemView.getContext(), LinearLayoutManager.VERTICAL, false);
 
+            recyclerChat.setLayoutManager(mLayoutManager);
         }
 
     }

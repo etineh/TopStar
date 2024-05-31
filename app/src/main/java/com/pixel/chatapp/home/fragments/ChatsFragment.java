@@ -1,5 +1,9 @@
 package com.pixel.chatapp.home.fragments;
 
+import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
+import static com.pixel.chatapp.home.MainActivity.handlerInternet;
+import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +11,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.Permission.Permission;
-import com.pixel.chatapp.adapters.AlertAdapter;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
@@ -53,7 +58,7 @@ public class ChatsFragment extends Fragment {
     private UserChatViewModel userViewModel;
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
-    static AlertAdapter adapter;
+    static ChatListAdapter adapter;
     public static CircleImageView openContactList;
 
     private List<UserOnChatUI_Model> chatListID;
@@ -89,13 +94,12 @@ public class ChatsFragment extends Fragment {
 //        refChecks = FirebaseDatabase.getInstance().getReference("Checks");
 
         userViewModel = new ViewModelProvider(requireActivity()).get(UserChatViewModel.class);
-
         // get users from ROOM database
         executors.execute(() -> {
             if(userViewModel.getAllUsers() != null){
                 mUsersID = userViewModel.getAllUsers();
 
-                adapter = new AlertAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
+                adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
 
                 getActivity().runOnUiThread(() -> {
@@ -140,7 +144,7 @@ public class ChatsFragment extends Fragment {
     public static void findUserPositionByUID(String userUid) {
         if (mUsersID != null) {
             for (int i = mUsersID.size() - 1; i >= 0; i--) {
-                if (mUsersID.get(i).getId().equals(userUid)) {
+                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
                     // Remove the item from its old position.
                     mUsersID.remove(i);
                     adapter.notifyItemRemoved(i);
@@ -155,7 +159,7 @@ public class ChatsFragment extends Fragment {
         if (mUsersID != null) {
             for (int i = mUsersID.size() - 1; i >= 0; i--) {
                 // check if it's same user ID
-                if (mUsersID.get(i).getId().equals(userUid)) {
+                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
                     // check if it's same message ID
                     if(mUsersID.get(i).getIdKey().equals(chatId)){
                         // Remove the chat from its old position.
@@ -173,7 +177,7 @@ public class ChatsFragment extends Fragment {
         if (mUsersID != null) {
             for (int i = mUsersID.size() - 1; i >= 0; i--) {
                 // check if it's same user ID
-                if (mUsersID.get(i).getId().equals(userUid)) {
+                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
                     // check if it's same message ID
                     if(mUsersID.get(i).getIdKey().equals(chatId)){
                         if(chat != null){
@@ -196,41 +200,55 @@ public class ChatsFragment extends Fragment {
     public static void notifyItemChanged(int i){
         adapter.notifyItemChanged(i, new Object());
     }
-    private void chatList(){
-        adapter = new AlertAdapter(mUsersID, getContext(), MainActivity.getMyUserName, getActivity());
+    private void chatList()
+    {
+
+        adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
+
         adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
         recyclerView.setAdapter(adapter);
 
-        // Getting all recent chats;
-        refUsers = FirebaseDatabase.getInstance().getReference("UsersList")
-                .child(user.getUid());
+        // Getting all my user chats only;
+        refUsers = FirebaseDatabase.getInstance().getReference("UsersList").child(user.getUid());
+
         refUsers.orderByChild("timeSent").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                for (DataSnapshot snapshot1 : snapshot.getChildren()){
-                    UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
-                    String userId = snapshot1.getKey();
-                    userModel.setId(userId);
+                new Thread(()->
+                {
+                    try{
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()){
+                            UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
+                            String userId = snapshot1.getKey();
+                            userModel.setOtherUid(userId);
 
-                    boolean userAlreadyExists = false;
-                    for (UserOnChatUI_Model userModelLoop : mUsersID) {
-                        if (userModelLoop.getId().equals(userId)) {
-                            userAlreadyExists = true;
-                            break;
+                            boolean userAlreadyExists = false;
+                            for (UserOnChatUI_Model userModelLoop : mUsersID) {
+                                if (userModelLoop.getOtherUid().equals(userId)) {
+            System.out.println("what is userId: " + userId + " uid: " + userModelLoop.getOtherUid());
+                                    userAlreadyExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (!userAlreadyExists) {
+                                // If the user doesn't exist, add it to the list
+                                mUsersID.add(0, userModel);
+
+                                // add to local database
+                                userViewModel.insertUser(userModel);
+
+                                handlerInternet.post(()-> adapter.notifyDataSetChanged());
+
+                            }
                         }
+                    } catch (Exception e){
+                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error here " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        System.out.println("what is error + CF L245 " + e.getMessage());
                     }
 
-                    if (!userAlreadyExists) {
-                        // If the user doesn't exist, add it to the list
-                        mUsersID.add(0, userModel);
-
-                        // add to local database
-                        userViewModel.insertUser(userModel);
-
-                        adapter.notifyDataSetChanged();
-                    }
-                }
+                }).start();
 
             }
 

@@ -1,6 +1,9 @@
 package com.pixel.chatapp.adapters;
 
+import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
+import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
+import static com.pixel.chatapp.home.MainActivity.myUserName;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 
 import android.annotation.SuppressLint;
@@ -34,6 +37,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
@@ -56,7 +60,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHolder>  {
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>  {
 
     private ChatViewHolder lastOpenViewHolder = null;
     private static List<UserOnChatUI_Model> otherUsersId;
@@ -90,15 +94,14 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
         this.listener = listener;
     }
 
-    private static AlertAdapter instance;
+    private static ChatListAdapter instance;
 
     // constructor
-    public AlertAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, String userName, Activity activity)
+    public ChatListAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, Activity activity)
     {
         this.otherUsersId = otherUsersId;
         this.mContext = mContext;
         this.activity = activity;
-        this.userName = userName;
 //        MainActivity.myHolder_ = new ArrayList<>();
 
         ContactAdapter.setmContext(mContext);
@@ -118,9 +121,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
         dateNum = new HashMap<>();
     }
 
-    public static AlertAdapter getInstance() {
+    public static ChatListAdapter getInstance() {
         if (instance == null) {
-            instance = new AlertAdapter(otherUsersId, mContext, userName, activity);
+            instance = new ChatListAdapter(otherUsersId, mContext, activity);
         }
         return instance;
     }
@@ -147,28 +150,34 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 //        holder.imageView
 
         int position_ = position;
-        String otherUid = otherUsersId.get(position_).getId();
+        String otherUid = otherUsersId.get(position_).getOtherUid();
         String emojiOnly = otherUsersId.get(position_).getEmojiOnly();
         String message = otherUsersId.get(position_).getMessage();
         String otherUserName = otherUsersId.get(position_).getOtherUserName();
+        String otherDisplayName = otherUsersId.get(position_).getOtherDisplayName();
+        String otherContactName = otherUsersId.get(position_).getOtherContactName();
         String imageLink = otherUsersId.get(position_).getImageUrl();
 
         int msgStatus = otherUsersId.get(position_).getMsgStatus();
+//        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/chatapp-9b7ce.appspot.com/o/images%2Fcd89b442-735a-4cae-8da0-2b7f36817e17.jpg?alt=media&token=21b05768-df6e-4be1-b9a2-12d5f944c641";
         long timeSent = otherUsersId.get(position_).getTimeSent();
 
-//        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/chatapp-9b7ce.appspot.com/o/images%2Fcd89b442-735a-4cae-8da0-2b7f36817e17.jpg?alt=media&token=21b05768-df6e-4be1-b9a2-12d5f944c641";
 
         // save user holders in List to MainActivity for forward chat
         if(!MainActivity.myHolder_.contains(holder)){
             MainActivity.myHolder_.add(holder);
         }
 
-        holder.textViewUser.setText(otherUserName);     //set users display name
+        // set display name
+        String getUserName__ = contactNameShareRef.getString(otherUid, otherDisplayName != null ? otherDisplayName : otherUserName);
 
-        if (imageLink == null) {
+        holder.textViewUser.setText(getUserName__);     //set user name
+
+        if (imageLink != null && !imageLink.isEmpty()) {
+            Picasso.get().load(imageLink).into(holder.imageView);
+        } else {
             holder.imageView.setImageResource(R.drawable.person_round);
         }
-        else Picasso.get().load(imageLink).into(holder.imageView);
 
         // set last message
         if(message != null){
@@ -191,65 +200,27 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
         }
         holder.imageViewDeliver.setImageResource(deliveryIcon);
 
+        //  ----------- call methods    ---------------------
 
-        // send all recyclerView to mainActivty just once and call the getMessage to load message to it
+        unreadMsgNumber(holder, otherUid);     // get number of unread message count
+
+        getTypingState(holder, otherUid);      // show when other user is typing
+
+        updateNameAndPhoto(holder, otherUid, position);
+
+        // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
-
             try{
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
                 listener.getMessage(userName, otherUid, mContext);
             } catch (Exception e){
-                System.out.println("Error (AlertAdapter L187)"+ e.getMessage());
+                System.out.println("what is Error (ChatListAdapter L220)"+ e.getMessage());
             }
 
 
             if(position_ == getItemCount() - 1){
                 MainActivity.loadMsg = false;    // stop the getVIew method from loading at every instance
                 listener.firstCallLoadPage(otherUid);   // call the method to load the all message
-
-                // add cardView after 3 sec to allow chats to load to List
-                new CountDownTimer(3000, 1000){
-                    @Override
-                    public void onTick(long l) {
-                    }
-
-                    @Override
-                    public void onFinish() {
-
-                        if(MessageAdapter.viewCacheReceive != null || MessageAdapter.viewCacheSend != null
-                                && MessageAdapter.viewCacheReceive.size() < 10 || MessageAdapter.viewCacheSend.size() < 10)
-//                        )
-                        {
-                            for (Map.Entry<String, MessageAdapter> entry : MainActivity.adapterMap.entrySet()) {
-                                String firstKey = entry.getKey();
-                                MainActivity.adapterMap.get(firstKey).addLayoutViewInBackground();
-                                // call runnable to add up view layer every sec
-                                MainActivity.loadViewRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        MainActivity.isLoadViewRunnableRunning = true;
-
-                                        if(MainActivity.adapterMap.get(firstKey) != null){
-//                                            MainActivity.adapterMap.get(firstKey).addLayoutViewEverySec();
-                                        }
-
-                                        MainActivity.handlerLoadViewLayout.postDelayed(this, 1000); // Re-schedule the runnable
-
-                                        if(MessageAdapter.viewCacheSend.size() > 50 && MessageAdapter.viewCacheReceive.size() > 50){
-                                            MainActivity.handlerLoadViewLayout.removeCallbacks(MainActivity.loadViewRunnable);
-                                            MainActivity.isLoadViewRunnableRunning = false;
-                                        }
-                                    }
-                                };
-
-                                break;
-                            }
-
-                        }
-
-                    }
-                }.start();
-
             }
 
         }
@@ -260,7 +231,17 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
         }
 
         // -------- open user chat box on MainActivity
-        holder.constraintLast.setOnClickListener(v -> {
+        holder.constraintLast.setOnClickListener(v ->
+        {
+            String otherDisplayName__ = otherUsersId.get(position_).getOtherDisplayName();
+            String otherUserName__ = otherUsersId.get(position_).getOtherUserName();
+            String imageLink__ = otherUsersId.get(position_).getImageUrl();
+
+            // get the contact name or displayed name of other user
+            String getUserName = contactNameShareRef.getString(otherUid, otherDisplayName__ != null ? otherDisplayName__ : otherUserName__);
+
+            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
 
             // make previous view clickable if any
             if(previousView != null && previousView != v) {
@@ -274,8 +255,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
                 if(viewClickList.contains(v)){
                     // open the user chats
                     try {
-
-                        listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
+                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                         listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -289,9 +269,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
                         MainActivity.readDatabase = 0;
                         listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                        listener.getMessage(userName, otherUid, mContext);
+                        listener.getMessage(myUserName, otherUid, mContext);
 
-                        listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
+                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                         listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -301,13 +281,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
-                        if (!MainActivity.isLoadViewRunnableRunning) {
-                            MainActivity.handlerLoadViewLayout.post(MainActivity.loadViewRunnable);
-                        }
-
                         MainActivity.offMainDatabase();
-                        Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur - WinnerChat Toast (AlertAdapter L222)" + e.getMessage());
+                        Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
+                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
                     }
 
                 } else {
@@ -331,7 +307,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
                                     try {
 
-                                        listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
+                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                                         listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -345,9 +321,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
                                         MainActivity.readDatabase = 0;
                                         listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                                        listener.getMessage(userName, otherUid, mContext);
+                                        listener.getMessage(myUsername_, otherUid, mContext);
 
-                                        listener.chatBodyVisibility(otherUserName, imageLink, userName, otherUid, mContext, holder.recyclerChat);
+                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                                         listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -357,13 +333,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
                                         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
-                                        if (!MainActivity.isLoadViewRunnableRunning) {
-                                            MainActivity.handlerLoadViewLayout.post(MainActivity.loadViewRunnable);
-                                        }
-
                                         MainActivity.offMainDatabase();
                                         Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                                        System.out.println("Error occur - WinnerChat Toast (AlertAdapter L222)" + e.getMessage());
+                                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
                                     }
 
                                 }
@@ -397,42 +369,9 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
         });
 
-        //  ----------- call methods    ---------------------
 
         // get lastMessage, and Date/Time sent, and set delivery msg to visibility
 //        getLastMsg_TimeSent_MsgDeliveryVisible(holder, otherUid);
-
-        unreadMsgNumber(holder, otherUid);     // get number of unread message count
-
-        getTypingState(holder, otherUid);      // show when other user is typing
-
-//  get all other-user name and photo  and onClick to chat room-----------------------
-        referenceUsers.keepSynced(true);
-        referenceUsers.child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                // Will later change it to Display Names
-                String otherName = snapshot.child("general").child("userName")
-                        .getValue().toString();
-
-                holder.textViewUser.setText(otherName);     //set users display name
-
-                // set users image
-                String imageUrl = snapshot.child(otherUid).child("image").getValue().toString();
-                if (imageUrl.equals("null")) {
-                    holder.imageView.setImageResource(R.drawable.person_round);
-                }
-                else Picasso.get().load(imageUrl).into(holder.imageView);
-
-                MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherName, imageUrl);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         //   get the number of new message I have to give my recycle position scrolling
         referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -453,7 +392,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
             }
         });
 
-        // view image
+        // view image   ===========   onClicks    ===========================
         holder.imageView.setOnClickListener(view -> {
             Intent i = new Intent(mContext, ZoomImage.class);
             i.putExtra("otherName", otherUserName);
@@ -554,7 +493,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
     public void updateDeliveryStatus(String otherUid){
         if(otherUsersId != null){
             for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getId().equals(otherUid)) {
+                if (otherUsersId.get(i).getOtherUid().equals(otherUid)) {
                     // Store the item in a temporary variable.
                     UserOnChatUI_Model getUser = otherUsersId.get(i);
                     // check the delivery status and update
@@ -576,7 +515,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
     public void updateDeliveryToRead(String otherUid){
         if(otherUsersId != null){
             for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getId().equals(otherUid)) {
+                if (otherUsersId.get(i).getOtherUid().equals(otherUid)) {
                     // Store the item in a temporary variable.
                     UserOnChatUI_Model getUser = otherUsersId.get(i);
                     // check the delivery status and update
@@ -601,7 +540,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
         if (otherUsersId != null) {
             for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getId().equals(userUid)) {
+                if (otherUsersId.get(i).getOtherUid().equals(userUid)) {
                     // Store the item in a temporary variable.
                     UserOnChatUI_Model getUser = otherUsersId.get(i);
                     String chat = modelChats.getMessage();
@@ -1000,6 +939,57 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
         });
     }
 
+    private void updateNameAndPhoto(ChatViewHolder holder, String otherUid, int position)
+    {
+        referenceUsers.keepSynced(true);
+        referenceUsers.child(otherUid).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                // Will later change it to Display Names
+                String otherUsername = snapshot.child("userName").getValue().toString();
+
+                String otherDisplayName = snapshot.child("displayName").exists()
+                        && !snapshot.child("displayName").getValue().toString().isEmpty()
+                        ? snapshot.child("displayName").getValue().toString() : null;
+
+                String otherContactName = contactNameShareRef.getString(otherUid, null);
+
+                if(otherContactName != null){
+                    holder.textViewUser.setText(otherContactName);     //set users contact name
+                } else if (otherDisplayName != null) {
+                    holder.textViewUser.setText(otherDisplayName);     //set users display name
+                } else {
+                    holder.textViewUser.setText(otherUsername);     //set users username name
+                }
+
+                // set users image
+                String imageUrl = snapshot.child("image").exists()
+                        && !snapshot.child("image").getValue().toString().equals("null")
+                        && !snapshot.child("image").getValue().toString().isEmpty()
+                        ? snapshot.child("image").getValue().toString() : null;
+
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Picasso.get().load(imageUrl).into(holder.imageView);
+
+                } else {
+                    holder.imageView.setImageResource(R.drawable.person_round);
+                }
+
+                otherUsersId.get(position).setOtherUserName(otherUsername);
+                otherUsersId.get(position).setOtherDisplayName(otherDisplayName);
+                otherUsersId.get(position).setImageUrl(imageUrl);
+
+                MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void offlineActivity(String otherUid){
         new Thread(() -> {
             // set user "typing" to be false when I disconnect
@@ -1073,17 +1063,12 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ChatViewHold
 
 //
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
-            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
-//            recyclerChat.setHasFixedSize(true);
+//            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
 
-//            recyclerChat = itemView.findViewById(R.id.recyclerChat);
-//
-//            // Set the layout manager with desired properties
-//            LinearLayoutManager layoutManager = new LinearLayoutManager(itemView.getContext());
-////            layoutManager.setReverseLayout(true); // Start from the bottom
-////            layoutManager.setStackFromEnd(true);   // Stack items from the bottom
-//
-//            recyclerChat.setLayoutManager(layoutManager);
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManagerWrapper(itemView.getContext(), LinearLayoutManager.VERTICAL, false);
+
+            recyclerChat.setLayoutManager(mLayoutManager);
+
         }
 //        public void setRecyclerView(RecyclerView recyclerView) {
 //            this.recyclerChat = recyclerView;

@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity(tableName = "chats", primaryKeys = {"idKey"})
-
 public class MessageModel implements Serializable {
 //public class MessageModel {
 
@@ -33,7 +32,7 @@ public class MessageModel implements Serializable {
 
     private String emoji;
 
-    private String id;      // link id between the user and chat
+    private String id;      // other user uid
 
     private String voiceNote;
     private String vnDuration;

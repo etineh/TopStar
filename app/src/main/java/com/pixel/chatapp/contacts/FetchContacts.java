@@ -1,6 +1,7 @@
 package com.pixel.chatapp.contacts;
 
 import static com.pixel.chatapp.home.MainActivity.contactList;
+import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.handlerInternet;
 import static com.pixel.chatapp.home.MainActivity.refUsers;
 
@@ -87,7 +88,7 @@ public class FetchContacts {
                     if (!contactMap.containsKey(sanitizedPhoneNumber)) {
                         // Create a new ContactModel and add it to the map
                         name = sanitizedPhoneNumber.equals(MainActivity.user.getPhoneNumber()) ? context.getString(R.string.you) : name;
-                        ContactModel contact = new ContactModel(null, null, name, null,
+                        ContactModel contact = new ContactModel(null, null, null, null, null,
                                 context.getString(R.string.invite_now), null, name, phoneNumber);
                         contactMap.put(sanitizedPhoneNumber, contact);
 
@@ -160,7 +161,7 @@ public class FetchContacts {
             @Override
             public void onFailure(Call<List<UserSearchM>> call, Throwable throwable) {
                 if (refreshContactListener != null) refreshContactListener.onFailure();
-                System.out.println("what is err MA: L2520 " + throwable.getMessage());
+                System.out.println("what is err MA: FetchContact L170 " + throwable.getMessage());
 
             }
         });
@@ -181,7 +182,7 @@ public class FetchContacts {
                 String displayName = snapshot.child("displayName").exists() ?
                         snapshot.child("displayName").getValue().toString() : null;
 
-                String userName = snapshot.child("userName").exists() ?
+                String otherUsername = snapshot.child("userName").exists() ?
                         snapshot.child("userName").getValue().toString() : null;
 
                 String hint = snapshot.child("hint").exists() && !snapshot.child("userName").getValue().toString().isEmpty()
@@ -189,23 +190,27 @@ public class FetchContacts {
 
 
                 contactModel.setBio(hint);
-                contactModel.setUserName(userName);
+                contactModel.setOtherUserName(otherUsername);
+                contactModel.setOtherDisplayName(displayName);
                 contactModel.setImage(imageLink);
                 contactModel.setOtherUid(contactUid);
 
                 contactList.add(0, contactModel);
 
+                // save contact name to each user uid
+                contactNameShareRef.edit().putString(contactUid, contactModel.getContactName()).apply();
+
                 // Increment the counter
                 int count = counter.incrementAndGet();
 
                 // Check if 20 iterations have been completed
-                if (count == contactSize) {
-                    // Save contacts to local file
-                    List<ContactModel> sortedSubList = contactList.subList(0, contactSize);
-
+                if (count == contactSize)
+                {
                     // Sort the sublist alphabetically
+                    List<ContactModel> sortedSubList = contactList.subList(0, contactSize);
                     Collections.sort(sortedSubList, (c1, c2) -> c1.getContactName().compareToIgnoreCase(c2.getContactName()));
 
+                    // Save contacts to local file
                     AllConstants.executors.execute(()-> saveContactToLocalFile(context));
                     counter.set(0);
                 }

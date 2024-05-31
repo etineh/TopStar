@@ -16,6 +16,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.constants.AllConstants;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.peer2peer.P2pSetupActivity;
 import com.pixel.chatapp.signup_login.EmailOrPhoneLoginActivity;
 
@@ -100,6 +102,7 @@ public class SettingsActivity extends AppCompatActivity {
             auth.signOut();
             startActivity(new Intent(this, EmailOrPhoneLoginActivity.class));
             finish();
+            MainActivity.myUserNamePreferences.edit().remove(AllConstants.USERNAME).apply();    // remove username
         });
         builder.setPositiveButton("Back", (dialogInterface, i) -> dialogInterface.cancel());
         builder.create().show();

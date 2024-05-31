@@ -3,24 +3,33 @@ package com.pixel.chatapp.model;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 
-@Entity(tableName = "usersOnChatUI", primaryKeys = {"id"})
+@Entity(tableName = "usersOnChatUI", primaryKeys = {"otherUid"})
 public class UserOnChatUI_Model {
 
     @NonNull
-    private String id;
+    private String otherUid; // other user uid
 
+    private String fromUid;
+    private String from;
     private String emojiOnly;
-    private String idKey;
+    private String idKey;   // chat id
     private String message;
+    private int type;
     private int msgStatus;
     private long timeSent;
     private String otherUserName;
+    private String otherDisplayName;
+    private String otherContactName;
     private String imageUrl;
-    public UserOnChatUI_Model(String id, String emojiOnly,String message, long timeSent,
-                              int msgStatus, String idKey) {
-        this.id = id;
+
+    public UserOnChatUI_Model(String otherUid, String fromUid, String from, String emojiOnly, String message, int type,
+                              long timeSent, int msgStatus, String idKey) {
+        this.otherUid = otherUid;
+        this.fromUid = fromUid;
+        this.from = from;
         this.emojiOnly = emojiOnly;
         this.message = message;
+        this.type = type;
         this.msgStatus = msgStatus;
         this.timeSent = timeSent;
         this.idKey = idKey;
@@ -29,12 +38,34 @@ public class UserOnChatUI_Model {
     public UserOnChatUI_Model() {
     }
 
-    public String getId() {
-        return id;
+    @NonNull
+    public String getOtherUid() {
+        return otherUid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setOtherUid(@NonNull String otherUid) {
+        this.otherUid = otherUid;
+    }
+
+    @NonNull
+    public String getFromUid() {
+        return fromUid;
+    }
+
+    public void setFromUid(@NonNull String fromUid) {
+        this.fromUid = fromUid;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getEmojiOnly() {
@@ -51,6 +82,10 @@ public class UserOnChatUI_Model {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getType() {
+        return type;
     }
 
     public long getTimeSent() {
@@ -75,6 +110,22 @@ public class UserOnChatUI_Model {
 
     public void setOtherUserName(String otherUserName) {
         this.otherUserName = otherUserName;
+    }
+
+    public String getOtherDisplayName() {
+        return otherDisplayName;
+    }
+
+    public void setOtherDisplayName(String otherDisplayName) {
+        this.otherDisplayName = otherDisplayName;
+    }
+
+    public String getOtherContactName() {
+        return otherContactName;
+    }
+
+    public void setOtherContactName(String otherContactName) {
+        this.otherContactName = otherContactName;
     }
 
     public String getImageUrl() {

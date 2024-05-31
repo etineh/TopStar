@@ -97,7 +97,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreateLeagueActivity;
 import com.pixel.chatapp.activities.CreatePinActivity;
 import com.pixel.chatapp.activities.LiveGameActivity;
-import com.pixel.chatapp.adapters.AlertAdapter;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.all_utils.CacheUtils;
 import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
@@ -129,7 +129,6 @@ import com.pixel.chatapp.model.CallModel;
 import com.pixel.chatapp.model.EditMessageModel;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
-import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 import com.pixel.chatapp.roomDatabase.viewModels.UserChatViewModel;
 import com.pixel.chatapp.side_bar_menu.dashboard.DashboardActivity;
 import com.pixel.chatapp.side_bar_menu.premium.PremiumActivity;
@@ -143,8 +142,6 @@ import com.pixel.chatapp.signup_login.SetUpProfileActivity;
 import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
 
-//import org.apache.poi.xwpf.usermodel.XWPFDocument;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -153,7 +150,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-//import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -194,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
             offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef, myProfileShareRef,
-            resetLoginSharePref;
+            resetLoginSharePref, contactNameShareRef;
     public static String getMyUserName;
     public static Boolean nightMood;
 
@@ -239,8 +235,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static CircleImageView circleForwardSend;
     private static ProgressBar progressBarForward;
     public static boolean onForward;
-    public static List<AlertAdapter.ChatViewHolder> myHolder_;
-    public static List<AlertAdapter.ChatViewHolder> myHolderNew;
+    public static List<ChatListAdapter.ChatViewHolder> myHolder_;
+    public static List<ChatListAdapter.ChatViewHolder> myHolderNew;
     public static List <String> forwardChatUserId;
     public static List <String> selectedUserNames;
 
@@ -262,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static CardView cardViewMsg, cardViewReplyOrEdit;
     public static ImageView scrollPositionIV, sendIndicator;
     public static TextView scrollCountTV, receiveIndicator;
+    private static ProgressBar progressBarLoadChats;
 
     //  -------------   network settings    -----------
     public static ConstraintLayout constrNetConnect;
@@ -328,8 +325,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static boolean onShare;
     
     //  checks declares
-    public static int downMsgCount, readDatabase, scNum = 0;// 0 is read, 1 is no_read
-    public static boolean loadMsg = true, isKeyboardVisible = false, isSendingFile = false, isSendingVoiceNote = false;
+    public static int downMsgCount, readDatabase;// 0 is read, 1 is no_read
+    public static boolean loadMsg, isKeyboardVisible = false, isSendingFile = false, isSendingVoiceNote = false;
     private Boolean clearOnlyChatHistory = false, isEmojiVisible = false, clearHighLight = false,
             fiveSecondsWait = false;
 
@@ -343,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static Map<String, RecyclerView> recyclerMap;
     private static List<String> otherNameList, otherUidList;
     public static Map<String, Object> downMsgCountMap, scrollNumMap;
-    private Map<String, Object>  notifyCountMap;
+    private static Map<String, Boolean>  userRecyclerActiveMap;
     private static Map<String, Boolean> insideChatMap;
 
     public static ConstraintLayout recyclerContainer;
@@ -355,14 +352,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ------- emoji declares
     private EmojiPopup popup;
     private Handler handlerEmoji = new Handler();
-    public static boolean isLoadViewRunnableRunning = false;
-
-    public static Handler handlerLoadViewLayout = new Handler();
 
     private int clearNumb = 0;
     private String chatID;
     private Runnable emojiRunnable;
-    public static Runnable loadViewRunnable;
 
     private boolean isChatKeyboardON;
     private static ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
@@ -517,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         ImageView homePage = findViewById(R.id.homePage_IV);
         ImageView liveWatch_IV = findViewById(R.id.liveWatch_IV);
         ImageView games_IV = findViewById(R.id.games_IV);
-
+        progressBarLoadChats = findViewById(R.id.progressBarLoadChats);
 
         // home more option
         moreOptionHomeLayout = findViewById(R.id.moreHomeContainer);
@@ -720,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         pinPublicChatMap = new HashMap<>();
         deleteMap = new HashMap<>();
         editMessageMap = new HashMap<>();
-        notifyCountMap = new HashMap<>();
+        userRecyclerActiveMap = new HashMap<>();
         scrollNumMap = new HashMap<>();
         modelListMap = new HashMap<>();
         downMsgCountMap = new HashMap<>();
@@ -745,6 +738,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         forwardChatUserId = new ArrayList<>();
         selectedUserNames = new ArrayList<>();
         selectCount = 0;
+        loadMsg = true;
 
         getOnBackPressedDispatcher().addCallback(this, callback);
 
@@ -812,21 +806,24 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // store and retrieve my username for ChatList usage
             myUserNamePreferences = this.getSharedPreferences(AllConstants.MYUSERNAME, Context.MODE_PRIVATE);
             getMyUserName = myUserNamePreferences.getString(AllConstants.USERNAME, null);
-            if(getMyUserName == null){
-                refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+            refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        String fetchUserName = snapshot.child("userName").getValue().toString();
+                    String fetchUserName = snapshot.child("userName").getValue().toString();
+
+                    if(getMyUserName == null || (getMyUserName != null && !fetchUserName.equals(getMyUserName)) ){
                         myUserNamePreferences.edit().putString(AllConstants.USERNAME, fetchUserName).apply();
                     }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                }
 
-                    }
-                });
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
 
             // store failed chat in local sharePreference
             offlineChat = this.getSharedPreferences(AllConstants.OFFLINECHAT, Context.MODE_PRIVATE);
@@ -834,6 +831,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             documentIdShareRef = getSharedPreferences(AllConstants.PHOTO_OTHERUID, Context.MODE_PRIVATE);
             voiceNoteIdShareRef = getSharedPreferences(AllConstants.VOICENOTE_UID, Context.MODE_PRIVATE);
             if(user != null) myProfileShareRef = getSharedPreferences(user.getUid(), Context.MODE_PRIVATE);
+            contactNameShareRef = getSharedPreferences(AllConstants.CONTACTNAME, Context.MODE_PRIVATE);
 
             // Register the NetworkChangeReceiver to receive network connectivity changes
             networkChangeReceiver = new NetworkChangeReceiver(this);
@@ -2176,8 +2174,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // delete only chats
                     refLastDetails.child(myId).child(otherUid_Del)
                             .child("message").setValue("...");
-                    adapterMap.get(otherUid_Del).notifyDataSetChanged();
-                    Toast.makeText(this, "Chats cleared for me!", Toast.LENGTH_SHORT).show();
+                    if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).notifyDataSetChanged();
+                    Toast.makeText(this, getString(R.string.chatClearForMe), Toast.LENGTH_SHORT).show();
                 }
 
                 refPublicPinChat.child(myId).child(otherUid_Del).removeValue();
@@ -2188,7 +2186,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 // clear chats from ROOM
                 chatViewModel.deleteChatByUserId(otherUid_Del);
                 // delete from adapter chat list
-                adapterMap.get(otherUid_Del).clearChats();
+                try{
+                    if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats();
+                } catch (Exception e){
+                    System.out.println("what is error Main L2195: " + e.getMessage());
+                }
+
                 cancelUserDeleteOption();
                 clearOnlyChatHistory = false;
 
@@ -2215,8 +2218,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     refLastDetails.child(otherUid_Del).child(myId)
                             .child("message").setValue("...");
 
-                    adapterMap.get(otherUid_Del).notifyDataSetChanged();
-                    Toast.makeText(this, "Chats cleared for everyone!", Toast.LENGTH_SHORT).show();
+                    if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).notifyDataSetChanged();
+                    Toast.makeText(this, getString(R.string.chatClearForEveryone), Toast.LENGTH_SHORT).show();
                 }
 
                 // delete pin message from database
@@ -2235,7 +2238,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 // clear chats from ROOM
                 chatViewModel.deleteChatByUserId(otherUid_Del);
 
-                adapterMap.get(otherUid_Del).clearChats(); // delete chats
+                if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats(); // delete chats
                 cancelUserDeleteOption();
                 clearOnlyChatHistory = false;
             });
@@ -2401,248 +2404,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     //  --------------- methods && interface --------------------
 
-//    public static void readContacts(Context context) {
-//
-//        PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
-//        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-//        String countryCode = telephonyManager.getNetworkCountryIso().toUpperCase();
-//
-//        // Use a Map to store unique contacts (key: phone number, value: ContactModel)
-//        Map<String, ContactModel> contactMap = new HashMap<>();
-//
-//        // Query contacts
-//        Cursor cursor = context.getContentResolver().query(
-//                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-//                null,
-//                null,
-//                null,
-//                null
-//        );
-//
-//        if (cursor.moveToFirst()) {
-//            int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-//            int phoneNumberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-//
-//            do {
-//                // Check if the column indices are valid
-//                if (nameIndex != -1 && phoneNumberIndex != -1) {
-//
-//                    String name = cursor.getString(nameIndex);
-//                    String phoneNumber = cursor.getString(phoneNumberIndex).replaceAll("\\s+", "");
-//                    if(phoneNumber.startsWith("0")){
-//                        // remove the 0 and add the country code
-//                        phoneNumber = CountryNumCodeUtils.getCountryDialingCode(countryCode, phoneNumberUtil) + phoneNumber.substring(1);
-//                    }
-//
-//                    String sanitizedPhoneNumber = "+" + phoneNumber.replaceAll("[^\\d]", ""); // Remove non-numeric characters
-//
-//                    // Check if the phone number already exists in the map
-//                    if (!contactMap.containsKey(sanitizedPhoneNumber)) {
-//                        // Create a new ContactModel and add it to the map
-//                        name = sanitizedPhoneNumber.equals(user.getPhoneNumber()) ? context.getString(R.string.you) : name;
-//                        ContactModel contact = new ContactModel(null, null, name, null,
-//                                context.getString(R.string.invite_now), null, name, phoneNumber);
-//                        contactMap.put(sanitizedPhoneNumber, contact);
-//
-//                    }
-//
-//                } else {
-//                    // Handle the case when the column indices are not found
-//                    Toast.makeText(context, context.getString(R.string.contactNotFound), Toast.LENGTH_SHORT).show();
-//                }
-//            } while (cursor.moveToNext());
-//
-//            cursor.close(); // Close the cursor when done
-//
-//            // Convert the Map values to a List
-//            contactList = new ArrayList<>(contactMap.values());     // number and names
-//
-//            // Sort the list of ContactModel objects alphabetically by name
-//            Collections.sort(contactList, (contact1, contact2) -> contact1.getContactName().compareToIgnoreCase(contact2.getContactName()));
-//
-//            List<String> numberList = new ArrayList<>(contactMap.keySet());  // only the numbers
-//
-//            readContactFromAPI(numberList, context);
-//
-//        } else {
-//            // Handle the case when the cursor is empty
-//            handlerInternet.post(()->{
-//                Toast.makeText(context, context.getString(R.string.contactNotFound), Toast.LENGTH_SHORT).show();
-//            });
-//
-//        }
-//
-//    }
-//
-//    private static void readContactFromAPI(List<String> numberList, Context context)
-//    {
-//        ContactApiDao contactApiDao = AllConstants.retrofit.create(ContactApiDao.class);
-//
-//        contactApiDao.contacts(numberList).enqueue(new Callback<List<UserSearchM>>() {
-//            @Override
-//            public void onResponse(Call<List<UserSearchM>> call, Response<List<UserSearchM>> response) {
-//
-//                if(response.isSuccessful()){
-//                    List<UserSearchM> number = response.body();
-//
-//                    for (int i = 0; i < number.size(); i++)
-//                    {
-//                        UserSearchM userSearchM = number.get(i);
-////                        numberList.remove(userSearchM.getNumber());
-//
-//                        for (int j = 0; j < contactList.size(); j++)
-//                        {
-//                            ContactModel contactModel = contactList.get(j);
-//
-//                            if(contactModel.getNumber().equals(userSearchM.getNumber()))
-//                            {
-//                                contactList.remove(j);
-//
-//                                getContactDetailsFromDB(userSearchM.getUid(), contactModel, number.size(), context);
-//
-//                            }
-//
-//                        }
-//
-//                    }
-//
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<UserSearchM>> call, Throwable throwable) {
-//                if (refreshContactListener != null) refreshContactListener.onFailure();
-//                System.out.println("what is err MA: L2520 " + throwable.getMessage());
-//
-//            }
-//        });
-//    }
-//
-//    private static AtomicInteger counter = new AtomicInteger(0);
-//
-//    private static void getContactDetailsFromDB(String contactUid, ContactModel contactModel, int contactSize, Context context)
-//    {
-//        refUsers.child(contactUid).child("general").addListenerForSingleValueEvent(new ValueEventListener()
-//        {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                String imageLink = snapshot.child("image").exists() && !snapshot.child("image").getValue().toString().equals("null")
-//                        ? snapshot.child("image").getValue().toString() : null;
-//
-//                String displayName = snapshot.child("displayName").exists() ?
-//                        snapshot.child("displayName").getValue().toString() : null;
-//
-//                String userName = snapshot.child("userName").exists() ?
-//                        snapshot.child("userName").getValue().toString() : null;
-//
-//                String hint = snapshot.child("hint").exists() && !snapshot.child("userName").getValue().toString().isEmpty()
-//                        ? snapshot.child("hint").getValue().toString() : context.getString(R.string.hint2);
-//
-//
-//                contactModel.setBio(hint);
-//                contactModel.setUserName(userName);
-//                contactModel.setImage(imageLink);
-//                contactModel.setOtherUid(contactUid);
-//
-//                contactList.add(0, contactModel);
-//
-//                // Increment the counter
-//                int count = counter.incrementAndGet();
-//
-//                // Check if 20 iterations have been completed
-//                if (count == contactSize) {
-//                    // Save contacts to local file
-//                    List<ContactModel> sortedSubList = contactList.subList(0, contactSize);
-//
-//                    // Sort the sublist alphabetically
-//                    Collections.sort(sortedSubList, (c1, c2) -> c1.getContactName().compareToIgnoreCase(c2.getContactName()));
-//
-//                    AllConstants.executors.execute(()-> saveContactToLocalFile(context));
-//                    counter.set(0);
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                if (refreshContactListener != null) refreshContactListener.onFailure();
-//            }
-//        });
-//    }
-//
-//    private static void saveContactToLocalFile(Context context)
-//    {
-//        Gson gson = new Gson();
-//        String json = gson.toJson(contactList);
-//
-//        contactListFile = contactList;
-//
-//        FileOutputStream fos = null;
-//        try {
-//            fos = context.openFileOutput("contacts.json", Context.MODE_PRIVATE);
-//            fos.write(json.getBytes());
-//
-//            if (refreshContactListener != null) refreshContactListener.onSuccess();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (fos != null) {
-//                try {
-//                    fos.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-//
-//    public static RefreshContactListener refreshContactListener;
-//
-//    public interface RefreshContactListener {
-//        void onSuccess();
-//        void onFailure();
-//    }
-//
-//    public static void readContactFromFile(Context context)
-//    {
-//        FileInputStream fis = null;
-//        try {
-//            fis = context.openFileInput("contacts.json");
-//            InputStreamReader inputStreamReader = new InputStreamReader(fis);
-//            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//            StringBuilder stringBuilder = new StringBuilder();
-//            String line;
-//            while ((line = bufferedReader.readLine()) != null) {
-//                stringBuilder.append(line);
-//            }
-//            String json = stringBuilder.toString();
-//            Gson gson = new Gson();
-//            Type listType = new TypeToken<List<ContactModel>>(){}.getType();
-//
-//            contactListFile = gson.fromJson(json, listType);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (fis != null) {
-//                try {
-//                    fis.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//    }
 
     @Override
     public void callAllMethods(String otherUid, Context context, Activity activity) {
-        getMyUserTyping();
+//        getMyUserTyping();
         tellUserAmTyping_AddUser();
-        getPreviousCounts();
+//        getPreviousCounts();
 
         getChatReadRequest(otherUid);
 
@@ -2673,137 +2440,149 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     @Override
-    public void chatBodyVisibility(String otherName, String imageUrl, String userName, String uID, Context mContext_,
-                                  RecyclerView recyclerChat) {
-
+    public void chatBodyVisibility(String otherName, String imageUrl, String myUsername, String uID, Context mContext_,
+                                  RecyclerView recyclerChat)
+    {
         editTextMessage.setFocusableInTouchMode(true);
         editTextMessage.requestFocus();
+// chichi - ucdySn50eeRx1iquBilJtYL86e92
+        // bella    -   Qfkxb3jrJEUM6rS8el2VUBQc6WA3
+//        boss GT   -   AZkfy6uZunMfMUxR7HIol4rPZBq2
+//        recyclerViewChatVisibility("ucdySn50eeRx1iquBilJtYL86e92");    // make only the active recyclerView to be visible
+//        recyclerViewChatVisibility("Qfkxb3jrJEUM6rS8el2VUBQc6WA3");    // make only the active recyclerView to be visible
 
-        // make only the active recyclerView to be visible
-        recyclerViewChatVisibility(uID);
+        recyclerViewChatVisibility(uID);    // make only the active recyclerView to be visible
 
-//        handlerLoadViewLayout.removeCallbacks(loadViewRunnable);
+        constraintMsgBody.setVisibility(View.VISIBLE);  // make chat box visible
+        firstTopUserDetailsContainer.setVisibility(View.VISIBLE);
 
-        if(adapterMap.get(uID) != null){  // reload message if empty later
-            // check recycler position before scrolling
-            int scrollNumCheck = scrollNumMap.get(uID) == null ? adapterMap.get(uID).getItemCount() - 1
-                    : (int) scrollNumMap.get(uID) ;
-            int scrollCheck = adapterMap.get(uID).getItemCount() - scrollNumCheck;
+        progressBarLoadChats.setVisibility(View.VISIBLE);   // make progressBar visible at first
 
-            if(scrollCheck < 5){   // scroll to last postion
-                recyclerMap.get(uID).scrollToPosition(adapterMap.get(uID).getItemCount() - 1);
-            } else {
-                scrollToPreviousPosition(uID, scrollNumCheck);
-            }
+        new Handler().postDelayed(()->
+        {
+            if(userRecyclerActiveMap.get(uID) == null) {
 
-            System.out.println("Total adapter (M1070) " + adapterMap.get(uID).getItemCount());
-        }
+                recyclerMap.get(uID).setAdapter(adapterMap.get(uID));   // set the adapter to the recyclerView
 
-        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(uID).getLayoutManager();
-        assert layoutManager != null;
-        downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
-        String numb = ""+ downMsgCount;
-        scrollCountTV.setText(numb);           // set down msg count
-        downMsgCountMap.put(uID, downMsgCount);     // set it for "sending message method"
+                new Handler().postDelayed(()-> progressBarLoadChats.setVisibility(View.GONE), 100);
 
-        // Get the position of the item for sendMessage() and retrieveMessage()
-        scrollNum = layoutManager.findLastVisibleItemPosition();
-        scrollNumMap.put(uID, scrollNum);
-
-        //  check count and display/hide the scroll arrow
-        if(downMsgCount > 2){
-            scrollCountTV.setVisibility(View.VISIBLE);
-            scrollPositionIV.setVisibility(View.VISIBLE);
-        } else {
-            scrollCountTV.setVisibility(View.GONE);
-            scrollPositionIV.setVisibility(View.GONE);
-            receiveIndicator.setVisibility(View.GONE);
-            sendIndicator.setVisibility(View.GONE);
-        }
-
-
-scNum = 20;
-//         Add an OnScrollListener to the RecyclerView
-        recyclerMap.get(uID).addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                // keep saving the recycler position while scrolling
-                scrollNum = layoutManager.findLastVisibleItemPosition();
-                scrollNumMap.put(uID, scrollNum);
-
-
-//                if(scNum > 1){
-//                    scNum-=1;
-//                    MessageModel model = modelListMap.get(otherName).get(scNum);
-//                    adapterMap.get(otherName).addNewMessageDB(model);
-//                    adapterMap.get(otherName).notifyItemInserted(scNum);
-//                    System.out.println("what is getNumber " + scNum);
+//                if(userRecyclerActiveMap.get("ucdySn50eeRx1iquBilJtYL86e92") == null){
+//
+//                    new Handler().postDelayed(()->{
+//
+//                        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").setAdapter(adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92"));   // set the adapter to the recyclerView
+////                    recyclerMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3").setAdapter(adapterMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3"));   // set the adapter to the recyclerView
+////                    userRecyclerActiveMap.put("Qfkxb3jrJEUM6rS8el2VUBQc6WA3", true);
+//                        userRecyclerActiveMap.put("ucdySn50eeRx1iquBilJtYL86e92", true);
+//
+//                        int position = lastPositionPreference.getInt("ucdySn50eeRx1iquBilJtYL86e92", adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92").getItemCount() - 1);
+//                        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").scrollToPosition(position-6 + 1);
+//
+//                    },5000);
 //                }
 
-                // keep updating the number of down messages
-                downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
-                scrollCountTV.setText(""+downMsgCount);
+            } else
+                progressBarLoadChats.setVisibility(View.GONE);
 
-                //  store the downMsgCount in a map for each user, to enable me
-                //  add to the number on sendMessage() when I send new message
-                downMsgCountMap.put(uID, downMsgCount);
+            if(adapterMap.get(uID) != null){  // reload message if empty later
+                // check recycler position before scrolling
+                int position = lastPositionPreference.getInt(uID, adapterMap.get(uID).getItemCount() - 1);
+                int scrollCheck = adapterMap.get(uID).getItemCount() - position;
 
-                //  check count and display/hide the scroll arrow
-                if(downMsgCount > 2){
-                    scrollCountTV.setVisibility(View.VISIBLE);
-                    scrollPositionIV.setVisibility(View.VISIBLE);
+                if(scrollCheck < 5){   // scroll to last position
+                    recyclerMap.get(uID).scrollToPosition(adapterMap.get(uID).getItemCount() - 1);
+//                    System.out.println("scroll done: " + scrollCheck + " adap count " + adapterMap.get(uID).getItemCount());
+
                 } else {
-                    scrollCountTV.setVisibility(View.GONE);
-                    scrollPositionIV.setVisibility(View.GONE);
-                    receiveIndicator.setVisibility(View.GONE);
-                    sendIndicator.setVisibility(View.GONE);
+//                    System.out.println("scroll from: " + position + " adap count " + adapterMap.get(uID).getItemCount());
+                    if(userRecyclerActiveMap.get(uID) == null) {
+                        recyclerMap.get(uID).scrollToPosition(position-6 + 1);
+                    }
                 }
+                scrollNum = position;
+                scrollNumMap.put(uID, position);
 
+                System.out.println("Total adapter (M1070) " + adapterMap.get(uID).getItemCount());
             }
-        });
+
+            userRecyclerActiveMap.put(uID, true);
 
 
-        // make chat box visible
-        constraintMsgBody.setVisibility(View.VISIBLE);
-        firstTopUserDetailsContainer.setVisibility(View.VISIBLE);
+            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(uID).getLayoutManager();
+            assert layoutManager != null;
+            downMsgCount = (layoutManager.getItemCount() - 1) - layoutManager.findLastVisibleItemPosition();
+            String numb = ""+ downMsgCount;
+            scrollCountTV.setText(numb);           // set down msg count
+            downMsgCountMap.put(uID, downMsgCount);     // set it for "sending message method"
+
+            //  check count and display/hide the scroll arrow
+            if(downMsgCount > 2){
+                scrollCountTV.setVisibility(View.VISIBLE);
+                scrollPositionIV.setVisibility(View.VISIBLE);
+            } else {
+                scrollCountTV.setVisibility(View.GONE);
+                scrollPositionIV.setVisibility(View.GONE);
+                receiveIndicator.setVisibility(View.GONE);
+                sendIndicator.setVisibility(View.GONE);
+            }
+
+
+
+            //        Add an OnScrollListener to the RecyclerView
+            recyclerMap.get(uID).addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    // keep saving the recycler position while scrolling
+                    scrollNum = layoutManager.findLastVisibleItemPosition();
+                    scrollNumMap.put(uID, scrollNum);
+                    System.out.println("scroll foo: " + scrollNum);
+                    System.out.println("scroll 22foo: " + layoutManager.findLastVisibleItemPosition());
+
+                    // keep updating the number of down messages
+                    downMsgCount = (layoutManager.getItemCount() - 1) - scrollNum;
+                    scrollCountTV.setText(""+downMsgCount);
+
+                    //  store the downMsgCount in a map for each user, to enable me add to the number on sendMessage() when I send new message
+                    downMsgCountMap.put(uID, downMsgCount);
+
+                    //  check count and display/hide the scroll arrow
+                    if(downMsgCount > 2){
+                        scrollCountTV.setVisibility(View.VISIBLE);
+                        scrollPositionIV.setVisibility(View.VISIBLE);
+                    } else {
+                        scrollCountTV.setVisibility(View.GONE);
+                        scrollPositionIV.setVisibility(View.GONE);
+                        receiveIndicator.setVisibility(View.GONE);
+                        sendIndicator.setVisibility(View.GONE);
+                    }
+
+                }
+            });
+
+
+            if(recyclerMap.get(uID) != null){
+                // Attach the ItemTouchHelper to your RecyclerView
+                itemTouchSwipe.attachToRecyclerView(recyclerMap.get(uID));
+            }
+
+        }, 100);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
 
         //  get user image
         if (imageUrl == null || imageUrl.equals("null")) {
-            circleImageLogo.setImageResource(R.drawable.person_round);
+            circleImageLogo.setImageResource(R.drawable.person_round_white);
         }
         else Picasso.get().load(imageUrl).into(circleImageLogo);
 
         otherUserName = otherName;
-        myUserName = userName;
+        myUserName = myUsername;
         imageUri = imageUrl;
         otherUserUid = uID;
 
-        if(recyclerMap.get(uID) != null){
-            // Attach the ItemTouchHelper to your RecyclerView
-            itemTouchSwipe.attachToRecyclerView(recyclerMap.get(uID));
-        }
     }
-
-//    private boolean isLastPage() {
-//        // Determine if you have loaded all messages based on your data source
-//        return adapterMap.get(otherUserName).getItemCount() >= modelListMap.get(otherUserName).size();
-//    }
-//
-//    private void onLoadMore(String otherName) {
-//        // Load older messages from your data source
-//        if(scNum > 1){
-//            scNum-=1;
-//            MessageModel model = modelListMap.get(otherName).get(scNum);
-//            adapterMap.get(otherName).addNewMessageDB(model);
-//            adapterMap.get(otherName).notifyItemInserted(scNum);
-//            System.out.println("what is getNumber " + scNum);
-//        }
-//
-//    }
 
 
     @Override       // run only once    -- also store otherName and otherUid on List
@@ -2821,10 +2600,7 @@ scNum = 20;
 
                 recyclerViewChatVisibility(otherUid);  // set to INVISIBLE since it's "GONE" on XML
             }
-//            Toast.makeText(this, "Recycler is not null", Toast.LENGTH_SHORT).show();
 
-        } else {
-//            Toast.makeText(this, "Recycler is null", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -2840,12 +2616,12 @@ scNum = 20;
     }
 
     @Override       // run only once
-    public void getMessage(String userName, String otherUID, Context mContext_){
+    public void getMessage(String myUsername, String otherUID, Context mContext_){
 
         constrNetConnect.setVisibility(View.VISIBLE);
 
         // store myUserName for looping through load message status and change to delivery status
-        myUserName = userName;
+        myUserName = myUsername;
 
         // only alert me if I am not on another call    -- work on this later
         incomingCallObserver(otherUID);
@@ -2854,10 +2630,10 @@ scNum = 20;
         new Handler().postDelayed(()-> {
 
             try {
-                retrieveMessages(userName, otherUID, mContext_);
+                retrieveMessages(myUsername, otherUID, mContext_);
             } catch (Exception e){
                 Toast.makeText(this, "error occur retriever M2410", Toast.LENGTH_SHORT).show();
-                System.out.println("what is error M2390: " + e.getMessage());
+                System.out.println("Error MainActivity L2690: " + e.getMessage());
             }
 
             // get pinMessage once
@@ -3004,7 +2780,7 @@ scNum = 20;
         myHolderNew.addAll(myHolder_);  // add all users holder that was gotten from chatListAdapter
 
         // call forward setting method to add onForward checkBox container
-        AlertAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
 
         if(sharingPhotoActivated){
             circleForwardSend.setImageResource(R.drawable.baseline_arrow_forward_24);
@@ -3317,13 +3093,14 @@ scNum = 20;
         return forwardMessageMap;
     }
 
-    public static Map<String, Object> setMessageMap(
+    private static Map<String, Object> setMessageMap(
             String text, String emojiOnly, int type, String chatKey,
             int msgStatus, String vnPath, String vnDuration /*String photoPath*/)
     {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         Map<String, Object> messageMap = new HashMap<>();
+        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
 
         messageMap.put("from", myUserName);
         messageMap.put("fromUid", myId);
@@ -3344,6 +3121,26 @@ scNum = 20;
 //        messageMap.put("photoUriPath", photoPath);
 
         return messageMap;
+    }
+
+    private static Map<String, Object> setOutsideChatMap(String text, String emojiOnly, int type,
+                                                        String chatKey, int msgStatus)
+    {
+        // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
+
+        Map<String, Object> lastestChatMap = new HashMap<>();
+        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+
+        lastestChatMap.put("fromUid", myId);
+        lastestChatMap.put("from", myUserName);
+        lastestChatMap.put("emojiOnly", emojiOnly);
+        lastestChatMap.put("message", text);
+        lastestChatMap.put("type", type);
+        lastestChatMap.put("msgStatus", msgStatus);
+        lastestChatMap.put( "timeSent", ServerValue.TIMESTAMP);
+        lastestChatMap.put("idKey", chatKey);
+
+        return lastestChatMap;
     }
 
     public void sendMessage(String text, String emojiOnly, int type, String vnPath_, String durationOrSizeVN, String otherId)
@@ -3406,7 +3203,7 @@ scNum = 20;
             }
 
             // find position and move it to top as recent chat... also update the outside chat details
-            AlertAdapter.getInstance().findUserPositionByUID(otherId, messageModel, chatKey);
+            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, chatKey);
 
             // remove the typingRunnable for checking network
             handlerTyping.removeCallbacks(runnableTyping);
@@ -3450,11 +3247,10 @@ scNum = 20;
 
         // save last msg for outside chat display
         refLastDetails.child(myId).child(otherUid).setValue(
-                setMessageMap(text, emojiOnly, type, chatKey,
-                        chatDeliveryStatus, vnPath_, durationOrSizeVN)
+                setOutsideChatMap(text, emojiOnly, type, chatKey, chatDeliveryStatus)
         );
         refLastDetails.child(otherUid).child(myId).setValue(
-                setMessageMap(text, emojiOnly, type, chatKey, 0, vnPath_, durationOrSizeVN)
+                setOutsideChatMap(text, emojiOnly, type, chatKey, chatDeliveryStatus)
         );
 
         //  send chatKey to other User to read  -- customise later to check user OnRead settings
@@ -3554,13 +3350,23 @@ scNum = 20;
                 if(forwardPhotoPath == null && vnPathFile == null && forwardType == 0){
                     refMsgFast.child(otherUid).child(myId).child(chatId).setValue( forwardChatsMap(chatModel, chatId) );
                     // save last msg for outside chat display
-                    refLastDetails.child(myId).child(otherUid).setValue( forwardChatsMap(chatModel, chatId) );
-                    refLastDetails.child(otherUid).child(myId).setValue( forwardChatsMap(chatModel, chatId) );
+                    refLastDetails.child(myId).child(otherUid).setValue(
+                            setOutsideChatMap(chatModel.getMessage(), chatModel.getEmojiOnly(),
+                                    chatModel.getType(), chatId, 700024)
+                    );
+                    refLastDetails.child(otherUid).child(myId).setValue(
+                            setOutsideChatMap(chatModel.getMessage(), chatModel.getEmojiOnly(),
+                                    chatModel.getType(), chatId, 700024)
+                    );
+
                     checkAndSaveCounts_SendMsg(otherUid);
                 }
 
                 // find position and move it to top as recent chat... also update the outside chat and ROOM DB
-                AlertAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
+                ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
+
+                //  send chatKey to other User to read  -- customise later to check user OnRead settings
+                refOnReadRequest.child(otherUid).child(myId).push().setValue(chatId);
 
                 // cancel when all is done
                 if(i == userSize-1 && j == chatSize-1 ){
@@ -3847,26 +3653,23 @@ scNum = 20;
         thread.start();
     }
 
-    public void retrieveMessages(String userName, String otherUID, Context mContext){
+    public void retrieveMessages(String myUsername, String otherUID, Context mContext){
 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // send empty List to the adapter
 
         // initialise adapter
-        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, userName, otherUID, mContext,
+        MessageAdapter adapter = new MessageAdapter(modelListAllMsg, myUsername, otherUID, mContext,
                 recyclerMap.get(otherUID));
 
-        // retrieve the last previous scroll position
-        getLastScrollPosition(otherUID);
+//        getLastScrollPosition(otherUID);    // retrieve the last previous scroll position
 
         AllConstants.executors.execute(() -> {
 
             if(chatViewModel != null){
                 // fetch chats from ROOM
-                if(chatViewModel.getEachUserChat(otherUID) != null){
-                    EachUserChats eachUserChat = chatViewModel.getEachUserChat(otherUID);
-                    List<MessageModel> userChatModel = eachUserChat.userChatList;
-//                    List<MessageModel> getEachUserChats = chatViewModel.getEachUserChat_(otherUID);
-                    adapter.setModelList(userChatModel);
+                if(chatViewModel.getEachUserChat_(otherUID) != null){
+                    List<MessageModel> getEachUserChats = chatViewModel.getEachUserChat_(otherUID);
+                    adapter.setModelList(getEachUserChats);
                     modelListMap.put(otherUID, adapter.getModelList());
                 }
 
@@ -3898,8 +3701,9 @@ scNum = 20;
 
         adapterMap.put(otherUID, adapter); // save each user adapter
 
-        recyclerMap.get(otherUID).setAdapter(adapter);
-
+//        recyclerMap.get(otherUID).setAdapter(adapter);
+//        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").setAdapter(adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92"));   // set chichi the adapter to the recyclerView
+//        Toast.makeText(mContext, "adapter " + adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92").getItemCount(), Toast.LENGTH_SHORT).show();
     }
 
     // retrieve the last previous scroll position
@@ -3976,9 +3780,9 @@ scNum = 20;
 
                     // scroll to previous position UI of user
                     try{
-                        scrollToPreviousPosition(otherUID, (int) scrollNumMap.get(otherUID));
+                        scrollToPreviousPosition(otherUID, (int) scrollNumMap.get(otherUID));   // get All message
                     } catch (Exception e){
-                        scrollToPreviousPosition(otherUID, adapter.getItemCount() - 1);
+                        scrollToPreviousPosition(otherUID, adapter.getItemCount() - 1); // get All message...
                     }
 
                 }
@@ -4013,7 +3817,7 @@ scNum = 20;
                             // add to room database
                             chatViewModel.insertChat(userId, messageModel);
                             // find position and move it to top as recent chat // add to outside ROOM
-                            AlertAdapter.getInstance()
+                            ChatListAdapter.getInstance()
                                     .findUserPositionByUID(userId, messageModel, snapshot1.getKey());
 
                             // delete after delivery the chat
@@ -4030,7 +3834,7 @@ scNum = 20;
                             // scroll to last position I am inside chat
                             if(insideChatMap.get(userId) != null) {
                                 if(insideChatMap.get(userId) && scrollCheck < 20){
-                                    scrollToPreviousPosition(userId, (adapter.getItemCount() - 1));
+                                    scrollToPreviousPosition(userId, (adapter.getItemCount() - 1));     // new message
                                 }
                             }
 
@@ -4329,7 +4133,7 @@ scNum = 20;
                                     adapter.notifyItemChanged(chatPosition, new Object());
 
                                     // update delivery status for outSide chat
-                                    AlertAdapter.getInstance().updateDeliveryToRead(otherId);
+                                    ChatListAdapter.getInstance().updateDeliveryToRead(otherId);
 
                                     // update ROOM for inside chat
                                     chatViewModel.updateDeliveryStatus(otherId, getChatId, 700016);
@@ -5192,7 +4996,7 @@ scNum = 20;
                             adapter.notifyItemChanged(chatPosition, new Object());
 
                             // update delivery status for outSide chat
-                            AlertAdapter.getInstance().updateDeliveryStatus(otherUID_);
+                            ChatListAdapter.getInstance().updateDeliveryStatus(otherUID_);
 
                             // update ROOM for inside chat
                             chatViewModel.updateDeliveryStatus(otherUID_, chatKey, 700024);
@@ -5725,7 +5529,7 @@ scNum = 20;
         // call forward setting method to remove the checkBox
         myHolderNew.clear();
         myHolderNew.addAll(myHolder_);  // add up all user holder
-        AlertAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
 
         // remove the typingRunnable for checking network
         handlerTyping.removeCallbacks(runnableTyping);
@@ -6099,7 +5903,7 @@ scNum = 20;
                 if(constraintMsgBody.getVisibility() == View.VISIBLE){
                     try{
                         refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
-                        int scroll = scrollNum > 20 ? scrollNum: adapterMap.get(otherUserUid).getItemCount() - 1;
+                        int scroll = scrollNum > 10 ? scrollNum: adapterMap.get(otherUserUid).getItemCount() - 1;
 
                         Map<String, Object> mapUpdate = new HashMap<>();
                         mapUpdate.put("status", false);
@@ -6107,7 +5911,7 @@ scNum = 20;
                         refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
 
                         // save last scroll position to local preference
-                        lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();
+                        lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();     // onPause
 
                         // Remove the ValueEventListener when the back button is pressed
                         if (chatReadListener != null) {
@@ -6213,6 +6017,12 @@ scNum = 20;
                     textViewLastSeen.setText(getString(R.string.app_name));   // clear last seen
                     chatMenuProfile.setVisibility(View.GONE); // close profile menu
                     isEmojiVisible = false;
+                    textViewMsgTyping.setText(null);
+                    scrollCountTV.setVisibility(View.GONE);
+                    scrollPositionIV.setVisibility(View.GONE);
+                    receiveIndicator.setVisibility(View.GONE);
+                    sendIndicator.setVisibility(View.GONE);
+                    textViewLastSeen.setText(null);
 
                     // remove the typingRunnable for checking network
                     handlerTyping.removeCallbacks(runnableTyping);
@@ -6234,9 +6044,9 @@ scNum = 20;
                     clearAllHighlights();
 
                     // make previous view clickable if any
-                    if (AlertAdapter.previousView != null) {
-                        AlertAdapter.previousView.setClickable(true);
-                        AlertAdapter.previousView = null;    // return it back to null
+                    if (ChatListAdapter.previousView != null) {
+                        ChatListAdapter.previousView.setClickable(true);
+                        ChatListAdapter.previousView = null;    // return it back to null
                     }
 
                     AllConstants.executors.execute(() -> {
@@ -6244,7 +6054,7 @@ scNum = 20;
                         if (otherUserUid != null) {
                             int scroll = 0;
                             if (adapterMap.get(otherUserUid) != null) {
-                                scroll = scrollNum > 20 ? scrollNum : adapterMap.get(otherUserUid).getItemCount() - 1;
+                                scroll = scrollNum > 10 ? scrollNum : adapterMap.get(otherUserUid).getItemCount() - 1;
                             }
                             Map<String, Object> mapUpdate = new HashMap<>();
                             mapUpdate.put("status", false);
@@ -6252,9 +6062,9 @@ scNum = 20;
                             refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
                             if (scroll > 5) {
                                 // save last scroll position to local preference
-                                lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();
+                                lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();     // onBackpress
 
-                                System.out.println("M3052 I have saved scroll " + scroll);
+                                System.out.println("M3052 I have saved scroll " + scroll + " uid: " + otherUserUid);
                             }
 
                             // set responds to pend always      ------- will change later to check condition if user is still an active call
@@ -6265,11 +6075,6 @@ scNum = 20;
                             // Remove the ValueEventListener when the back button is pressed
                             if (chatReadListener != null) {
                                 refOnReadRequest.child(myId).child(otherUserUid).removeEventListener(chatReadListener);
-                            }
-
-                            // call runnable to add views if list cache view layout is less than 100
-                            if (!isLoadViewRunnableRunning && MessageAdapter.viewCacheSend.size() < 50) {
-                                handlerLoadViewLayout.post(loadViewRunnable);
                             }
 
                             insideChat = false;  // onBackPress

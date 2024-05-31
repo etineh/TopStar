@@ -4,20 +4,24 @@ public class ContactModel {
 
     private String otherUid;
     private String image;
-    private String userName;
+    private String otherUserName;
     private Long presence;
     private String bio;
     private String myUserName;
     private String contactName;
+    private String otherDisplayName;
     private String number;
 
     public ContactModel() {
     }
 
-    public ContactModel(String otherUid, String image, String userName, Long presence, String bio, String myUserName, String contactName, String number) {
+    public ContactModel(String otherUid, String image, String otherUserName, String otherDisplayName,
+                        Long presence, String bio, String myUserName, String contactName, String number)
+    {
         this.otherUid = otherUid;
         this.image = image;
-        this.userName = userName;
+        this.otherUserName = otherUserName;
+        this.otherDisplayName = otherDisplayName;
         this.presence = presence;
         this.bio = bio;
         this.myUserName = myUserName;
@@ -41,12 +45,20 @@ public class ContactModel {
         this.image = image;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getOtherUserName() {
+        return otherUserName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOtherUserName(String otherUserName) {
+        this.otherUserName = otherUserName;
+    }
+
+    public String getOtherDisplayName() {
+        return otherDisplayName;
+    }
+
+    public void setOtherDisplayName(String otherDisplayName) {
+        this.otherDisplayName = otherDisplayName;
     }
 
     public Long getPresence() {

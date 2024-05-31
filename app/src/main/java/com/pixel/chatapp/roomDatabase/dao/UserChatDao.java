@@ -6,12 +6,10 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
-import com.pixel.chatapp.roomDatabase.entities.EachUserChats;
 
 import java.util.List;
 
@@ -24,25 +22,26 @@ public interface UserChatDao {
     @Update
     void updateUser(UserOnChatUI_Model userOnChatUIModel);
 
-    @Query("UPDATE usersOnChatUI SET otherUserName = :otherName, imageUrl = :imageUrl WHERE id = :id")
-    void updateOtherNameAndPhoto(String id, String otherName, String imageUrl);
+    @Query("UPDATE usersOnChatUI SET otherUserName = :otherUsername, otherDisplayName = :otherDisplayName, " +
+            "otherContactName = :contactName, imageUrl = :imageUrl WHERE otherUid = :otherUid")
+    void updateOtherNameAndPhoto(String otherUid, String otherUsername, String otherDisplayName, String contactName, String imageUrl);
 
     @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly, msgStatus = :statusNum, " +
-            "timeSent = :timeSent, idKey = :idKey WHERE id = :id")
-    void updateOutsideChat(String id, String chat, String emojiOnly, int statusNum, long timeSent, String idKey);
+            "timeSent = :timeSent, idKey = :idKey WHERE otherUid = :otherUid")
+    void updateOutsideChat(String otherUid, String chat, String emojiOnly, int statusNum, long timeSent, String idKey);
 
-    @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly WHERE id = :id AND idKey = :idKey")
-    void editOutsideChat(String id, String chat, String emojiOnly, String idKey);
+    @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly WHERE otherUid = :otherUid AND idKey = :idKey")
+    void editOutsideChat(String otherUid, String chat, String emojiOnly, String idKey);
 
-    @Query("UPDATE usersOnChatUI SET msgStatus = :statusNum WHERE id = :otherUid")
+    @Query("UPDATE usersOnChatUI SET msgStatus = :statusNum WHERE otherUid = :otherUid")
     void updateOutsideDelivery(String otherUid, int statusNum);
 
     @Delete
     void deleteUser(UserOnChatUI_Model userOnChatUIModel);
 
     // Delete a user based on the id
-    @Query("DELETE FROM usersOnChatUI WHERE id = :id")
-    void deleteUserById(String id);
+    @Query("DELETE FROM usersOnChatUI WHERE otherUid = :otherUid")
+    void deleteUserById(String otherUid);
 
     @Query("SELECT * FROM usersOnChatUI ORDER BY timeSent DESC")
     List<UserOnChatUI_Model> getEachUser();
@@ -88,11 +87,7 @@ public interface UserChatDao {
     void deleteUserChatsById(String id);
 
     // get the chats of each user based on the id
-//    @Query("SELECT * FROM chats WHERE id = :userUid")
-//    List<MessageModel> getEachUserChat_(String userUid);
-
-    @Transaction
-    @Query("SELECT * FROM chats WHERE id = :id")
-    EachUserChats getEachUserChat(String id);
+    @Query("SELECT * FROM chats WHERE id = :userUid")
+    List<MessageModel> getEachUserChat_(String userUid);
 
 }

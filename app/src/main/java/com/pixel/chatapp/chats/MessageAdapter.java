@@ -64,7 +64,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.pixel.chatapp.adapters.AlertAdapter;
+import com.pixel.chatapp.adapters.ChatListAdapter;
 import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
@@ -271,19 +271,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         @Override
         protected Void doInBackground(Void... voids) {
             // Preload views in the background and add them to the cache
-            if(viewTypeSelect == send){
+            if(viewTypeSelect == send && viewCacheSend.size() < 30){
                 View itemView = inflater.inflate(R.layout.view_card, parent, false);
                 viewCacheSend.add(itemView);
                 System.out.println("Adding to viewSend " + viewCacheSend.size());
-            } else if (viewTypeSelect == sendPhoto) {
+            } else if (viewTypeSelect == sendPhoto && viewPhotoSend.size() < 30) {
+//                if()
                 View itemView = inflater.inflate(R.layout.photo_send_card, parent, false);
                 viewPhotoSend.add(itemView);
                 System.out.println("Adding to viewPhotoSend " + viewPhotoSend.size());
-            } else if (viewTypeSelect == receivePhoto) {
+            } else if (viewTypeSelect == receivePhoto && viewPhotoReceive.size() < 30) {
                 View itemView = inflater.inflate(R.layout.photo_receive_card, parent, false);
                 viewPhotoReceive.add(itemView);
                 System.out.println("Adding to viewPhotoRe " + viewPhotoReceive.size());
-            } else {
+            } else if(viewCacheReceive.size() < 30) {
                 View itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
                 viewCacheReceive.add(itemView);
                 System.out.println("Adding to viewReceive " + viewCacheReceive.size());
@@ -328,140 +329,53 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    // called at CA212
-    public void addLayoutViewEverySec() {
-        Executor executor = Executors.newSingleThreadExecutor();
-
-        executor.execute(() -> {
-
-            for (int i = 0; i < 4; i++) {
-
-                View itemView;
-
-                if(i % 2 == 0){
-                    itemView = inflater.inflate(R.layout.view_card, parent, false);
-                    synchronized (viewCacheSend) {
-                        viewCacheSend.add(itemView);
-                        System.out.println("Added to viewCacheSend: " + viewCacheSend.size());
-                    }
-                } else if (i % 3 == 0) {
-                    itemView = inflater.inflate(R.layout.photo_send_card, parent, false);
-                    synchronized (viewPhotoSend) {
-                        viewPhotoSend.add(itemView);
-                        System.out.println("Added to viewPhotoLayer: " + viewPhotoSend.size());
-                    }
-                } else if (i % 4 == 0) {
-                    itemView = inflater.inflate(R.layout.photo_receive_card, parent, false);
-                    synchronized (viewPhotoReceive) {
-                        viewPhotoReceive.add(itemView);
-                        System.out.println("Added to viewPhotoRe:  " + viewPhotoReceive.size());
-                    }
-                } else{
-                    itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
-                    synchronized (viewCacheSend) {
-                        viewCacheReceive.add(itemView);
-                        System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
-                    }
-                }
-
-            }
-
-        });
-    }
-
-    // add first 15 on first load
-    public void addLayoutViewInBackground() {
-        Executor executor = Executors.newSingleThreadExecutor();
-
-        executor.execute(() -> {
-
-            for (int i = 0; i < 60; i++) {
-
-                if(i == 58) {
-                    if (!MainActivity.isLoadViewRunnableRunning && viewCacheSend.size() < 50) {
-                        MainActivity.handlerLoadViewLayout.post(MainActivity.loadViewRunnable);
-                    }
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        Toast.makeText(mContext, "view adding done MA340", Toast.LENGTH_SHORT).show();
-                    });
-                }
-
-                View itemView;
-
-                if(i % 2 == 0){
-                    itemView = inflater.inflate(R.layout.view_card, parent, false);
-                    synchronized (viewCacheSend) {
-                        viewCacheSend.add(itemView);
-                        System.out.println("Added to viewCacheSend:  " + viewCacheSend.size());
-                    }
-                } else if (i % 3 == 0) {
-                    itemView = inflater.inflate(R.layout.photo_send_card, parent, false);
-                    synchronized (viewPhotoSend) {
-                        viewPhotoSend.add(itemView);
-                        System.out.println("Added to viewPhotoSend:  " + viewPhotoSend.size());
-                    }
-                }else if (i % 4 == 0) {
-                    itemView = inflater.inflate(R.layout.photo_receive_card, parent, false);
-                    synchronized (viewPhotoReceive) {
-                        viewPhotoReceive.add(itemView);
-                        System.out.println("Added to viewPhotoRe:  " + viewPhotoReceive.size());
-                    }
-                } else{
-                    itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
-                    synchronized (viewCacheSend) {
-                        viewCacheReceive.add(itemView);
-                        System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
-                    }
-                }
-
-            }
-
-        });
-    }
 
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_msg, parent, false);
+
+        new PreloadViewsTask(viewType).execute();
 
         View itemView;
         if (viewType == send && !viewCacheSend.isEmpty())
         {
             // Retrieve and remove a cached send view
             itemView = viewCacheSend.remove(0);
-            new PreloadViewsTask(viewType).execute();   // add a new view
-//            Toast.makeText(mContext, "adding view 1", Toast.LENGTH_SHORT).show();
+//            new PreloadViewsTask(viewType).execute();
 
         } else if (viewType == sendPhoto && !viewPhotoSend.isEmpty())
         {
 
             itemView = viewPhotoSend.remove(0);
-            new PreloadViewsTask(viewType).execute();
+//            new PreloadViewsTask(viewType).execute();
 
         } else if (viewType == receivePhoto && !viewPhotoReceive.isEmpty())
         {
 
             itemView = viewPhotoReceive.remove(0);
-            new PreloadViewsTask(viewType).execute();
+//            new PreloadViewsTask(viewType).execute();
 
         } else if (viewType == receive && !viewCacheReceive.isEmpty())
         {
             // Retrieve and remove a cached receive view
             itemView = viewCacheReceive.remove(0);
-            new PreloadViewsTask(viewType).execute();   // add a new view
+//            new PreloadViewsTask(viewType).execute();
 
         } else
         {
             // Inflate a new view if the cache is empty or the view type doesn't match
             int layer;
-            if(viewType == send){
+            if(viewType == send)
+            {
                 layer = R.layout.view_card;
                 Toast.makeText(mContext, "view sender", Toast.LENGTH_SHORT).show();
-            } else if (viewType == sendPhoto) {
+            } else if (viewType == sendPhoto)
+            {
                 layer = R.layout.photo_send_card;
                 Toast.makeText(mContext, "view photo send", Toast.LENGTH_SHORT).show();
-            } else if (viewType == receivePhoto) {
+            } else if (viewType == receivePhoto)
+            {
                 layer = R.layout.photo_receive_card;
                 Toast.makeText(mContext, "view photo receive", Toast.LENGTH_SHORT).show();
             }else {
@@ -2605,7 +2519,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refOnReadRequest.child(otherUid).child(myId).push().setValue(modelChats.getIdKey());
 
         // update delivery status for outSide chat
-        AlertAdapter.getInstance().updateDeliveryStatus(otherUid);
+        ChatListAdapter.getInstance().updateDeliveryStatus(otherUid);
         // update delivery status ROOM for outside chat
         chatViewModel.updateOutsideDelivery(otherUid, 700024);
 

@@ -18,8 +18,8 @@ public interface AllConstants {
 //    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8080/")
 //            .addConverterFactory(GsonConverterFactory.create())
 //            .build();
-
-    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.2:8080/")
+//192.168.0.3
+    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.3:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 //192.168.0.2.
@@ -36,6 +36,7 @@ public interface AllConstants {
     String OFFLINECHAT = "offlineChat";
     String PHOTO_OTHERUID = "PHOTO_UID";
     String VOICENOTE_UID = "VOICENOTE_UID";
+    String CONTACTNAME = "CONTACT_NAME";
 
     String PICKED_IMAGE_URI_PATH = "ImageUriPath";
 
