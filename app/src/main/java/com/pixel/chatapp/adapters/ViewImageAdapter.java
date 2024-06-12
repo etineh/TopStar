@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -21,7 +20,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.photos.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageOrVideoActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.OtherMethods;
 import com.pixel.chatapp.interface_listeners.ImageListener;
@@ -99,7 +98,7 @@ public class ViewImageAdapter extends PagerAdapter {
                 fileSize_TV.setText(model.getImageSize());
 
             } else {
-                Toast.makeText(context, "Error occur at SendImageAdapter L95", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Error occur at SendImageAdapter L105", Toast.LENGTH_SHORT).show();
             }
 
         } else {    // it is audio or document
@@ -162,8 +161,8 @@ public class ViewImageAdapter extends PagerAdapter {
         });
 
         photoView.setOnClickListener(v -> {
-//            SendImageActivity.recyclerPhoto.setVisibility(View.VISIBLE);
-            OtherMethods.fadeInFastRecyclerview(SendImageActivity.recyclerPhoto);
+//            SendImageOrVideoActivity.recyclerPhoto.setVisibility(View.VISIBLE);
+            OtherMethods.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         });
 
 
@@ -174,10 +173,10 @@ public class ViewImageAdapter extends PagerAdapter {
     private void fadeInAndOut(ConstraintLayout videoSeekBarContainer){
         if(videoSeekBarContainer.getVisibility() == View.VISIBLE){
             OtherMethods.fadeOutSeekBar(videoSeekBarContainer);
-            OtherMethods.fadeOutRecyclerview(SendImageActivity.recyclerPhoto);
+            OtherMethods.fadeOutRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         } else {
             OtherMethods.fadeInSeekBar(videoSeekBarContainer);
-            OtherMethods.fadeInRecyclerview(SendImageActivity.recyclerPhoto);
+            OtherMethods.fadeInRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         }
     }
 

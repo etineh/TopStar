@@ -1,8 +1,6 @@
 package com.pixel.chatapp.home.fragments;
 
-import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.handlerInternet;
-import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +9,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,10 +50,10 @@ public class ChatsFragment extends Fragment {
     }
 
     public static RecyclerView recyclerView;
+    ProgressBar progressBarLoadChatList;
     FirebaseUser user;
     DatabaseReference refUsers;
 
-    String myUserName;
     private UserChatViewModel userViewModel;
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
@@ -63,7 +62,6 @@ public class ChatsFragment extends Fragment {
 
     private List<UserOnChatUI_Model> chatListID;
     public static List<UserOnChatUI_Model> mUsersID;
-    private FragmentListener fragmentListener;
 
     Permission permissionCheck = new Permission();
 
@@ -73,10 +71,11 @@ public class ChatsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
 
-        View view = inflater.inflate(R.layout.alert_fragment, container, false);
+        View view = inflater.inflate(R.layout.chatlist_fragment, container, false);
 
         openContactList = view.findViewById(R.id.openContactList);
         recyclerView = view.findViewById(R.id.recyclerViewChatList);
+        progressBarLoadChatList = view.findViewById(R.id.progressBarLoadChatList);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -96,15 +95,20 @@ public class ChatsFragment extends Fragment {
         userViewModel = new ViewModelProvider(requireActivity()).get(UserChatViewModel.class);
         // get users from ROOM database
         executors.execute(() -> {
-            if(userViewModel.getAllUsers() != null){
-                mUsersID = userViewModel.getAllUsers();
+            if(userViewModel.getAllUsers(user.getUid()) != null){
+                mUsersID = userViewModel.getAllUsers(user.getUid());
 
                 adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
 
                 getActivity().runOnUiThread(() -> {
                     recyclerView.setAdapter(adapter);
+                    progressBarLoadChatList.setVisibility(View.GONE);
+                    chatList(false);
                 });
+
+            } else {
+                chatList(true);
             }
         });
 
@@ -132,8 +136,6 @@ public class ChatsFragment extends Fragment {
 
         });
 
-
-        chatList();
 
         return view;
     }
@@ -200,13 +202,15 @@ public class ChatsFragment extends Fragment {
     public static void notifyItemChanged(int i){
         adapter.notifyItemChanged(i, new Object());
     }
-    private void chatList()
+
+    private void chatList(boolean isRoomDbNull)
     {
-
-        adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
-
-        adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
-        recyclerView.setAdapter(adapter);
+        if(isRoomDbNull){
+            adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
+            adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
+            recyclerView.setAdapter(adapter);
+            progressBarLoadChatList.setVisibility(View.GONE);
+        }
 
         // Getting all my user chats only;
         refUsers = FirebaseDatabase.getInstance().getReference("UsersList").child(user.getUid());
@@ -220,13 +224,13 @@ public class ChatsFragment extends Fragment {
                     try{
                         for (DataSnapshot snapshot1 : snapshot.getChildren()){
                             UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
-                            String userId = snapshot1.getKey();
-                            userModel.setOtherUid(userId);
+                            String otherUid = snapshot1.getKey();
+                            userModel.setOtherUid(otherUid);
+                            userModel.setMyUid(user.getUid());
 
                             boolean userAlreadyExists = false;
                             for (UserOnChatUI_Model userModelLoop : mUsersID) {
-                                if (userModelLoop.getOtherUid().equals(userId)) {
-            System.out.println("what is userId: " + userId + " uid: " + userModelLoop.getOtherUid());
+                                if (userModelLoop.getOtherUid().equals(otherUid) && userModelLoop.getMyUid().equals(user.getUid())) {
                                     userAlreadyExists = true;
                                     break;
                                 }
@@ -239,7 +243,8 @@ public class ChatsFragment extends Fragment {
                                 // add to local database
                                 userViewModel.insertUser(userModel);
 
-                                handlerInternet.post(()-> adapter.notifyDataSetChanged());
+                                getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+//                                handlerInternet.post(()-> adapter.notifyDataSetChanged());
 
                             }
                         }
@@ -254,13 +259,10 @@ public class ChatsFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                System.out.println("what is error ChatFragment L270 " + error.getMessage());
 
             }
         });
-
-
-//        getActivity().runOnUiThread(() -> {
-//        });
 
     }
 
@@ -279,7 +281,7 @@ public class ChatsFragment extends Fragment {
         super.onAttach(context);
 
         if (context instanceof FragmentListener) {
-            fragmentListener = (FragmentListener) context;
+            FragmentListener fragmentListener = (FragmentListener) context;
         } else {
             throw new RuntimeException(context.toString() + " must implement FragmentListener");
         }

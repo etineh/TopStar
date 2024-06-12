@@ -210,7 +210,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         UserDao userDao = AllConstants.retrofit.create(UserDao.class);
 
-        LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), getNumber);
+        LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), getNumber, null, null);
 
         userDao.login(loginDetailM).enqueue(new Callback<ResultApiM>() {
             @Override

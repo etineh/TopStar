@@ -1,6 +1,7 @@
 package com.pixel.chatapp.model;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
 @Entity(tableName = "usersOnChatUI", primaryKeys = {"otherUid"})
@@ -9,6 +10,9 @@ public class UserOnChatUI_Model {
     @NonNull
     private String otherUid; // other user uid
 
+//    @NonNull
+//    @ColumnInfo(defaultValue = "s4QQf6riOiRcwC9HMeA3S8TgL8y1")
+    private String myUid;
     private String fromUid;
     private String from;
     private String emojiOnly;
@@ -45,6 +49,14 @@ public class UserOnChatUI_Model {
 
     public void setOtherUid(@NonNull String otherUid) {
         this.otherUid = otherUid;
+    }
+
+    public String getMyUid() {
+        return myUid;
+    }
+
+    public void setMyUid(String myUid) {
+        this.myUid = myUid;
     }
 
     @NonNull
@@ -143,4 +155,5 @@ public class UserOnChatUI_Model {
     public void setIdKey(String idKey) {
         this.idKey = idKey;
     }
+
 }

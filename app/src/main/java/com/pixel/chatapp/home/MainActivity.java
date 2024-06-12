@@ -83,6 +83,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -111,8 +112,9 @@ import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
 import com.pixel.chatapp.model.ContactModel;
 import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
-import com.pixel.chatapp.photos.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageOrVideoActivity;
 import com.pixel.chatapp.calls.CallCenterActivity;
+import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.activities.AppLifecycleHandler;
 import com.pixel.chatapp.photos.CameraActivity;
@@ -135,6 +137,7 @@ import com.pixel.chatapp.side_bar_menu.premium.PremiumActivity;
 import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;
 import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
+import com.pixel.chatapp.signup_login.EmailOrPhoneLoginActivity;
 import com.pixel.chatapp.signup_login.LinkNumberActivity;
 import com.pixel.chatapp.signup_login.PhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
@@ -190,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
             offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef, myProfileShareRef,
-            resetLoginSharePref, contactNameShareRef;
+            resetLoginSharePref, contactNameShareRef, deviceFirstloginRef;
     public static String getMyUserName;
     public static Boolean nightMood;
 
@@ -215,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static ConstraintLayout pinIconsContainer, pinMsgBox_Constr;
     public static ConstraintLayout pinMsgContainer, pinOptionBox, line, chatContainer;
     @SuppressLint("StaticFieldLeak")
-    private static ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV;
+    private static ImageView hidePinMsg_IV, pinClose_IV, pinPrivateIcon_IV, pinLockPrivate_IV, pinPublicIcon_IV, pinLockPublic_IV, closePinBox_TV;
     private int pinNextPublic, pinNextPrivate, pinScrollPrivate, pinScrollPublic;
     private String msgId, message, pinByWho, pinStatus = "null", chatNotFoundID = "null";
     private MessageAdapter.MessageViewHolder holderPin, holderEmoji;
@@ -335,13 +338,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private Map<String, Object> editMessageMap;
     private Map<String, Integer> dateNum, dateMonth;
     private Map<String, Object> deleteMap;
-    private static Map<String, List<MessageModel>> modelListMap;
     public static Map<String, MessageAdapter> adapterMap; // to prevent it from re-creating all the time
     public static Map<String, RecyclerView> recyclerMap;
     private static List<String> otherNameList, otherUidList;
     public static Map<String, Object> downMsgCountMap, scrollNumMap;
     private static Map<String, Boolean>  userRecyclerActiveMap;
     private static Map<String, Boolean> insideChatMap;
+    public static Map<String, List<MessageModel>>  photoAndVideoMap;    // add all photo and video with their key and position in chat
+    public static Map<String, Integer>  filePositionMap;
 
     public static ConstraintLayout recyclerContainer;
     private ConstraintLayout constraintLayoutAdjust;
@@ -591,6 +595,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         newPinIndicator_TV = findViewById(R.id.newPinIndicator_TV);
         pinClose_IV = findViewById(R.id.pinClose_IV);
         pinByTV = findViewById(R.id.pinByWho_TV);
+        closePinBox_TV = findViewById(R.id.closePinBox_TV);
 
         // pin option (only me or everyone)
         pinOptionBox = findViewById(R.id.pinOptionBoxConstr);
@@ -715,7 +720,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         editMessageMap = new HashMap<>();
         userRecyclerActiveMap = new HashMap<>();
         scrollNumMap = new HashMap<>();
-        modelListMap = new HashMap<>();
+        photoAndVideoMap = new HashMap<>();
+        filePositionMap = new HashMap<>();
         downMsgCountMap = new HashMap<>();
         insideChatMap = new HashMap<>();
         otherNameList = new ArrayList<>();
@@ -767,11 +773,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         resetLoginSharePref = this.getSharedPreferences(AllConstants.RESET_LOGIN, Context.MODE_PRIVATE);
         boolean isResetMood = user != null && resetLoginSharePref.getBoolean(user.getUid(), false);
 
-        if(user == null){
-//            startActivity(new Intent(MainActivity.this, EmailOrPhoneLoginActivity.class));
-            startActivity(new Intent(MainActivity.this, PhoneLoginActivity.class));
+        deviceFirstloginRef = this.getSharedPreferences(AllConstants.DEVICEFIRSTLOGIN, Context.MODE_PRIVATE);
+        boolean isFirstTimeLogin = deviceFirstloginRef.getBoolean(AllConstants.FIRSTTIME, true);
 
-            Toast.makeText(this, "User is null (M740) ", Toast.LENGTH_SHORT).show();
+        if(user == null){
+
+            if(isFirstTimeLogin){  // this is user first time login
+                startActivity(new Intent(MainActivity.this, PhoneLoginActivity.class));
+            } else {    // the phone already has a previous login
+                startActivity(new Intent(MainActivity.this, EmailOrPhoneLoginActivity.class));
+            }
             finish();
 
         } else if ( (user.getEmail() != null && user.getEmail().isEmpty()) || user.getEmail() == null)
@@ -785,15 +796,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         } else if ((user.getPhoneNumber() != null && user.getPhoneNumber().isEmpty()) || user.getPhoneNumber() == null)
         {
+            IdTokenUtil.generateToken(token -> {
+                System.out.println("what is token " + token);
+            });
+
             startActivity(new Intent(MainActivity.this, LinkNumberActivity.class));
-            Toast.makeText(this, "Link your phone number! ", Toast.LENGTH_SHORT).show();
-//FirebaseAuth auth = FirebaseAuth.getInstance();
-//auth.signOut();
+            Toast.makeText(this, getString(R.string.linkPhoneNumber), Toast.LENGTH_SHORT).show();
+            finish();
+
         } else if (isResetMood)
         {
             startActivity(new Intent(MainActivity.this, ResetAccountActivity.class));
-//            finish();
+            finish();
         } else{
+
+            deviceFirstloginRef.edit().putBoolean(AllConstants.FIRSTTIME, false).apply();
 
             IdTokenUtil.generateToken(token -> {
                 System.out.println("what is token " + token);
@@ -803,7 +820,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             lastPositionPreference = this.getSharedPreferences(AllConstants.SCROLLPOSITION, Context.MODE_PRIVATE);
 
-            // store and retrieve my username for ChatList usage
+            // store new username if another new user login
             myUserNamePreferences = this.getSharedPreferences(AllConstants.MYUSERNAME, Context.MODE_PRIVATE);
             getMyUserName = myUserNamePreferences.getString(AllConstants.USERNAME, null);
             refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -1039,7 +1056,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             // =========    down buttons at home    ==============
-            
+
             p2pHome_IV.setOnClickListener(v -> {
                 v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
                 {
@@ -1055,7 +1072,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }).start();
             });
 
-            homeOpenMore.setOnClickListener(v -> 
+            homeOpenMore.setOnClickListener(v ->
             {
                 moreOptionHomeLayout.setVisibility(View.VISIBLE);
                 v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
@@ -1103,7 +1120,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             moreOptionHomeLayout.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-            hostPlayerClick.setOnClickListener(v -> 
+            hostPlayerClick.setOnClickListener(v ->
             {
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
                 {
@@ -1160,9 +1177,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 new Handler().postDelayed(()-> getOnBackPressedDispatcher().onBackPressed(), 300);
 
             });
-            
-            
-            // view my profile photo @sideBar menu
+
+
+            //  ==================   @sideBar menu     ===========================
+
             View.OnClickListener viewImage = view -> {
                 Intent i = new Intent(this, ZoomImage.class);
                 i.putExtra("otherName", "My Profile Photo");
@@ -1171,7 +1189,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                 startActivity(i);
             };
-            imageViewUserPhoto.setOnClickListener(viewImage);
+            imageViewUserPhoto.setOnClickListener(viewImage); // view my profile photo @sideBar menu
             tapImage_TV.setOnClickListener(viewImage);
 
             // dashboard side bar
@@ -1189,16 +1207,19 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 
             // settings
-            cardViewSettings.setOnClickListener(v -> {
-
+            cardViewSettings.setOnClickListener(v ->
+            {
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
-                        startActivity(new Intent(MainActivity.this, SettingsActivity.class))).start();
+                {
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
 
-                new Handler().postDelayed(() -> {
-                    sideBarMenuContainer.setVisibility(View.GONE);
-                    v.setScaleX(1.0f);
-                    v.setScaleY(1.0f);
-                }, 1000);
+                    new Handler().postDelayed(() -> {
+                        sideBarMenuContainer.setVisibility(View.GONE);
+                        v.setScaleX(1.0f);
+                        v.setScaleY(1.0f);
+                    }, 1000);
+
+                }).start();
 
             });
 
@@ -1250,7 +1271,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             {
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
                 {
-                    startActivity(new Intent(MainActivity.this, SupportActivity.class));
+                    Intent intent = new Intent(MainActivity.this, SupportActivity.class);
+                    intent.putExtra("reason", "from home activity - state reason from chat");
+
+                    startActivity(intent);
                 });
 
                 new Handler().postDelayed(() -> {
@@ -1277,7 +1301,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             //  clear user chats
             clearChat_TV.setOnClickListener(view -> {
 
-                if (adapterMap.get(otherUserUid) != null && adapterMap.get(otherUserUid).getItemCount() > 0){
+                if (adapterMap.get(otherUserUid) != null && adapterMap.get(otherUserUid).getItemCount() > 0)
+                {
                     chatMenuProfile.setVisibility(View.GONE);   // hide profile option
                     otherUserName_TV.setText(R.string.clear_history );
                     deleteUserForMe_TV.setText(R.string.clear_for_me);
@@ -1287,7 +1312,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     clearOnlyChatHistory = true;
                     otherUid_Del = otherUserUid;
 
-                } else Toast.makeText(this, "Chat is empty...", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(this, getString(R.string.chatEmpty), Toast.LENGTH_SHORT).show();
 
             });
 
@@ -1454,15 +1479,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 {
                     if(modelChatsOption.getType() != 0){    //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
                         editTV.setVisibility(View.GONE);
-                        if(modelChatsOption.getType() ==  1) {
-                            saveToGalleryTV.setVisibility(View.GONE);
-                        } else saveToGalleryTV.setVisibility(View.VISIBLE);
+                        if(modelChatsOption.getType() ==  2 || modelChatsOption.getType() ==  5) {
+                            saveToGalleryTV.setVisibility(View.VISIBLE);
+                        } else saveToGalleryTV.setVisibility(View.GONE);
 
                     } else {
                         saveToGalleryTV.setVisibility(View.GONE);
-                        editTV.setVisibility(View.VISIBLE);
+                        editTV.setVisibility(View.GONE);
+                        if(modelChatsOption.getFromUid().equals(myId)) editTV.setVisibility(View.VISIBLE);
                     }
 
+                    // open or close more option
                     if(moreOptionContainer.getVisibility() == View.GONE){
                         // Start the animation to make it visible
                         animateVisibility(null, moreOptionContainer);
@@ -1474,7 +1501,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     new Handler().postDelayed(()-> {
                         view.setScaleX(1f);
                         view.setScaleY(1f);
-                    }, 300);
+                    }, 100);
                 });
             });
 
@@ -1574,7 +1601,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     selectedUserNames.add(otherUserName);
                     forwardChatUserId.add(otherUserUid);
 
-                    Intent i = new Intent(this, SendImageActivity.class);
+                    Intent i = new Intent(this, SendImageOrVideoActivity.class);
                     startActivity(i);
 
                     fileAttachOptionContainer.setVisibility(View.GONE);
@@ -1592,6 +1619,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // send message
             sendMessageButton.setOnClickListener(view -> {
 
+                addEmptyChatCard(otherUserUid);     // mine sending
+
                 String message = editTextMessage.getText().toString().trim();
 
                 if (!message.isEmpty()) {
@@ -1604,13 +1633,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         // Send as normal text
                         sendMessage(message, null, 0, null, null, otherUserUid);
                     }
+
                 }
 
                 sendMessageButton.setVisibility(View.INVISIBLE);
                 recordButton.setVisibility(View.VISIBLE);
                 camera_IV.setVisibility(View.VISIBLE);
                 refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
-                clearInputFields();
+//                clearInputFields();
 
             });
 
@@ -1638,6 +1668,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             gameMe_IV.setOnClickListener(v -> {
                 Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
             });
+
 
             // ==================    react emoji settings    ====================================
 
@@ -1760,7 +1791,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if(i == size-1){
                         cancelChatOption();
                         adapter.notifyDataSetChanged();
-                        Toast.makeText(MainActivity.this, "Message deleted for only you.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getString(R.string.deleteForMe), Toast.LENGTH_SHORT).show();
+
+                        new Thread(()-> getEachUserAllPhotoAndVideos(otherUserUid, adapterMap.get(otherUserUid).getModelList())).start();
                     }
                 }
 
@@ -1783,10 +1816,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         System.out.println("message key not found to delete for other (M474) " + e.getMessage());
                     }
 
-                    if(i == size-1){
+                    if(i == size-1){    // no need to call adapter since you are only deleting for other user.
                         cancelChatOption();
                         constraintDelBody.setVisibility(View.GONE);
-                        Toast.makeText(MainActivity.this, "Message deleted for "+otherUserName+".", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getString(R.string.deleteForOthers) +" "+otherUserName+".", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -1836,7 +1869,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         cancelChatOption();
                         adapter.notifyDataSetChanged();
                         constraintDelBody.setVisibility(View.GONE);
-//                        Toast.makeText(MainActivity.this, "Message deleted for everyone.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getString(R.string.deleteForEveryone), Toast.LENGTH_SHORT).show();
+
+                        new Thread(()-> getEachUserAllPhotoAndVideos(otherUserUid, adapterMap.get(otherUserUid).getModelList())).start();
                     }
                 }
 
@@ -1850,24 +1885,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // ============ scroll to previous position of reply message
             scrollPositionIV.setOnClickListener(view -> {
 
-                if(goToLastMessage) {
+                view.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(()->
+                {
+                    if(goToLastMessage) {
+                        if(adapterMap.get(otherUserUid).getItemCount() - goToNum > 3){
+                            recyclerMap.get(otherUserUid).scrollToPosition(goToNum + 2);
+                        } else {
+                            //scroll to last position
+                            recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount() - 1);
+                        }
 
-                    if(adapterMap.get(otherUserUid).getItemCount() - goToNum > 3){
-                        recyclerMap.get(otherUserUid).scrollToPosition(goToNum + 2);
+                        adapterMap.get(otherUserUid).highlightItem(goToNum); // notify Colour
+                        MessageAdapter.lastPosition = goToNum;
+                        goToLastMessage = false;
+                        // remove all highlight in 2 secs
+                        new Handler().postDelayed(MainActivity::clearAllHighlights, 2000);
+
                     } else {
-                        //scroll to last position
-                        recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount() - 1);
+                        recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount()-1);
                     }
-
-                    adapterMap.get(otherUserUid).highlightItem(goToNum); // notify Colour
-                    MessageAdapter.lastPosition = goToNum;
-                    goToLastMessage = false;
-                    // remove all highlight in 2 secs
-                    new Handler().postDelayed(MainActivity::clearAllHighlights, 2000);
-
-                } else {
-                    recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount()-1);
-                }
+                    view.setScaleX(1.0f);
+                    view.setScaleY(1.0f);
+                }).start();
 
             });
 
@@ -1912,6 +1951,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // hide pin message view
             hidePinMsg_IV.setOnClickListener(closePinBox);
             pinClose_IV.setOnClickListener(closePinBox);
+            closePinBox_TV.setOnClickListener(closePinBox);
 
             // open private pin message box
             View.OnClickListener openPrivatePinMsg = view -> { // personalise later
@@ -1970,7 +2010,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 // display pin chat and pinByWho on the UI
                 pinMsg_TV.setTypeface(null);
                 pinMsg_TV.setText(getChat);
-                pinByTV.setText(getPinBy);
+                String pinBy = getString(R.string.pinBy) + " " + getPinBy;
+                pinByTV.setText(pinBy);
                 newPinIndicator_TV.setVisibility(View.GONE);
 
                 // make pinByWho visible and close pin box option
@@ -2054,7 +2095,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if(reduceNumber >= 0){  // only update UI when pin is between 0 to pinNum
                         pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
                         pinMsg_TV.setText(getChat);
-                        pinByTV.setText("Pin by " + getPinByWho);
+                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
+                        pinByTV.setText(pinBy);
                     } else{
                         pinNextPublic -= 1;
 //                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
@@ -2114,7 +2156,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if (increaseNumber < pinNum){
                         pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
                         pinMsg_TV.setText(getChat);
-                        pinByTV.setText("Pin by " + getPinByWho);
+                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
+                        pinByTV.setText(pinBy);
                     } else {
                         pinNextPublic += 1; // to enable it stop decreasing
                     }
@@ -2136,7 +2179,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 if(MainActivity.sharingPhotoActivated) {
                     sharing = true;
                     // open send_image activity and prepare the photo
-                    startActivity(new Intent(this, SendImageActivity.class));
+                    startActivity(new Intent(this, SendImageOrVideoActivity.class));
                 } else {
                     // send forward or share chat
                     view.animate().scaleX(1.2f).scaleY(1.2f)
@@ -2174,6 +2217,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // delete only chats
                     refLastDetails.child(myId).child(otherUid_Del)
                             .child("message").setValue("...");
+
+                    // delete last chat from ROOM - outside UI
+                    MessageAdapter adapter = adapterMap.get(otherUid_Del);
+                    MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
+                    chatViewModel.editOutsideChat(otherUserUid, AllConstants.DELETE_ICON + "  ...",
+                            null, model.getIdKey());
+                    // update outside user UI chatList model
+                    ChatsFragment.findUserAndDeleteChat(otherUserUid, model.getIdKey());
+
                     if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).notifyDataSetChanged();
                     Toast.makeText(this, getString(R.string.chatClearForMe), Toast.LENGTH_SHORT).show();
                 }
@@ -2184,7 +2236,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 refMsgFast.child(myId).child(otherUid_Del).removeValue();
 
                 // clear chats from ROOM
-                chatViewModel.deleteChatByUserId(otherUid_Del);
+                chatViewModel.deleteChatByUserId(otherUid_Del, myId);
                 // delete from adapter chat list
                 try{
                     if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats();
@@ -2192,8 +2244,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     System.out.println("what is error Main L2195: " + e.getMessage());
                 }
 
-                cancelUserDeleteOption();
+                if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
                 clearOnlyChatHistory = false;
+                cancelUserDeleteOption();
 
             });
 
@@ -2211,12 +2264,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     ChatsFragment.findUserPositionByUID(otherUid_Del);
                     // delete user from ROOM
                     chatViewModel.deleteUserById(otherUid_Del);
-                } else {
-                    // clear only chat from outside
+                } else
+                {   // clear only chat from outside
                     refLastDetails.child(myId).child(otherUid_Del)
                             .child("message").setValue("...");
                     refLastDetails.child(otherUid_Del).child(myId)
                             .child("message").setValue("...");
+
+                    // delete last chat from ROOM - outside UI
+                    MessageAdapter adapter = adapterMap.get(otherUid_Del);
+                    MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
+                    chatViewModel.editOutsideChat(otherUserUid, AllConstants.DELETE_ICON + "  ...",
+                            null, model.getIdKey());
+
+                    // update outside user UI chatList model
+                    ChatsFragment.findUserAndDeleteChat(otherUserUid, model.getIdKey());
 
                     if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).notifyDataSetChanged();
                     Toast.makeText(this, getString(R.string.chatClearForEveryone), Toast.LENGTH_SHORT).show();
@@ -2236,11 +2298,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 refDeleteUser.child(myId).child(otherUid_Del).setValue("clear");
 
                 // clear chats from ROOM
-                chatViewModel.deleteChatByUserId(otherUid_Del);
+                chatViewModel.deleteChatByUserId(otherUid_Del, myId);
 
                 if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats(); // delete chats
-                cancelUserDeleteOption();
+                if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
                 clearOnlyChatHistory = false;
+                cancelUserDeleteOption();
+
             });
 
             getProfileSharePref();
@@ -2407,9 +2471,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     @Override
     public void callAllMethods(String otherUid, Context context, Activity activity) {
-//        getMyUserTyping();
+        getMyUserTyping();
         tellUserAmTyping_AddUser();
-//        getPreviousCounts();
+        getPreviousCounts();
 
         getChatReadRequest(otherUid);
 
@@ -2445,68 +2509,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         editTextMessage.setFocusableInTouchMode(true);
         editTextMessage.requestFocus();
-// chichi - ucdySn50eeRx1iquBilJtYL86e92
-        // bella    -   Qfkxb3jrJEUM6rS8el2VUBQc6WA3
-//        boss GT   -   AZkfy6uZunMfMUxR7HIol4rPZBq2
-//        recyclerViewChatVisibility("ucdySn50eeRx1iquBilJtYL86e92");    // make only the active recyclerView to be visible
-//        recyclerViewChatVisibility("Qfkxb3jrJEUM6rS8el2VUBQc6WA3");    // make only the active recyclerView to be visible
 
         recyclerViewChatVisibility(uID);    // make only the active recyclerView to be visible
 
         constraintMsgBody.setVisibility(View.VISIBLE);  // make chat box visible
         firstTopUserDetailsContainer.setVisibility(View.VISIBLE);
 
-        progressBarLoadChats.setVisibility(View.VISIBLE);   // make progressBar visible at first
+        // make progressBar visible at first
+        if(userRecyclerActiveMap.get(uID) == null) progressBarLoadChats.setVisibility(View.VISIBLE);
 
         new Handler().postDelayed(()->
         {
-            if(userRecyclerActiveMap.get(uID) == null) {
-
-                recyclerMap.get(uID).setAdapter(adapterMap.get(uID));   // set the adapter to the recyclerView
-
-                new Handler().postDelayed(()-> progressBarLoadChats.setVisibility(View.GONE), 100);
-
-//                if(userRecyclerActiveMap.get("ucdySn50eeRx1iquBilJtYL86e92") == null){
-//
-//                    new Handler().postDelayed(()->{
-//
-//                        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").setAdapter(adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92"));   // set the adapter to the recyclerView
-////                    recyclerMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3").setAdapter(adapterMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3"));   // set the adapter to the recyclerView
-////                    userRecyclerActiveMap.put("Qfkxb3jrJEUM6rS8el2VUBQc6WA3", true);
-//                        userRecyclerActiveMap.put("ucdySn50eeRx1iquBilJtYL86e92", true);
-//
-//                        int position = lastPositionPreference.getInt("ucdySn50eeRx1iquBilJtYL86e92", adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92").getItemCount() - 1);
-//                        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").scrollToPosition(position-6 + 1);
-//
-//                    },5000);
-//                }
-
-            } else
-                progressBarLoadChats.setVisibility(View.GONE);
-
-            if(adapterMap.get(uID) != null){  // reload message if empty later
-                // check recycler position before scrolling
-                int position = lastPositionPreference.getInt(uID, adapterMap.get(uID).getItemCount() - 1);
-                int scrollCheck = adapterMap.get(uID).getItemCount() - position;
-
-                if(scrollCheck < 5){   // scroll to last position
-                    recyclerMap.get(uID).scrollToPosition(adapterMap.get(uID).getItemCount() - 1);
-//                    System.out.println("scroll done: " + scrollCheck + " adap count " + adapterMap.get(uID).getItemCount());
-
-                } else {
-//                    System.out.println("scroll from: " + position + " adap count " + adapterMap.get(uID).getItemCount());
-                    if(userRecyclerActiveMap.get(uID) == null) {
-                        recyclerMap.get(uID).scrollToPosition(position-6 + 1);
-                    }
-                }
-                scrollNum = position;
-                scrollNumMap.put(uID, position);
-
-                System.out.println("Total adapter (M1070) " + adapterMap.get(uID).getItemCount());
-            }
-
-            userRecyclerActiveMap.put(uID, true);
-
+            populateRecyclerWithAdapter(myUsername, uID, mContext_, recyclerChat);
 
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(uID).getLayoutManager();
             assert layoutManager != null;
@@ -2515,17 +2529,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             scrollCountTV.setText(numb);           // set down msg count
             downMsgCountMap.put(uID, downMsgCount);     // set it for "sending message method"
 
-            //  check count and display/hide the scroll arrow
-            if(downMsgCount > 2){
-                scrollCountTV.setVisibility(View.VISIBLE);
-                scrollPositionIV.setVisibility(View.VISIBLE);
-            } else {
-                scrollCountTV.setVisibility(View.GONE);
-                scrollPositionIV.setVisibility(View.GONE);
-                receiveIndicator.setVisibility(View.GONE);
-                sendIndicator.setVisibility(View.GONE);
-            }
-
+            displayOrHideCountArrowDown(downMsgCount);  //  check count and display/hide the scroll arrow
 
 
             //        Add an OnScrollListener to the RecyclerView
@@ -2537,8 +2541,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // keep saving the recycler position while scrolling
                     scrollNum = layoutManager.findLastVisibleItemPosition();
                     scrollNumMap.put(uID, scrollNum);
-                    System.out.println("scroll foo: " + scrollNum);
-                    System.out.println("scroll 22foo: " + layoutManager.findLastVisibleItemPosition());
 
                     // keep updating the number of down messages
                     downMsgCount = (layoutManager.getItemCount() - 1) - scrollNum;
@@ -2547,16 +2549,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     //  store the downMsgCount in a map for each user, to enable me add to the number on sendMessage() when I send new message
                     downMsgCountMap.put(uID, downMsgCount);
 
-                    //  check count and display/hide the scroll arrow
-                    if(downMsgCount > 2){
-                        scrollCountTV.setVisibility(View.VISIBLE);
-                        scrollPositionIV.setVisibility(View.VISIBLE);
-                    } else {
-                        scrollCountTV.setVisibility(View.GONE);
-                        scrollPositionIV.setVisibility(View.GONE);
-                        receiveIndicator.setVisibility(View.GONE);
-                        sendIndicator.setVisibility(View.GONE);
-                    }
+                    displayOrHideCountArrowDown(downMsgCount);
 
                 }
             });
@@ -2584,6 +2577,90 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
+    private void populateRecyclerWithAdapter(String myUserName_, String uID, Context context, RecyclerView recyclerChat)
+    {
+        if(userRecyclerActiveMap.get(uID) == null) {
+
+            if(recyclerMap.get(uID) == null) {
+                sendRecyclerView(recyclerChat, uID);
+                getMessage(myUserName_, uID, context, true);
+            }
+            else recyclerMap.get(uID).setAdapter(adapterMap.get(uID));   // set the adapter to the recyclerView
+
+            new Handler().postDelayed(()-> progressBarLoadChats.setVisibility(View.GONE), 100);
+
+//                loadOtherUserChatsToRecycler();
+
+        } else
+            progressBarLoadChats.setVisibility(View.GONE);
+
+        if(adapterMap.get(uID) != null){
+            // check recycler position before scrolling
+            int position = lastPositionPreference.getInt(uID, adapterMap.get(uID).getItemCount() - 1);
+            int scrollCheck = adapterMap.get(uID).getItemCount() - position;
+
+            if(scrollCheck > 0 && scrollCheck < 5){   // scroll to last position
+                recyclerMap.get(uID).scrollToPosition(adapterMap.get(uID).getItemCount() - 1);
+            } else if(userRecyclerActiveMap.get(uID) == null) {
+                recyclerMap.get(uID).scrollToPosition(position-6 + 1);
+            }
+
+            scrollNum = position;
+            scrollNumMap.put(uID, position);
+
+            userRecyclerActiveMap.put(uID, true);
+
+            System.out.println("Total adapter (MainAct L2500) " + adapterMap.get(uID).getItemCount());
+        }
+    }
+
+    private void displayOrHideCountArrowDown(int downMsgCount)
+    {
+        if(downMsgCount > 2){
+            scrollCountTV.setVisibility(View.VISIBLE);
+            scrollPositionIV.setVisibility(View.VISIBLE);
+        } else {
+            scrollCountTV.setVisibility(View.GONE);
+            scrollPositionIV.setVisibility(View.GONE);
+            receiveIndicator.setVisibility(View.GONE);
+            sendIndicator.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadOtherUserChatsToRecycler(){
+        // chichi - ucdySn50eeRx1iquBilJtYL86e92
+        // bella    -   Qfkxb3jrJEUM6rS8el2VUBQc6WA3
+//        boss GT   -   AZkfy6uZunMfMUxR7HIol4rPZBq2
+        //  noble - s4QQf6riOiRcwC9HMeA3S8TgL8y1
+//        recyclerViewChatVisibility("ucdySn50eeRx1iquBilJtYL86e92");    // make only the active recyclerView to be visible
+//        recyclerViewChatVisibility("Qfkxb3jrJEUM6rS8el2VUBQc6WA3");    // make only the active recyclerView to be visible
+
+        if(userRecyclerActiveMap.get("ucdySn50eeRx1iquBilJtYL86e92") == null){    //// chichi
+
+            new Handler().postDelayed(()->{
+
+                recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").setAdapter(adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92"));   // set the adapter to the recyclerView
+                userRecyclerActiveMap.put("ucdySn50eeRx1iquBilJtYL86e92", true);
+
+                int position = lastPositionPreference.getInt("ucdySn50eeRx1iquBilJtYL86e92", adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92").getItemCount() - 1);
+                recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").scrollToPosition(position-6 + 1);
+
+            },5000);
+        }
+
+        if(userRecyclerActiveMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3") == null){    //// bella
+
+            new Handler().postDelayed(()->{
+
+                recyclerMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3").setAdapter(adapterMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3"));   // set the adapter to the recyclerView
+                userRecyclerActiveMap.put("Qfkxb3jrJEUM6rS8el2VUBQc6WA3", true);
+
+                int position = lastPositionPreference.getInt("Qfkxb3jrJEUM6rS8el2VUBQc6WA3", adapterMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3").getItemCount() - 1);
+                recyclerMap.get("Qfkxb3jrJEUM6rS8el2VUBQc6WA3").scrollToPosition(position-6 + 1);
+
+            },5000);
+        }
+    }
 
     @Override       // run only once    -- also store otherName and otherUid on List
     public void sendRecyclerView(RecyclerView recyclerChat, String otherUid) {
@@ -2616,7 +2693,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     @Override       // run only once
-    public void getMessage(String myUsername, String otherUID, Context mContext_){
+    public void getMessage(String myUsername, String otherUID, Context mContext_, boolean activateRecycler){
 
         constrNetConnect.setVisibility(View.VISIBLE);
 
@@ -2626,13 +2703,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // only alert me if I am not on another call    -- work on this later
         incomingCallObserver(otherUID);
 
-        // delay for 3 secs to allow user chatList to load users first
-        new Handler().postDelayed(()-> {
+//        new Handler().postDelayed(()-> {      // delay for 3 secs to allow user chatList to load users first
 
             try {
-                retrieveMessages(myUsername, otherUID, mContext_);
+                retrieveMessages(myUsername, otherUID, mContext_, activateRecycler);
             } catch (Exception e){
-                Toast.makeText(this, "error occur retriever M2410", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "error occur retriever M2610", Toast.LENGTH_SHORT).show();
                 System.out.println("Error MainActivity L2690: " + e.getMessage());
             }
 
@@ -2642,9 +2718,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             getEmojiReact(otherUID);
             getReadChatResponse(otherUID);
 
-
-
-        }, 3000);
+//        }, 3000);
 
     }
 
@@ -2724,13 +2798,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
 
         // reply setting
-        if(editOrReply == "reply"){
+        if(editOrReply.equals("reply")){
 
             replyVisibility = visible;      // send visible to database to make the replied msg Visible on the UI
 
             replyText = micIconAndDuration_OrChat;
             replyFrom = "From: " + messageModel.getFrom();
-
 //            if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
 //                replyFrom = "From You.";
 //                nameReply.setText(replyFrom);
@@ -3050,6 +3123,29 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     //  ------------    methods     ---------------
 
+    private void addEmptyChatCard(String otherID){
+        if(adapterMap.get(otherID) != null && adapterMap.get(otherID).getItemCount() == 0)
+        {
+            String chatKey = refMsgFast.child(myId).push().getKey();  // create an id for each message
+
+            // save to local list for fast update
+            MessageModel messageModel = new MessageModel(null, null, myId, null,
+                    System.currentTimeMillis(), chatKey, null, 0,
+                    null, 0, 10, null, null, false, false,
+                    null, null, null, null, null, null);
+
+            messageModel.setMyUid(myId);
+
+            // add chat to local list
+            MessageAdapter adapter = adapterMap.get(otherID);
+            adapter.addNewMessageDB(messageModel);  // add new chat
+
+            // save to local ROOM database
+            chatViewModel.insertChat(otherID, messageModel);
+        }
+
+    }
+
     // Check if a string message contains only emojis
     private boolean containsOnlyEmojis(String text) {
         for (int i = 0; i < text.length(); i++) {
@@ -3119,7 +3215,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         messageMap.put("isChatPin", false);
         messageMap.put("isChatForward", false);
 //        messageMap.put("photoUriPath", photoPath);
-
         return messageMap;
     }
 
@@ -3173,6 +3268,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     replyText, delivery, type, null, idKey, false, false,
                     null, emojiOnly, vnPath_, durationVN, null, null);
 
+            messageModel.setMyUid(myId);
             // add chat to local list
             MessageAdapter adapter = adapterMap.get(otherId);
             if(adapter != null){
@@ -3209,6 +3305,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             handlerTyping.removeCallbacks(runnableTyping);
             networkTypingOk = true;
 
+
+            // save to local ROOM database
+            chatViewModel.insertChat(otherId, messageModel);
+
             // send only text chat to other user -- not photo nor file yet
 //            if(!isSendingVoiceNote){
 //                sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
@@ -3216,19 +3316,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //            }
             excutorSendDB.execute(() -> {
 
-                if(!isSendingVoiceNote){
+                if(!isSendingVoiceNote){    // send only text chat, don't sent voice note here
                     sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
                             vnPath_, durationOrSizeVN, chatKey, otherId);
                 }
+                clearInputFields();     // sendMessage
+                isSendingVoiceNote = false; // deactivate voice note boolean not to block sending text
 
             });
-
-            // save to local ROOM database
-            chatViewModel.insertChat(otherId, messageModel);
-
-            // Clear the input field and reset other variables
-            clearInputFields();
-//            AllConstants.executors.execute(() -> { });
 
         }
 
@@ -3259,11 +3354,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         checkAndSaveCounts_SendMsg(otherUid);   // save the number of new message I am sending
     }
 
+    // send forward chat or new photo, video or doc files
     public void sendSharedChat(Context context){
+
         // loop through each user
         int userSize = forwardChatUserId.size();
         for (int i = 0; i < userSize; i++ ) {
             String otherUid = forwardChatUserId.get(i);
+
+            addEmptyChatCard(otherUid); // sending forward chat or new photo, video
 
             // loop through each selected chat
             int chatSize = chatModelList.size();
@@ -3323,8 +3422,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         forwardType, imageSize_, replyId, false, forwardIcon, null,
                         forwardChatEmojiOnly, vnPathFile, audioOrVN_Duration, forwardPhotoPath, photoOriginal);
 
+                messageModel.setMyUid(myId);
+
                 MessageAdapter adapter = adapterMap.get(otherUid);
-                adapter.addNewMessageDB(messageModel);
+                adapter.addNewMessageDB(messageModel);  // onForward
 
                 // scroll to new position only if scrollCheck int is < 20
                 int scrollCheck;
@@ -3346,8 +3447,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 // save to ROOM database
                 chatViewModel.insertChat(otherUid, messageModel);
 
-                // send to database only when there's no photo and VN attach, adapter will do the sending for photo
-                if(forwardPhotoPath == null && vnPathFile == null && forwardType == 0){
+                // send to database only if it's text
+                if(forwardType == 0){
                     refMsgFast.child(otherUid).child(myId).child(chatId).setValue( forwardChatsMap(chatModel, chatId) );
                     // save last msg for outside chat display
                     refLastDetails.child(myId).child(otherUid).setValue(
@@ -3361,6 +3462,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     checkAndSaveCounts_SendMsg(otherUid);
                 }
+
+                // add new photo or video to all photo and video views list
+                if(photoAndVideoMap.get(otherUid) == null) getEachUserAllPhotoAndVideos(otherUid, adapter.getModelList());
+                else MessageAdapter.addNewPhotoOrVideoToViewLists(otherUid, messageModel);
 
                 // find position and move it to top as recent chat... also update the outside chat and ROOM DB
                 ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
@@ -3529,8 +3634,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // send voice note to local list and room only -- adapter will do the sending to other user
                     sendMessage(null, null, 1, fileNamePath, sizeOrDuration, otherUserUid);
 
-                    isSendingVoiceNote = false; // deactivate voice note boolean not to block sending text
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -3653,7 +3756,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         thread.start();
     }
 
-    public void retrieveMessages(String myUsername, String otherUID, Context mContext){
+    public void retrieveMessages(String myUsername, String otherUID, Context mContext, boolean activateRecycler){
 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // send empty List to the adapter
 
@@ -3667,13 +3770,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             if(chatViewModel != null){
                 // fetch chats from ROOM
-                if(chatViewModel.getEachUserChat_(otherUID) != null){
-                    List<MessageModel> getEachUserChats = chatViewModel.getEachUserChat_(otherUID);
+                if(chatViewModel.getEachUserChat_(otherUID, myId) != null){
+                    List<MessageModel> getEachUserChats = chatViewModel.getEachUserChat_(otherUID, myId);
                     adapter.setModelList(getEachUserChats);
-                    modelListMap.put(otherUID, adapter.getModelList());
+
+                    adapter.setFragmentListener((FragmentListener) mContext);
+                    adapterMap.put(otherUID, adapter); // save each user adapter
+
+                    getEachUserAllPhotoAndVideos(otherUID, getEachUserChats);
                 }
 
                 runOnUiThread(() -> {
+
+                    if(activateRecycler) {  // for new user not the list previously
+                        recyclerMap.get(otherUID).setAdapter(adapter);
+                    }
+
                     //  delay for like 2 sec to fetch all old data first
                     new Handler().postDelayed( () -> {
                         // add new message directly to local List and interact with few msg in refMsgFast database
@@ -3698,13 +3810,51 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //        getAllMessages(userName, otherName, modelListAllMsg, msgListNotRead, adapter, otherUID);
 
         adapter.setFragmentListener((FragmentListener) mContext);
-
         adapterMap.put(otherUID, adapter); // save each user adapter
 
-//        recyclerMap.get(otherUID).setAdapter(adapter);
+
 //        recyclerMap.get("ucdySn50eeRx1iquBilJtYL86e92").setAdapter(adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92"));   // set chichi the adapter to the recyclerView
 //        Toast.makeText(mContext, "adapter " + adapterMap.get("ucdySn50eeRx1iquBilJtYL86e92").getItemCount(), Toast.LENGTH_SHORT).show();
     }
+
+    public static void getEachUserAllPhotoAndVideos(String otherUID, List<MessageModel> modelList){
+
+        int count = 0;
+        // Create a list to add the photo
+        List<MessageModel> photoAndVideoModelList = new ArrayList<>();
+
+        // loop through the list to select which one contain the download image
+        for (int i = 0; i < modelList.size(); i++) {
+
+            MessageModel model = modelList.get(i);
+
+            // check if the model is photo or video file
+            if(model.getType() == 2 || model.getType() == 5)
+            {
+                // check if I have downloaded other user photo
+                if(!model.getFromUid().equals(myId) && !model.getPhotoUriOriginal().startsWith("media/video")
+                        && !model.getPhotoUriOriginal().startsWith("media/photos"))
+                {
+                    photoAndVideoModelList.add(model);
+                    filePositionMap.put(model.getIdKey(), count++);
+
+                } else if (model.getFromUid().equals(myId)) {
+                    // add my image -- from my from storage
+                    photoAndVideoModelList.add(model);
+                    filePositionMap.put(model.getIdKey(), count++);
+
+                }
+            }
+
+            if (i == (modelList.size() - 1) && !photoAndVideoModelList.isEmpty())
+            {
+                photoAndVideoMap.put(otherUID, photoAndVideoModelList);
+            }
+
+        }
+
+    }
+
 
     // retrieve the last previous scroll position
     private void getLastScrollPosition(String otherId)
@@ -3797,9 +3947,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
     
     // add new message to local List and interact with few msg in refMsgFast database for delivery and read status
-    private void newMessageInteraction(MessageAdapter adapter, String userId)
+    private void newMessageInteraction(MessageAdapter adapter, String otherId)
     {
-        AllConstants.executors.execute(() -> refMsgFast.child(myId).child(userId)
+        AllConstants.executors.execute(() -> refMsgFast.child(myId).child(otherId)
                 .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -3811,30 +3961,34 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // If there's new message from otherUser, add here
                     if(messageModel.getFromUid() != null){
 
-                        if (messageModel.getFromUid().equals(userId)) {
+                        if (messageModel.getFromUid().equals(otherId))
+                        {
+                            messageModel.setMyUid(myId);
+
+                            addEmptyChatCard(otherId);   // other user sending me chat the first time
                             // add the new msg to the modelList method at MessageAdapter
-                            adapter.addNewMessageDB(messageModel);
+                            adapter.addNewMessageDB(messageModel);  // receiving from other other
                             // add to room database
-                            chatViewModel.insertChat(userId, messageModel);
+                            chatViewModel.insertChat(otherId, messageModel);
                             // find position and move it to top as recent chat // add to outside ROOM
                             ChatListAdapter.getInstance()
-                                    .findUserPositionByUID(userId, messageModel, snapshot1.getKey());
+                                    .findUserPositionByUID(otherId, messageModel, snapshot1.getKey());
 
                             // delete after delivery the chat
-                            refMsgFast.child(myId).child(userId).child(snapshot1.getKey()).removeValue();
+                            refMsgFast.child(myId).child(otherId).child(snapshot1.getKey()).removeValue();
 
                             // update last msg for outside chat display chat
-                            refLastDetails.child(myId).child(userId).child("msgStatus").setValue(0);
+                            refLastDetails.child(myId).child(otherId).child("msgStatus").setValue(0);
 
                             // check recycler position before scrolling
-                            int scrollNumCheck = scrollNumMap.get(userId) == null ? adapter.getItemCount() - 1
-                                    : (int) scrollNumMap.get(userId) ;
+                            int scrollNumCheck = scrollNumMap.get(otherId) == null ? adapter.getItemCount() - 1
+                                    : (int) scrollNumMap.get(otherId) ;
                             int scrollCheck = adapter.getItemCount() - scrollNumCheck;
 
                             // scroll to last position I am inside chat
-                            if(insideChatMap.get(userId) != null) {
-                                if(insideChatMap.get(userId) && scrollCheck < 20){
-                                    scrollToPreviousPosition(userId, (adapter.getItemCount() - 1));     // new message
+                            if(insideChatMap.get(otherId) != null) {
+                                if(insideChatMap.get(otherId) && scrollCheck < 20){
+                                    scrollToPreviousPosition(otherId, (adapter.getItemCount() - 1));     // new message
                                 }
                             }
 
@@ -3847,7 +4001,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             }
                         }
                     } else{
-                        refMsgFast.child(myId).child(userId).child(snapshot1.getKey()).removeValue();
+                        System.out.println("what is deleting " + messageModel.getIdKey());
+                        refMsgFast.child(myId).child(otherId).child(snapshot1.getKey()).removeValue();
+
                     }
                 }
             }
@@ -4701,14 +4857,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
                 MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
                         .get(viewHolder.getAdapterPosition());
 
-                adapterMap.get(otherUserUid).replyChat(modelChats, null);
-                // notify it to reset the adapter in case onSwipe was called
-                adapterMap.get(otherUserUid).notifyDataSetChanged();
-                // close chatOption is visible
-                cancelChatOption();
+                if(modelChats.getType() != 10)
+                {
+                    adapterMap.get(otherUserUid).replyChat(modelChats, null);
+                    // notify it to reset the adapter in case onSwipe was called
+                    adapterMap.get(otherUserUid).notifyDataSetChanged();
+                    // close chatOption is visible
+                    cancelChatOption();
+                }
             }
 
 //            @Override
@@ -4731,21 +4891,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 int screenWidth = recyclerView.getWidth();
                 float quarterScreen = screenWidth * 0.2f;
 
-                // Check if the item is beyond the quarter of the screen and Return 0 to disable both dragging and swiping
-                if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
+                MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
+                        .get(viewHolder.getAdapterPosition());
 
-                    MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
-                            .get(viewHolder.getAdapterPosition());
+                if(modelChats.getType() != 10){
+                    // Check if the item is beyond the quarter of the screen and Return 0 to disable both dragging and swiping
+                    if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
 
-                    adapterMap.get(otherUserUid).replyChat(modelChats, null);
+                        adapterMap.get(otherUserUid).replyChat(modelChats, null);
 
-                    // close chatOption is visible
-                    cancelChatOption();
+                        // close chatOption is visible
+                        cancelChatOption();
 
-                    return 0;
+                        return 0;
+                    } else {
+                        // Allow normal movement
+                        return super.getMovementFlags(recyclerView, viewHolder);
+                    }
+
                 } else {
-                    // Allow normal movement
-                    return super.getMovementFlags(recyclerView, viewHolder);
+                    return 0;
                 }
             }
 
@@ -4753,20 +4918,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
-                // Get the width of the screen
-                int screenWidth = recyclerView.getWidth();
+                MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
+                        .get(viewHolder.getAdapterPosition());
 
-                // Calculate the quarter of the screen
-                float quarterScreen = screenWidth * 0.2f;
+                if(modelChats.getType() != 10) {
 
-                // Check if the item is beyond the quarter of the screen
-                if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
-                    // indicate the colour
-                    viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(viewHolder.itemView.getContext(), R.color.transparent_orangeLow));
+                    // Get the width of the screen
+                    int screenWidth = recyclerView.getWidth();
 
-                } else {
-                    // Reset the background color or remove the indicator
-                    viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                    // Calculate the quarter of the screen
+                    float quarterScreen = screenWidth * 0.2f;
+
+                    // Check if the item is beyond the quarter of the screen
+                    if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
+                        // indicate the colour
+                        viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(viewHolder.itemView.getContext(), R.color.transparent_orangeLow));
+
+                    } else {
+                        // Reset the background color or remove the indicator
+                        viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                    }
                 }
             }
 
@@ -5272,7 +5443,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 if(i == results.size()-1){  // send the document
                                     sharingPhotoActivated = true;
                                     isSharingDocument = true;
-                                    startActivity(new Intent(MainActivity.this, SendImageActivity.class));
+                                    startActivity(new Intent(MainActivity.this, SendImageOrVideoActivity.class));
 //                                    sendSharedChat(MainActivity.this);
                                 }
 
@@ -5736,7 +5907,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         //delete the sign from firebase DB
                         refClearSign.child(otherUid).child(myId).removeValue();
                         // chat all chat from ROOM
-                        chatViewModel.deleteChatByUserId(otherUid);
+                        chatViewModel.deleteChatByUserId(otherUid, myId);
                     }
 
                 }
@@ -5778,21 +5949,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     public void clearInputFields(){
-        nameReply.setVisibility(View.GONE);
-        replyVisible.setVisibility(View.GONE);
-        cardViewReplyOrEdit.setVisibility((int) 8);   // 8 is for GONE
+
+        runOnUiThread(()->{
+            nameReply.setVisibility(View.GONE);
+            replyVisible.setVisibility(View.GONE);
+            cardViewReplyOrEdit.setVisibility((int) 8);   // 8 is for GONE
+            if(replyFrom == null) editTextMessage.setText("");
+            textViewReplyOrEdit.setText("");
+            clearAllHighlights();
+        });
 
         listener = "no";
-        idKey = null;
-        if(replyFrom == null) editTextMessage.setText("");
         replyText = null;
         replyFrom = null;
         idKey = null;
         replyVisibility = 8;
-        textViewReplyOrEdit.setText("");
         messageModel = null;
-
-        clearAllHighlights();
     }
 
     private void clearEmojiReactSetting(){
@@ -5903,7 +6075,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 if(constraintMsgBody.getVisibility() == View.VISIBLE){
                     try{
                         refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
-                        int scroll = scrollNum > 10 ? scrollNum: adapterMap.get(otherUserUid).getItemCount() - 1;
+//                        int scroll = scrollNum > 10 ? scrollNum: adapterMap.get(otherUserUid).getItemCount() - 1;
 
                         Map<String, Object> mapUpdate = new HashMap<>();
                         mapUpdate.put("status", false);
@@ -5911,7 +6083,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
 
                         // save last scroll position to local preference
-                        lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();     // onPause
+                        lastPositionPreference.edit().putInt(otherUserUid, scrollNum).apply();     // onPause
 
                         // Remove the ValueEventListener when the back button is pressed
                         if (chatReadListener != null) {
@@ -6028,12 +6200,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     handlerTyping.removeCallbacks(runnableTyping);
                     networkTypingOk = true;
 
-                    // edit and reply settings cancel
-                    clearInputFields();
-                    // cancel user or clear_chat container if visible
-                    cancelUserDeleteOption();
-                    // hide the pin icons
-                    closePinIcons();
+                    clearInputFields();     //onBackPress- edit and reply settings cancel
+                    cancelUserDeleteOption();   // cancel user or clear_chat container if visible
+                    closePinIcons();        // hide the pin icons
 
                     // highlight send message and new receive message indicator
                     receiveIndicator.setVisibility(View.GONE);
@@ -6052,20 +6221,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     AllConstants.executors.execute(() -> {
 
                         if (otherUserUid != null) {
-                            int scroll = 0;
-                            if (adapterMap.get(otherUserUid) != null) {
-                                scroll = scrollNum > 10 ? scrollNum : adapterMap.get(otherUserUid).getItemCount() - 1;
-                            }
                             Map<String, Object> mapUpdate = new HashMap<>();
                             mapUpdate.put("status", false);
                             mapUpdate.put("newMsgCount", 0);
                             refChecks.child(myId).child(otherUserUid).updateChildren(mapUpdate);
-                            if (scroll > 5) {
-                                // save last scroll position to local preference
-                                lastPositionPreference.edit().putInt(otherUserUid, scroll).apply();     // onBackpress
-
-                                System.out.println("M3052 I have saved scroll " + scroll + " uid: " + otherUserUid);
-                            }
+                            // save last scroll position to local preference
+                            lastPositionPreference.edit().putInt(otherUserUid, scrollNum).apply();     // onBackpress
+                            System.out.println("M3052 I have saved scroll " + scrollNum + " uid: " + otherUserUid);
 
                             // set responds to pend always      ------- will change later to check condition if user is still an active call
 //                    refChecks.child(myId).child(otherUserUid).child("vCallResp").setValue("pending");

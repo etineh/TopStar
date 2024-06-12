@@ -1,6 +1,8 @@
 package com.pixel.chatapp.signup_login;
 
+import static com.pixel.chatapp.home.MainActivity.deviceFirstloginRef;
 import static com.pixel.chatapp.home.MainActivity.nightMood;
+import static com.pixel.chatapp.home.MainActivity.refUsers;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -22,10 +24,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
@@ -68,6 +79,8 @@ public class LinkNumberActivity extends AppCompatActivity {
     String getCodeSent;
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
+    FirebaseUser user = auth.getCurrentUser();
+    DatabaseReference userRef;
 
     CountDownTimer countDownTimer;
 
@@ -90,6 +103,27 @@ public class LinkNumberActivity extends AppCompatActivity {
         spinnerCountryCode = findViewById(R.id.spinnerCountryCode);
         editTextCode = findViewById(R.id.editTextCode);
         progressBarNumber = findViewById(R.id.progressBarNumber);
+
+        userRef = FirebaseDatabase.getInstance().getReference("Users");
+
+//        refUsers.child(user.getUid()).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                if(snapshot.exists()){
+//                    String username = snapshot.child("userName").getValue().toString();
+//                } else {
+//                    Toast.makeText(LinkNumberActivity.this, getString(R.string.userNotFound), Toast.LENGTH_SHORT).show();
+//                    startActivity(new Intent(LinkNumberActivity.this, PhoneLoginActivity.class));
+//                    deviceFirstloginRef.edit().putBoolean(AllConstants.FIRSTTIME, true).apply();
+//                    finish();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
         mCallbacksInitialise(); // for sending otp firebase
 
@@ -143,9 +177,14 @@ public class LinkNumberActivity extends AppCompatActivity {
             if(editTextCode.length() > 5){
                 PhoneUtils.hideKeyboard(this, number_ET);
 
-                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(getCodeSent, editTextCode.getText().toString());
+                try{
+                    PhoneAuthCredential credential = PhoneAuthProvider.getCredential(getCodeSent, editTextCode.getText().toString());
 
-                createAccount(credential);  // verify button onClick
+                    loginAccount(credential);  // verify button onClick
+                } catch (Exception e){
+                    System.out.println("what is error linkNumberActivity L190: " + e.getMessage());
+                    Toast.makeText(this, getString(R.string.errorOccur), Toast.LENGTH_SHORT).show();
+                }
 
             } else Toast.makeText(this, getText(R.string.invalidOTP), Toast.LENGTH_SHORT).show();
         });
@@ -157,7 +196,8 @@ public class LinkNumberActivity extends AppCompatActivity {
         });
         
         support_IV.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            verifyDatabaseConnection();
+//            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
         });
 
         getOnBackPressedDispatcher().addCallback(callback);
@@ -166,6 +206,33 @@ public class LinkNumberActivity extends AppCompatActivity {
 
 
     //  ======  methods
+
+    private void verifyDatabaseConnection()     // method to test database or internet connection
+    {
+        try {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference(".info/connected");
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                    Boolean connected = dataSnapshot.getValue(Boolean.class);
+                    if (Boolean.TRUE.equals(connected)) {
+                        Toast.makeText(LinkNumberActivity.this, "Successfully connected to Firebase Database", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LinkNumberActivity.this, "Failed to connect to Firebase Database", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(LinkNumberActivity.this, "Error verifying Firebase connection: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("what is Unexpected error during Firebase connection verification: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     private int setSpinnerCountryCOdeAdapter(){
 
@@ -213,7 +280,7 @@ public class LinkNumberActivity extends AppCompatActivity {
 
             @Override
             public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-                createAccount(phoneAuthCredential); // callback
+                loginAccount(phoneAuthCredential); // callback
             }
 
             @Override
@@ -231,106 +298,140 @@ public class LinkNumberActivity extends AppCompatActivity {
         };
     }
 
-    private void createAccount(PhoneAuthCredential credential) {
+    private void loginAccount(PhoneAuthCredential credential) {
 
         verifyOTP.setVisibility(View.INVISIBLE);
         progressBarLink.setVisibility(View.VISIBLE);
         codeError_TV.setVisibility(View.GONE);
 
-        auth.signInWithCredential(credential).addOnCompleteListener(task -> {
-            codeError_TV.setVisibility(View.VISIBLE);
-            codeError_TV.setText(null);
-
-            if (task.isSuccessful()) {
-
-                loginApi();
-
-            } else if (task.getException().getMessage().contains("expired"))
+        user.linkWithCredential(credential).addOnCompleteListener(this, task1 ->    // link number
+        {
+            if (task1.isSuccessful())   // sign in with number
             {
-                codeError_TV.setText(getString(R.string.smsCodeExpired));
-                progressBarLink.setVisibility(View.GONE);
-                verifyOTP.setVisibility(View.VISIBLE);
+                auth.signInWithCredential(credential).addOnCompleteListener(task -> {   // login with the credential
+                    codeError_TV.setVisibility(View.VISIBLE);
+                    codeError_TV.setText(null);
 
-            }  else if (task.getException().getMessage().contains("SMS/TOTP is invalid"))
-            {
-                codeError_TV.setText(getString(R.string.invalidOTP));
-                progressBarLink.setVisibility(View.GONE);
-                verifyOTP.setVisibility(View.VISIBLE);
+                    if (task.isSuccessful()) {
+                        loginApi();
+                    } else {
+                        handleSignInError(task.getException());
+                    }
 
-            } else if (task.getException().getMessage().contains("timeout"))
-            {
-                codeError_TV.setText(getString(R.string.isNetwork));
-                progressBarLink.setVisibility(View.GONE);
-                verifyOTP.setVisibility(View.VISIBLE);
-
+                }).addOnFailureListener(e -> {
+                    codeError_TV.setVisibility(View.VISIBLE);
+                    codeError_TV.setText(getString(R.string.errorOccur));
+                    progressBarLink.setVisibility(View.GONE);
+                });
             } else {
-                codeError_TV.setText(getString(R.string.errorOccur));
-                progressBarLink.setVisibility(View.GONE);
-                verifyOTP.setVisibility(View.VISIBLE);
-
+                Toast.makeText(this, "Error linking phone number", Toast.LENGTH_SHORT).show();
             }
-
-        }).addOnFailureListener(e -> {
-            codeError_TV.setVisibility(View.VISIBLE);
-            codeError_TV.setText(getString(R.string.errorOccur));
-            progressBarLink.setVisibility(View.GONE);
         });
 
     }
 
+    // Handle sign-in errors
+    private void handleSignInError(Exception exception) {
+        progressBarLink.setVisibility(View.GONE);
+        verifyOTP.setVisibility(View.VISIBLE);
+
+        if (exception != null) {
+            String message = exception.getMessage();
+            if (message != null) {
+                if (message.contains("expired")) {
+                    codeError_TV.setText(getString(R.string.smsCodeExpired));
+                } else if (message.contains("SMS/TOTP is invalid")) {
+                    codeError_TV.setText(getString(R.string.invalidOTP));
+                } else if (message.contains("timeout")) {
+                    codeError_TV.setText(getString(R.string.isNetwork));
+                } else {
+                    codeError_TV.setText(getString(R.string.errorOccur));
+                }
+            } else {
+                codeError_TV.setText(getString(R.string.errorOccur));
+            }
+        } else {
+            codeError_TV.setText(getString(R.string.errorOccur));
+        }
+    }
+
     private void loginApi() {
 
-        UserDao userDao = AllConstants.retrofit.create(UserDao.class);
-
-        LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), finalCodeNumber);
-
-        userDao.login(loginDetailM).enqueue(new Callback<ResultApiM>() {
+        refUsers.child(user.getUid()).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onResponse(Call<ResultApiM> call, Response<ResultApiM> response) {
+            public void onDataChange(@NonNull DataSnapshot snapshot)    // get the username
+            {
+                if(snapshot.exists())
+                {
+                    String myUsername = snapshot.child("userName").getValue().toString();
 
-                if(response.isSuccessful()){
+                    UserDao userDao = AllConstants.retrofit.create(UserDao.class);
 
-                    close = 0;
-                    getOnBackPressedDispatcher().onBackPressed();
-                    Toast.makeText(LinkNumberActivity.this, getString(R.string.loginSuccessful), Toast.LENGTH_SHORT).show();
+                    LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), finalCodeNumber, user.getEmail(), myUsername);
+
+                    userDao.login(loginDetailM).enqueue(new Callback<ResultApiM>() {
+                        @Override
+                        public void onResponse(Call<ResultApiM> call, Response<ResultApiM> response) {
+
+                            if(response.isSuccessful()){
+
+                                startActivity(new Intent(LinkNumberActivity.this, MainActivity.class));
+                                Toast.makeText(LinkNumberActivity.this, getString(R.string.loginSuccessful), Toast.LENGTH_SHORT).show();
+                                finish();
+
+                            } else {
+
+                                try {
+                                    String error = response.errorBody().string();
+
+                                    JsonObject jsonObject = new Gson().fromJson(error, JsonObject.class);
+                                    String message = jsonObject.get("message").getAsString();
+
+                                    codeError_TV.setVisibility(View.VISIBLE);
+                                    codeError_TV.setText(message);
+
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResultApiM> call, Throwable throwable) {
+
+                            verifyOTP.setVisibility(View.VISIBLE);
+                            progressBarLink.setVisibility(View.GONE);
+                            codeError_TV.setVisibility(View.VISIBLE);
+
+                            if(throwable.getMessage().contains("Failed to connect")) {  // server error
+                                codeError_TV.setText(getString(R.string.serverError));
+
+                            } else{     // no internet connection | timeout
+                                codeError_TV.setText(getString(R.string.isNetwork));
+                            }
+
+                            System.out.println("what is err CreateAcc: L220 " + throwable.getMessage());
+
+                        }
+                    });
 
                 } else {
-
-                    try {
-                        String error = response.errorBody().string();
-
-                        JsonObject jsonObject = new Gson().fromJson(error, JsonObject.class);
-                        String message = jsonObject.get("message").getAsString();
-
-                        codeError_TV.setVisibility(View.VISIBLE);
-                        codeError_TV.setText(message);
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
+                    Toast.makeText(LinkNumberActivity.this, getString(R.string.userNotFound), Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LinkNumberActivity.this, PhoneLoginActivity.class));
+                    deviceFirstloginRef.edit().putBoolean(AllConstants.FIRSTTIME, true).apply();
+                    finish();
                 }
-
             }
 
             @Override
-            public void onFailure(Call<ResultApiM> call, Throwable throwable) {
-
-                verifyOTP.setVisibility(View.VISIBLE);
-                progressBarLink.setVisibility(View.GONE);
-                codeError_TV.setVisibility(View.VISIBLE);
-
-                if(throwable.getMessage().contains("Failed to connect")) {  // server error
-                    codeError_TV.setText(getString(R.string.serverError));
-
-                } else{     // no internet connection | timeout
-                    codeError_TV.setText(getString(R.string.isNetwork));
-                }
-
-                System.out.println("what is err CreateAcc: L220 " + throwable.getMessage());
-
+            public void onCancelled(@NonNull DatabaseError error) {
+                System.out.println("what is error: " + error.getMessage());
+                Toast.makeText(LinkNumberActivity.this, getString(R.string.errorOccur), Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     private void checkPhoneNumber(){
@@ -342,6 +443,11 @@ public class LinkNumberActivity extends AppCompatActivity {
             progressBarNumber.setVisibility(View.VISIBLE);
             sendCode_TV.setVisibility(View.INVISIBLE);
             codeError_TV.setVisibility(View.GONE);
+
+            if(!countryCode.startsWith("+")){   // (NG) +234
+                String[] splitCode = countryCode.split(" ");
+                countryCode = splitCode[1];
+            }
 
             String countryCodeNumber = countryCode + number;
 
@@ -364,7 +470,7 @@ public class LinkNumberActivity extends AppCompatActivity {
                         codeError_TV.setVisibility(View.VISIBLE);
                         codeError_TV.setText(R.string.phoneNumberExist__);
 
-                    } else {    // user not found, go to create account page
+                    } else {    // user/number not found, proceed to sending code for verification and number link up
 
                         try {
                             String error = response.errorBody().string();

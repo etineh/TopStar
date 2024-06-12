@@ -1,75 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/senderLayerContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="10dp"
-    android:paddingTop="2dp"
-    android:paddingEnd="2dp"
-    android:paddingBottom="1dp">
+    android:paddingStart="5dp"
+    android:paddingTop="3dp"
+    android:paddingEnd="60dp"
+    android:paddingBottom="5dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        style="@style/card"
+        style="@style/chatReceiveContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
         android:padding="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/documentContainer"
+        <TextView
+            android:id="@+id/holdinglengthTV"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:background="@color/dark_orange2"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/photoChatSender_TV"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <ImageView
-                android:id="@+id/document_IV"
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:layout_marginBottom="5dp"
-                app:layout_constraintBottom_toTopOf="@id/documentDetails_TV"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:srcCompat="@drawable/light" />
-
-            <TextView
-                android:id="@+id/documentDetails_TV"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:ellipsize="end"
-                android:maxLines="4"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:textColor="@color/cool_orange"
-                android:textSize="13sp"
-                android:textStyle="italic"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/imageView10" />
-
-            <ImageView
-                android:id="@+id/imageView10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                app:layout_constraintBottom_toBottomOf="@+id/documentDetails_TV"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/documentDetails_TV"
-                app:srcCompat="@drawable/baseline_document_scanner_24" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/linearLayoutReplyBox_PS"
-            style="@style/card"
+            style="@style/replyBackground2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -80,7 +40,7 @@
 
             <TextView
                 android:id="@+id/senderNameTV_PS"
-                style="@style/appName"
+                style="@style/replyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -116,6 +76,30 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayoutReplyBox_PS">
 
+            <TextView
+                android:id="@+id/videoDuration_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_margin="5dp"
+                android:background="@color/transBlack50"
+                android:elevation="2dp"
+                android:padding="2dp"
+                android:text="00:23"
+                android:textColor="@color/whitePure"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/playVideoIcon_IV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/msg_count"
+                android:elevation="2dp"
+                android:padding="5dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/baseline_play_arrow_24" />
+
             <ImageView
                 android:id="@+id/photoCardSender"
                 android:layout_width="250dp"
@@ -123,7 +107,56 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="3dp"
                 android:scaleType="centerCrop" />
+
         </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/documentContainer"
+            style="@style/card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/photoChatSender_TV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/document_IV"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginBottom="5dp"
+                app:layout_constraintBottom_toTopOf="@id/documentDetails_TV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/documentDetails_TV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:ellipsize="end"
+                android:maxLines="4"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textSize="13sp"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/imageView10" />
+
+            <ImageView
+                android:id="@+id/imageView10"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/documentDetails_TV"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/documentDetails_TV"
+                app:srcCompat="@drawable/baseline_document_scanner_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/photoChatSender_TV"

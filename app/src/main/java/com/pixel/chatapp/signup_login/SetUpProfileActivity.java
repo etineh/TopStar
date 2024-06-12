@@ -1,5 +1,6 @@
 package com.pixel.chatapp.signup_login;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -56,7 +57,6 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
     private Button setUpButton;
     ProgressBar progressBarSetUp, progressBarSearch;
     TextView textViewImage, checkUsername_TV;
-    Uri imageUri;
     private static String imageLink;
     private Boolean imageCheck = false;
     FirebaseAuth auth;
@@ -115,7 +115,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
         textViewImage.setOnClickListener(view -> imageChooser());
 
         setUpButton.setOnClickListener(view -> {
-
+//auth.signOut();
             String email = editTextEmailRegister.getText().toString();
             String password = editTextPasswordRegister.getText().toString();
             String username = editTextUsername.getText().toString();
@@ -161,6 +161,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
 
         });
 
+        getOnBackPressedDispatcher().addCallback(callback);
     }
 
 
@@ -317,17 +318,18 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if(close == 0){
-            Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-            close = 1;
-            new Handler().postDelayed( ()-> close = 0, 5_000);
-        } else {
-            super.onBackPressed();
-            finish();
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(close == 0){
+                Toast.makeText(SetUpProfileActivity.this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
+            } else {
+                finish();
+            }
         }
-    }
+    };
 
     // ====     image interface
     @Override

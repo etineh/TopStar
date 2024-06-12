@@ -807,7 +807,6 @@
         android:clickable="true"
         android:elevation="5dp"
         android:gravity="center_vertical"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/returnBackToCAll">
@@ -927,7 +926,7 @@
 
         <TextView
             android:id="@+id/isTyping_TV"
-            style="@style/textColorFullBlack"
+            style="@style/textColorWhiteAndCoolOrange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="11sp"
@@ -955,7 +954,6 @@
         style="@style/ChatBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -1218,7 +1216,6 @@
             android:id="@+id/chatBoxContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/trans"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -1301,10 +1298,10 @@
                 android:id="@+id/constraintLayoutAdjust"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="800dp"
+                android:layout_marginBottom="801dp"
                 android:background="@color/light_orange"
                 android:elevation="30dp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
                 app:layout_constraintEnd_toEndOf="@+id/constraintRecyler"
                 app:layout_constraintStart_toStartOf="parent"
@@ -1313,13 +1310,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintRecyler"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginStart="6dp"
-                android:layout_marginBottom="7dp"
-                app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayoutAdjust">
+                android:layout_height="794dp"
+                tools:layout_editor_absoluteX="6dp">
 
                 <ProgressBar
                     android:id="@+id/progressBarLoadChats"
@@ -1569,7 +1561,7 @@
                     android:id="@+id/fab9"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
                     android:padding="7dp"
@@ -1584,7 +1576,7 @@
                     android:layout_height="45dp"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
                     android:elevation="3dp"
@@ -1701,7 +1693,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/firstTopContainer">
@@ -1724,7 +1715,7 @@
                 android:paddingRight="5dp"
                 android:text="@string/newMsg"
                 android:textColor="@color/white"
-                android:textSize="8dp"
+                android:textSize="9dp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toTopOf="@id/pinsPublic_IV"
                 app:layout_constraintLeft_toLeftOf="@id/pinsPublic_IV"
@@ -1833,7 +1824,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="3dp"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -1841,14 +1831,50 @@
 
             <ImageView
                 android:id="@+id/pinClose_IV"
-                android:layout_width="20dp"
-                android:layout_height="15dp"
-                android:layout_marginBottom="-2dp"
-                app:layout_constraintBottom_toTopOf="@+id/view_IV"
+                android:layout_width="15dp"
+                android:layout_height="@dimen/_15dp"
+                android:layout_marginTop="2dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/pinByWho_TV"
                 app:layout_constraintEnd_toEndOf="@+id/view_IV"
                 app:layout_constraintStart_toStartOf="@+id/view_IV"
+                app:layout_constraintTop_toTopOf="@+id/pinByWho_TV"
+                app:srcCompat="@drawable/baseline_push_pin_24"
+                app:tint="#FF5722" />
+
+            <ImageView
+                android:id="@+id/closePinBox_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_cancel_24"
                 app:tint="#FF5722" />
+
+            <TextView
+                android:id="@+id/pinByWho_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:text="Noble"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@+id/linearLayout4"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lineEnd"
+                android:layout_width="2dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/cool_orange"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/closePinBox_TV"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/line4"
@@ -1858,21 +1884,19 @@
                 android:background="@color/cool_orange"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/downArrow_IV"
-                app:layout_constraintTop_toTopOf="parent">
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <LinearLayout
                 android:id="@+id/linearLayout4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="7dp"
-                android:layout_marginEnd="5dp"
                 android:layout_marginBottom="5dp"
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/pinCount_TV"
-                app:layout_constraintStart_toEndOf="@id/view_IV">
+                app:layout_constraintEnd_toStartOf="@+id/pinCount_TV"
+                app:layout_constraintStart_toEndOf="@id/view_IV"
+                app:layout_constraintTop_toBottomOf="@+id/pinByWho_TV">
 
                 <TextView
                     android:id="@+id/pinMsg_TV"
@@ -1881,7 +1905,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:lines="1"
-                    android:text="A pin message" />
+                    android:text="A pin message going to be here I can see it" />
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -1901,21 +1925,13 @@
                 style="@style/BackgroundTintOrange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                app:layout_constraintBottom_toBottomOf="@+id/view_IV"
+                android:layout_marginStart="10dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/view_IV"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_arrow_downward_24" />
-
-            <TextView
-                android:id="@+id/pinByWho_TV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="from"
-                app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
-                app:layout_constraintStart_toStartOf="@+id/linearLayout4" />
 
             <ImageView
                 android:id="@+id/view_IV"
@@ -1927,23 +1943,15 @@
                 app:layout_constraintTop_toTopOf="@+id/linearLayout4"
                 app:srcCompat="@drawable/baseline_disabled_visible_view_24" />
 
-            <ImageView
-                android:id="@+id/pinIV"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                app:layout_constraintEnd_toStartOf="@id/line3"
-                app:layout_constraintTop_toTopOf="@+id/linearLayout4"
-                app:srcCompat="@drawable/baseline_push_pin_24" />
-
             <TextView
                 android:id="@+id/pinCount_TV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="3dp"
                 android:text="(1/200)"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                app:layout_constraintRight_toLeftOf="@id/pinIV"
+                app:layout_constraintEnd_toStartOf="@+id/line3"
                 app:layout_constraintTop_toTopOf="@+id/linearLayout4" />
 
             <ImageView
@@ -1951,10 +1959,12 @@
                 style="@style/BackgroundTintOrange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/linearLayout4"
+                android:layout_marginEnd="5dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/lineEnd"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/baseline_arrow_upward_24" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

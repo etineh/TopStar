@@ -3,6 +3,7 @@ package com.pixel.chatapp.model;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ public class MessageModel implements Serializable {
     @NonNull
     private String idKey;
 
+    private String myUid;
     private String fromUid;
     private String message;
     private String emojiOnly;
@@ -77,6 +79,14 @@ public class MessageModel implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getMyUid() {
+        return myUid;
+    }
+
+    public void setMyUid(String myUid) {
+        this.myUid = myUid;
     }
 
     public String getFrom() {

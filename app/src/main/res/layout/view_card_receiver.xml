@@ -5,7 +5,8 @@
     android:id="@+id/constraintBodyReceive"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="10dp"
+    android:layout_marginTop="2dp"
+    android:paddingStart="5dp"
     android:paddingEnd="60dp">
 
     <TextView
@@ -134,8 +135,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chatContainerR"
-        style="@style/card"
-        android:layout_width="wrap_content"
+        style="@style/chatReceiveContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="3dp"
         android:paddingRight="5dp"
@@ -160,6 +161,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="-15dp"
+            android:text="3:10"
             android:textSize="11sp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/seekBarMusicProgress2"
@@ -168,7 +170,7 @@
 
         <SeekBar
             android:id="@+id/seekBarMusicProgress2"
-            android:layout_width="170dp"
+            android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
@@ -177,6 +179,7 @@
             android:thumbTint="@color/orange"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/textViewChatTime2"
+            app:layout_constraintEnd_toStartOf="@+id/speedTV_R"
             app:layout_constraintStart_toEndOf="@+id/pauseAndPlay_IV2"
             app:layout_constraintTop_toBottomOf="@+id/linearClickReply2" />
 
@@ -198,7 +201,6 @@
             style="@style/roundBackgroundAndTint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="7dp"
             android:elevation="3dp"
             android:paddingStart="15dp"
             android:paddingTop="3dp"
@@ -208,7 +210,7 @@
             android:textColor="@color/white"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/seekBarMusicProgress2"
-            app:layout_constraintStart_toEndOf="@+id/seekBarMusicProgress2"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/minuteTV2" />
 
         <ProgressBar
@@ -229,7 +231,7 @@
 
         <LinearLayout
             android:id="@+id/linearClickReply2"
-            style="@style/ChatMsgContainer"
+            style="@style/replyBackground2"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="-20dp"
@@ -241,7 +243,7 @@
 
         <LinearLayout
             android:id="@+id/linearLayoutReplyBox2"
-            style="@style/ChatMsgContainer"
+            style="@style/replyBackground2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"

@@ -4,12 +4,14 @@ public class LoginDetailM {
 
     private final String uid;
     private final String number;
-//    private final String token;
+    private final String email;
+    private final String username;
 
-    public LoginDetailM(String uid, String number /** String token */) {
+    public LoginDetailM(String uid, String number, String email, String username) {
         this.uid = uid;
         this.number = number;
-//        this.token = token;
+        this.email = email;
+        this.username = username;
     }
 
     public String getUid() {
@@ -20,8 +22,12 @@ public class LoginDetailM {
         return number;
     }
 
-//    public String getToken() {
-//        return token;
-//    }
+    public String getEmail() {
+        return email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }
 

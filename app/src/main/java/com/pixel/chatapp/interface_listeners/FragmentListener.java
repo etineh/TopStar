@@ -20,7 +20,7 @@ public interface FragmentListener {
 
     void sendRecyclerView(RecyclerView recyclerChat, String otherUid);
 
-    void getMessage(String userName, String uID, Context mContext);
+    void getMessage(String userName, String uID, Context mContext, boolean activateRecycler);
 
     void getLastSeenAndOnline(String otherUid, Context context);
 

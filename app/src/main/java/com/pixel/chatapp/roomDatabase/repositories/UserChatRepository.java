@@ -175,25 +175,24 @@ public class UserChatRepository {
 
     }
 
-    public void deleteChatsByUserId(String otherId){
+    public void deleteChatsByUserId(String otherId, String myId){
 
         executors.execute(new Runnable() {
             @Override
             public void run() {
-                userChatDao.deleteUserChatsById(otherId);
+                userChatDao.deleteUserChatsById(otherId, myId);
             }
         });
 
     }
 
-    public List<UserOnChatUI_Model> getUsers(){
-//        System.out.println("what is the re " + userChatDao.getEachUser().size());
-        return userChatDao.getEachUser();
+    public List<UserOnChatUI_Model> getUsers(String myUid){
+        return userChatDao.getEachUser(myUid);
     }
 
     // get all the chats of each user
-    public List<MessageModel> getEachUserChats_(String userUID){
-        return userChatDao.getEachUserChat_(userUID);
+    public List<MessageModel> getEachUserChats_(String userUID, String myUid){
+        return userChatDao.getEachUserChat_(userUID, myUid);
     }
 
 }

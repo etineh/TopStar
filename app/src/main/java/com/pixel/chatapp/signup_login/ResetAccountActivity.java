@@ -1,5 +1,6 @@
 package com.pixel.chatapp.signup_login;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +19,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.OTPActivity;
 import com.pixel.chatapp.all_utils.IdTokenUtil;
+import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 public class ResetAccountActivity extends AppCompatActivity {
 
@@ -43,10 +46,12 @@ public class ResetAccountActivity extends AppCompatActivity {
         support_IV = findViewById(R.id.support_IV);
 
 
-        arrowBack_IV.setOnClickListener(v -> onBackPressed());
+        arrowBack_IV.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         support_IV.setOnClickListener(v -> {
-            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, SupportActivity.class);
+            intent.putExtra("reason", "reset account issue");
+            OpenActivityUtil.openColorHighlight(v, this, intent);
         });
 
 
@@ -97,6 +102,7 @@ public class ResetAccountActivity extends AppCompatActivity {
 
         });
 
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -105,19 +111,17 @@ public class ResetAccountActivity extends AppCompatActivity {
     //  =========== methods =========
 
 
-
-
-    @Override
-    public void onBackPressed() {
-        if(close == 0){
-            Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-            close = 1;
-            new Handler().postDelayed( ()-> close = 0, 5_000);
-        } else {
-            super.onBackPressed();
-            finish();
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(close == 0){
+                Toast.makeText(ResetAccountActivity.this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
+            } else {
+                finish();
+            }
         }
-    }
-
+    };
 
 }

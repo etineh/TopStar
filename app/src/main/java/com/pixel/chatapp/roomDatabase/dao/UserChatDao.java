@@ -43,8 +43,8 @@ public interface UserChatDao {
     @Query("DELETE FROM usersOnChatUI WHERE otherUid = :otherUid")
     void deleteUserById(String otherUid);
 
-    @Query("SELECT * FROM usersOnChatUI ORDER BY timeSent DESC")
-    List<UserOnChatUI_Model> getEachUser();
+    @Query("SELECT * FROM usersOnChatUI WHERE myUid = :myUid ORDER BY timeSent DESC")
+    List<UserOnChatUI_Model> getEachUser(String myUid);
 
 
 
@@ -83,11 +83,11 @@ public interface UserChatDao {
     void deleteChat(MessageModel chatModel);
 
     // Delete a user chats based on the id
-    @Query("DELETE FROM chats WHERE id = :id")
-    void deleteUserChatsById(String id);
+    @Query("DELETE FROM chats WHERE id = :id AND myUid = :myId")
+    void deleteUserChatsById(String id, String myId);
 
     // get the chats of each user based on the id
-    @Query("SELECT * FROM chats WHERE id = :userUid")
-    List<MessageModel> getEachUserChat_(String userUid);
+    @Query("SELECT * FROM chats WHERE id = :userUid AND myUid = :myId")
+    List<MessageModel> getEachUserChat_(String userUid, String myId);
 
 }

@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.pixel.chatapp.photos.SendImageActivity;
+import com.pixel.chatapp.photos.SendImageOrVideoActivity;
 import com.pixel.chatapp.home.MainActivity;
 
 public class AppLifecycleHandler implements Application.ActivityLifecycleCallbacks {
@@ -22,7 +22,7 @@ public class AppLifecycleHandler implements Application.ActivityLifecycleCallbac
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         // delay for 3 sec to get the initial state of the isAppActive before activity loads
         new Handler().postDelayed(() -> isAppActive = true, 3000);
-        if (activity.getClass() != RedirectHome.class && activity.getClass() != SendImageActivity.class && activity.getClass() != MainActivity.class) {
+        if (activity.getClass() != RedirectHome.class && activity.getClass() != SendImageOrVideoActivity.class && activity.getClass() != MainActivity.class) {
             if(!sharing) currentActivity = activity.getClass();
         }
     }
@@ -42,7 +42,7 @@ public class AppLifecycleHandler implements Application.ActivityLifecycleCallbac
     @Override
     public void onActivityPaused(Activity activity) {
         // don't change if activity is Home Direct or send
-        if (activity.getClass() != RedirectHome.class && activity.getClass() != SendImageActivity.class) {
+        if (activity.getClass() != RedirectHome.class && activity.getClass() != SendImageOrVideoActivity.class) {
             if(!sharing) {  // this will prevent Main Activity from replacing the previous activity till user finish sharing the photo
                 currentActivity = activity.getClass();
             }

@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.photos.SendImageActivity;
 import com.pixel.chatapp.constants.AllConstants;
 
 import java.io.IOException;
@@ -76,17 +75,17 @@ public class ImagePainter {
         path.moveTo(x, y);
 
         if(!isFirstPaint){   // don't add bitmap to list and don't save image when user draw first time
-            Uri uri = SendImageActivity.savePaintPhotoUri(context, SendImageActivity.paintedBitmap);
+            Uri uri = SendImageOrVideoActivity.savePaintPhotoUri(context, SendImageOrVideoActivity.paintedBitmap);
             Bitmap uriToBitmap;
             try {
                 uriToBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
                 bitmapList.add(uriToBitmap);    // to enable displaying the the previous image/bitmap when user undo
-                SendImageActivity.tempUri.add(uri.toString()); // to enable deleting from app memory when done painting
-                SendImageActivity.allOldUriList.add(uri.toString());    // for sharePreference deleting in case goes offline
-                SendImageActivity.undoPaint_IV.setColorFilter(0);
+                SendImageOrVideoActivity.tempUri.add(uri.toString()); // to enable deleting from app memory when done painting
+                SendImageOrVideoActivity.allOldUriList.add(uri.toString());    // for sharePreference deleting in case goes offline
+                SendImageOrVideoActivity.undoPaint_IV.setColorFilter(0);
 
                 // save edited photo uri to sharePref via gson to enable app first launch onCreate to delete the photos in case photo was not deleted
-                String json = gson.toJson(SendImageActivity.allOldUriList);
+                String json = gson.toJson(SendImageOrVideoActivity.allOldUriList);
                 unusedPhotoShareRef.edit().putString(AllConstants.OLD_URI_LIST, json).apply();
 
             } catch (IOException e) {
@@ -139,7 +138,7 @@ public class ImagePainter {
         } else {
             // change the undo button color
             int fadedOrangeColor = ContextCompat.getColor(context, R.color.transparent_orange);
-            SendImageActivity.undoPaint_IV.setColorFilter(fadedOrangeColor);
+            SendImageOrVideoActivity.undoPaint_IV.setColorFilter(fadedOrangeColor);
             // reset the image
             canvas.drawBitmap(currentBitmap, 0, 0, paint);
         }

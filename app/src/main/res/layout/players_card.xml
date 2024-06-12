@@ -17,9 +17,9 @@
 
         <TextView
             android:id="@+id/lineH"
-            style="@style/roundRadiusBackground2"
+            style="@style/recyclerBackground"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="2dp"
             android:layout_marginTop="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -40,7 +40,7 @@
 
         <TextView
             android:id="@+id/playerName_TV"
-            style="@style/textColorFullBlack"
+            style="@style/textColorBlack_CoolOrange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -55,7 +55,7 @@
 
         <TextView
             android:id="@+id/gameType_TV"
-            style="@style/textColorFullBlack"
+            style="@style/TV_black_defualtWhite"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -71,7 +71,7 @@
 
         <TextView
             android:id="@+id/mode_TV"
-            style="@style/textColorFullBlack"
+            style="@style/TV_black_defualtWhite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
@@ -91,10 +91,10 @@
 
         <TextView
             android:id="@+id/playOnclick"
+            style="@style/roundButtonBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
-            android:background="@drawable/round_radius_orange"
             android:padding="5dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
@@ -117,7 +117,7 @@
 
         <TextView
             android:id="@+id/stakeAmount_TV"
-            style="@style/textColorFullBlack"
+            style="@style/TV_black_defualtWhite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"

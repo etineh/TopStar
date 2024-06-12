@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="60dp"
-    android:paddingEnd="10dp"
+    android:paddingEnd="5dp"
     android:textAlignment="center">
 
     <TextView
@@ -142,7 +142,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chatContainerS"
         style="@style/ChatMsgContainer"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="3dp"
         android:paddingLeft="5dp"
@@ -152,7 +152,7 @@
 
         <LinearLayout
             android:id="@+id/linearClickReply1"
-            style="@style/card"
+            style="@style/replyBackground1"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
@@ -163,7 +163,7 @@
 
         <LinearLayout
             android:id="@+id/linearLayoutReplyBox"
-            style="@style/card"
+            style="@style/replyBackground1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
@@ -175,7 +175,7 @@
 
             <TextView
                 android:id="@+id/senderNameTV"
-                style="@style/appName"
+                style="@style/replyName2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -247,7 +247,7 @@
 
         <SeekBar
             android:id="@+id/seekBarMusicProgress"
-            android:layout_width="170dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
@@ -257,9 +257,9 @@
             android:paddingBottom="10dp"
             android:progressTint="@color/orange"
             android:thumbTint="@color/orange"
-            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/imageViewSeen"
             app:layout_constraintEnd_toStartOf="@+id/imageViewOptions"
+            app:layout_constraintStart_toEndOf="@+id/pauseAndPlay_IV"
             app:layout_constraintTop_toBottomOf="@id/linearLayoutReplyBox" />
 
         <TextView
@@ -267,6 +267,7 @@
             style="@style/roundBackgroundAndTint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
             android:elevation="3dp"
             android:paddingLeft="10dp"
             android:paddingTop="3dp"
@@ -274,9 +275,9 @@
             android:paddingBottom="5dp"
             android:text="1.5x"
             android:textColor="@color/white"
-            android:visibility="gone"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/cirleDownload"
-            app:layout_constraintEnd_toStartOf="@id/pauseAndPlay_IV"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/cirleDownload" />
 
         <ProgressBar
@@ -319,7 +320,7 @@
             android:layout_height="40dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/seekBarMusicProgress"
-            app:layout_constraintEnd_toStartOf="@+id/seekBarMusicProgress"
+            app:layout_constraintStart_toEndOf="@+id/speedTV_S"
             app:layout_constraintTop_toTopOf="@+id/seekBarMusicProgress"
             app:srcCompat="@drawable/baseline_play_arrow_24" />
 
@@ -332,7 +333,7 @@
             android:textSize="11sp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/seekBarMusicProgress"
-            app:layout_constraintEnd_toEndOf="@+id/seekBarMusicProgress"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewOptions"
             app:layout_constraintStart_toStartOf="@+id/seekBarMusicProgress" />
 
         <ImageView

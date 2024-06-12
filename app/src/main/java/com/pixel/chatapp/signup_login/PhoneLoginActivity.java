@@ -21,10 +21,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.all_utils.CountryNumCodeUtils;
+import com.pixel.chatapp.all_utils.OpenActivityUtil;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,7 +80,7 @@ public class PhoneLoginActivity extends AppCompatActivity {
 
         spinnerListener();
 
-        new Handler().postDelayed(()-> number_ET.requestFocus(), 500);
+        new Handler().postDelayed(()-> number_ET.requestFocus(), 1000);
 
         openCountryCode_TV.setOnClickListener(v -> {
 
@@ -105,7 +107,9 @@ public class PhoneLoginActivity extends AppCompatActivity {
         supportLogin.setOnClickListener(v -> {
             v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->{
 
-                Toast.makeText(this,  getString(R.string.inProgress), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, SupportActivity.class);
+                intent.putExtra("reason", "phone number login issue");
+                OpenActivityUtil.openColorHighlight(v, this, intent);
 
             });
         });
@@ -138,6 +142,11 @@ public class PhoneLoginActivity extends AppCompatActivity {
             proceedButton.setVisibility(View.INVISIBLE);
             errorInfo_TV.setVisibility(View.GONE);
 
+            if(!countryCode.startsWith("+")){   // (NG) +234
+                String[] splitCode = countryCode.split(" ");
+                countryCode = splitCode[1];
+            }
+
             String countryCodeNumber = countryCode + number;
 
             if(number.startsWith("0")){
@@ -165,13 +174,13 @@ public class PhoneLoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(PhoneLoginActivity.this, PasswordActivity.class);
                             intent.putExtra("email", email);
                             intent.putExtra("username", username);
-                            startActivity(intent);  // number exist, send user to password page
+                            startActivity(intent);  // number exist, move user to password page
                             finish();
 
                         } else {
                             Intent intent = new Intent(PhoneLoginActivity.this, NumberWithoutEmailActivity.class);
                             intent.putExtra("number", finalCodeNumber);
-                            startActivity(intent);  // number exist, send user to password page
+                            startActivity(intent);  // number exist, send user to re-authenticate number page
                             finish();
                         }
 

@@ -62,6 +62,7 @@ import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
 import com.pixel.chatapp.all_utils.OtherMethods;
+import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
@@ -81,7 +82,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class SendImageActivity extends AppCompatActivity implements ImageListener {
+public class SendImageOrVideoActivity extends AppCompatActivity implements ImageListener {
 
     ImageView arrowBack, cropper, delete_IV, addPhoto_IV, paintBrush_IV, emoji_IV, oneTimeView, reset_IV;
     private static EditText message_ET;
@@ -138,7 +139,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_send_image);
+        setContentView(R.layout.activity_send_image_or_video);
 
         arrowBack = findViewById(R.id.arrowBack_IV);
         typeMessageContainer = findViewById(R.id.typePaintContainer);
@@ -201,8 +202,6 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
         //  send the image to the firebase and home adapter UI
         buttonSend.setOnClickListener(v -> {
 
-//            PhoneAccess.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
-
             if(chatModelList.size() >= 1){
                 isSendingPause = true; // Prevent present model photo uri adding to the delete sharePrefs
 
@@ -225,6 +224,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                 Toast.makeText(this, getString(R.string.empty), Toast.LENGTH_SHORT).show();
             }
 
+            PhoneUtils.hideKeyboard(this, this.getCurrentFocus()); // hide keyboard before sending
+            adapterViewPager.notifyDataSetChanged();
         });
 
         // initialise adapter when user is sharing photo from other app or when app is onPause or not active.
@@ -621,7 +622,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data)  // for cropping
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP && data !=null)
@@ -688,14 +690,14 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                                     MainActivity.chatModelList.add(0, messageModel);
                                 }
 
-                                adapterRecycler = new SendImageAdapter(SendImageActivity.this, chatModelList);
-                                adapterRecycler.setImageListener(SendImageActivity.this);
+                                adapterRecycler = new SendImageAdapter(SendImageOrVideoActivity.this, chatModelList);
+                                adapterRecycler.setImageListener(SendImageOrVideoActivity.this);
                                 recyclerPhoto.setAdapter(adapterRecycler);
                                 adapterRecycler.notifyDataSetChanged();
 
                                 // initialise the adapter for ViewPager
-                                adapterViewPager = new ViewImageAdapter(SendImageActivity.this, chatModelList);
-                                adapterViewPager.setImageListener(SendImageActivity.this); // activate the interface listener
+                                adapterViewPager = new ViewImageAdapter(SendImageOrVideoActivity.this, chatModelList);
+                                adapterViewPager.setImageListener(SendImageOrVideoActivity.this); // activate the interface listener
                                 viewPager.setAdapter(adapterViewPager);
                                 adapterViewPager.notifyDataSetChanged();
 
@@ -708,7 +710,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                                 // make the recycler visible only when the photo on the list is above 1
                                 if(countPhotoPick > 1 || chatModelList.size() > 1) {
                                     recyclerPhoto.setVisibility(View.VISIBLE);
-                                    OtherMethods.fadeInFastRecyclerview(SendImageActivity.recyclerPhoto);
+                                    OtherMethods.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
                                 }
 
                             }
@@ -720,6 +722,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                             chatModelList.clear();
                             forwardChatUserId.clear();
                             selectedUserNames.clear();
+
                         }
                         addNewPhoto = false;
                     }
@@ -786,8 +789,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                         imageView.setImageBitmap(paintedBitmap);
 
                         // initialise the custom image painter
-                        imagePainter = new ImagePainter(paintedBitmap, SendImageActivity.this);
-                        imagePainter.setColor(ContextCompat.getColor(SendImageActivity.this, R.color.orange));
+                        imagePainter = new ImagePainter(paintedBitmap, SendImageOrVideoActivity.this);
+                        imagePainter.setColor(ContextCompat.getColor(SendImageOrVideoActivity.this, R.color.orange));
 
                         // set the brush colour and size
                         if(currentBrush != null){
@@ -917,7 +920,8 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == AllConstants.STORAGE_REQUEST_CODE && grantResults.length > 0
@@ -950,7 +954,7 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                     recyclerPhoto.setVisibility(View.VISIBLE);
                 }
 
-                deleteOldUriFromAppMemory(tempUri, SendImageActivity.this); //  for onBackPress
+                deleteOldUriFromAppMemory(tempUri, SendImageOrVideoActivity.this); //  for onBackPress
 
                 new Handler().postDelayed(() -> message_ET.requestFocus(), 300);
 
@@ -963,15 +967,16 @@ public class SendImageActivity extends AppCompatActivity implements ImageListene
                         sharingPhotoActivated = false;
                         isSharingDocument = false;
                     }
-
                     finish();
 //            super.onBackPressed();
 
                 } else {
+
                     deleteFile();   // for onBackPress
-                    deleteUnusedPhotoFromSharePrefsAndAppMemory(SendImageActivity.this);    // for onBackPress
+                    deleteUnusedPhotoFromSharePrefsAndAppMemory(SendImageOrVideoActivity.this);    // for onBackPress
                     openOrLaunchGallery();   // go back to pick image gallery
                     message_ET.clearFocus();
+                    adapterViewPager.notifyDataSetChanged();
                 }
             }
 

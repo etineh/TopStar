@@ -1,5 +1,6 @@
 package com.pixel.chatapp.signup_login;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,9 +24,11 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.all_utils.NumberSpacing;
 import com.pixel.chatapp.all_utils.OTPGenerator;
+import com.pixel.chatapp.all_utils.OpenActivityUtil;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
+import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 public class NumberWithoutEmailActivity extends AppCompatActivity {
 
@@ -98,9 +101,16 @@ public class NumberWithoutEmailActivity extends AppCompatActivity {
 
         });
 
-        arrowBack_IV.setOnClickListener(v -> onBackPressed());
+        arrowBack_IV.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        support_IV.setOnClickListener(v -> Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show());
+        support_IV.setOnClickListener(v -> {
+
+            Intent intent = new Intent(this, SupportActivity.class);
+            intent.putExtra("reason", "No email link to my number yet");
+            OpenActivityUtil.openColorHighlight(v, this, intent);
+        });
+
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -207,18 +217,20 @@ public class NumberWithoutEmailActivity extends AppCompatActivity {
         }.start();
     }
 
-    @Override
-    public void onBackPressed() {
-        if(close == 0){
-            Toast.makeText(this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
-            close = 1;
-            new Handler().postDelayed( ()-> close = 0, 5_000);
-        } else {
-            super.onBackPressed();
-            startActivity(new Intent(this, PhoneLoginActivity.class));
-            finish();
+
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if(close == 0){
+                Toast.makeText(NumberWithoutEmailActivity.this, getString(R.string.pressAgain), Toast.LENGTH_SHORT).show();
+                close = 1;
+                new Handler().postDelayed( ()-> close = 0, 5_000);
+            } else {
+                startActivity(new Intent(NumberWithoutEmailActivity.this, PhoneLoginActivity.class));
+                finish();
+            }
         }
-    }
+    };
 }
 
 

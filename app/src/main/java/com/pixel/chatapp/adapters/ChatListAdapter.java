@@ -212,9 +212,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         if(MainActivity.loadMsg){
             try{
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                listener.getMessage(userName, otherUid, mContext);
+                listener.getMessage(userName, otherUid, mContext, false);
             } catch (Exception e){
                 System.out.println("what is Error (ChatListAdapter L220)"+ e.getMessage());
+            }
+
+            if(position == 0){
+//                new Handler().postDelayed(()-> {
+                    for (Map.Entry<String, MessageAdapter> entry : MainActivity.adapterMap.entrySet()) {
+                        String firstKey = entry.getKey();
+                        MainActivity.adapterMap.get(firstKey).addLayoutViewInBackground();
+                    }
+//                }, 2000);
             }
 
 
@@ -269,7 +278,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                         MainActivity.readDatabase = 0;
                         listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                        listener.getMessage(myUserName, otherUid, mContext);
+                        listener.getMessage(myUserName, otherUid, mContext, false);
 
                         listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
@@ -321,7 +330,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                                         MainActivity.readDatabase = 0;
                                         listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                                        listener.getMessage(myUsername_, otherUid, mContext);
+                                        listener.getMessage(myUsername_, otherUid, mContext, false);
 
                                         listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 

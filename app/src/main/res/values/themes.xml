@@ -35,6 +35,20 @@
         <item name="android:background">@drawable/view_card_day</item>
     </style>
 
+    <style name="TV_black_defualtWhite">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TV_defualtBlack_CoolOrange">
+        <item name="android:textColor">@color/defaultBlack</item>
+    </style>
+
+
+    <style name="chatReceiveContainer">
+        <!--        <item name="android:background">#1E1D1D</item>-->
+        <item name="android:background">@drawable/view_card_receive_day</item>
+    </style>
+
     <!--    user chat list contact-->
     <style name="userCard">
         <item name="android:background">#FBF9F9</item>
@@ -56,6 +70,10 @@
         <item name="android:background">@color/orange</item>
     </style>
 
+    <style name="backgroundOrange_Black">
+        <item name="android:background">@color/orange</item>
+    </style>
+
     <style name="appName">
         <item name="android:textColor">@color/orange</item>
     </style>
@@ -67,6 +85,10 @@
 <!--    textColor - cool_orange and black-->
     <style name="replyName">
         <item name="android:textColor">#59514A</item>
+    </style>
+
+    <style name="replyName2">
+        <item name="android:textColor">@color/black2</item>
     </style>
 
 <!--    reply background receiver-->
@@ -94,6 +116,10 @@
     </style>
 
     <style name="textColorFullBlack">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="textColorBlack_CoolOrange">
         <item name="android:textColor">@color/black</item>
     </style>
 
@@ -183,6 +209,14 @@
         <item name="android:background">@drawable/light</item>
     </style>
 
+    <style name="roundButtonBackground">
+        <item name="android:background">@drawable/round_button_orange</item>
+    </style>
+
+    <style name="recyclerBackground">
+        <item name="android:background">@color/white</item>
+    </style>
+
     <!--    radius background-->
     <style name="roundRadiusBackground">
         <item name="android:background">@drawable/round_radius_light</item>
@@ -200,6 +234,22 @@
     <style name="ChatMsgContainer">
         <item name="android:background">@drawable/view_card_send_day</item>
 <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <style name="ChatDocContainer">
+        <item name="android:background">#EDB36B</item>
+    </style>
+
+    <style name="ChatDocContainer2">
+        <item name="android:background">@color/whitePure</item>
+    </style>
+
+    <style name="replyBackground1">
+        <item name="android:background">@drawable/reply_background_day1</item>
+    </style>
+
+    <style name="replyBackground2">
+        <item name="android:background">@drawable/reply_background_day2</item>
     </style>
 
     <!--    drawable background - orange and black -->

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".photos.SendImageActivity">
+    tools:context=".photos.SendImageOrVideoActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayerConstraint"
@@ -328,6 +328,7 @@
         android:elevation="5dp"
         android:max="360"
         android:progress="0"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/displayNames_TV"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

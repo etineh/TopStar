@@ -5,6 +5,15 @@
     <string name="pin">PIN</string>
     <string name="pinChat">Pin</string>
     <string name="copied">Copied</string>
+    <string name="pinBy">Pin by: </string>
+
+    <string name="resendFile">Resend file boss</string>
+    <string name="askForResend">Photo not found. Ask user to resend!</string>
+
+    <string name="deleteForOthers">Message(s) deleted for</string>
+    <string name="deleteForMe">Message(s) deleted for only you.</string>
+    <string name="deleteForEveryone">Message(s) deleted for everyone.</string>
+
     <string name="unpin">Unpin</string>
     <string name="delete">Del.</string>
     <string name="move">Move</string>
@@ -233,7 +242,7 @@
 
     <string name="newMessage">New message</string>
     <string name="p2pTradeCall">P2P trade calls</string>
-    <!--    <string name="gameSound">Game </string>-->
+    <string name="chatEmpty">Chat is empty… </string>
 
     <!--    privacy -->
     <string name="lastSeen_">Last seen and online</string>
@@ -400,6 +409,8 @@
     <string name="errorOccur">Error occur.</string>
     <string name="serverError">Server error.</string>
     <string name="invalidDetails">Incorrect details.</string>
+    <string name="noInternetConnection">No internet connection 😔</string>
+<!--    <string name="uninstall">R 😔</string>-->
 
     <string name="errorWithOtp">Error with code. Resend again.</string>
     <string name="timeout">timeout</string>
@@ -413,6 +424,7 @@
     <string name="notFound">file not found…</string>
     <string name="dCancel">Download cancel</string>
     <string name="userNotFound">user not found</string>
+    <string name="downloadFirst">Download first.</string>
 
     <string name="fileNotExist">File does not exist.</string>
 
@@ -528,7 +540,7 @@
     <string name="linkNumber">Link Number</string>
     <string name="link">Link</string>
     <string name="link_info">Link your phone number to enjoy seamless high features</string>
-
+    <string name="linkPhoneNumber">Link your phone number!</string>
     <string name="account_name">Account Name:</string>
 
     <string name="changeDisplayName">Change Display Name</string>

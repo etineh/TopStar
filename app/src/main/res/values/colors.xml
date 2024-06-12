@@ -8,17 +8,19 @@
     <color name="black">#FF000000</color>
     <color name="whitePure">#FFFFFFFF</color>
 
-    <color name="white">#FFFBEF</color>
-    <color name="blackApp">#111111</color>
+    <color name="white">#FFFBEF</color>     <!-- project white colour -->
+    <color name="blackApp">#111111</color>  <!-- project black colour -->
+    <color name="cool_orange">#E6CBB7</color>   <!-- project fade orange colour -->
+    <color name="orange">#ED7014</color>        <!-- project orange colour -->
+    <color name="defaultBlack">#B3000000</color>
+    <color name="defaultWhite">#B3FFFFFF</color>
 
-    <color name="orange">#ED7014</color>
     <color name="black2">#191818</color>
     <color name="trans">#55000000</color><!-- 33% transparent -->
     <color name="transBlack50">#80000000</color> <!-- 50% transparent -->
     <color name="dark_orange1">#281600</color>
     <color name="dark_orange2">#301a00</color>
-    <color name="light_orange">#ffc278</color>#E6CBB7
-    <color name="cool_orange">#E6CBB7</color>
+    <color name="light_orange">#ffc278</color> <!--  #E6CBB7 -->
     <color name="transparent_orange">#55FFA500</color>
     <color name="transparent_orangeLow">#33FFA500</color> <!-- 80% transparent -->
     <color name="whiteTransparent">#80FFFFFF</color>

@@ -19,12 +19,14 @@ public interface AllConstants {
 //            .addConverterFactory(GsonConverterFactory.create())
 //            .build();
 //192.168.0.3
-    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.3:8080/")
+    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.2:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 //192.168.0.2.
     String MYUSERNAME = "MYUSERNAME";
     String USERNAME = "USERNAME";
+    String DEVICEFIRSTLOGIN = "DEVICEFIRSTLOGIN";
+    String FIRSTTIME = "FIRSTTIME";
 
     String PROFILE_USERNAME = "USERNAME";
     String PROFILE_DISNAME = "DISPLAY-NAME";

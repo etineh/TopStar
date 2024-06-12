@@ -162,7 +162,12 @@ public class EmailOrPhoneLoginActivity extends AppCompatActivity {
 
                 } else Toast.makeText(this, getString(R.string.emailError), Toast.LENGTH_SHORT).show();
 
-            } else {
+            } else {    // it is number
+
+                if(!countryCode.startsWith("+")){   // (NG) +234
+                    String[] splitCode = countryCode.split(" ");
+                    countryCode = splitCode[1];
+                }
 
                 String finalCodeNumber = countryCode + valueEmailOrNumber;
 

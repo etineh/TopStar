@@ -146,8 +146,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
                             // activate adapter for user if null
                             if(MainActivity.adapterMap.get(otherUid) == null){
                                 // call getMessage() to add up new user adapter
-//                listener.getMessage(myUsername, otherName, otherUid, chatsFragment.getMainContext());
-                                listener.getMessage(myUsername, otherUid, getmContext());
+                                listener.getMessage(myUsername, otherUid, getmContext(), false);
                             }
                             // check if network is okay and remove the network bar constraint
                             new Handler().postDelayed(() -> {

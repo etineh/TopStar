@@ -57,6 +57,7 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         // get the details of the items
         List<MessageModel> getChatsList = (List<MessageModel>) getIntent().getSerializableExtra("modelList");
         String photoId = getIntent().getStringExtra("photoId");
+        int getCurrentPosition = getIntent().getIntExtra("photoIdPosition", findCurrentImagePosition(getChatsList, photoId));
 
         // initialise the adapter
         ViewImageAdapter adapter = new ViewImageAdapter(this, getChatsList);
@@ -66,8 +67,7 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         viewPager.setAdapter(adapter);
 
         // Set the initial position based on the current image you want to display
-        int initialPosition = findCurrentImagePosition(getChatsList, photoId);
-        viewPager.setCurrentItem(initialPosition);
+        viewPager.setCurrentItem(getCurrentPosition);
 
         //  ========  onClicks
         arrowBack.setOnClickListener(view -> onBackPressed());

@@ -23,6 +23,8 @@ public class UserChatViewModel extends AndroidViewModel {
 
     }
 
+    //   =======   users on outside chats
+
     public void insertUser(UserOnChatUI_Model userOnChat){
         repository.insertUser(userOnChat);
     }
@@ -52,10 +54,12 @@ public class UserChatViewModel extends AndroidViewModel {
         repository.deleteUserById(otherId);
     }
 
-    public List<UserOnChatUI_Model> getAllUsers(){
-        return repository.getUsers();
+    public List<UserOnChatUI_Model> getAllUsers(String myUid){
+        return repository.getUsers(myUid);
     }
 
+
+    //   =======   chats
 
     public void insertChat(String otherId, MessageModel chatModel){
         AllConstants.executors.execute(() -> {
@@ -93,13 +97,13 @@ public class UserChatViewModel extends AndroidViewModel {
         repository.deleteChats(chatModel);
     }
 
-    public void deleteChatByUserId(String otherId){
-        repository.deleteChatsByUserId(otherId);
+    public void deleteChatByUserId(String otherId, String myId){
+        repository.deleteChatsByUserId(otherId, myId);
     }
 
     // get the chats of each user
-    public List<MessageModel> getEachUserChat_(String userUid){
-        return repository.getEachUserChats_(userUid);
+    public List<MessageModel> getEachUserChat_(String userUid, String myUid){
+        return repository.getEachUserChats_(userUid, myUid);
     }
 
 }

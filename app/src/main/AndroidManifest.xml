@@ -241,7 +241,7 @@
             android:name=".photos.ViewImageActivity"
             android:exported="false" />
         <activity
-            android:name=".photos.SendImageActivity"
+            android:name=".photos.SendImageOrVideoActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

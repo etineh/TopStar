@@ -34,7 +34,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -276,8 +275,8 @@ public class CameraActivity extends AppCompatActivity {
             progressBarCamera.setVisibility(View.VISIBLE);
             v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(()->
             {
-                sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageActivity
-                startActivity(new Intent(CameraActivity.this, SendImageActivity.class));
+                sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageOrVideoActivity
+                startActivity(new Intent(CameraActivity.this, SendImageOrVideoActivity.class));
                 finish();
             });
         });
@@ -353,7 +352,7 @@ public class CameraActivity extends AppCompatActivity {
                 if (!((VideoRecordEvent.Finalize) videoRecordEvent).hasError()) {
 
 
-                    sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageActivity
+                    sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageOrVideoActivity
 
                     Uri videoUri = ((VideoRecordEvent.Finalize) videoRecordEvent).getOutputResults().getOutputUri();
                     // Create a temporary file to store the compressed video
@@ -383,7 +382,7 @@ public class CameraActivity extends AppCompatActivity {
                         mAdapter.notifyDataSetChanged();
 
                     } else {
-                        startActivity(new Intent(CameraActivity.this, SendImageActivity.class));
+                        startActivity(new Intent(CameraActivity.this, SendImageOrVideoActivity.class));
                         finish();
                     }
 
@@ -457,7 +456,7 @@ public class CameraActivity extends AppCompatActivity {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
 
-                        sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageActivity
+                        sharingPhotoActivated = true;   // which mean the chatListModel is ready, so don't open gallery at SendImageOrVideoActivity
                         Uri cameraUri = FileProvider.getUriForFile(CameraActivity.this, "com.pixel.chatapp.fileprovider", photoFile);
 
                         String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
@@ -485,7 +484,7 @@ public class CameraActivity extends AppCompatActivity {
                             mAdapter.notifyDataSetChanged();
 
                         } else {
-                            startActivity(new Intent(CameraActivity.this, SendImageActivity.class));
+                            startActivity(new Intent(CameraActivity.this, SendImageOrVideoActivity.class));
                             finish();
                         }
 

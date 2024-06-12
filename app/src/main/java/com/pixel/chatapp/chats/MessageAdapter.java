@@ -13,9 +13,11 @@ import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.clearAllHighlights;
+import static com.pixel.chatapp.home.MainActivity.filePositionMap;
 import static com.pixel.chatapp.home.MainActivity.firstTopUserDetailsContainer;
 import static com.pixel.chatapp.home.MainActivity.networkOk;
 import static com.pixel.chatapp.home.MainActivity.otherUserUid;
+import static com.pixel.chatapp.home.MainActivity.photoAndVideoMap;
 import static com.pixel.chatapp.home.MainActivity.recyclerMap;
 
 import android.app.Activity;
@@ -33,6 +35,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +49,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -116,6 +120,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private final int sendPhoto;
     private final int receive;
     private final int receivePhoto;
+    private final int empty;
     private final String myId;
     FirebaseUser user;
     Map<String, Integer> dateMonth = new HashMap<>();
@@ -173,6 +178,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         receive = 2;
         sendPhoto = 3;
         receivePhoto = 4;
+        empty = 10;
 
         status = send;
 
@@ -219,8 +225,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // Add the new message to the list
             modelList.add(newMessage);
         } else {
+            System.out.println("what is new id: " + newMessage.getVoiceNote());
             // Display a toast message to indicate that the chat message already exists
             Toast.makeText(mContext, "Chat message already exists", Toast.LENGTH_SHORT).show();
+//            updateMessage(newMessage, null);
         }
 
 //        if(!modelList.contains(newMessage)) {
@@ -294,12 +302,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    // add 10 views on first load
-    public class PreloadTenViewsTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            // Preload views in the background and add them to the cache
-            for (int i = 0; i < 40; i++) {
+    public void addLayoutViewInBackground() {
+        Executor executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(() -> {
+
+            for (int i = 0; i < 10; i++) {
+
+                if(i == 9) {
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        Toast.makeText(mContext, "Test view MsgAdapter L310", Toast.LENGTH_SHORT).show();
+                    });
+                }
 
                 View itemView;
 
@@ -307,28 +321,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     itemView = inflater.inflate(R.layout.view_card, parent, false);
                     synchronized (viewCacheSend) {
                         viewCacheSend.add(itemView);
-                        System.out.println("first loading Send: " + viewCacheSend.size());
-                    }
-                } else if (i % 3 == 0) {
-                    itemView = inflater.inflate(R.layout.photo_send_card, parent, false);
-                    synchronized (viewPhotoSend) {
-                        viewPhotoSend.add(itemView);
-                        System.out.println("first loading Send: " + viewPhotoSend.size());
+                        System.out.println("Added to viewCacheSend:  " + viewCacheSend.size());
                     }
                 } else{
                     itemView = inflater.inflate(R.layout.view_card_receiver, parent, false);
                     synchronized (viewCacheSend) {
                         viewCacheReceive.add(itemView);
-                        System.out.println("first loading Receive: " + viewCacheReceive.size());
+                        System.out.println("Added to viewCacheReceive: " + viewCacheReceive.size());
                     }
                 }
 
             }
-            return null;
-        }
 
+        });
     }
-
 
 
     @NonNull
@@ -365,7 +371,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         } else
         {
             // Inflate a new view if the cache is empty or the view type doesn't match
-            int layer;
+            int layer = R.layout.empty_chat_card;
             if(viewType == send)
             {
                 layer = R.layout.view_card;
@@ -378,7 +384,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             {
                 layer = R.layout.photo_receive_card;
                 Toast.makeText(mContext, "view photo receive", Toast.LENGTH_SHORT).show();
-            }else {
+            }else if (viewType == receive) {
                 layer = R.layout.view_card_receiver;
                 Toast.makeText(mContext, "view receiver", Toast.LENGTH_SHORT).show();
             }
@@ -392,45 +398,62 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position_) {
+        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3), type 5 is video
 
         int chatPosition = position_;     //   to get the position of each chat
         MessageModel modelChats = modelList.get(chatPosition);    // get the model position of each chat
 
         // reset all data to default
-        holder.pinIcon_IV.setVisibility(View.GONE);         // pin icon reset
-        holder.forwardIcon_IV.setVisibility(View.GONE);     // forward icon reset
-        if(holder.editNotify != null){
-            holder.editNotify.setVisibility(View.GONE);     // edit icon reset
-        }       // edit icon
-        if(holder.seenMsg != null ) holder.seenMsg.setImageResource(0);   // seen icon
-        if(holder.textViewShowMsg != null) {
-            holder.textViewShowMsg.setText("");
-            // Reset width and height properties of textTV
-            holder.textViewShowMsg.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            holder.textViewShowMsg.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        }   //  reset chat textView and size
-        if(holder.emojiOnly_TV != null){        // reset emoji only
-            holder.emojiOnly_TV.setText("");
-        }
-        holder.timeMsg.setText("");             // time reset
-        if(holder.constraintChatTop != null){
-            closeMyOwnOption(modelList.get(position_), holder);
+        if(modelChats.getType() != 10){
+            holder.pinIcon_IV.setVisibility(View.GONE);         // pin icon reset
+            holder.forwardIcon_IV.setVisibility(View.GONE);     // forward icon reset
+            if(holder.editNotify != null){
+                holder.editNotify.setVisibility(View.GONE);     // edit icon reset
+            }       // edit icon
+            if(holder.seenMsg != null ) holder.seenMsg.setImageResource(0);   // seen icon
+            if(holder.textViewShowMsg != null) {
+                holder.textViewShowMsg.setText("");
+                // Reset width and height properties of textTV
+                holder.textViewShowMsg.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                holder.textViewShowMsg.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            }   //  reset chat textView and size
+            if(holder.emojiOnly_TV != null){        // reset emoji only
+                holder.emojiOnly_TV.setText("");
+            }
+            holder.timeMsg.setText("");             // time reset
+            if(holder.constraintChatTop != null){
+                closeMyOwnOption(modelList.get(position_), holder);
 //            holder.constraintChatTop.setVisibility(View.GONE);
-        }   // top chat option reset
-        if(holder.react_TV != null){
-            holder.react_TV.setVisibility(View.GONE);
-        }       // react emoji reset
+            }   // top chat option reset
+            if(holder.react_TV != null){
+                holder.react_TV.setVisibility(View.GONE);
+            }       // react emoji reset
+
+        }
+
         // reset voice note tools player
         if(holder.seekBarProgress != null){
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(holder.constraintMsgContainer);
+
+            // Clear the constraint when the condition is not met
+            if(modelChats.getFromUid().equals(myId)) {
+                constraintSet.clear(holder.chatContainer.getId(), ConstraintSet.START); // Clear start as well if needed
+            } else {
+                constraintSet.clear(holder.chatContainer.getId(), ConstraintSet.END);
+            }
+            constraintSet.applyTo(holder.constraintMsgContainer);
+
             holder.seekBarProgress.setVisibility(View.GONE);
             holder.circleDownload.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.GONE);
-            holder.speedTV.setVisibility(View.GONE);
+            holder.speedTV.setVisibility(View.INVISIBLE);
             holder.pauseAndPlay_IV.setVisibility(View.GONE);
             holder.seekBarProgress.setProgress(0);
             holder.totalMinute_TV.setText("");
         }
-        // reset image and document tools
+
+        // reset photo, video and document tools
         if(holder.loadProgressTV != null){
             holder.loadProgressTV.setVisibility(View.GONE); // hide image loading progress bar
             holder.progressBarLoad.setVisibility(View.GONE); // hide image loading progress bar
@@ -443,17 +466,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.showImage.setImageURI(null);
             int orangeColor = ContextCompat.getColor(mContext, R.color.white);
             holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(orangeColor));
+            holder.playVideoIcon_IV.setVisibility(View.GONE);
+            holder.videoDuration_TV.setVisibility(View.GONE);
+            holder.videoDuration_TV.setText(null);
 
         }
-        // reset photo chat textView
 
         holder.itemView.setBackgroundColor(0);  //  reset background highlight
+
+        if (modelChats.getVoiceNote() != null)      // adjust voice note size
+        {
+            // Add logging to see if this block is executed
+
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(holder.constraintMsgContainer);
+
+            // Set new constraints
+            if(modelChats.getFromUid().equals(myId)) {
+                constraintSet.connect(holder.chatContainer.getId(), ConstraintSet.START, holder.constraintMsgContainer.getId(), ConstraintSet.START); // Ensure start is constrained too
+            } else {
+                constraintSet.connect(holder.chatContainer.getId(), ConstraintSet.END, holder.constraintMsgContainer.getId(), ConstraintSet.END);
+            }
+
+            constraintSet.applyTo(holder.constraintMsgContainer);
+
+        }
 
 
         //  ==============    input the real data to their positions after resetting    ============
 
 
-        holder.timeMsg.setText( chatTime(modelChats.getTimeSent()) ); // show the time each msg was sent
+        if(holder.timeMsg != null)
+            holder.timeMsg.setText( chatTime(modelChats.getTimeSent()) ); // show the time each msg was sent
 
         if(modelChats.getMessage() != null){
             if(holder.textViewShowMsg != null)
@@ -493,11 +537,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         // ----------------- reply msg setting
-        int intValue = (int) modelChats.getVisibility();
-        if(holder.linearLayoutClick != null) holder.linearLayoutClick.setVisibility(intValue);
-        holder.linearLayoutReplyBox.setVisibility(intValue);    // set reply container to visibility
-        holder.senderNameTV.setText(modelChats.getReplyFrom());  //  set the username for reply msg
-        holder.replyChat_TV.setText(modelChats.getReplyMsg());     //   set the reply text on top msg
+        if(modelChats.getType() != empty){
+            int intValue = (int) modelChats.getVisibility();
+            if(holder.linearLayoutClick != null) holder.linearLayoutClick.setVisibility(intValue);
+            holder.linearLayoutReplyBox.setVisibility(intValue);    // set reply container to visibility
+            holder.senderNameTV.setText(modelChats.getReplyFrom());  //  set the username for reply msg
+            holder.replyChat_TV.setText(modelChats.getReplyMsg());     //   set the reply text on top msg
+        }
 
         // set unsent and sent msg... delivery and seen settings-- msg status tick
         int intMsg = modelChats.getMsgStatus();
@@ -514,7 +560,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(holder.seenMsg != null ) {
             holder.seenMsg.setImageResource(numMsg);     // set msg status tick
         }
-
 
         // set load image progress bar
         if(holder.loadProgressTV != null && modelChats.getPhotoUriOriginal() != null){
@@ -546,8 +591,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         }
 
-        // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-        if(modelChats.getPhotoUriPath() != null || modelChats.getType() == 3){
+        // set or auto-send image and document => type 0 is text-chat, type 1 is voice_note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+        if(modelChats.getPhotoUriPath() != null || modelChats.getType() == 2 || modelChats.getType() == 3 || modelChats.getType() == 5)
+        {
 
             // activate my auto image sending  ------ change later to auto download other user photo that he sent according to his settings
             if( modelChats.getFromUid().equals(myId) && modelChats.getMsgStatus() == 700033
@@ -596,7 +642,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     holder.document_IV.setVisibility(View.GONE);
                 }
             }
-
 //            Picasso.get().load(imageUri_).into(new Target() {
 //                @Override
 //                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -624,7 +669,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
 
-        // ----- Voice Note and Audio setting
+        // ----- Voice Note and Audio setting and auto sending
         int visible = (int) modelChats.getType();   //  1 is visible, 4 is invisible, 8 is Gone
         if( holder.seekBarProgress != null && (visible == 1 || visible == 4) ){
             // display the view setting
@@ -637,7 +682,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // check if my voice note sending is downloading and display the progress
             if(modelChats.getMsgStatus() == 700033 && modelChats.getFromUid().equals(myId)){
                 holder.circleDownload.setVisibility(View.VISIBLE);
-                holder.speedTV.setVisibility(View.GONE);
+                holder.speedTV.setVisibility(View.INVISIBLE);
                 // if voice note is already downloading, show the progress it has reached
                 displaySendingProgress(modelChats, holder);
                 // auto send voice note -- get the voice note uid owner and the sending state
@@ -651,7 +696,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.pauseAndPlay_IV.setVisibility(View.INVISIBLE);
                 holder.circleDownload.setVisibility(View.VISIBLE);
                 if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
-                    holder.circleDownload.setVisibility(View.INVISIBLE);
+                    holder.circleDownload.setVisibility(View.GONE);
                 }
                 // check for network first
                 if(networkOk){
@@ -686,19 +731,36 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // --------------------------   Settings end   ----------------------------------------------------------------------
 
 
-        View.OnClickListener optionClickListener = view -> {
-            // process onClick if longPress is not yet activated
-            if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+        View.OnClickListener optionClickListener = view ->
+        {
+            if(modelChats.getType() != empty)
+            {
+                // process onClick if longPress is not yet activated
+                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
 
-                // Close the previously open chat options
-                closePreviousChatOption(modelChats, holder);
+                    // Close the previously open chat options
+                    closePreviousChatOption(modelChats, holder);
 
-                // make option menu visible if it's gone
-                makeChatOptionVisible(modelChats, holder, chatPosition);
+                    // make option menu visible if it's gone
+                    makeChatOptionVisible(modelChats, holder, chatPosition);
 
-            } else {
-                // if onLongPress mood is activated, add or remove chat from list when user click a chat
-                addOrRemoveChatFromList(modelChats, chatPosition);
+                } else {
+                    // if onLongPress mood is activated, add or remove chat from list when user click a chat
+                    if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
+                    {
+                        addOrRemoveChatFromList(modelChats, chatPosition);
+
+                    } else {
+                        if( (modelChats.getType() == 1 && !modelChats.getVoiceNote().startsWith("media/voice"))
+                                || ( modelChats.getPhotoUriOriginal() != null && !modelChats.getPhotoUriOriginal().startsWith("media") ))
+                        {
+                            addOrRemoveChatFromList(modelChats, chatPosition);
+                        }  else {
+                            Toast.makeText(mContext, mContext.getString(R.string.downloadFirst), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
             }
         };
         //   show chat selection options via onClick
@@ -711,18 +773,45 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
                 // activate long click press and send data to MainActivity
-                activateOnLongClick(modelChats, holder, chatPosition);
+                if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
+                {
+                    activateOnLongClick(modelChats, holder, chatPosition);
+
+                } else {
+                    if( (modelChats.getType() == 1 && !modelChats.getVoiceNote().startsWith("media/voice"))
+                            || ( modelChats.getPhotoUriOriginal() != null && !modelChats.getPhotoUriOriginal().startsWith("media") ))
+                    {
+                        activateOnLongClick(modelChats, holder, chatPosition);
+                    }  else {
+                        Toast.makeText(mContext, mContext.getString(R.string.downloadFirst), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
             } else {
                 // if onLongPress mood is activated, add or remove chat from list when user click a chat
-                addOrRemoveChatFromList(modelChats, chatPosition);
+                if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
+                {
+                    addOrRemoveChatFromList(modelChats, chatPosition);
+
+                } else {
+                    if( (modelChats.getType() == 1 && !modelChats.getVoiceNote().startsWith("media/voice"))
+                            || ( modelChats.getPhotoUriOriginal() != null && !modelChats.getPhotoUriOriginal().startsWith("media") ))
+                    {
+                        addOrRemoveChatFromList(modelChats, chatPosition);
+                    }  else {
+                        Toast.makeText(mContext, mContext.getString(R.string.downloadFirst), Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
 
             return true;
         });
-        holder.linearLayoutReplyBox.setOnLongClickListener(longClick);
-        holder.constraintMsgContainer.setOnLongClickListener(longClick);
-        if(holder.photoChatTV != null ) holder.photoChatTV.setOnLongClickListener(longClick);
-        if(holder.textViewShowMsg != null ) holder.textViewShowMsg.setOnLongClickListener(longClick);
+        if(modelChats.getType() != empty){
+            holder.linearLayoutReplyBox.setOnLongClickListener(longClick);
+            holder.constraintMsgContainer.setOnLongClickListener(longClick);
+            if(holder.photoChatTV != null ) holder.photoChatTV.setOnLongClickListener(longClick);
+            if(holder.textViewShowMsg != null ) holder.textViewShowMsg.setOnLongClickListener(longClick);
+        }
 
         //  image, document and progressLoad bar onClick settings
         if(holder.showImage != null){
@@ -732,11 +821,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.showImage.setOnLongClickListener(longClick);
             holder.documentContainer.setOnLongClickListener(longClick);
 
-            // for single onClick =>    type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+            // for single onClick =>    type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
             View.OnClickListener imageOrDocOnClick = view -> {
                 // check if longPress is activated yet or not
-                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE
-                ){
+                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
                     // open image if I was the one that sent them photo
                     if(modelChats.getFromUid().equals(myId) ||
                             (!modelChats.getFromUid().equals(myId) && holder.progressBarLoad.getVisibility() == View.GONE) )
@@ -745,6 +833,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 && !modelChats.getPhotoUriOriginal().startsWith("media/photo"))
                         {
                             openPhoto(modelChats, holder);  // swipe to view all photo
+
                         } else if (modelChats.getType() == 3 /* || modelChats.getMsgStatus() != 700033 */)
                         {
                             // open document
@@ -768,8 +857,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 Toast.makeText(mContext, mContext.getString(R.string.dCancel), Toast.LENGTH_SHORT).show();
                             }
 
-                        }else
-                            downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
+                        }else downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                     }
 
                 } else {
@@ -781,8 +869,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.showImage.setOnClickListener(imageOrDocOnClick);
             holder.documentContainer.setOnClickListener(imageOrDocOnClick);
 
-            holder.loadProgressTV.setOnClickListener(view -> {
-//System.out.println("what is uri " + modelChats.getPhotoUriOriginal());
+            holder.loadProgressTV.setOnClickListener(view ->
+            {
                 if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
 
                     if(modelChats.getPhotoUriOriginal() != null){
@@ -802,7 +890,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             }else
                                 downloadPhotoOrDocSentByOtherUser(modelChats, holder, chatPosition);
                         }
-                    } else Toast.makeText(mContext, "Resend file boss", Toast.LENGTH_SHORT).show();
+                    } else Toast.makeText(mContext, mContext.getString(R.string.resendFile), Toast.LENGTH_SHORT).show();
 
                 } else {
                     // if onLongPress mood is activated, add or remove chat from list when user click a chat
@@ -895,7 +983,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
 
                 if(deliveryStatus == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
                 } else if (positionCheck > 100)
                 {
                     Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
@@ -915,7 +1003,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.imageViewDel.setOnClickListener(view -> {
 
                 if(modelChats.getMsgStatus() == 700033){
-                    Toast.makeText(mContext, "Check your network connection", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
                 } else {
 
                     holder.constraintChatTop.setVisibility(View.GONE);
@@ -952,7 +1040,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 try{
                     fragmentListener.onEmojiReact(holder, modelChats.getIdKey());
                 }catch (Exception e){
-                    System.out.println("Urgent error at MA320" + e.getMessage());
+                    System.out.println("Urgent error at MessageAdapter L1030" + e.getMessage());
                 };
 
                 // reverse arrow
@@ -970,7 +1058,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 if (clipboard == null || clip == null) return;
                 clipboard.setPrimaryClip(clip);
 
-                Toast.makeText(mContext, "Copied!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mContext.getString(R.string.copied), Toast.LENGTH_SHORT).show();
                 // for paste code
 //                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
 //                try {
@@ -1012,7 +1100,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 // send voice note
                                 sendMyVoiceNote(modelChats, holder, otherId, chatPosition);    // for button click
                             }
-                        } else Toast.makeText(mContext, "No internet connection 😔", Toast.LENGTH_SHORT).show();
+                        } else Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
@@ -1024,7 +1112,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             downloadOtherUserVoiceNote(modelChats, holder, position_);  // onClick
 
                         }
-                    } else Toast.makeText(mContext, "No internet connection 😔", Toast.LENGTH_SHORT).show();
+                    } else Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -1039,8 +1127,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.transparent_orange));
 
-                holder.itemView.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
-                {
+                new Handler().postDelayed(()-> {
                     String originalMessageId = modelChats.getReplyID();
                     int originalPosition = findMessagePositionById(originalMessageId);
 
@@ -1062,32 +1149,45 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                     // clear highlight
                     new Handler().postDelayed(()-> {
-                        // Reset the scale
-                        holder.itemView.setScaleX(1.0f);
-                        holder.itemView.setScaleY(1.0f);
                         // reset the background o=colour
                         holder.itemView.setBackgroundColor(0);
                     }, 100);
+                }, 20);
 
-                }).start();
 
             } else {
                 // if onLongPress mood is activated, add or remove chat from list when user click a chat
-                addOrRemoveChatFromList(modelChats, chatPosition);
+                if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
+                {
+                    addOrRemoveChatFromList(modelChats, chatPosition);
+
+                } else {
+                    if( (modelChats.getType() == 1 && !modelChats.getVoiceNote().startsWith("media/voice"))
+                            || ( modelChats.getPhotoUriOriginal() != null && !modelChats.getPhotoUriOriginal().startsWith("media") ))
+                    {
+                        addOrRemoveChatFromList(modelChats, chatPosition);
+                    }  else {
+                        Toast.makeText(mContext, mContext.getString(R.string.downloadFirst), Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
 
         };
-        holder.linearLayoutReplyBox.setOnClickListener(scrollToReplyChat);
-        holder.senderNameTV.setOnClickListener(scrollToReplyChat);
-        holder.replyChat_TV.setOnClickListener(scrollToReplyChat);
-        if(holder.linearLayoutClick != null ) { // reply background fill-up onClick
-            holder.linearLayoutClick.setOnClickListener(scrollToReplyChat);
-            holder.linearLayoutClick.setOnLongClickListener(longClick);
+
+        if (modelChats.getType() != empty)
+        {
+            holder.linearLayoutReplyBox.setOnClickListener(scrollToReplyChat);
+            holder.senderNameTV.setOnClickListener(scrollToReplyChat);
+            holder.replyChat_TV.setOnClickListener(scrollToReplyChat);
+            if(holder.linearLayoutClick != null ) { // reply background fill-up onClick
+                holder.linearLayoutClick.setOnClickListener(scrollToReplyChat);
+                holder.linearLayoutClick.setOnLongClickListener(longClick);
+            }
+            // onLongClick for reply box highlights
+            holder.linearLayoutReplyBox.setOnLongClickListener(longClick);
+            holder.senderNameTV.setOnLongClickListener(longClick);
+            holder.replyChat_TV.setOnLongClickListener(longClick);
         }
-        // onLongClick for reply box highlights
-        holder.linearLayoutReplyBox.setOnLongClickListener(longClick);
-        holder.senderNameTV.setOnLongClickListener(longClick);
-        holder.replyChat_TV.setOnLongClickListener(longClick);
 
         // check it's on onLongPress and retain chat position highlight
         retainHighlight(chatPosition);
@@ -1280,7 +1380,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
                 MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
                 MainActivity.onShare = true;
-
+//                Toast.makeText(mContext, "what is type: " + modelChats.getType(), Toast.LENGTH_SHORT).show();
             }
 
             // display pin icon, is it private or public
@@ -1666,8 +1766,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     String newUri = saveFileFromContentUriToAppStorage(Uri.parse(modelChats.getPhotoUriOriginal()), mContext);
                     modelChats.setPhotoUriOriginal(newUri);
                 }
-                onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
-                        null, otherUid, null);
+                onSendingSuccessful(modelChats, finalPhoto_location_original_DB, null, otherUid, null);
 
             }).addOnFailureListener(exception -> {
                 // Handle unsuccessful uploads
@@ -1731,8 +1830,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 modelChats.setPhotoUriPath(thumbnailUri.toString());
 
-                onSendingSuccessful(modelChats, chatPosition, holder, finalPhoto_location_original_DB,
-                        photo_location_low_DB, otherUid, imageLinkToFBStorage);
+                onSendingSuccessful(modelChats, finalPhoto_location_original_DB, photo_location_low_DB, otherUid, imageLinkToFBStorage);
 
             }).addOnFailureListener(e -> {
                 loadBarVisibility(holder, modelChats);
@@ -1807,13 +1905,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             fileDownloadTaskMap.remove( modelChats.getIdKey()); // remove from when done.
 
+            if(photoAndVideoMap.get(modelChats.getFromUid()) == null){      // add new photo or video to all photo and video views list
+                new Thread(()->MainActivity.getEachUserAllPhotoAndVideos(modelChats.getFromUid(), modelList)).start();
+            } else addNewPhotoOrVideoToViewLists(modelChats.getFromUid(), modelChats);
+
         }).addOnFailureListener(exception -> {
             // Handle failed download
             int orangeColor = ContextCompat.getColor(mContext, R.color.orange);
             // Set the indeterminate tint color for the ProgressBar to white
             holder.progressBarLoad.setIndeterminateTintList(ColorStateList.valueOf(orangeColor));
             holder.loadProgressTV.setText(modelChats.getImageSize());
-            Toast.makeText(mContext, "Photo not found. Ask user to resend!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.askForResend), Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(snapshot -> {
             // Calculate progress percentage
             double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
@@ -1822,50 +1924,57 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    public static void addNewPhotoOrVideoToViewLists(String otherUid, MessageModel modelChats)    // add new photo or video to all photo and video views list
+    {
+        if(modelChats.getType() == 2 || modelChats.getType() == 5)
+        {
+            if(!photoAndVideoMap.get(otherUid).contains(modelChats)){
+                photoAndVideoMap.get(otherUid).add(modelChats);
+                // add the file position
+                filePositionMap.put(modelChats.getIdKey(), photoAndVideoMap.get(otherUid).size() - 1);
+            }
+
+        }
+    }
+
     private void openPhoto(MessageModel modelChats, MessageViewHolder holder){
         holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.transparent_orange));
 
-        holder.itemView.animate().scaleX(1.2f).scaleY(1.2f).setDuration(10).withEndAction(() ->
+        new Handler().postDelayed(()->
         {
-            // Create a list to add the photo
-            List<MessageModel> photoModel = new ArrayList<>();
-            // loop through the list to select which one contain the download image
-            for (int i = 0; i < modelList.size(); i++) {
-                MessageModel model = modelList.get(i);
-                // check if the model photo is not null first
-                if(model.getPhotoUriPath() != null){
-                    if(!model.getFromUid().equals(myId) // check if I have downloaded other user photo
-                            && !model.getPhotoUriOriginal().startsWith("media/photos"))
-                    {
-                        // add other user images if I have downloaded it
-                        photoModel.add(model);
-                    } else if (model.getFromUid().equals(myId)) {
-                        // add my image -- from my from storage
-                        photoModel.add(model);
-                    }
-                }
-                // Wait until it loop through the last model before opening the ViewImage
-                if (i == (modelList.size() - 1) && !photoModel.isEmpty()) {
-                    Intent intent = new Intent(mContext, ViewImageActivity.class);
-                    // Put the modelList as an extra
-                    intent.putExtra("modelList", new ArrayList<>(photoModel));
-                    intent.putExtra("photoId", modelChats.getIdKey());
+            Intent intent = new Intent(mContext, ViewImageActivity.class);
+            // Put the modelList as an extra
+            intent.putExtra("modelList", new ArrayList<>(photoAndVideoMap.get(modelChats.getId())));
+            intent.putExtra("photoId", (modelChats.getIdKey()));  // scroll to the file position
+            intent.putExtra("photoIdPosition", MainActivity.filePositionMap.get(modelChats.getIdKey()));  // scroll to the file position
 
-                    // Start the ViewPagerActivity
-                    mContext.startActivity(intent);
+            // Start the ViewPagerActivity
+            mContext.startActivity(intent);
 
+            // clear highlight
+            new Handler().postDelayed(MainActivity::clearAllHighlights, 100);
 
-                    // clear highlight
-                    new Handler().postDelayed(()-> {
-                        clearAllHighlights();
-                        // Reset the scale
-                        holder.itemView.setScaleX(1.0f);
-                        holder.itemView.setScaleY(1.0f);
-                    }, 100);
-                }
-            }
+        }, 10);
 
-        });
+//        holder.itemView.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(() ->
+//        {
+//            Intent intent = new Intent(mContext, ViewImageActivity.class);
+//            // Put the modelList as an extra
+//            intent.putExtra("modelList", new ArrayList<>(MainActivity.photoAndVideoMap.get(modelChats.getId())));
+//            intent.putExtra("photoId", (modelChats.getIdKey()));  // scroll to the file position
+//            intent.putExtra("photoIdPosition", MainActivity.filePositionMap.get(modelChats.getIdKey()));  // scroll to the file position
+//
+//            // Start the ViewPagerActivity
+//            mContext.startActivity(intent);
+//
+//            // clear highlight
+//            new Handler().postDelayed(()-> {
+//                clearAllHighlights();
+//                // Reset the scale
+//                holder.itemView.setScaleX(1.0f);
+//                holder.itemView.setScaleY(1.0f);
+//            }, 100);
+//        });
 
     }
 
@@ -1903,9 +2012,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return saveImageToPhoneUri;
     }
 
-    private void onSendingSuccessful(MessageModel modelChats, int chatPosition, MessageViewHolder holder,
-                                     String finalPhoto_location_original_DB, String lowPhotoOrDocLocationOn_DB,
-                                     String otherUid, String imageLinkToFBStorage)
+    private void onSendingSuccessful(MessageModel modelChats, String finalPhoto_location_original_DB,
+                                     String lowPhotoOrDocLocationOn_DB, String otherUid, String imageLinkToFBStorage)
     {
         // get the image size and send to user before it turns null for me
         String getImageSize = modelChats.getImageSize();
@@ -1945,12 +2053,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 });
     }
     private void displayLowImageOrDocumentThumbnail(Uri imageUri_, MessageViewHolder holder, MessageModel modelChats){
-        if(modelChats.getType() == 2){
+        if(modelChats.getType() == 2)
+        {
             holder.documentContainer.setVisibility(View.GONE);
             holder.showImage.setVisibility(View.VISIBLE);
             Glide.with(mContext).load(imageUri_).into(holder.showImage);
 
-        } else if (modelChats.getType() == 3) {
+        } else if (modelChats.getType() == 3)
+        {
             holder.showImage.setVisibility(View.GONE);
             holder.documentContainer.setVisibility(View.VISIBLE);   // make the document container visible
             holder.documentDetails_TV.setText(modelChats.getEmojiOnly());   // I used document details to replace emojiOnly
@@ -1959,11 +2069,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 //                    .apply(RequestOptions.centerCropTransform())
                     .into(holder.document_IV);  // display the document thumbnail
 
-        } else if (modelChats.getType() == 5) {    // it is video
+        } else if (modelChats.getType() == 5)
+        {    // it is video
             holder.documentContainer.setVisibility(View.GONE);
             holder.showImage.setVisibility(View.VISIBLE);
             Glide.with(mContext).load(imageUri_).into(holder.showImage);
-            // show the playIcon button
+            // show the playIcon button, size and duration
+            holder.playVideoIcon_IV.setVisibility(View.VISIBLE);
+            holder.videoDuration_TV.setVisibility(View.VISIBLE);
+            holder.videoDuration_TV.setText(modelChats.getVnDuration());
+
         }
 
     }
@@ -2199,7 +2314,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private void sendMyVoiceNote(MessageModel modelChats, MessageViewHolder holder,
                                  String otherUid, int chatPosition)
     {
-        holder.circleDownload.setVisibility(View.INVISIBLE);
+        holder.circleDownload.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.VISIBLE);     // change later
         holder.progressBar.incrementProgressBy(5);     // change later
 
@@ -2423,7 +2538,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.totalMinute_TV.setText(modelChats.getVnDuration());
         // load the last progress
         if(progressMap.get(modelChats.getIdKey()) != null){
-            holder.circleDownload.setVisibility(View.INVISIBLE);
+            holder.circleDownload.setVisibility(View.GONE);
             int lastProgress = progressMap.get(modelChats.getIdKey());
             holder.progressBar.setVisibility(View.VISIBLE);
             holder.progressBar.setProgress(lastProgress);
@@ -2791,7 +2906,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         private TextView react_TV;
         private TextView replyChat_TV, senderNameTV, otherInfo;
         private TextView timeMsg;
-//        private CardView cardViewChatBox;
+        private ConstraintLayout emptyConstraint;
 
         // voice note
         private SeekBar seekBarProgress;
@@ -2802,8 +2917,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         private TextView speedTV;
 
         // photo display
-        public ImageView showImage;
-        TextView loadProgressTV;
+        public ImageView showImage, playVideoIcon_IV;
+        TextView loadProgressTV, videoDuration_TV;
 
         // document display
         private ConstraintLayout documentContainer;
@@ -2813,6 +2928,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
+
             if(status == send)
             {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime);
@@ -2836,7 +2952,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 editNotify = itemView.findViewById(R.id.editedSender_IV);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
-//                chatContainer = itemView.findViewById(R.id.chatContainerS);
+                chatContainer = itemView.findViewById(R.id.chatContainerS);
                 constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBodySend);
 
@@ -2867,6 +2983,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 loadProgressTV = itemView.findViewById(R.id.loadPhotoProgressTV);
                 progressBarLoad = itemView.findViewById(R.id.progressBarLoad1);
 
+                // video
+                playVideoIcon_IV = itemView.findViewById(R.id.playVideoIcon_IV);
+                videoDuration_TV = itemView.findViewById(R.id.videoDuration_TV);
+
                 // general
                 timeMsg = itemView.findViewById(R.id.photoChatTimeTV);
                 photoChatTV = itemView.findViewById(R.id.photoChatSender_TV);
@@ -2885,11 +3005,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 document_IV = itemView.findViewById(R.id.document_IV);
                 documentDetails_TV = itemView.findViewById(R.id.documentDetails_TV);
 
-            }  else {
+            }  else if(status == receive)
+            {
                 timeMsg = itemView.findViewById(R.id.textViewChatTime2);
                 textViewShowMsg = itemView.findViewById(R.id.receiverChat_TV);
                 emojiOnly_TV = itemView.findViewById(R.id.textViewReceivedOnlyEmoji);
-//                chatContainer = itemView.findViewById(R.id.chatContainerR);
+                chatContainer = itemView.findViewById(R.id.chatContainerR);
 
                 pinALL_IV = itemView.findViewById(R.id.pinALL_R_IV);
                 pinIcon_IV = itemView.findViewById(R.id.pinReceiver_IV);
@@ -2926,7 +3047,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 totalMinute_TV = itemView.findViewById(R.id.minuteTV2);
                 speedTV = itemView.findViewById(R.id.speedTV_R);
 
+            } else if(status == empty)
+            {
+                constraintMsgContainer = itemView.findViewById(R.id.emptyConstraint);
             }
+
+
         }
 
         // Getter method to access your specific view
@@ -2939,7 +3065,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public int getItemViewType(int position) {
 
-        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+        // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3), type 5 is video
 
         MessageModel chat = modelList.get(position);
         // check if the chat is from me via my uid
@@ -2949,6 +3075,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             {
                 status = sendPhoto;
                 return sendPhoto;
+
+            } else if(chat.getType() == 10)
+            {
+                status = empty;
+                return empty;
+
             } else
             {
                 status = send;
@@ -2961,12 +3093,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             {
                 status = receivePhoto;
                 return receivePhoto;
-            } else
+
+            } else if(chat.getType() == 10)
+            {
+                status = empty;
+                return empty;
+            }  else
             {
                 status = receive;
                 return receive;
             }
         }
+
     }
 
 }

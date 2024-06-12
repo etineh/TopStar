@@ -11,10 +11,10 @@
 
     <TextView
         android:id="@+id/playOnclick"
+        style="@style/roundRadiusBackground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
-        android:background="@drawable/round_radius_orange"
         android:padding="5dp"
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
@@ -35,17 +35,8 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/line_2"
-        style="@style/backgroundOrangeAndCoolOrange"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
         android:id="@+id/rewardPool_TV"
-        style="@style/textColorFullBlack"
+        style="@style/TV_black_defualtWhite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
@@ -56,10 +47,11 @@
 
     <TextView
         android:id="@+id/gameTitle_TV"
-        style="@style/textColorFullBlack"
+        style="@style/textColorBlack_CoolOrange"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="5dp"
         android:text="World Chess Tournament"
         android:textSize="16sp"
@@ -70,15 +62,15 @@
 
     <TextView
         android:id="@+id/sponsoredByTV"
-        style="@style/textColorFullBlack"
+        style="@style/textColorBlack_CoolOrange"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="5dp"
         android:maxLines="2"
-        android:paddingBottom="5dp"
+        android:paddingBottom="10dp"
         android:text="Sponsored by: Shuttle Community"
-        android:textStyle="italic"
+        android:textStyle="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/rewardPool_TV"
         app:layout_constraintTop_toBottomOf="@+id/rewardPool_TV" />
