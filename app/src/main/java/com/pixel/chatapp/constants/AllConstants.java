@@ -18,11 +18,22 @@ public interface AllConstants {
 //    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8080/")
 //            .addConverterFactory(GsonConverterFactory.create())
 //            .build();
-//192.168.0.3
+
     Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.2:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build();
-//192.168.0.2.
+
+    int type_text = 0;
+    int type_voice_note = 1;
+    int type_photo = 2;
+    int type_document = 3;
+    int type_audio = 4;
+    int type_video = 5;
+    int type_call = 6;
+    int type_game = 7;
+    int type_pin = 8;
+    int type_empty = 10;
+
     String MYUSERNAME = "MYUSERNAME";
     String USERNAME = "USERNAME";
     String DEVICEFIRSTLOGIN = "DEVICEFIRSTLOGIN";
@@ -43,14 +54,18 @@ public interface AllConstants {
     String PICKED_IMAGE_URI_PATH = "ImageUriPath";
 
     String MIC_ICON = "\uD83C\uDFA4  ";
+    String MUSIC_ICON = "\uD83C\uDFB5 ";
+
     String DELETE_ICON = "\uD83D\uDDD1\uFE0F  ";
 //    String PHOTO_ICON = "\uD83D\uDCF7  ";
     String PHOTO_ICON = "\uD83C\uDF03";
     String VIDEO_ICON ="\uD83C\uDFA5  ";
     String PIN_ICON = "\uD83D\uDCCC  ";
     String EDIT_ICON = "✏\uFE0F  ";
-
+    String CALL_ICON = "☎️  ";
+    String GAME_ICON = "🎮  ";
     String DOCUMENT_ICON = "\uD83D\uDCDC";
+
     String URI_PREF = "UriPrefs";
     String OLD_URI_LIST = "oldPhotoEditedUri";
 
@@ -58,7 +73,7 @@ public interface AllConstants {
 
 //    String FIREBASE_PHOTO_LOCATION = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
 
-    String JOIN = "winnerChatJoinPaths";
+    String JOIN = "TopstarChatJoinPaths";
 
     String ALL_PHOTOS = "/Media/Photos/";
     String ALL_VIDEOs= "/Media/Videos/";

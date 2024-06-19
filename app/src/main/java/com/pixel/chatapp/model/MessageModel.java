@@ -5,14 +5,16 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-@Entity(tableName = "chats", primaryKeys = {"idKey"})
+@Entity(tableName = "chats")
 public class MessageModel implements Serializable {
 //public class MessageModel {
 
+    @PrimaryKey
     @NonNull
     private String idKey;
 
@@ -20,22 +22,24 @@ public class MessageModel implements Serializable {
     private String fromUid;
     private String message;
     private String emojiOnly;
-    private String from, replyFrom;
+    private String from;
+    private String replyFrom;
     private String edit;
     private String replyMsg;
+
+    @NonNull
     private long timeSent;
-    private int visibility;
+//    @NonNull
+//    @ColumnInfo(defaultValue = "sfrssrfsffsessfesefsef")
+    private String newChatNumberID;
     private int msgStatus;
     private int type;
     private String imageSize;
     private String replyID;
     private boolean isChatPin;
     private boolean isChatForward;
-
     private String emoji;
-
-    private String id;      // other user uid
-
+    private String id;
     private String voiceNote;
     private String vnDuration;
     private String photoUriPath;
@@ -46,7 +50,7 @@ public class MessageModel implements Serializable {
     }
 
     public MessageModel(String message, String from, String fromUid, String replyFrom, long timeSent, String idKey,
-                        String edit, int visibility, String replyMsg, int msgStatus, int type, String imageSize,
+                        String edit, String newChatNumberID, String replyMsg, int msgStatus, int type, String imageSize,
                         String replyID, Boolean isChatPin, Boolean isChatForward, String emoji, String emojiOnly,
                         String voiceNote, String vnDuration, String photoUriPath, String photoUriOriginal) {
         this.message = message;
@@ -54,7 +58,7 @@ public class MessageModel implements Serializable {
         this.timeSent = timeSent;
         this.idKey = idKey;
         this.edit = edit;
-        this.visibility = visibility;
+        this.newChatNumberID = newChatNumberID;
         this.replyMsg = replyMsg;
         this.msgStatus = msgStatus;
         this.replyFrom = replyFrom;
@@ -137,12 +141,12 @@ public class MessageModel implements Serializable {
         this.replyMsg = replyMsg;
     }
 
-    public int getVisibility() {
-        return visibility;
+    public String getNewChatNumberID() {
+        return newChatNumberID;
     }
 
-    public void setVisibility(int visibility) {
-        this.visibility = visibility;
+    public void setNewChatNumberID(String newChatNumberID) {
+        this.newChatNumberID = newChatNumberID;
     }
 
     public int getMsgStatus() {

@@ -682,7 +682,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
                                 String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
 
                                 MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                        System.currentTimeMillis(), chatId, null, 8,
+                                        System.currentTimeMillis(), chatId, null, null,
                                         null, 700033, type, size, null, false, false,
                                         null, fileName, null, videoDuration, eachUri.toString(), eachUri.toString());
 

@@ -22,13 +22,16 @@ public interface UserChatDao {
     @Update
     void updateUser(UserOnChatUI_Model userOnChatUIModel);
 
+    @Query("UPDATE usersOnChatUI SET message = :text WHERE otherUid = :otherUid AND myUid = :myUid")
+    void updateCallOrGame(String otherUid, String myUid, String text);
+
     @Query("UPDATE usersOnChatUI SET otherUserName = :otherUsername, otherDisplayName = :otherDisplayName, " +
             "otherContactName = :contactName, imageUrl = :imageUrl WHERE otherUid = :otherUid")
     void updateOtherNameAndPhoto(String otherUid, String otherUsername, String otherDisplayName, String contactName, String imageUrl);
 
     @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly, msgStatus = :statusNum, " +
-            "timeSent = :timeSent, idKey = :idKey WHERE otherUid = :otherUid")
-    void updateOutsideChat(String otherUid, String chat, String emojiOnly, int statusNum, long timeSent, String idKey);
+            "timeSent = :timeSent, idKey = :idKey, type = :type WHERE otherUid = :otherUid")
+    void updateOutsideChat(String otherUid, String chat, String emojiOnly, int statusNum, long timeSent, String idKey, int type);
 
     @Query("UPDATE usersOnChatUI SET message = :chat, emojiOnly = :emojiOnly WHERE otherUid = :otherUid AND idKey = :idKey")
     void editOutsideChat(String otherUid, String chat, String emojiOnly, String idKey);

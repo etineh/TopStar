@@ -11,6 +11,7 @@
     <color name="white">#FFFBEF</color>     <!-- project white colour -->
     <color name="blackApp">#111111</color>  <!-- project black colour -->
     <color name="cool_orange">#E6CBB7</color>   <!-- project fade orange colour -->
+    <color name="cool_black">#222020</color>
     <color name="orange">#ED7014</color>        <!-- project orange colour -->
     <color name="defaultBlack">#B3000000</color>
     <color name="defaultWhite">#B3FFFFFF</color>

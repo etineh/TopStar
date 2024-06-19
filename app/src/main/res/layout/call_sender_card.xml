@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/callOrGameContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="3dp"
+    android:paddingStart="60dp"
+    android:paddingEnd="5dp"
+    android:paddingBottom="3dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/ChatMsgContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="7dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/callOrGameHeading_TV"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:paddingStart="1dp"
+            android:paddingEnd="@dimen/_10dp"
+            android:text="Video call"
+            android:textSize="16dp"
+            app:layout_constraintStart_toEndOf="@+id/callOrGame_IV"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/callOrGame_IV"
+            style="@style/drawableBG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/msg_count"
+            android:padding="7dp"
+            app:layout_constraintBottom_toBottomOf="@+id/response_TV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/callOrGameHeading_TV"
+            app:srcCompat="@drawable/baseline_games_24"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/response_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="1dp"
+            android:paddingEnd="10dp"
+            android:text="Missed call"
+            app:layout_constraintStart_toStartOf="@+id/callOrGameHeading_TV"
+            app:layout_constraintTop_toBottomOf="@+id/callOrGameHeading_TV" />
+
+        <TextView
+            android:id="@+id/timeCall_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="10dp"
+            android:text="1:30 pm"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/response_TV" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

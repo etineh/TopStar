@@ -143,12 +143,15 @@ public class ChatsFragment extends Fragment {
     //  ---------------  All   methods     -----------------
 
     // find user and delete from the ChatList
-    public static void findUserPositionByUID(String userUid) {
-        if (mUsersID != null) {
-            for (int i = mUsersID.size() - 1; i >= 0; i--) {
-                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
+    public static void findUserPositionByUID(String userUid)
+    {
+        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
+
+        if (userModel != null) {
+            for (int i = 0; i < userModel.size(); i++) {
+                if (userModel.get(i).getOtherUid().equals(userUid)) {
                     // Remove the item from its old position.
-                    mUsersID.remove(i);
+                    userModel.remove(i);
                     adapter.notifyItemRemoved(i);
                     // Exit the loop, as we've found the item and moved it.
                     break;
@@ -157,15 +160,17 @@ public class ChatsFragment extends Fragment {
         }
     }
 
-    public static void findUserAndDeleteChat(String userUid, String chatId) {
-        if (mUsersID != null) {
-            for (int i = mUsersID.size() - 1; i >= 0; i--) {
+    public static void findUserAndDeleteChat(String userUid, String chatId)
+    {
+        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
+        if (userModel != null) {
+            for (int i = 0; i < userModel.size(); i++) {
                 // check if it's same user ID
-                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
+                if (userModel.get(i).getOtherUid().equals(userUid)) {
                     // check if it's same message ID
-                    if(mUsersID.get(i).getIdKey().equals(chatId)){
+                    if(userModel.get(i).getIdKey().equals(chatId)){
                         // Remove the chat from its old position.
-                        mUsersID.get(i).setMessage(AllConstants.DELETE_ICON +"  ...");
+                        userModel.get(i).setMessage(AllConstants.DELETE_ICON +"  ...");
 //                        mUsersID.get(i).setEmojiOnly("...");
                         adapter.notifyItemChanged(i, new Object());
                     }
@@ -175,17 +180,20 @@ public class ChatsFragment extends Fragment {
         }
     }
 
-    public static void findUserAndEditChat(String userUid, String chatId, String chat, String emoji) {
-        if (mUsersID != null) {
-            for (int i = mUsersID.size() - 1; i >= 0; i--) {
+    public static void findUserAndEditChat(String userUid, String chatId, String chat, String emoji)
+    {
+        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
+
+        if (userModel != null) {
+            for (int i = 0; i < userModel.size(); i++) {
                 // check if it's same user ID
-                if (mUsersID.get(i).getOtherUid().equals(userUid)) {
+                if (userModel.get(i).getOtherUid().equals(userUid)) {
                     // check if it's same message ID
-                    if(mUsersID.get(i).getIdKey().equals(chatId)){
+                    if(userModel.get(i).getIdKey().equals(chatId)){
                         if(chat != null){
-                            mUsersID.get(i).setMessage(AllConstants.EDIT_ICON + chat);
+                            userModel.get(i).setMessage(AllConstants.EDIT_ICON + chat);
                         } else {
-                            mUsersID.get(i).setMessage(AllConstants.EDIT_ICON + emoji);
+                            userModel.get(i).setMessage(AllConstants.EDIT_ICON + emoji);
                         }
 
                         adapter.notifyItemChanged(i, new Object());
@@ -244,13 +252,12 @@ public class ChatsFragment extends Fragment {
                                 userViewModel.insertUser(userModel);
 
                                 getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
-//                                handlerInternet.post(()-> adapter.notifyDataSetChanged());
 
                             }
                         }
                     } catch (Exception e){
-                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error here " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        System.out.println("what is error + CF L245 " + e.getMessage());
+                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error CFragment L270 " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        System.out.println("what is error in CFragment L270 " + e.getMessage());
                     }
 
                 }).start();

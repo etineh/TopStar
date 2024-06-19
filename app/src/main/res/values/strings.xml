@@ -5,7 +5,6 @@
     <string name="pin">PIN</string>
     <string name="pinChat">Pin</string>
     <string name="copied">Copied</string>
-    <string name="pinBy">Pin by: </string>
 
     <string name="resendFile">Resend file boss</string>
     <string name="askForResend">Photo not found. Ask user to resend!</string>
@@ -190,6 +189,14 @@
     <string name="limited">Limited</string>
     <string name="orangeTick">Verified Orange Tick</string>
 
+    <!--    pin chats    -->
+    <string name="pinBy">Pin by: </string>
+    <string name="pinAChat">pin a chat </string>
+    <string name="unPinAChat">unpin a chat </string>
+<!--    <string name="you">You pin a chat privately </string>-->
+<!--    <string name="youUnpinPrivate">You unpin a chat private </string>-->
+    <string name="youPinPublicly">You pin a chat  🌏 </string>
+    <string name="youUnpinPublicly">You unpin a chat  🌏</string>
 
     <!--    profile side bar    -->
     <string name="profile">Profile</string>
@@ -240,7 +247,7 @@
     <string name="noteNewMsg">Private Alerts</string>
 
 
-    <string name="newMessage">New message</string>
+    <string name="newMessage">new message</string>
     <string name="p2pTradeCall">P2P trade calls</string>
     <string name="chatEmpty">Chat is empty… </string>
 
@@ -343,6 +350,8 @@
     <string name="voice_note">Voice Notes</string>
     <string name="documents">Documents</string>
     <string name="thumbnail">Thumbnails</string>
+    <string name="photoCap">Photo</string>
+    <string name="videoCap">Video</string>
 
     <string name="downloadFails">Failed to download image</string>
     <string name="sharePhotoFails">Failed to share image</string>
@@ -380,6 +389,8 @@
     <string name="audioCall">Audio call from</string>
     <string name="video_call">Video call</string>
     <string name="audio_call">Audio call</string>
+    <string name="video_callCap">Video Call</string>
+    <string name="audio_callCap">Audio Call</string>
     <string name="accept">Accept</string>
     <string name="reject">Reject</string>
     <string name="initialising">initialising</string>
@@ -397,7 +408,14 @@
     <string name="requestForVideoCall">is requesting for video call</string>
     <string name="rejectVideoCall">reject video call</string>
     <string name="switchToVideo">Switch to video call mood first</string>
-
+    <string name="incomingCall">Incoming call</string>
+    <string name="incomingGame">Incoming game</string>
+    <string name="incomingAudioCall">Incoming Audio Call</string>
+    <string name="incomingVideoCall">Incoming Video Call</string>
+    <string name="ongoingCall">Ongoing</string>
+    <string name="noResponse">No response</string>
+    <string name="end">End</string>
+    <string name="missed">Missed</string>
 
     <string name="page">pages</string>
     <string name="video">video</string>
@@ -425,6 +443,7 @@
     <string name="dCancel">Download cancel</string>
     <string name="userNotFound">user not found</string>
     <string name="downloadFirst">Download first.</string>
+    <string name="chatNotFound">chat not found…</string>
 
     <string name="fileNotExist">File does not exist.</string>
 
@@ -828,7 +847,7 @@
     <string name="invalidAccount">Trader\'s account is incorrect/invalid.</string>
     <string name="other">Other</string>
     <string name="cancelNow">Cancel Now</string>
-    <string name="stateReason">State the reason you are cancelling.</string>
+    <string name="stateReason">State detail reason you are cancelling.</string>
 
     <string name="stateOtherReason">State other reason(s)</string>
     <string name="moreSettings">More settings</string>

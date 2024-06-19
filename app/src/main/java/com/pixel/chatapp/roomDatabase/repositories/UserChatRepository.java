@@ -49,6 +49,15 @@ public class UserChatRepository {
         });
     }
 
+    public void updateUserCallOrGame(String otherUid, String myUid, String text){
+        executors.execute(new Runnable() {
+            @Override
+            public void run() {
+                userChatDao.updateCallOrGame(otherUid, myUid, text);
+            }
+        });
+    }
+
     public void updateOutsideDelivery(String otherUid, int statusNum){
         executors.execute(new Runnable() {
             @Override
@@ -76,16 +85,16 @@ public class UserChatRepository {
         });
     }
 
-    public void updateOutsideChat(String id, String chat, String emojiOnly, int statusNum, long timeSent, String idKey){
+    public void updateOutsideChat(String id, String chat, String emojiOnly, int statusNum, long timeSent, String idKey, int type){
         executors.execute(new Runnable() {
             @Override
             public void run() {
-                userChatDao.updateOutsideChat(id, chat, emojiOnly, statusNum, timeSent, idKey);
+                userChatDao.updateOutsideChat(id, chat, emojiOnly, statusNum, timeSent, idKey, type);
             }
         });
     }
 
-    public void editOutsideChat(String id, String chat, String emojiOnly, String idKey ){
+    public void editOutsideChat(String id, String chat, String emojiOnly, String idKey){
         executors.execute(new Runnable() {
             @Override
             public void run() {

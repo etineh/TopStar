@@ -104,6 +104,7 @@ import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.NumberSpacing;
 import com.pixel.chatapp.all_utils.OpenActivityUtil;
 import com.pixel.chatapp.all_utils.SharePhotoUtil;
+import com.pixel.chatapp.all_utils.TimeUtils;
 import com.pixel.chatapp.api.Dao_interface.WalletListener;
 import com.pixel.chatapp.calls.CallPickUpCenter;
 import com.pixel.chatapp.contacts.FetchContacts;
@@ -111,6 +112,7 @@ import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
 import com.pixel.chatapp.model.ContactModel;
+import com.pixel.chatapp.model.UserOnChatUI_Model;
 import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
 import com.pixel.chatapp.photos.SendImageOrVideoActivity;
 import com.pixel.chatapp.calls.CallCenterActivity;
@@ -266,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  -------------   network settings    -----------
     public static ConstraintLayout constrNetConnect;
     public static String otherUserUid, otherUserName, myUserName, imageUri;
-
     private CallModel callModel;
     private String callType_;
     public static Handler handlerInternet = new Handler(), handlerTyping = new Handler();
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     //  -------------- database ------------
     public static UserChatViewModel chatViewModel;
-    private static MessageModel messageModel;
+    private static MessageModel messageModel, callChatModel, gameModel, missCallModel;
     private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign,
             refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls, refWallet;
@@ -295,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static boolean insideChat = false;     // for checking when user wants to send photo from other app
     public static String networkListener = "no";
     public static Boolean networkOk = true, networkTypingOk = true;
-    private static int replyVisibility = 8;    // gone as default
 
 
     //  --------   voice note declares
@@ -338,6 +338,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private Map<String, Object> editMessageMap;
     private Map<String, Integer> dateNum, dateMonth;
     private Map<String, Object> deleteMap;
+    public static Map<String, Long> getLastTimeChat;
     public static Map<String, MessageAdapter> adapterMap; // to prevent it from re-creating all the time
     public static Map<String, RecyclerView> recyclerMap;
     private static List<String> otherNameList, otherUidList;
@@ -430,6 +431,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static List<ContactModel> contactList;
     public static List<ContactModel> contactListFile;
 
+    // card views to messageAdapter
+    public static List<View> viewCacheSend; // List to store views for caching
+    public static List<View> viewCacheReceive; // List to store views for caching
+    public static List<View> viewPhotoSend; // List to store views for caching
+    public static List<View> viewPhotoReceive; // List to store views for caching
+
+    public static int isOnlongClick = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -525,16 +533,20 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         TextView inviteFriendsClick = moreOptionHomeLayout.findViewById(R.id.inviteFriendsClick);
         TextView goPremiumClick = moreOptionHomeLayout.findViewById(R.id.goPremiumClick);
 
+        // card views to messageAdapter
+        viewCacheSend = new ArrayList<>(); // List to store views for caching
+        viewCacheReceive = new ArrayList<>(); // List to store views for caching
+        viewPhotoSend = new ArrayList<>(); // List to store views for caching
+        viewPhotoReceive = new ArrayList<>(); // List to store views for caching
+
         // calls
         incomingCallLayout = findViewById(R.id.incomingCallLayout);
         whoIsCallingTV = incomingCallLayout.findViewById(R.id.incomingNameTV);
         answerCall_IV = incomingCallLayout.findViewById(R.id.annswerCall_IV);
         rejectCall_IV = incomingCallLayout.findViewById(R.id.rejectCall_IV);
         callButton = findViewById(R.id.callMeet_IV);
-
         returnToCallLayout = findViewById(R.id.returnBackToCAll);
         returnToCallWithDuration = returnToCallLayout.findViewById(R.id.tapInfoTV);
-
         audioOrVideoOptionConatiner = findViewById(R.id.videoOrAudioOptionLayout);
         audioCallButton = audioOrVideoOptionConatiner.findViewById(R.id.audioCallOption);
         videoCallButton = audioOrVideoOptionConatiner.findViewById(R.id.videoCallOption);
@@ -717,6 +729,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         pinPrivateChatMap = new HashMap<>();
         pinPublicChatMap = new HashMap<>();
         deleteMap = new HashMap<>();
+        getLastTimeChat = new HashMap<>();
         editMessageMap = new HashMap<>();
         userRecyclerActiveMap = new HashMap<>();
         scrollNumMap = new HashMap<>();
@@ -937,7 +950,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             audioOrVideoOptionConatiner.setOnClickListener(v -> audioOrVideoOptionConatiner.setVisibility(View.GONE));
 
             audioCallButton.setOnClickListener(v -> {
-                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(30).withEndAction(() ->
                 {
                     makeCall("audio");
                     makeCall = true;
@@ -1406,7 +1419,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         .withEndAction(() -> {
 
                             onPinData(modelChatsOption.getIdKey(), modelChatsOption.getMessage(),
-                                    ServerValue.TIMESTAMP, myUserName, chatHolder);
+                                    ServerValue.TIMESTAMP, chatHolder);
 
                             // Reset the scale
                             view.setScaleX(1.0f);
@@ -1777,7 +1790,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     // delete the ROOM outside UI
                     chatViewModel.editOutsideChat( otherUserUid, AllConstants.DELETE_ICON + " ...",
-                            null, chatModel.getIdKey() );
+                            null, chatModel.getIdKey());
 
                     // delete inside chat from ROOM
                     chatViewModel.deleteChat(chatModel);
@@ -1949,8 +1962,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             };
             // hide pin message view
-            hidePinMsg_IV.setOnClickListener(closePinBox);
-            pinClose_IV.setOnClickListener(closePinBox);
             closePinBox_TV.setOnClickListener(closePinBox);
 
             // open private pin message box
@@ -1999,19 +2010,22 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 int pinNum = pinPublicChatMap.get(otherUserUid).size();
                 pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
                 int currentPinNumber = pinNum - pinNextPublic;
-                String getChat, getPinBy;
+                String getChat, getPinBy, getPinName;
                 try{
                     getChat = pinPublicChatMap.get(otherUserUid).get(currentPinNumber).getMessage();
                     getPinBy = pinPublicChatMap.get(otherUserUid).get(currentPinNumber).getPinByWho();
+//                    getPinName = contactNameShareRef.getString(otherUserUid, getPinBy);
+
                 } catch (Exception e){
                     getChat = pinPublicChatMap.get(otherUserUid).get(pinNum-1).getMessage();
                     getPinBy = pinPublicChatMap.get(otherUserUid).get(pinNum -1).getPinByWho();
+//                    getPinName = contactNameShareRef.getString(otherUserUid, getPinBy);
                 }
                 // display pin chat and pinByWho on the UI
                 pinMsg_TV.setTypeface(null);
                 pinMsg_TV.setText(getChat);
-                String pinBy = getString(R.string.pinBy) + " " + getPinBy;
-                pinByTV.setText(pinBy);
+//                String pinBy = getString(R.string.pinBy) + " " + getPinBy;
+                pinByTV.setText(getPinBy);
                 newPinIndicator_TV.setVisibility(View.GONE);
 
                 // make pinByWho visible and close pin box option
@@ -2095,8 +2109,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if(reduceNumber >= 0){  // only update UI when pin is between 0 to pinNum
                         pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
                         pinMsg_TV.setText(getChat);
-                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
-                        pinByTV.setText(pinBy);
+//                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
+                        pinByTV.setText(getPinByWho);
                     } else{
                         pinNextPublic -= 1;
 //                    Toast.makeText(this, "No more pin message!", Toast.LENGTH_SHORT).show();
@@ -2156,8 +2170,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     if (increaseNumber < pinNum){
                         pinCount_TV.setText("(" + pinNextPublic + "/" + (pinNum) + ")");
                         pinMsg_TV.setText(getChat);
-                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
-                        pinByTV.setText(pinBy);
+//                        String pinBy = getString(R.string.pinBy) + " " + getPinByWho;
+                        pinByTV.setText(getPinByWho);
                     } else {
                         pinNextPublic += 1; // to enable it stop decreasing
                     }
@@ -2356,115 +2370,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    private void openWalletMethod(){
-
-        PhoneUtils.hideKeyboard(this, enterAckPin_ET);
-
-        Intent intent = new Intent(this, WalletActivity.class);
-        startActivity(intent);
-
-        walletVerifyLayout.setVisibility(View.GONE);
-
-        sideBarMenuContainer.setVisibility(View.GONE);
-
-//        v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
-//        {
-
-            // Reset the scale
-//            new Handler().postDelayed( ()-> {
-//                v.setScaleX(1.0f);
-//                v.setScaleY(1.0f);
-//            }, 50);
-//        }).start();
-    }
-
-    private void showFingerPrint(){
-        if(permissionCheck.isBiometricOk(this)){
-
-            enterAckPin_ET.setText(null);
-            // Create a BiometricPrompt instance
-            biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback()
-            {
-                @Override
-                public void onAuthenticationError(int errorCode, CharSequence errString) {
-                    super.onAuthenticationError(errorCode, errString);
-                    if(errorCode == 13){
-
-                        verifyWithPin();
-                        
-                    } else {
-                        pinOptionContainer.setVisibility(View.VISIBLE);
-                        pinContainerHome.setVisibility(View.GONE);
-                        openWalletButton.setVisibility(View.GONE);
-                        forgetPin_Button.setVisibility(View.GONE);
-
-                        fingerprintIcon.setVisibility(View.VISIBLE);
-                        verifyViaTV.setVisibility(View.VISIBLE);
-                        or_TV.setVisibility(View.VISIBLE);
-                        openPinBox_TV.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                @Override
-                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
-                    super.onAuthenticationSucceeded(result);
-
-                    loadVerify();
-
-                    openWalletMethod(); // fingerprint
-
-                    Toast.makeText(MainActivity.this, getString(R.string.verifying), Toast.LENGTH_SHORT).show();
-                    // Handle authentication success
-                }
-
-                @Override
-                public void onAuthenticationFailed() {
-                    super.onAuthenticationFailed();
-                    Toast.makeText(MainActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
-                    // verify with PIN directly
-                    verifyWithPin();
-                }
-            });
-
-            // Create a BiometricPrompt.PromptInfo instance
-            promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Fingerprint Authentication")
-                    .setSubtitle("Click 'Verify by PIN' if fingerprint is dirty or wet")
-                    .setNegativeButtonText("Or\n Verify by PIN")
-                    .build();
-
-            // Show the fingerprint authentication dialog
-            biometricPrompt.authenticate(promptInfo);
-
-        } else {
-            permissionCheck.requestBiometric(this);
-        }
-
-    }
-
-    private void verifyWithPin(){
-        pinOptionContainer.setVisibility(View.VISIBLE);
-        pinContainerHome.setVisibility(View.VISIBLE);
-        openWalletButton.setVisibility(View.VISIBLE);
-        forgetPin_Button.setVisibility(View.VISIBLE);
-
-        fingerprintIcon.setVisibility(View.GONE);
-        verifyViaTV.setVisibility(View.GONE);
-        or_TV.setVisibility(View.GONE);
-        openPinBox_TV.setVisibility(View.GONE);
-    }
-
-    private void loadVerify(){
-        generalBackground.setVisibility(View.VISIBLE);
-        verifyLoadTV.setVisibility(View.VISIBLE);
-        verifyProgressBar.setVisibility(View.VISIBLE);
-
-        new Handler().postDelayed(()-> {
-            generalBackground.setVisibility(View.GONE);
-            verifyLoadTV.setVisibility(View.GONE);
-            verifyProgressBar.setVisibility(View.GONE);
-        }, 2000);
-    }
 
     //  --------------- methods && interface --------------------
 
@@ -2517,10 +2422,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         // make progressBar visible at first
         if(userRecyclerActiveMap.get(uID) == null) progressBarLoadChats.setVisibility(View.VISIBLE);
+        if(userRecyclerActiveMap.get(uID) != null)  populateRecyclerWithAdapter(myUsername, uID, mContext_, recyclerChat);
 
         new Handler().postDelayed(()->
         {
-            populateRecyclerWithAdapter(myUsername, uID, mContext_, recyclerChat);
+            if(userRecyclerActiveMap.get(uID) == null) populateRecyclerWithAdapter(myUsername, uID, mContext_, recyclerChat);
 
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMap.get(uID).getLayoutManager();
             assert layoutManager != null;
@@ -2535,7 +2441,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             //        Add an OnScrollListener to the RecyclerView
             recyclerMap.get(uID).addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy)
+                {
                     super.onScrolled(recyclerView, dx, dy);
 
                     // keep saving the recycler position while scrolling
@@ -2555,10 +2462,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
 
-            if(recyclerMap.get(uID) != null){
-                // Attach the ItemTouchHelper to your RecyclerView
-                itemTouchSwipe.attachToRecyclerView(recyclerMap.get(uID));
-            }
+            // Attach the ItemTouchHelper to your RecyclerView
+            if(recyclerMap.get(uID) != null) itemTouchSwipe.attachToRecyclerView(recyclerMap.get(uID));
+
 
         }, 100);
 
@@ -2756,22 +2662,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
 
-        String vnDuration = messageModel.getVnDuration() != null ? messageModel.getVnDuration() : "";
+        String chat = ChatListAdapter.getInstance().setChatText(messageModel.getType(),
+                messageModel.getMessage(), messageModel.getEmojiOnly(), messageModel.getVnDuration());
 
-        String micIconAndDuration_OrChat;
-        if(messageModel.getMessage() == null){
-            if(messageModel.getEmojiOnly() != null){
-                micIconAndDuration_OrChat = messageModel.getEmojiOnly();
-            } else
-                micIconAndDuration_OrChat = "\uD83C\uDFA4    " +  vnDuration;
-        } else {
-            micIconAndDuration_OrChat = messageModel.getMessage();
-//            Toast.makeText(this, "It not null", Toast.LENGTH_SHORT).show();
-
-        }
 
         // General settings
-        textViewReplyOrEdit.setText(micIconAndDuration_OrChat);
+        textViewReplyOrEdit.setText(chat);
         editOrReplyIV.setImageResource(icon);               //  show edit or reply icon at left view
         cardViewReplyOrEdit.setVisibility(View.VISIBLE);    // make the container of the text visible
         replyVisible.setVisibility(View.VISIBLE);
@@ -2793,20 +2689,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // edit settings
         if(editOrReply.equals("edit")){
             nameReply.setText("");
-            editTextMessage.setText(micIconAndDuration_OrChat);  // set the edit message on the text field
-            editTextMessage.setSelection(micIconAndDuration_OrChat.length()); // Set focus to the end of the text
+            editTextMessage.setText(chat);  // set the edit message on the text field
+            editTextMessage.setSelection(chat.length()); // Set focus to the end of the text
         }
 
         // reply setting
         if(editOrReply.equals("reply")){
 
-            replyVisibility = visible;      // send visible to database to make the replied msg Visible on the UI
-
-            replyText = micIconAndDuration_OrChat;
-            replyFrom = "From: " + messageModel.getFrom();
+            replyText = chat;
+            replyFrom = messageModel.getFromUid() + AllConstants.JOIN + messageModel.getFrom();
+            nameReply.setText(messageModel.getFrom());
 //            if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
 //                replyFrom = "From You.";
-//                nameReply.setText(replyFrom);
 //            }
 //            else {
 //                // edit later to username and display name
@@ -2866,7 +2760,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     @Override
-    public void onPinData(String msgId_, String message_, Object timeStamp_, String pinByWho_, MessageAdapter.MessageViewHolder holder)
+    public void onPinData(String msgId_, String message_, Object timeStamp_, MessageAdapter.MessageViewHolder holder)
     {
 
         clearEmojiReactSetting();
@@ -2875,7 +2769,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         msgId = msgId_;
         message = message_;
         timeStamp = timeStamp_;
-        pinByWho = pinByWho_;
+        pinByWho = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, myUserName);
         holderPin = holder;
         // show pin option
         pinOptionBox.setVisibility(View.VISIBLE);
@@ -2941,10 +2835,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             statusAndMSgCount.put("status", true);
             statusAndMSgCount.put("unreadMsg", 0);
 
-            this.refChecks.child(this.myId).child(otherUid).updateChildren(statusAndMSgCount);
+            refChecks.child(myId).child(otherUid).updateChildren(statusAndMSgCount);
 
             // set responds to pend always      ------- will change later to check condition if user is still an active call
-            this.refChecks.child(this.myId).child(otherUid).child("vCallResp").setValue("pending");
+            refChecks.child(myId).child(otherUid).child("vCallResp").setValue("pending");
 
         });
 
@@ -3130,7 +3024,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             // save to local list for fast update
             MessageModel messageModel = new MessageModel(null, null, myId, null,
-                    System.currentTimeMillis(), chatKey, null, 0,
+                    System.currentTimeMillis(), chatKey, null, null,
                     null, 0, 10, null, null, false, false,
                     null, null, null, null, null, null);
 
@@ -3138,7 +3032,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             // add chat to local list
             MessageAdapter adapter = adapterMap.get(otherID);
-            adapter.addNewMessageDB(messageModel);  // add new chat
+            adapter.addMyMessageDB(messageModel);  // add empty card
 
             // save to local ROOM database
             chatViewModel.insertChat(otherID, messageModel);
@@ -3158,19 +3052,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     // create forward message map for each loop
-    private Map<String, Object> forwardChatsMap(MessageModel chatModel, String chatId){
+    private Map<String, Object> forwardChatsMap(MessageModel chatModel)
+    {
         Map<String, Object> forwardMessageMap = new HashMap<>();
+        String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, myUserName);
 
-        forwardMessageMap.put("from", myUserName);
+        forwardMessageMap.put("from", myDisplayName);
         forwardMessageMap.put("fromUid", myId);
         forwardMessageMap.put("type", chatModel.getType());
-        forwardMessageMap.put("idKey", chatId);
+        forwardMessageMap.put("idKey", chatModel.getIdKey());
         forwardMessageMap.put("message", chatModel.getMessage());
         forwardMessageMap.put("emojiOnly", chatModel.getEmojiOnly());
         forwardMessageMap.put("voiceNote", chatModel.getVoiceNote());
         forwardMessageMap.put("msgStatus", 700024);
         forwardMessageMap.put( "timeSent", ServerValue.TIMESTAMP);
-        forwardMessageMap.put("visibility", 8);
+        forwardMessageMap.put("newChatNumberID", chatModel.getNewChatNumberID());
         forwardMessageMap.put("isChatPin", false);
         forwardMessageMap.put("photoUriPath", chatModel.getPhotoUriPath());
         if(chatModel.getFromUid().equals(myId)){
@@ -3181,7 +3077,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         if(chatModel.getType() == 2 || chatModel.getType() == 4){
             forwardMessageMap.put("replyFrom", replyFrom);
-            forwardMessageMap.put("visibility", replyVisibility);
             forwardMessageMap.put("replyID", idKey);
             forwardMessageMap.put("replyMsg", replyText);
         }
@@ -3190,26 +3085,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     private static Map<String, Object> setMessageMap(
-            String text, String emojiOnly, int type, String chatKey,
-            int msgStatus, String vnPath, String vnDuration /*String photoPath*/)
+            MessageModel chatModel, String text, String emojiOnly, int msgStatus, String durationOrSizeVN)
     {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
         Map<String, Object> messageMap = new HashMap<>();
         // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+        String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "@"+myUserName);
 
-        messageMap.put("from", myUserName);
+        messageMap.put("from", displayName);
         messageMap.put("fromUid", myId);
-        messageMap.put("type", type);            // 8 is for text while 1 is for voice note
-        messageMap.put("idKey", chatKey);
+        messageMap.put("type", chatModel.getType());            // 8 is for text while 1 is for voice note
+        messageMap.put("idKey", chatModel.getIdKey());
         messageMap.put("message", text);
         messageMap.put("emojiOnly", emojiOnly);
-        messageMap.put("voiceNote", vnPath);
-        messageMap.put("vnDuration", vnDuration);
+        messageMap.put("voiceNote", chatModel.getVoiceNote());
+        messageMap.put("vnDuration", durationOrSizeVN);
         messageMap.put("msgStatus", msgStatus);
         messageMap.put( "timeSent", ServerValue.TIMESTAMP);
         messageMap.put("replyFrom", replyFrom);
-        messageMap.put("visibility", replyVisibility);
+        messageMap.put("newChatNumberID", chatModel.getNewChatNumberID());
         messageMap.put("replyID", idKey);
         messageMap.put("replyMsg", replyText);
         messageMap.put("isChatPin", false);
@@ -3223,19 +3118,19 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
 
-        Map<String, Object> lastestChatMap = new HashMap<>();
+        Map<String, Object> latestChatMap = new HashMap<>();
         // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+        String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "@"+myUserName);
+        latestChatMap.put("fromUid", myId);
+        latestChatMap.put("from", displayName);
+        latestChatMap.put("emojiOnly", emojiOnly);
+        latestChatMap.put("message", text);
+        latestChatMap.put("type", type);
+        latestChatMap.put("msgStatus", msgStatus);
+        latestChatMap.put( "timeSent", ServerValue.TIMESTAMP);
+        latestChatMap.put("idKey", chatKey);
 
-        lastestChatMap.put("fromUid", myId);
-        lastestChatMap.put("from", myUserName);
-        lastestChatMap.put("emojiOnly", emojiOnly);
-        lastestChatMap.put("message", text);
-        lastestChatMap.put("type", type);
-        lastestChatMap.put("msgStatus", msgStatus);
-        lastestChatMap.put( "timeSent", ServerValue.TIMESTAMP);
-        lastestChatMap.put("idKey", chatKey);
-
-        return lastestChatMap;
+        return latestChatMap;
     }
 
     public void sendMessage(String text, String emojiOnly, int type, String vnPath_, String durationOrSizeVN, String otherId)
@@ -3244,6 +3139,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(listener.equals("edit")){ // check if it's on edit mode
             sendEditChat(text, emojiOnly);
         } else {
+
+            String newChatNumberKey = refMsgFast.child(myId).child(otherUserUid).push().getKey();  // create an id for each message
 
             String chatKey = refMsgFast.child(myId).child(otherUserUid).push().getKey();  // create an id for each message
 
@@ -3264,22 +3161,30 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             // save to local list for fast update
             MessageModel messageModel = new MessageModel(text, myUserName, myId, replyFrom,
-                    System.currentTimeMillis(), chatKey, null, replyVisibility,
+                    System.currentTimeMillis(), chatKey, null, newChatNumberKey,
                     replyText, delivery, type, null, idKey, false, false,
                     null, emojiOnly, vnPath_, durationVN, null, null);
 
             messageModel.setMyUid(myId);
             // add chat to local list
             MessageAdapter adapter = adapterMap.get(otherId);
-            if(adapter != null){
-                adapter.addNewMessageDB(messageModel);  // add new chat
+
+            if(adapter != null)
+            {
+                if(getLastTimeChat.get(otherId) != null){   // check if it's the first chat of the day
+                    notifyFirstChatOfANewDay(getLastTimeChat.get(otherId), messageModel.getTimeSent(),
+                            newChatNumberKey, adapter, otherId);
+                }
+
+                adapter.addMyMessageDB(messageModel);  // add new chat
                 // scroll to new position only if scrollCheck int is < 20
                 int scrollCheck = adapter.getItemCount() - (int) scrollNumMap.get(otherId);
                 int lastPosition = adapterMap.get(otherId).getItemCount()-1;
 
                 if(scrollCheck < 6){    // scroll to last position on new message update.
                     recyclerMap.get(otherId).scrollToPosition(lastPosition);
-                }   // else don't scroll.
+                } // else don't scroll...
+
             }
 
             // add one to the down message number
@@ -3299,7 +3204,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             }
 
             // find position and move it to top as recent chat... also update the outside chat details
-            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, chatKey);
+            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, 0);
 
             // remove the typingRunnable for checking network
             handlerTyping.removeCallbacks(runnableTyping);
@@ -3309,17 +3214,31 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // save to local ROOM database
             chatViewModel.insertChat(otherId, messageModel);
 
-            // send only text chat to other user -- not photo nor file yet
-//            if(!isSendingVoiceNote){
-//                sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
-//                        vnPath_, durationOrSizeVN, chatKey, otherId);
-//            }
-            excutorSendDB.execute(() -> {
+            if(messageModel.getType() == 6) {   // sending to other user database
+                emojiOnly = getString(R.string.missed);
+                callChatModel = messageModel;
+            } else if (messageModel.getType() == 7) {
+                emojiOnly = getString(R.string.incomingGame);
+                gameModel = messageModel;
+            }
+            final String emoji = emojiOnly;
 
+            if(messageModel.getType() == AllConstants.type_pin)     // @maro pin a chat
+            {
+                String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "@"+myUserName);
+                String pinNoty = emojiOnly.equals(getString(R.string.pin)) ? getString(R.string.pinAChat) : getString(R.string.unPinAChat);
+                text = displayName + " " + pinNoty;
+                messageModel.setReplyID(msgId);
+                idKey = msgId;
+            }
+            final String text_ = text;
+
+            excutorSendDB.execute(() ->     // send only text chat to other user -- not photo nor file yet
+            {
                 if(!isSendingVoiceNote){    // send only text chat, don't sent voice note here
-                    sendToDataBase(text, emojiOnly, type, chatDeliveryStatus,
-                            vnPath_, durationOrSizeVN, chatKey, otherId);
+                    sendToDataBase(messageModel, text_, emoji, chatDeliveryStatus, durationOrSizeVN, otherId);
                 }
+
                 clearInputFields();     // sendMessage
                 isSendingVoiceNote = false; // deactivate voice note boolean not to block sending text
 
@@ -3329,29 +3248,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    public void sendToDataBase(
-            String text, String emojiOnly, int type, int chatDeliveryStatus,
-            String vnPath_, String durationOrSizeVN, String chatKey, String otherUid
-    ){
+    public void sendToDataBase(MessageModel messageModel, String text, String emojiOnly, 
+                               int chatDeliveryStatus, String durationOrSizeVN, String otherUid)
+    {
         // send the chat to other user
-        refMsgFast.child(otherUid).child(myId).child(chatKey).setValue(
-                setMessageMap(text, emojiOnly, type, chatKey,
-                        chatDeliveryStatus, vnPath_, durationOrSizeVN)
-//                                .put("photoUriPath", null)
+        refMsgFast.child(otherUid).child(myId).child(messageModel.getIdKey()).setValue(
+                setMessageMap(messageModel, text, emojiOnly, chatDeliveryStatus, durationOrSizeVN)
         );
 
         // save last msg for outside chat display
-        refLastDetails.child(myId).child(otherUid).setValue(
-                setOutsideChatMap(text, emojiOnly, type, chatKey, chatDeliveryStatus)
+        refLastDetails.child(myId).child(otherUid).updateChildren(
+                setOutsideChatMap(text, emojiOnly, messageModel.getType(), messageModel.getIdKey(), chatDeliveryStatus)
         );
-        refLastDetails.child(otherUid).child(myId).setValue(
-                setOutsideChatMap(text, emojiOnly, type, chatKey, chatDeliveryStatus)
+        refLastDetails.child(otherUid).child(myId).updateChildren(
+                setOutsideChatMap(text, emojiOnly, messageModel.getType(), messageModel.getIdKey(), chatDeliveryStatus)
         );
 
         //  send chatKey to other User to read  -- customise later to check user OnRead settings
-        refOnReadRequest.child(otherUid).child(myId).push().setValue(chatKey);
+        refOnReadRequest.child(otherUid).child(myId).push().setValue(messageModel.getIdKey());
 
-        checkAndSaveCounts_SendMsg(otherUid);   // save the number of new message I am sending
+//        checkAndSaveCounts_SendMsg(otherUid);   // save the number of new message I am sending
     }
 
     // send forward chat or new photo, video or doc files
@@ -3378,9 +3294,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 String forwardPhotoPath = chatModel.getPhotoUriPath();
                 String photoOriginal = chatModel.getPhotoUriOriginal(); // also for document
                 String imageSize_ = chatModel.getImageSize();
-
                 String replyFrom_ = null;
-                int replyVisibility_ = 8;
                 String replyId = null;
                 String replyText_ = null;
                 boolean forwardIcon;
@@ -3390,10 +3304,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                 if(chatModel.getType() != 3){ // don't apply to document which is 3.
                     replyFrom_ = replyFrom;
-                    replyVisibility_ = replyVisibility;
                     replyId = idKey;
                     replyText_ = replyText;
                 }
+                String newChatNumberId = refMsgFast.child(myId).child(otherUid).push().getKey();  // create an id for each message
 
                 String chatId = refMsgFast.child(myId).child(otherUid).push().getKey();  // create an id for each message
 
@@ -3416,9 +3330,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     voiceNoteIdShareRef.edit().putString(chatId, otherUid + AllConstants.JOIN + "yes").apply();
                 }
 
+                String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, myUserName);
+
                 // save to local list for fast update
-                MessageModel messageModel = new MessageModel(forwardChat, myUserName, myId, replyFrom_,
-                        System.currentTimeMillis(), chatId, null, replyVisibility_, replyText_, delivery,
+                MessageModel messageModel = new MessageModel(forwardChat, myDisplayName, myId, replyFrom_,
+                        System.currentTimeMillis(), chatId, null, newChatNumberId, replyText_, delivery,
                         forwardType, imageSize_, replyId, false, forwardIcon, null,
                         forwardChatEmojiOnly, vnPathFile, audioOrVN_Duration, forwardPhotoPath, photoOriginal);
 
@@ -3435,7 +3351,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     scrollCheck = adapter.getItemCount();
                 }
                 int lastPosition = adapterMap.get(otherUid).getItemCount()-1;
-                if(scrollCheck < 20){    // scroll to last position on new message update.
+                if(scrollCheck < 6){    // scroll to last position on new message update.
                     recyclerMap.get(otherUid).scrollToPosition(lastPosition);
                 }   // else don't scroll.
 
@@ -3448,8 +3364,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 chatViewModel.insertChat(otherUid, messageModel);
 
                 // send to database only if it's text
-                if(forwardType == 0){
-                    refMsgFast.child(otherUid).child(myId).child(chatId).setValue( forwardChatsMap(chatModel, chatId) );
+                if(forwardType == 0)
+                {
+                    refMsgFast.child(otherUid).child(myId).child(chatId).setValue( forwardChatsMap(chatModel) );
                     // save last msg for outside chat display
                     refLastDetails.child(myId).child(otherUid).setValue(
                             setOutsideChatMap(chatModel.getMessage(), chatModel.getEmojiOnly(),
@@ -3460,7 +3377,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                     chatModel.getType(), chatId, 700024)
                     );
 
-                    checkAndSaveCounts_SendMsg(otherUid);
+//                    checkAndSaveCounts_SendMsg(otherUid);
                 }
 
                 // add new photo or video to all photo and video views list
@@ -3468,7 +3385,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 else MessageAdapter.addNewPhotoOrVideoToViewLists(otherUid, messageModel);
 
                 // find position and move it to top as recent chat... also update the outside chat and ROOM DB
-                ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, chatId);
+                ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, 0);
 
                 //  send chatKey to other User to read  -- customise later to check user OnRead settings
                 refOnReadRequest.child(otherUid).child(myId).push().setValue(chatId);
@@ -3484,6 +3401,43 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
     }
 
+    public static void updateCallOrGameChat(int type, String response)
+    {
+        if(callChatModel != null)
+        {
+            callChatModel.setEmojiOnly(response);
+
+            //  update inside chat adapter
+            adapterMap.get(currentUserUidOnCall).updateCallOrGameChat(callChatModel);
+
+            // save to ROOM inside chat
+            chatViewModel.updateChat(callChatModel);
+
+            //  update outside chat adapter      //  update ROOM outside database too
+            ChatListAdapter.getInstance().updateCallOrGameUI(type, currentUserUidOnCall, myId, response);
+
+        }
+
+    }
+
+    public static void missCallOrGameMethod(int type, String response, String otherId)
+    {
+        if(missCallModel != null)
+        {
+            missCallModel.setEmojiOnly(response);
+
+            //  update inside chat adapter
+            adapterMap.get(otherId).updateCallOrGameChat(missCallModel);
+
+            // save to ROOM inside chat
+            chatViewModel.updateChat(missCallModel);
+
+            //  update outside chat adapter      //  update ROOM outside database too
+            ChatListAdapter.getInstance().updateCallOrGameUI(type, otherId, myId, response);
+
+        }
+
+    }
     private void sendEditChat(String text, String emojiOnly){
         editMessageMap.put("from", myUserName);
         editMessageMap.put("fromUid", myId);
@@ -3520,6 +3474,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         // hide chat Option menu if visible
         chatOptionsConstraints.setVisibility(View.GONE);
+
+        clearInputFields();
 
     }
 
@@ -3632,7 +3588,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     mediaPlayer.release();  // Release the MediaPlayer resources after getting the duration
 
                     // send voice note to local list and room only -- adapter will do the sending to other user
-                    sendMessage(null, null, 1, fileNamePath, sizeOrDuration, otherUserUid);
+                    sendMessage(null, null, 1, fileNamePath, sizeOrDuration, otherUserUid);     // voice note
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -3756,7 +3712,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         thread.start();
     }
 
-    public void retrieveMessages(String myUsername, String otherUID, Context mContext, boolean activateRecycler){
+    public void retrieveMessages(String myUsername, String otherUID, Context mContext, boolean activateRecycler)
+    {
 
         List<MessageModel> modelListAllMsg = new ArrayList<>();     // send empty List to the adapter
 
@@ -3799,7 +3756,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                         checkClearChatsDB(otherUID);
 
-                    }, 2000);
+                    }, 3000);
 
                 });
             }
@@ -3949,8 +3906,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     // add new message to local List and interact with few msg in refMsgFast database for delivery and read status
     private void newMessageInteraction(MessageAdapter adapter, String otherId)
     {
-        AllConstants.executors.execute(() -> refMsgFast.child(myId).child(otherId)
-                .addValueEventListener(new ValueEventListener() {
+        AllConstants.executors.execute(() -> refMsgFast.child(myId).child(otherId).addValueEventListener(new ValueEventListener()
+        {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -3964,32 +3921,77 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         if (messageModel.getFromUid().equals(otherId))
                         {
                             messageModel.setMyUid(myId);
+                            messageModel.setMsgStatus(0);
+
+                            if(messageModel.getType() == AllConstants.type_call) missCallModel = messageModel;
 
                             addEmptyChatCard(otherId);   // other user sending me chat the first time
-                            // add the new msg to the modelList method at MessageAdapter
-                            adapter.addNewMessageDB(messageModel);  // receiving from other other
-                            // add to room database
-                            chatViewModel.insertChat(otherId, messageModel);
-                            // find position and move it to top as recent chat // add to outside ROOM
-                            ChatListAdapter.getInstance()
-                                    .findUserPositionByUID(otherId, messageModel, snapshot1.getKey());
 
-                            // delete after delivery the chat
-                            refMsgFast.child(myId).child(otherId).child(snapshot1.getKey()).removeValue();
+                            // get the number of previous unread chat, if any.
+                            UserOnChatUI_Model outsideUserModel = ChatListAdapter.getInstance().findUserModelByUid(otherId);
 
-                            // update last msg for outside chat display chat
-                            refLastDetails.child(myId).child(otherId).child("msgStatus").setValue(0);
+                            //  ============    check if it's a new day first chat,
+                            notifyFirstChatOfANewDay(outsideUserModel.getTimeSent(), messageModel.getTimeSent(), messageModel.getNewChatNumberID(), adapter, otherId);
 
-                            // check recycler position before scrolling
+                            int currentNewChatNumber = 0;
+                            
+                            // check recycler position before scrolling // or receiving number of new chat alert
                             int scrollNumCheck = scrollNumMap.get(otherId) == null ? adapter.getItemCount() - 1
                                     : (int) scrollNumMap.get(otherId) ;
                             int scrollCheck = adapter.getItemCount() - scrollNumCheck;
 
-                            // scroll to last position I am inside chat
-                            if(insideChatMap.get(otherId) != null) {
-                                if(insideChatMap.get(otherId) && scrollCheck < 20){
-                                    scrollToPreviousPosition(otherId, (adapter.getItemCount() - 1));     // new message
+                            // add the new chat alert   ================= 5 new chats
+                            if( (insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck > 5)   // I am inside the chat
+                                    || ( insideChatMap.get(otherId) != null && !insideChatMap.get(otherId) )    // I am not inside the chat
+                                    || (insideChatMap.get(otherId) == null) )  // a total new user
+                            {
+                                if(outsideUserModel != null)
+                                {
+                                    currentNewChatNumber = outsideUserModel.getNumberOfNewChat() + 1;
+                                    
+                                    if(outsideUserModel.getNumberOfNewChat() >= 1) { // add increment to previous new chat number -- inside chat
+
+                                        adapter.getChatAndIncrementNewChatNumber(currentNewChatNumber+"");
+
+                                    } else // it is the first new chat // generate new id and add count
+                                    {    
+                                        MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
+                                                System.currentTimeMillis(), messageModel.getNewChatNumberID(), "yes", currentNewChatNumber+"",
+                                                null, 0, AllConstants.type_pin, null, null, false, false,
+                                                null, null, null, null, null, null);
+
+                                        newNewCountModel.setMyUid(myId);
+
+                                        // add new chat model number count to local list
+                                        adapter.addMyMessageDB(newNewCountModel);
+
+                                        // save to local ROOM database
+                                        chatViewModel.insertChat(otherId, newNewCountModel);
+
+                                    }
                                 }
+
+                            }
+
+                            
+                            // add the new msg to the model List at MessageAdapter
+                            adapter.addNewMessageDB(messageModel);  // receiving from other user
+                            // add to room database -- inside chat
+                            chatViewModel.insertChat(otherId, messageModel);
+
+                            // find position and move it to top as recent chat // add to outside ROOM
+                            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, currentNewChatNumber);
+
+                            // delete after delivery the chat
+                            refMsgFast.child(myId).child(otherId).child(messageModel.getIdKey()).removeValue();
+
+                            // update last msg for outside chat display chat
+                            refLastDetails.child(myId).child(otherId).child("msgStatus").setValue(0);
+
+                            // scroll to last position I am inside chat
+                            if(insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck < 10) 
+                            {
+                                scrollToPreviousPosition(otherId, (adapter.getItemCount() - 1));     // new message
                             }
 
                             adapter.notifyItemInserted(adapter.getItemCount() - 1);
@@ -4015,6 +4017,30 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }));
 
     }
+
+    private void notifyFirstChatOfANewDay(long compareTime, long timeStamp, String chatID, MessageAdapter adapter, String otherId)
+    {
+        if (TimeUtils.isNotToday(compareTime))  // The timestamp is not today -- add
+        {
+            MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
+                    timeStamp, chatID, "newDate", null,
+                    null, 0, AllConstants.type_pin, null, null, false, false,
+                    null, null, null, null, null, null);
+
+            newNewCountModel.setMyUid(myId);
+
+            // add to local chat list
+            adapter.addMyMessageDB(newNewCountModel);
+
+            // save to local ROOM database  -- inside chat
+            chatViewModel.insertChat(otherId, newNewCountModel);
+
+            getLastTimeChat.put(otherId, System.currentTimeMillis());   // disable sending new time
+        }
+
+//1718750571411
+    }
+
 
     // retrieve message when edited
     private void getEditMessage(MessageAdapter adapter, String otherUid)
@@ -4399,6 +4425,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         });
     }
 
+
+    //      ================      pin methods           ========================
+
     private void pinIconsVisibility(String otherId){
 
         // make private pin details invisible if no pin chat yet
@@ -4594,9 +4623,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                         // get the position of the pin chat
                         int pinPosition = messageAdapter.findMessagePositionById(chatId);
+                        if(pinPosition != -1){
+                            messageAdapter.getModelList().get(pinPosition).setChatPin(false);
+                            messageAdapter.notifyItemChanged(pinPosition, new Object());
+                        }
                         // update the icon on the model chat list UI
-                        messageAdapter.getModelList().get(pinPosition).setChatPin(false);
-                        messageAdapter.notifyItemChanged(pinPosition, new Object());
 
                         // delete the pin Id from firebase
                         refDeletePin.child(myId).child(otherId).child(snapshot1.getKey()).removeValue();
@@ -4653,7 +4684,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
 
         boolean foundPrivate = false;
-        // check if message has already been pin or not in public pin
+        // check if message has already been pin or not in private pin
         for (PinMessageModel pinMes : pinPrivateChatMap.get(otherUserUid)) {
             if (pinMes.getMsgId().equals(msgId)) {
                 foundPrivate = true;
@@ -4694,6 +4725,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
+            // send to database
+            sendMessage(getString(R.string.youUnpinPublicly), getString(R.string.unpin), AllConstants.type_pin,    // unpin publicly
+                    null, null, otherUserUid);
+
         } else {
             // Add the new pin message to the local map
             PinMessageModel newPin = new PinMessageModel(msgId, message, timeStamp, pinByWho);
@@ -4705,7 +4740,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             refPublicPinChat.child(otherUserUid).child(myId).child(msgId)
                     .setValue(pinDetails);
 
-            //  show pin icon on the chat UI, and update ROOM and adapter list
+            //  show pin icon 📌 on the chat UI, and update ROOM and adapter list
             adapterMap.get(otherUserUid).pinIconDisplay(holderPin, msgId,true);
 
             //  Increment the count
@@ -4727,6 +4762,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             }
             Toast.makeText(this, "Chat pin!", Toast.LENGTH_SHORT).show();
 
+            // send to database
+            sendMessage(getString(R.string.youPinPublicly), getString(R.string.pin), AllConstants.type_pin,    // pin publicly
+                    null, null, otherUserUid);
         }
 
         // close the pin box option
@@ -4845,6 +4883,43 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         pinStatus = "null";      // indicate to show public pins
 
     }
+    private void scrollToPinMessage(int i){
+        pinMsg_TV.setTypeface(null);    // remove italic style if any
+
+        // get the msg id you want to scroll to
+        String findMsgId = pinStatus.equals(PRIVATE) ? pinPrivateChatMap.get(otherUserUid).get(i).
+                getMsgId() : pinPublicChatMap.get(otherUserUid).get(i).getMsgId();
+
+        // get the position of the message
+        int position = adapterMap.get(otherUserUid).findMessagePositionById(findMsgId);
+
+        if(position != RecyclerView.NO_POSITION){
+            if(scrollNum > position) recyclerMap.get(otherUserUid).scrollToPosition(position - 3);   // under correct
+            else recyclerMap.get(otherUserUid).scrollToPosition(position + 3);
+
+            // highlight the message found
+            adapterMap.get(otherUserUid).highlightItem(position);
+
+        } else {
+            Toast.makeText(this, getString(R.string.chatNotFound), Toast.LENGTH_SHORT).show();
+            chatNotFoundID = findMsgId;
+        }
+    }
+
+    // scroll to position on new message update
+    private void scrollToPreviousPosition(String otherId, int position){
+        for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
+            View child = recyclerContainer.getChildAt(i);
+
+            if (child == recyclerMap.get(otherId)){
+                RecyclerView recyclerView = (RecyclerView) child;
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                layoutManager.scrollToPosition(position);
+
+            }
+        }
+    }
 
     private void swipeReply(){
         itemTouchSwipe = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
@@ -4861,7 +4936,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
                         .get(viewHolder.getAdapterPosition());
 
-                if(modelChats.getType() != 10)
+                if(modelChats.getType() != 8 && modelChats.getType() != 10)
                 {
                     adapterMap.get(otherUserUid).replyChat(modelChats, null);
                     // notify it to reset the adapter in case onSwipe was called
@@ -4894,7 +4969,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
                         .get(viewHolder.getAdapterPosition());
 
-                if(modelChats.getType() != 10){
+                if(modelChats.getType() != 8 && modelChats.getType() != 10){
                     // Check if the item is beyond the quarter of the screen and Return 0 to disable both dragging and swiping
                     if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
 
@@ -4921,7 +4996,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 MessageModel modelChats = adapterMap.get(otherUserUid).getModelList()
                         .get(viewHolder.getAdapterPosition());
 
-                if(modelChats.getType() != 10) {
+                if(modelChats.getType() != 8 && modelChats.getType() != 10) {
 
                     // Get the width of the screen
                     int screenWidth = recyclerView.getWidth();
@@ -4969,43 +5044,118 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         );
     }
 
-    private void scrollToPinMessage(int i){
-        pinMsg_TV.setTypeface(null);    // remove italic style if any
 
-        // get the msg id you want to scroll to
-        String findMsgId = pinStatus.equals(PRIVATE) ? pinPrivateChatMap.get(otherUserUid).get(i).
-                getMsgId() : pinPublicChatMap.get(otherUserUid).get(i).getMsgId();
+    //      ================      wallet methods           ========================
+    private void openWalletMethod(){
 
-        // get the position of the message
-        int position = adapterMap.get(otherUserUid).findMessagePositionById(findMsgId);
+        PhoneUtils.hideKeyboard(this, enterAckPin_ET);
 
-        if(position != RecyclerView.NO_POSITION){
+        Intent intent = new Intent(this, WalletActivity.class);
+        startActivity(intent);
 
-            recyclerMap.get(otherUserUid).scrollToPosition(position - 2);
+        walletVerifyLayout.setVisibility(View.GONE);
 
-            // highlight the message found
-            adapterMap.get(otherUserUid).highlightItem(position);
+        sideBarMenuContainer.setVisibility(View.GONE);
+
+//        v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+//        {
+
+        // Reset the scale
+//            new Handler().postDelayed( ()-> {
+//                v.setScaleX(1.0f);
+//                v.setScaleY(1.0f);
+//            }, 50);
+//        }).start();
+    }
+
+    private void showFingerPrint(){
+        if(permissionCheck.isBiometricOk(this)){
+
+            enterAckPin_ET.setText(null);
+            // Create a BiometricPrompt instance
+            biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback()
+            {
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    if(errorCode == 13){
+
+                        verifyWithPin();
+
+                    } else {
+                        pinOptionContainer.setVisibility(View.VISIBLE);
+                        pinContainerHome.setVisibility(View.GONE);
+                        openWalletButton.setVisibility(View.GONE);
+                        forgetPin_Button.setVisibility(View.GONE);
+
+                        fingerprintIcon.setVisibility(View.VISIBLE);
+                        verifyViaTV.setVisibility(View.VISIBLE);
+                        or_TV.setVisibility(View.VISIBLE);
+                        openPinBox_TV.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+
+                    loadVerify();
+
+                    openWalletMethod(); // fingerprint
+
+                    Toast.makeText(MainActivity.this, getString(R.string.verifying), Toast.LENGTH_SHORT).show();
+                    // Handle authentication success
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    Toast.makeText(MainActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                    // verify with PIN directly
+                    verifyWithPin();
+                }
+            });
+
+            // Create a BiometricPrompt.PromptInfo instance
+            promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Fingerprint Authentication")
+                    .setSubtitle("Click 'Verify by PIN' if fingerprint is dirty or wet")
+                    .setNegativeButtonText("Or\n Verify by PIN")
+                    .build();
+
+            // Show the fingerprint authentication dialog
+            biometricPrompt.authenticate(promptInfo);
 
         } else {
-            Toast.makeText(this, "Chat not found", Toast.LENGTH_SHORT).show();
-            chatNotFoundID = findMsgId;
+            permissionCheck.requestBiometric(this);
         }
+
     }
 
-    // scroll to position on new message update
-    private void scrollToPreviousPosition(String otherId, int position){
-        for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
-            View child = recyclerContainer.getChildAt(i);
+    private void verifyWithPin(){
+        pinOptionContainer.setVisibility(View.VISIBLE);
+        pinContainerHome.setVisibility(View.VISIBLE);
+        openWalletButton.setVisibility(View.VISIBLE);
+        forgetPin_Button.setVisibility(View.VISIBLE);
 
-            if (child == recyclerMap.get(otherId)){
-                RecyclerView recyclerView = (RecyclerView) child;
-
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                layoutManager.scrollToPosition(position);
-
-            }
-        }
+        fingerprintIcon.setVisibility(View.GONE);
+        verifyViaTV.setVisibility(View.GONE);
+        or_TV.setVisibility(View.GONE);
+        openPinBox_TV.setVisibility(View.GONE);
     }
+
+    private void loadVerify(){
+        generalBackground.setVisibility(View.VISIBLE);
+        verifyLoadTV.setVisibility(View.VISIBLE);
+        verifyProgressBar.setVisibility(View.VISIBLE);
+
+        new Handler().postDelayed(()-> {
+            generalBackground.setVisibility(View.GONE);
+            verifyLoadTV.setVisibility(View.GONE);
+            verifyProgressBar.setVisibility(View.GONE);
+        }, 2000);
+    }
+
 
     public void recyclerViewChatVisibility(String otherUid){
         for (int i = 0; i < recyclerContainer.getChildCount(); i++) {
@@ -5307,7 +5457,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
 
                         MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                System.currentTimeMillis(), null, null, 8, null,
+                                System.currentTimeMillis(), null, null, null, null,
                                 700033, 4, null, null, false, false,
                                 null, fileName, convertUri, sizeOrDuration, null, null);
 
@@ -5336,7 +5486,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
 
                     MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                            System.currentTimeMillis(), null, null, 8, null,
+                            System.currentTimeMillis(), null, null, null, null,
                             700033, 4, null, null, false, false,
                             null, fileName, convertUri, sizeOrDuration, null, null);
 
@@ -5433,8 +5583,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 String docNameAndDetails = docName + "\n" + details;
 
                                 MessageModel messageModel = new MessageModel(null, myUserName, user.getUid(), null, // replace emojiOnly with docNameAndDetails
-                                        System.currentTimeMillis(), chatId, null, 8, null, 700033, 3, docSize,
-                                        null, false, false, null, docNameAndDetails,
+                                        System.currentTimeMillis(), chatId, null, null, null, 700033, 
+                                        3, docSize, null, false, false, null, docNameAndDetails,
                                         null, null, lowUri, documentUri.toString());
                                 // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
 
@@ -5523,10 +5673,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             currentUserUidOnCall = otherUserUid;
 
             activeOnCall = 0;
+
+            String headingType = getString(R.string.audio_call);
+            if(callType.equals("video")) headingType = getString(R.string.video_call);
+
+            sendMessage(headingType, getString(R.string.connect), 6, null, null, otherUserUid);     // audio call
+
         } else {
             Intent callIntentActivity = new Intent(this, CallCenterActivity.class);
             callIntentActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(callIntentActivity);
+
         }
         run = 1;    // to make the call activity to open instead of recreating new instance
     }
@@ -5557,6 +5714,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             returnToCallWithDuration.setText(getString(R.string.returnToCall));
         }
 
+        callChatModel = missCallModel;  // interswitch to detect other user miss call
+        missCallModel = null;
+
         incomingCallLayout.setVisibility(View.GONE);
         run = 1;    // to make the call activity to open instead of recreating new instance
         handlerOnAnotherCall.removeCallbacks(runnableOnAnotherCall);
@@ -5571,10 +5731,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 activeOnCall+=1;
                 runOnUiThread(()->{
                     //  activeOnCall = 1, mean I have received the call signal, 2 means I have indicate to user that it's ringing here
-                    if (activeOnCall <= 1 || ( currentUserUidOnCall != null && currentUserUidOnCall.equals(data.getSenderUid())) ) {
+                    if (activeOnCall <= 1 || ( currentUserUidOnCall != null && currentUserUidOnCall.equals(data.getSenderUid())) )
+                    {
 
-                        if(activeOnCall <=1){
-
+                        if(activeOnCall <=1)
+                        {
                             iHaveACall(data);
 
                         } else if (currentUserUidOnCall != null) {
@@ -5610,6 +5771,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 }
                                 CallCenterActivity.isOtherUserCameraOn = false;
                             }
+
                         }
 
                     } else {
@@ -5630,8 +5792,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     activeOnCall = 0;
                 });
 
+                if(missCallModel != null && missCallModel.getFromUid().equals(data.getSenderUid())){
+                    missCallOrGameMethod(AllConstants.type_call, getString(R.string.missed), data.getSenderUid()); // update chat UI
+                }
+
                 // to enable viewCallerActivity to end or finish when other user end call
-                callsListener.myUserEndCall();
+                if(callsListener != null) callsListener.myUserEndCall();  // close callCentreActivity
+
             }
 
         });
@@ -5666,6 +5833,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         runnableOnAnotherCall = () -> activeOnCall = 0;
         handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
 
+        MainActivity.missCallOrGameMethod(AllConstants.type_call, getString(R.string.incomingCall), callData.getSenderUid());
         // make activeCall return back to 0 after 5min if I didn't pick
 //        runnableOnAnotherCall2 = () -> activeOnCall = 0;
 //        handlerOnAnotherCall2.postDelayed(runnableOnAnotherCall2, 300_000);
@@ -5746,7 +5914,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         replyChatOption_IV.setVisibility(View.VISIBLE);
         moreOption_IV.setVisibility(View.VISIBLE);
         editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
-
+        isOnlongClick = 0;
         deleteChatForOnlyOther_TV.setVisibility(View.VISIBLE);
 
         pinMsgContainer.setVisibility(View.VISIBLE);
@@ -5963,7 +6131,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         replyText = null;
         replyFrom = null;
         idKey = null;
-        replyVisibility = 8;
         messageModel = null;
     }
 
@@ -6152,27 +6319,33 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             if (constraintMsgBody.getVisibility() == View.VISIBLE)
             {
                 boolean isEmojiVisible_ = popup.isShowing();
-                if (isEmojiVisible_) {
+                if (isEmojiVisible_)
+                {
                     popup.dismiss();
                     isEmojiVisible = false;
                     typeMsgContainer.setVisibility(View.VISIBLE);
 
-                } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE) {
+                } else if (fileAttachOptionContainer.getVisibility() == View.VISIBLE)
+                {
                     fileAttachOptionContainer.setVisibility(View.GONE);
                     fileContainerAnim.setVisibility(View.GONE);
-                } else if (chatOptionsConstraints.getVisibility() == View.VISIBLE) {
+                } else if (chatOptionsConstraints.getVisibility() == View.VISIBLE)
+                {
                     cancelChatOption();
                     generalBackground.setVisibility(View.GONE);
                     moreOptionContainer.setVisibility(View.GONE);
 
-                } else if (constraintDelBody.getVisibility() == View.VISIBLE) {
+                } else if (constraintDelBody.getVisibility() == View.VISIBLE)
+                {
                     cancelChatDeleteOption();
                 } else if (pinOptionBox.getVisibility() == View.VISIBLE) {
                     pinOptionBox.setVisibility(View.GONE);
                     cancelChatOption();
-                } else if (audioOrVideoOptionConatiner.getVisibility() == View.VISIBLE) {
+                }
+                else if (audioOrVideoOptionConatiner.getVisibility() == View.VISIBLE) {
                     audioOrVideoOptionConatiner.setVisibility(View.GONE);
-                } else {
+                }
+                else {
 
                     emoji_IV.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
                     handlerEmoji.removeCallbacks(emojiRunnable);
@@ -6229,8 +6402,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             lastPositionPreference.edit().putInt(otherUserUid, scrollNum).apply();     // onBackpress
                             System.out.println("M3052 I have saved scroll " + scrollNum + " uid: " + otherUserUid);
 
-                            // set responds to pend always      ------- will change later to check condition if user is still an active call
-//                    refChecks.child(myId).child(otherUserUid).child("vCallResp").setValue("pending");
+//                            new Handler().postDelayed(()-> adapterMap.get(otherUserUid).getChatByPinTypeAndDelete(), 5000);
 
                             insideChatMap.put(otherUserUid, false);
 
@@ -6383,6 +6555,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ==========  call interface listener
     @Override
     public void endCall() {
+//        MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.noResponse)); // update chat UI
+
         run = 0;   // restart to 0 so it can create new instead
         activeOnCall = 0;
         callButton.setVisibility(View.VISIBLE);
@@ -6422,6 +6596,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     @Override
     public void busyCall() {
+
+        MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.busy)); // update chat UI
+
         CallModel data = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
         refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(data));
         CallModel callModel = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.None, false);

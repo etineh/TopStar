@@ -357,12 +357,13 @@ public class CameraActivity extends AppCompatActivity {
                     Uri videoUri = ((VideoRecordEvent.Finalize) videoRecordEvent).getOutputResults().getOutputUri();
                     // Create a temporary file to store the compressed video
 
+                    String newChatNumId = refMsgFast.child(user.getUid()).push().getKey();
                     String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
                     String size = FileUtils.getEstimateVideoSize(videoUri, CameraActivity.this);   // get the size of the image on compressing
                     String size2 = FileUtils.getFileSize(videoUri, CameraActivity.this);   // get the size of the image
 //System.out.println("what is size " + size + " size2 " + size2);
                     MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                            System.currentTimeMillis(), chatId, null, 8,
+                            System.currentTimeMillis(), chatId, null, newChatNumId,
                             null, 700033, 5, size, null, false, false,
                             null, "record", null, null, videoUri.toString(), videoUri.toString());
                     //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
@@ -463,7 +464,7 @@ public class CameraActivity extends AppCompatActivity {
                         String size = FileUtils.getFileSize(cameraUri, CameraActivity.this);   // get the size of the image
 
                         MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                System.currentTimeMillis(), chatId, null, 8,
+                                System.currentTimeMillis(), chatId, null, null,
                                 null, 700033, 2, size, null, false, false,
                                 null, photoFile.toString(), null, null, cameraUri.toString(), cameraUri.toString());
                         //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
@@ -632,7 +633,7 @@ public class CameraActivity extends AppCompatActivity {
                                     String size = FileUtils.getFileSize(eachUri, CameraActivity.this);   // get the size of the image
 
                                     MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                                            System.currentTimeMillis(), chatId, null, 8,
+                                            System.currentTimeMillis(), chatId, null, null,
                                             null, 700033, type, size, null, false, false,
                                             null, fileName, null, videoDuration, eachUri.toString(), eachUri.toString());
                                     //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video

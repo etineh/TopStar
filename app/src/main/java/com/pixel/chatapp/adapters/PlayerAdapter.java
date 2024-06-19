@@ -1,5 +1,6 @@
 package com.pixel.chatapp.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +13,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.all_utils.TimeUtils;
 import com.pixel.chatapp.model.GameRankM;
 import com.pixel.chatapp.model.PlayerModel;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import okhttp3.internal.Util;
 
 public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerViewHolder> {
 
@@ -121,31 +126,25 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
     //  ======  methods
 
-    private void timeAndDateSent(long lastTime, PlayerViewHolder holder)
-    {
-        Date d = new Date(lastTime);    // convert the timestamp to current time
-        DateFormat formatter = new SimpleDateFormat("h:mm a");
-        String time = formatter.format(d);
+    private void timeAndDateSent(long lastTime, PlayerViewHolder holder) {
+        // Convert the timestamp to the Date object
+        Date d = new Date(lastTime);
+        // Format the time part
+        DateFormat timeFormatter = new SimpleDateFormat("h:mm a");
+        String time = timeFormatter.format(d);
 
-        long currentTimeMillis = System.currentTimeMillis();
-
-        long timeDifferenceMillis = currentTimeMillis - lastTime;
-
-        // Convert milliseconds to hours
-        long timeDifferenceHours = timeDifferenceMillis / (1000 * 60 * 60);
-
-        if (timeDifferenceHours < 24) {
+        if (TimeUtils.compareDays(lastTime) == 0) {
             holder.timeCreated_TV.setText(time);
-        }else if (timeDifferenceHours <= 48) {
+        } else if (TimeUtils.compareDays(lastTime) == 1) {
             holder.timeCreated_TV.setText(context.getString(R.string.yesterday));
-        } else
-        {
-            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
-            String formattedDate = sdf.format(d);
+        } else {
+            @SuppressLint("SimpleDateFormat") DateFormat dateFormatter = new SimpleDateFormat("MMMM dd");
+            String formattedDate = dateFormatter.format(d);
             holder.timeCreated_TV.setText(formattedDate);
         }
 
     }
+
 
 
     @Override

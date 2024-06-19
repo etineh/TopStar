@@ -1,5 +1,6 @@
 package com.pixel.chatapp.calls;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -38,6 +39,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.all_utils.AnimUtils;
 import com.pixel.chatapp.all_utils.CallUtils;
 import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
@@ -205,7 +207,6 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 ////            answerCallOrSendCallRequest(DataModelType.VideoCall);
 //        });
 
-        System.out.println("what is " + myId+otherUid+otherName+myUserName+callType+answerCall);
         new Handler().postDelayed(() -> {
             if(!videoCall){  // set it on loud speaker by default
                 setSpeakerphoneOn(true);
@@ -400,18 +401,23 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 
         // go back to home activity
         arrowBackButton.setOnClickListener(v -> {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
         });
 
         //  end call
         endCall_IV.setOnClickListener(view -> {
+            if(seconds < 1){
+                MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.end)); // update chat UI
+            }
             callEnd(false); // when I end the call myself
         });
 
         // end call in 30 sec if user did not pick
         runnableRinging = () -> {
-            if (!isConnected) { // first check if it rang
+            if (!isConnected) { // first check if it has rang
                 Toast.makeText(this, isUserAvailable, Toast.LENGTH_SHORT).show();
+                MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.noResponse)); // update chat UI
+
                 callEnd(false); // end if user is unavailable
             }
         };
@@ -419,6 +425,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 
         // observe when user end call or didn't pick
         new Handler().postDelayed(() -> {
+            System.out.println("where usss");
             observeWhenAnyoneEndCall(myId, otherUid);
         }, 3000);
 
@@ -427,6 +434,8 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             videoIcon.startAnimation(AnimUtils.makeTransition());
             handlerAnim.postDelayed(runnableAnim, 1000);
         };
+
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -469,10 +478,13 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
                     String data = Objects.requireNonNull(snapshot.getValue()).toString();
                     CallModel callModel = gson.fromJson(data, CallModel.class);
 
-                    if(callModel.getType().equals(DataModelType.Busy))
-                    {     // when user change busy my call, it change from StartCall to None
+                    if(callModel.getType().equals(DataModelType.Busy))  // when user busy my call, it change from StartCall to None
+                    {
+                        MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.busy)); // update chat UI
+
                         Toast.makeText(CallCenterActivity.this, R.string.userBusy, Toast.LENGTH_SHORT).show();
                         callEnd(false); // end when user is busy
+//                        Toast.makeText(CallCenterActivity.this, "busy", Toast.LENGTH_SHORT).show();
 
                     } else if(callModel.getIsRinging())
                     {    // call is ringing on the other user device
@@ -480,21 +492,28 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
                         isRinging_TV.setText(connectionStatus);
                         durationTV.setText(connectionStatus);
 
+                        MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.ringing)); // update chat UI
+
                         // when ringing, restart the isConnected runnable to 0
                         handlerRinging.removeCallbacks(runnableRinging);
                         handlerRinging.postDelayed(runnableRinging, 30_000);
                         // indicate user is not picking via toast and end call
                         isUserAvailable = getString(R.string.notPicking);
 
-                    } else if (callModel.getType().equals(DataModelType.OnAnotherCall))
-                    {   // when user is on another call, alert me and end my call.
+                    } else if (callModel.getType().equals(DataModelType.OnAnotherCall))     // other user is on another call
+                    {
+                        MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.end)); // update chat UI
+
                         Toast.makeText(CallCenterActivity.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
                         callEnd(true);  // end when user is on another call
+
                     } else if (callModel.getType().equals(DataModelType.None))
                     {   // when user is on another call, alert me and end my call.
+
                         Toast.makeText(CallCenterActivity.this, R.string.callEnd, Toast.LENGTH_SHORT).show();
                         callEnd(true);  // end when user is on another call
 //                        Toast.makeText(CallCenterActivity.this, "I end call none", Toast.LENGTH_SHORT).show();
+
                     }
                 }
             }
@@ -515,34 +534,47 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
         // Increment the time count by 1 second
         seconds++;
 
-        // Calculate minutes and seconds
-        int minutes = seconds / 60;
-        int remainingSeconds = seconds % 60;
-
         // Format the time count as "00:00"
-        String timeText = String.format("%02d:%02d", minutes, remainingSeconds);
+        String timeText = convertCountToTimeFormat(seconds);
         durationTV.setText(timeText);
         isRinging_TV.setText(timeText);
 
         // Update the TextView with the formatted time text
-        if (callType.equals("video")) {
-            isRinging_TV.setVisibility(View.GONE);
-        } else {
-            durationTV.setVisibility(View.GONE);
+        if(callType != null){
+            if (callType.equals("video")) {
+                isRinging_TV.setVisibility(View.GONE);
+            } else {
+                durationTV.setVisibility(View.GONE);
+            }
         }
         callListenerNext.callConnected(timeText);
+    }
+
+    private String convertCountToTimeFormat(int count){
+        // Calculate minutes and seconds
+        int minutes = count / 60;
+        int remainingSeconds = count % 60;
+
+        // Format the time count as "00:00"
+        String timeText = String.format("%02d:%02d", minutes, remainingSeconds);
+        return timeText;
     }
 
     private void callEnd(Boolean onAnotherCall){
         setSpeakerphoneOn(false);
         callUtils.stopRingingIndicator();
+
+        if(seconds > 1){
+            String timeText = convertCountToTimeFormat(seconds);
+            MainActivity.updateCallOrGameChat(AllConstants.type_call, timeText); // update chat UI
+        }
+
         CallModel callModel = new CallModel(otherUid, otherName, user.getUid(), myUserName,
                 null, DataModelType.None, false);
 
         if(!onAnotherCall) {    // only change the other user TYPE when he is not on another call
             refCall.child(otherUid).child(myId).setValue(gson.toJson(callModel));
         }
-
         refCall.child(myId).child(otherUid).setValue(gson.toJson(callModel));
 
         mainRepository.endCall();   // close all camera settings
@@ -825,13 +857,15 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 //    }
 
 
-    @Override
-    public void onBackPressed() {
-        onBackPress = true;
-        Intent mainActivityIntent = new Intent(this, MainActivity.class);
-        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(mainActivityIntent);
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            onBackPress = true;
+            Intent mainActivityIntent = new Intent(CallCenterActivity.this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(mainActivityIntent);
+        }
+    };
 
 
     //  =====   interface
@@ -861,6 +895,9 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
 
 //            toggleVideoView(false);
             bigLocalView = true;
+
+            MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.ongoingCall));
+
         });
     }
 
@@ -880,6 +917,7 @@ public class CallCenterActivity extends AppCompatActivity implements MainReposit
             bigLocalView = true;
             smallLocalView();
 
+            MainActivity.updateCallOrGameChat(AllConstants.type_call, getString(R.string.pairing));
         });
     }
 

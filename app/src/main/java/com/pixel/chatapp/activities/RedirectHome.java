@@ -168,7 +168,7 @@ public class RedirectHome extends AppCompatActivity {
         String size = getImageSize(fileUri);
 
         MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                System.currentTimeMillis(), chatId, null, 8, null,
+                System.currentTimeMillis(), chatId, null, null, null,
                 700033, 2, size, null, false, false,
                 null, fileName, null, null, fileUri.toString(), fileUri.toString());
 
@@ -203,7 +203,7 @@ public class RedirectHome extends AppCompatActivity {
         String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
 
         MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                System.currentTimeMillis(), chatId, null, 8, null,
+                System.currentTimeMillis(), chatId, null, null, null,
                 700033, 4, null, null, false, false,
                 null, fileName, fileUriString, sizeOrDuration, null, null);
 
@@ -240,7 +240,7 @@ public class RedirectHome extends AppCompatActivity {
         String sizeOrDuration = fileSizeKB < 500.0 ? formattedDuration : formattedDuration +  " * Audio " + fileSizeMB + " MB";
 
         MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                System.currentTimeMillis(), chatId, null, 8, null,
+                System.currentTimeMillis(), chatId, null, null, null,
                 700033, 5, size, null, false, false,
                 null, null, null, null, fileUriString, fileUriString);
 
@@ -278,7 +278,7 @@ public class RedirectHome extends AppCompatActivity {
 
 
         MessageModel messageModel = new MessageModel(getText, null, user.getUid(), null,
-                System.currentTimeMillis(), chatId, null, 8, null,
+                System.currentTimeMillis(), chatId, null, null, null,
                 700033, 3, pdfSize, null, false, false,
                 null, pdfDetails, null, null, lowUri, fileUriString); // I used emojiOnly for the pdfDetails
 

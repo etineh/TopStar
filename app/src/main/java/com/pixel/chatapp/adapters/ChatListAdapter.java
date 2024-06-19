@@ -4,7 +4,9 @@ import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
 import static com.pixel.chatapp.home.MainActivity.myUserName;
+import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
+import static com.pixel.chatapp.home.MainActivity.textViewMsgTyping;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
+import com.pixel.chatapp.all_utils.TimeUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
@@ -63,7 +67,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>  {
 
     private ChatViewHolder lastOpenViewHolder = null;
-    private static List<UserOnChatUI_Model> otherUsersId;
+    public static List<UserOnChatUI_Model> otherUsersId;
 //    private static List<String> otherUsersId;
 
     private static Context mContext;
@@ -142,12 +146,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         // reset data
         holder.textViewMsgCount.setText(null);
+        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
         holder.textViewTyping.setText(null);
         holder.imageView.setImageResource(R.drawable.person_round);
         holder.imageViewDeliver.setImageResource(0);
         holder.textViewMsg.setText(null);
+//        holder.textViewMsg.setTextAppearance(android.R.style.TextAppearance);
+        if(MainActivity.nightMood){
+            holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultWhite));
+        } else holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultBlack));
+
         holder.textViewUser.setText(null);
-//        holder.imageView
 
         int position_ = position;
         String otherUid = otherUsersId.get(position_).getOtherUid();
@@ -157,7 +166,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         String otherDisplayName = otherUsersId.get(position_).getOtherDisplayName();
         String otherContactName = otherUsersId.get(position_).getOtherContactName();
         String imageLink = otherUsersId.get(position_).getImageUrl();
-
+        int type = otherUsersId.get(position_).getType();
+        int newChatNumbers = otherUsersId.get(position_).getNumberOfNewChat();
         int msgStatus = otherUsersId.get(position_).getMsgStatus();
 //        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/chatapp-9b7ce.appspot.com/o/images%2Fcd89b442-735a-4cae-8da0-2b7f36817e17.jpg?alt=media&token=21b05768-df6e-4be1-b9a2-12d5f944c641";
         long timeSent = otherUsersId.get(position_).getTimeSent();
@@ -169,9 +179,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
 
         // set display name
-        String getUserName__ = contactNameShareRef.getString(otherUid, otherDisplayName != null ? otherDisplayName : otherUserName);
+        String otherName__ = contactNameShareRef.getString(otherUid, otherDisplayName != null ? otherDisplayName : otherUserName);
 
-        holder.textViewUser.setText(getUserName__);     //set user name
+        holder.textViewUser.setText(otherName__);     //set user name
 
         if (imageLink != null && !imageLink.isEmpty()) {
             Picasso.get().load(imageLink).into(holder.imageView);
@@ -180,8 +190,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
 
         // set last message
-        if(message != null){
+        if(message != null)
+        {
             holder.textViewMsg.setText(message);
+
+            if(type == AllConstants.type_call || type ==AllConstants.type_game) // add colour if on call or game
+            {
+                if(message.contains(mContext.getString(R.string.incomingAudioCall)) || message.contains(mContext.getString(R.string.incomingVideoCall))
+                        || message.contains(mContext.getString(R.string.ongoingCall)) || message.contains(mContext.getString(R.string.ringing)) )
+                {
+                    holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.orange));
+                }
+            }
         } else if(emojiOnly != null) {
             holder.textViewMsg.setText(emojiOnly);
         }
@@ -200,9 +220,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
         holder.imageViewDeliver.setImageResource(deliveryIcon);
 
-        //  ----------- call methods    ---------------------
+        // set number of new number
+        if(newChatNumbers > 0){
+            holder.textViewMsgCount.setVisibility(View.VISIBLE);
+            holder.textViewMsgCount.setText(String.valueOf(newChatNumbers));
+        }
 
-        unreadMsgNumber(holder, otherUid);     // get number of unread message count
+
+        //  ----------- call methods    ---------------------
 
         getTypingState(holder, otherUid);      // show when other user is typing
 
@@ -245,6 +270,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             String otherDisplayName__ = otherUsersId.get(position_).getOtherDisplayName();
             String otherUserName__ = otherUsersId.get(position_).getOtherUserName();
             String imageLink__ = otherUsersId.get(position_).getImageUrl();
+            String otherId = otherUsersId.get(position_).getOtherUid();
 
             // get the contact name or displayed name of other user
             String getUserName = contactNameShareRef.getString(otherUid, otherDisplayName__ != null ? otherDisplayName__ : otherUserName__);
@@ -253,114 +279,151 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
 
             // make previous view clickable if any
-            if(previousView != null && previousView != v) {
-                previousView.setClickable(true);
-                previousView.setBackgroundColor(((ColorDrawable) v.getBackground()).getColor());
-            }
+//            if(previousView != null && previousView != v) {
+//                previousView.setClickable(true);
+//                previousView.setBackgroundColor(((ColorDrawable) v.getBackground()).getColor());
+//            }
+
+            if (MainActivity.getLastTimeChat != null)
+                MainActivity.getLastTimeChat.put(otherId, otherUsersId.get(position_).getTimeSent());    // enable add up new time card
 
             if(!MainActivity.onForward){
-                holder.checkBoxContainer.setVisibility(View.GONE);  // close forward chat checkbox if visible by bug
-                // don't show anim if it contain
-                if(viewClickList.contains(v)){
-                    // open the user chats
-                    try {
-                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
-                        listener.getLastSeenAndOnline(otherUid, mContext);
+                // open the user chats
+                try {
+                    listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
-                        listener.msgBackgroundActivities(otherUid);
+                    listener.getLastSeenAndOnline(otherUid, mContext);
 
-                        listener.callAllMethods(otherUid, mContext, activity);
+                    listener.msgBackgroundActivities(otherUid);
 
-                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+                    listener.callAllMethods(otherUid, mContext, activity);
 
-                    } catch (Exception e){
+                } catch (Exception e){
 
-                        MainActivity.readDatabase = 0;
-                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                        listener.getMessage(myUserName, otherUid, mContext, false);
+                    MainActivity.readDatabase = 0;
+                    listener.sendRecyclerView(holder.recyclerChat, otherUid);
+                    listener.getMessage(myUserName, otherUid, mContext, false);
 
-                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+                    listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
-                        listener.getLastSeenAndOnline(otherUid, mContext);
+                    listener.getLastSeenAndOnline(otherUid, mContext);
 
-                        listener.msgBackgroundActivities(otherUid);
+                    listener.msgBackgroundActivities(otherUid);
 
-                        listener.callAllMethods(otherUid, mContext, activity);
+                    listener.callAllMethods(otherUid, mContext, activity);
 
-                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
 
-                        MainActivity.offMainDatabase();
-                        Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
-                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
-                    }
-
-                } else {
-                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
-
-                    int originalColor;  // Default color
-                    if (v.getBackground() instanceof ColorDrawable) {
-                        originalColor = ((ColorDrawable) v.getBackground()).getColor();
-                    } else {
-                        originalColor = 0;
-                    }
-                    v.setBackgroundColor(mContext.getResources().getColor(R.color.transparent_orangeLow));
-                    // set it false so it doesn't click and change colour
-                    v.setClickable(false);
-                    // Apply custom animation (e.g., scale)
-                    v.animate().scaleX(1.1f).scaleY(1.1f)
-//                    .setDuration(50)
-                            .withEndAction(() -> {
-
-                                if(!MainActivity.onForward){
-
-                                    try {
-
-                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-
-                                        listener.getLastSeenAndOnline(otherUid, mContext);
-
-                                        listener.msgBackgroundActivities(otherUid);
-
-                                        listener.callAllMethods(otherUid, mContext, activity);
-
-                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-
-                                    } catch (Exception e){
-
-                                        MainActivity.readDatabase = 0;
-                                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                                        listener.getMessage(myUsername_, otherUid, mContext, false);
-
-                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-
-                                        listener.getLastSeenAndOnline(otherUid, mContext);
-
-                                        listener.msgBackgroundActivities(otherUid);
-
-                                        listener.callAllMethods(otherUid, mContext, activity);
-
-                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-
-                                        MainActivity.offMainDatabase();
-                                        Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-                                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
-                                    }
-
-                                }
-
-                                v.setBackgroundColor(originalColor);
-
-                                // Reset the scale
-
-                                v.setScaleX(1.0f);
-                                v.setScaleY(1.0f);
-
-                            }).start();
-
-                    viewClickList.add(v);
-                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
+                    MainActivity.offMainDatabase();
+                    Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
+                    System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
                 }
+
+
+                holder.checkBoxContainer.setVisibility(View.GONE);  // close forward chat checkbox if visible by bug
+
+                // don't show anim if it contain
+//                if(viewClickList.contains(v)){
+//                    // open the user chats
+//                    try {
+//                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+//
+//                        listener.getLastSeenAndOnline(otherUid, mContext);
+//
+//                        listener.msgBackgroundActivities(otherUid);
+//
+//                        listener.callAllMethods(otherUid, mContext, activity);
+//
+//                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+//
+//                    } catch (Exception e){
+//
+//                        MainActivity.readDatabase = 0;
+//                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
+//                        listener.getMessage(myUserName, otherUid, mContext, false);
+//
+//                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+//
+//                        listener.getLastSeenAndOnline(otherUid, mContext);
+//
+//                        listener.msgBackgroundActivities(otherUid);
+//
+//                        listener.callAllMethods(otherUid, mContext, activity);
+//
+//                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+//
+//                        MainActivity.offMainDatabase();
+//                        Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
+//                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
+//                    }
+//
+//                } else
+//                {
+//                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
+//
+//                    int originalColor;  // Default color
+//                    if (v.getBackground() instanceof ColorDrawable) {
+//                        originalColor = ((ColorDrawable) v.getBackground()).getColor();
+//                    } else {
+//                        originalColor = 0;
+//                    }
+//                    v.setBackgroundColor(mContext.getResources().getColor(R.color.transparent_orangeLow));
+//                    // set it false so it doesn't click and change colour
+//                    v.setClickable(false);
+//                    // Apply custom animation (e.g., scale)
+//                    v.animate().scaleX(1.1f).scaleY(1.1f)
+////                    .setDuration(50)
+//                            .withEndAction(() -> {
+//
+//                                if(!MainActivity.onForward){
+//
+//                                    try {
+//
+//                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+//
+//                                        listener.getLastSeenAndOnline(otherUid, mContext);
+//
+//                                        listener.msgBackgroundActivities(otherUid);
+//
+//                                        listener.callAllMethods(otherUid, mContext, activity);
+//
+//                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+//
+//                                    } catch (Exception e){
+//
+//                                        MainActivity.readDatabase = 0;
+//                                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
+//                                        listener.getMessage(myUsername_, otherUid, mContext, false);
+//
+//                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+//
+//                                        listener.getLastSeenAndOnline(otherUid, mContext);
+//
+//                                        listener.msgBackgroundActivities(otherUid);
+//
+//                                        listener.callAllMethods(otherUid, mContext, activity);
+//
+//                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
+//
+//                                        MainActivity.offMainDatabase();
+//                                        Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
+//                                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
+//                                    }
+//
+//                                }
+//
+//                                v.setBackgroundColor(originalColor);
+//
+//                                // Reset the scale
+//
+//                                v.setScaleX(1.0f);
+//                                v.setScaleY(1.0f);
+//
+//                            }).start();
+//
+//                    viewClickList.add(v);
+//                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
+//                }
 
             } else {    // check if user is forwarding chat
                 if(holder.checkBoxContainer.getVisibility() != View.VISIBLE){
@@ -373,33 +436,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         MainActivity.myHolderNew.add(holder);
                     }
                 }
-
             }
 
         });
 
-
-        // get lastMessage, and Date/Time sent, and set delivery msg to visibility
-//        getLastMsg_TimeSent_MsgDeliveryVisible(holder, otherUid);
-
-        //   get the number of new message I have to give my recycle position scrolling
-        referenceCheck.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot1) {
-                if(!snapshot1.child(otherUid).child("newMsgCount").exists()){
-                    referenceCheck.child(user.getUid()).child(otherUid).child("newMsgCount").setValue(0);
-                } else {
-                    long numScroll = (long) snapshot1.child(otherUid).child("newMsgCount").getValue();
-                    int castNum = (int) numScroll;
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         // view image   ===========   onClicks    ===========================
         holder.imageView.setOnClickListener(view -> {
@@ -433,7 +473,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             listener.onUserDelete(otherName, otherUid);
 
-            //  return height to 2dp
             holder.constraintTop.setVisibility(View.GONE);
         });
 
@@ -544,60 +583,116 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
     }
 
+    //  update outside chat adapter for call or game     //  update ROOM outside database too
+    public void updateCallOrGameUI(int type, String otherUID, String myUid, String emojiOnly)
+    {
+        if(otherUsersId != null)
+        {
+            for (int i = otherUsersId.size() - 1; i >= 0; i--)
+            {
+                String otherId = otherUsersId.get(i).getOtherUid();
+                String myId = otherUsersId.get(i).getMyUid();
+                if(otherId.equals(otherUID) && myId.equals(myUid))
+                {
+                    String headingMsg = otherUsersId.get(i).getMessage();
+                    String chat = setChatText(type, headingMsg, emojiOnly, null);
+
+                    otherUsersId.get(i).setMessage(chat);
+                    otherUsersId.get(i).setEmojiOnly(emojiOnly);
+
+                    // notify the adapter of the item changes - outside chat
+                    ChatsFragment.notifyItemChanged(i);
+
+                    // update outside chat in ROOM
+                    MainActivity.chatViewModel.updateUserCallOrGame(otherUID, myId, chat);
+
+                }
+            }
+        }
+    }
+
+    public UserOnChatUI_Model findUserModelByUid(String otherID)
+    {
+        if (otherUsersId != null) {
+            for (int i = 0; i < otherUsersId.size(); i++) {
+                if (otherUsersId.get(i).getOtherUid().equals(otherID))
+                {
+                    return otherUsersId.get(i);
+                }
+            }
+        }
+        return null; // Return null if no matching user is found
+
+    }
+
+    public void findUserModelByUidAndResetNewChatNum(String otherId)
+    {
+        if (otherUsersId != null) {
+            for (int i = 0; i < otherUsersId.size(); i++) {
+                if (otherUsersId.get(i).getOtherUid().equals(otherId))
+                {
+                    otherUsersId.get(i).setNumberOfNewChat(0);  // reset it to 0
+
+                    ChatsFragment.notifyItemChanged(i);
+                    MainActivity.chatViewModel.updateUser(otherUsersId.get(i));     // update room db
+
+                    refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(0);
+
+                    break;
+                }
+            }
+        }
+
+    }
+
+
     // find user and update the outside chat list with the new chat
-    public void findUserPositionByUID(String userUid, MessageModel modelChats, String chatID) {
+    public void findUserPositionByUID(String otherId, MessageModel modelChats, int numberOfNewChat) {
 
         if (otherUsersId != null) {
-            for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getOtherUid().equals(userUid)) {
+            for (int i = 0; i < otherUsersId.size(); i++) {
+                if (otherUsersId.get(i).getOtherUid().equals(otherId)) {
                     // Store the item in a temporary variable.
                     UserOnChatUI_Model getUser = otherUsersId.get(i);
                     String chat = modelChats.getMessage();
                     String emojiOnly = modelChats.getEmojiOnly();
                     String vnDuration = modelChats.getVnDuration();
-                    int statusNum = modelChats.getMsgStatus();
                     long timeSent = modelChats.getTimeSent();
-                    String photoUri = modelChats.getPhotoUriPath();
+                    String chatID = modelChats.getIdKey();
+                    int type = modelChats.getType();
 
-                    if(chat == null) {
-                        if(emojiOnly != null) {
-                            chat = emojiOnly;
-                        } else if(vnDuration != null){
-                            chat = AllConstants.MIC_ICON + vnDuration;
-                        } else {
-                            chat = AllConstants.PHOTO_ICON + " Photo";
-                        }
-                    } else {
-                        if(chat.isEmpty()) {
-                            if (emojiOnly != null) {
-                                chat = emojiOnly;
-                            } else if (vnDuration != null) {
-                                chat = AllConstants.MIC_ICON + vnDuration;
-                            } else {
-                                chat = AllConstants.PHOTO_ICON + " Photo";
-                            }
-                        } else {
-                            if (photoUri != null) chat = AllConstants.PHOTO_ICON + " " + chat;
-                        }
-                    }
-                    getUser.setMessage(chat);
+                    chat = setChatText(type, chat, emojiOnly, vnDuration);
 
-                    getUser.setMsgStatus(statusNum);
-                    // last user date and time
-                    getUser.setTimeSent(timeSent);
-                    // set the new id
+                    // update user outside chat data
+                    getUser.setFromUid(modelChats.getFromUid());
                     getUser.setIdKey(chatID);
+                    getUser.setMessage(chat);
+                    getUser.setType(type);
+                    getUser.setEmojiOnly(emojiOnly);
+                    getUser.setMsgStatus(modelChats.getMsgStatus());
+                    getUser.setTimeSent(timeSent);
+                    getUser.setNumberOfNewChat(numberOfNewChat);
 
-                    // Remove the item from its old position.
-                    otherUsersId.remove(i);
+                    otherUsersId.remove(i);     // Remove the item from its old position.
 
-                    // Insert the item at the first position (position 0) in the list.
-                    otherUsersId.add(0, getUser);
+                    otherUsersId.add(0, getUser);   // Insert the item at the first position
 
-                    // notify the adapter of the item changes
-                    ChatsFragment.notifyItemChanged(i);
-                    // Notify the adapter that the user has moved.
-                    ChatsFragment.notifyUserMoved(i);
+                    ChatsFragment.notifyItemChanged(i);     // notify the adapter of the item changes
+
+                    ChatsFragment.notifyUserMoved(i);   // Notify the adapter that the user has moved.
+
+                    MainActivity.chatViewModel.updateUser(getUser);     // update room db
+
+                    if(numberOfNewChat > 0){    // update firebase with the new chat number
+                        refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
+                    } else {
+                        // stop from removing new chat number count    -- inside chat // message adapter will do it
+                        if(!MainActivity.adapterMap.get(otherId).alreadySighted) {
+                            new Thread(()-> MainActivity.adapterMap.get(otherId).getChatByPinTypeAndDelete()).start();
+
+                        };
+                    }
+
 
                     // last user date and time
 //                    Date d = new Date(timeSent);    // convert the timestamp to current time
@@ -614,13 +709,87 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
                     // update outside chat in ROOM
-                    MainActivity.chatViewModel.updateOutsideChat(userUid, chat, emojiOnly, statusNum, timeSent, chatID);
+//                    MainActivity.chatViewModel.updateOutsideChat(userUid, chat, emojiOnly, statusNum, timeSent, chatID, type);
 
-                    // Exit the loop, as we've found the item and moved it.
                     break;
                 }
             }
         }
+    }
+
+    public String setChatText(int type, String chat, String emojiOnly, String vnDuration){
+
+        if (type == AllConstants.type_text){
+            if(chat == null || chat.isEmpty()) chat = emojiOnly;
+
+        } else if (type == AllConstants.type_voice_note){
+            chat = AllConstants.MIC_ICON + vnDuration;
+
+        }  if (type == AllConstants.type_audio)
+        {
+            chat = AllConstants.MUSIC_ICON + vnDuration;
+
+        } else if (type == AllConstants.type_photo)
+        {
+            if(chat == null || chat.isEmpty()) chat = AllConstants.PHOTO_ICON + " " + mContext.getString(R.string.photoCap);
+            else chat = AllConstants.PHOTO_ICON + " " + chat;
+        }
+        else if (type == AllConstants.type_video)
+        {
+            if(chat == null || chat.isEmpty()) chat = AllConstants.VIDEO_ICON + " " + mContext.getString(R.string.videoCap);
+            else chat = AllConstants.VIDEO_ICON + " " + chat;
+
+        } else if (type == AllConstants.type_document)
+        {
+            if(chat == null || chat.isEmpty()) chat = AllConstants.DOCUMENT_ICON + " " + emojiOnly;
+            else chat = AllConstants.DOCUMENT_ICON + " " + chat;
+
+        }else if (type == AllConstants.type_call)
+        {
+            if(emojiOnly.equals(mContext.getString(R.string.ongoingCall))){
+
+                if(chat.contains("Audio")) chat = mContext.getString(R.string.audio_callCap);
+                if(chat.contains("Video")) chat = mContext.getString(R.string.video_callCap);
+                chat = mContext.getString(R.string.ongoingCall) + " " + chat;
+
+            } else if (emojiOnly.equals(mContext.getString(R.string.incomingCall))) {
+                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.incomingAudioCall);
+                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.incomingVideoCall);
+
+            } else{
+                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
+                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
+            }
+
+        } else if (type == AllConstants.type_pin)
+        {
+            chat = AllConstants.PIN_ICON + chat;
+        }
+
+        return chat;
+
+//        if(chat == null) {
+//            if(emojiOnly != null) {
+//                chat = emojiOnly;
+//            } else if(vnDuration != null){
+//                chat = AllConstants.MIC_ICON + vnDuration;
+//            } else {
+//                chat = AllConstants.PHOTO_ICON + " Photo";
+//            }
+//        } else {
+//            if(chat.isEmpty()) {
+//                if (emojiOnly != null) {
+//                    chat = emojiOnly;
+//                } else if (vnDuration != null) {
+//                    chat = AllConstants.MIC_ICON + vnDuration;
+//                } else {
+//                    chat = AllConstants.PHOTO_ICON + " Photo";
+//                }
+//            } else {
+//                if (photoUri != null) chat = AllConstants.PHOTO_ICON + " " + chat;
+//            }
+//        }
+
     }
 
     public void setOutsideTextView(ChatViewHolder holder, String chat, String emoji, int statusNum, String timeSent, String vnDuration){
@@ -925,15 +1094,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     if(snapshot.child(otherUid).child("typing").getValue() != null){
                         long typing = (long) snapshot.child(otherUid).child("typing").getValue();
 
-                        if(typing == 1){
-                            holder.textViewMsg.setVisibility(View.INVISIBLE);
-                            holder.textViewTyping.setVisibility(View.VISIBLE);
-                            holder.textViewTyping.setText("typing...");
-                            holder.textViewTyping.setTypeface(null, Typeface.ITALIC);  // Italic style
-                        }
-                        else {
+                        if(typing == 0)
+                        {
                             holder.textViewMsg.setVisibility(View.VISIBLE);
                             holder.textViewTyping.setVisibility(View.GONE);
+                        } else {
+                            holder.textViewMsg.setVisibility(View.INVISIBLE);
+                            holder.textViewTyping.setVisibility(View.VISIBLE);
+                            holder.textViewTyping.setText(mContext.getString(R.string.typing));
                         }
                     }
                 } catch (Exception e){
@@ -951,7 +1119,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     private void updateNameAndPhoto(ChatViewHolder holder, String otherUid, int position)
     {
         referenceUsers.keepSynced(true);
-        referenceUsers.child(otherUid).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
+        referenceUsers.child(otherUid).child("general").addListenerForSingleValueEvent(new ValueEventListener()
+        {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 

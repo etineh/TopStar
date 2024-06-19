@@ -48,8 +48,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        int position_ = position;
-        Uri imageUri = mImageUris.get(position_);
+
+        Uri imageUri = mImageUris.get(position);
 
         // reset
         holder.imageView.setBackgroundColor(0); // remove highlight
@@ -60,14 +60,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
 
         // initialise the previous state of the item _> highlight
-        if(mImageUris.get(position_) != null){
+        if(imageUri != null){
             if(!imageUri.toString().startsWith("file:/") && FileUtils.isVideoFile(imageUri, mContext)){
                 holder.playIcon_IV.setVisibility(View.VISIBLE);
             }
 
             for (int i = 0; i < chatModelList.size(); i++) {
                 MessageModel chats = chatModelList.get(i);
-                if( chats.getPhotoUriOriginal().equals( mImageUris.get(position_).toString() ) ) {
+                if( chats.getPhotoUriOriginal().equals( imageUri.toString() ) ) {
                     // recall highlight and previous state
                     holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.orange));
                     holder.deleteIcon_IV.setVisibility(View.VISIBLE);
@@ -83,72 +83,80 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         Glide.with(mContext).load(imageUri).into(holder.imageView); // Use Glide library to load image
 
 
-        holder.itemView.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> selectPhotos(imageUri, v, holder));
 
-           if(mImageUris.get(position_) != null) {
-               int orangeColor = ContextCompat.getColor(mContext, R.color.orange);
+        holder.itemView.setOnLongClickListener(v -> {
+            selectPhotos(imageUri, v, holder);
+            return true;
+        });
 
-               if( (holder.itemView.getBackground()) == null || ( (ColorDrawable) holder.itemView.getBackground() ).getColor() != orangeColor) {
+    }
 
-                   v.setBackgroundColor(ContextCompat.getColor(mContext, R.color.orange));
+    //  ==========      methods
+    private void selectPhotos(Uri imageUri, View v, ViewHolder holder)
+    {
+        if(imageUri != null) {
+            int orangeColor = ContextCompat.getColor(mContext, R.color.orange);
+
+            if( (holder.itemView.getBackground()) == null || ( (ColorDrawable) holder.itemView.getBackground() ).getColor() != orangeColor) {
+
+                v.setBackgroundColor(ContextCompat.getColor(mContext, R.color.orange));
 
 //content://media/external/images/media/1000147354 for photo picked from gallery  or file:// for the photo snapped
-                   String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
-                   String size = FileUtils.getFileSize(imageUri, mContext);   // get the size of the image
-                   String fileName = "🌃 " + FileUtils.getFileName(imageUri, mContext);
-                   int type = 2;
-                   String videoDuration = null;
-                   if( FileUtils.isVideoFile(imageUri, mContext) ){   //  content://media/external/video/media/1000142346
-                       type = 5;
-                       videoDuration = FileUtils.getVideoDuration(imageUri, mContext);
-                       fileName = "🎥 " + FileUtils.getFileName(imageUri, mContext);
-                       size = FileUtils.getEstimateVideoSize(imageUri,mContext);
-                   }
-                   //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
-                   MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
-                           System.currentTimeMillis(), chatId, null, 8,
-                           null, 700033, type, size, null, false, false,
-                           null, fileName, null, videoDuration, imageUri.toString(), imageUri.toString());
+                String newChatNumId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+                String chatId = refMsgFast.child(user.getUid()).push().getKey();  // create an id for each message
+                String size = FileUtils.getFileSize(imageUri, mContext);   // get the size of the image
+                String fileName = "🌃 " + FileUtils.getFileName(imageUri, mContext);
+                int type = 2;
+                String videoDuration = null;
+                if( FileUtils.isVideoFile(imageUri, mContext) ){   //  content://media/external/video/media/1000142346
+                    type = 5;
+                    videoDuration = FileUtils.getVideoDuration(imageUri, mContext);
+                    fileName = "🎥 " + FileUtils.getFileName(imageUri, mContext);
+                    size = FileUtils.getEstimateVideoSize(imageUri,mContext);
+                }
+                //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+                MessageModel messageModel = new MessageModel(null, null, user.getUid(), null,
+                        System.currentTimeMillis(), chatId, null, newChatNumId,
+                        null, 700033, type, size, null, false, false,
+                        null, fileName, null, videoDuration, imageUri.toString(), imageUri.toString());
 
-                   if ( !chatModelList.contains(messageModel) ) chatModelList.add(messageModel);
+                if ( !chatModelList.contains(messageModel) ) chatModelList.add(messageModel);
 
-                   // in case user select image from gallery that is already added to the chatList
-                   CameraActivity.checkIfUriExist.add(imageUri);
+                // in case user select image from gallery that is already added to the chatList
+                CameraActivity.checkIfUriExist.add(imageUri);
 
-                   CameraActivity.photoSelected_TV.setText(chatModelList.size()+"");
-                   CameraActivity.sendALLPhoto_TV.setVisibility(View.VISIBLE);
-                   CameraActivity.photoSelected_TV.setVisibility(View.VISIBLE);
-                   holder.deleteIcon_IV.setVisibility(View.VISIBLE);
+                CameraActivity.photoSelected_TV.setText(chatModelList.size()+"");
+                CameraActivity.sendALLPhoto_TV.setVisibility(View.VISIBLE);
+                CameraActivity.photoSelected_TV.setVisibility(View.VISIBLE);
+                holder.deleteIcon_IV.setVisibility(View.VISIBLE);
 
-               } else {
+            } else {
 
-                   for (int i = 0; i < chatModelList.size(); i++) {
-                       MessageModel chats = chatModelList.get(i);
+                for (int i = 0; i < chatModelList.size(); i++) {
+                    MessageModel chats = chatModelList.get(i);
 //                    boolean isContain = false;
-                       if( chats.getPhotoUriOriginal().equals( imageUri.toString() ) ) {
+                    if( chats.getPhotoUriOriginal().equals( imageUri.toString() ) ) {
 //                        isContain = true;
-                           chatModelList.remove(i);
-                           v.setBackgroundColor(0);
-                           holder.deleteIcon_IV.setVisibility(View.GONE);
-                           // in case user select image from gallery that is already added to the chatList
-                           CameraActivity.checkIfUriExist.remove(imageUri);
+                        chatModelList.remove(i);
+                        v.setBackgroundColor(0);
+                        holder.deleteIcon_IV.setVisibility(View.GONE);
+                        // in case user select image from gallery that is already added to the chatList
+                        CameraActivity.checkIfUriExist.remove(imageUri);
 
-                           if(chatModelList.size() == 0) {
-                               CameraActivity.sendALLPhoto_TV.setVisibility(View.GONE);
-                               CameraActivity.photoSelected_TV.setVisibility(View.GONE);
-                           }
-                           CameraActivity.photoSelected_TV.setText(chatModelList.size() + "");
-                       }
-                   }
+                        if(chatModelList.size() == 0) {
+                            CameraActivity.sendALLPhoto_TV.setVisibility(View.GONE);
+                            CameraActivity.photoSelected_TV.setVisibility(View.GONE);
+                        }
+                        CameraActivity.photoSelected_TV.setText(chatModelList.size() + "");
+                    }
+                }
 
-               }
+            }
 
-           } else{
-               cameraActivity.selectImageFromGallery(mContext, cameraActivity);
-           }
-
-//
-        });
+        } else{
+            cameraActivity.selectImageFromGallery(mContext, cameraActivity);
+        }
     }
 
     public void addPhotoUri (Uri uri){

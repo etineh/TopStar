@@ -34,8 +34,7 @@ public interface FragmentListener {
                               int visible, MessageAdapter.MessageViewHolder holder);
     void onDeleteMessage();
     void onForwardChat();
-    void onPinData(String msgId_, String message_, Object timeStamp_, String pinByWho,
-                     MessageAdapter.MessageViewHolder holder);
+    void onPinData(String msgId_, String message_, Object timeStamp_, MessageAdapter.MessageViewHolder holder);
 
     void onUserDelete(String otherName, String otherUid);
     void onEmojiReact(MessageAdapter.MessageViewHolder holder, String chatID);

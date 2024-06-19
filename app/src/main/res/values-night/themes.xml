@@ -81,6 +81,9 @@
         <item name="android:background">#070707</item>
     </style>
 
+    <style name="backgroundWhite_coolBlack">
+        <item name="android:background">@color/cool_black</item>
+    </style>
 
     <style name="appName">
         <item name="android:textColor">@color/cool_orange</item>
@@ -278,7 +281,7 @@
 
     <!--    drawable tint and background-->
     <style name="roundBackgroundAndTint">
-        <item name="android:background">@drawable/black_circle_round</item>
+        <item name="android:background">@drawable/cool_black_circle_round</item>
         <item name="android:tint">@color/cool_orange</item>
     </style>
 

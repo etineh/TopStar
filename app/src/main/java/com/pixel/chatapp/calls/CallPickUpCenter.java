@@ -112,7 +112,7 @@ public class CallPickUpCenter extends AppCompatActivity implements CallsListener
 
     @Override
     public void myUserEndCall() {
-        handlerAnim.removeCallbacks(runnableAnim);
+        if(handlerAnim != null) handlerAnim.removeCallbacks(runnableAnim);
         finish();
     }
 

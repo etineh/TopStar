@@ -26,8 +26,12 @@ public class UserOnChatUI_Model {
     private String otherContactName;
     private String imageUrl;
 
+//    @NonNull
+//    @ColumnInfo(defaultValue = "0")
+    private int numberOfNewChat; // New field
+
     public UserOnChatUI_Model(String otherUid, String fromUid, String from, String emojiOnly, String message, int type,
-                              long timeSent, int msgStatus, String idKey) {
+                              long timeSent, int msgStatus, String idKey, int numberOfNewChat) {
         this.otherUid = otherUid;
         this.fromUid = fromUid;
         this.from = from;
@@ -37,6 +41,7 @@ public class UserOnChatUI_Model {
         this.msgStatus = msgStatus;
         this.timeSent = timeSent;
         this.idKey = idKey;
+        this.numberOfNewChat = numberOfNewChat;
     }
 
     public UserOnChatUI_Model() {
@@ -156,4 +161,11 @@ public class UserOnChatUI_Model {
         this.idKey = idKey;
     }
 
+    public int getNumberOfNewChat() {
+        return numberOfNewChat;
+    }
+
+    public void setNumberOfNewChat(int numberOfNewChat) {
+        this.numberOfNewChat = numberOfNewChat;
+    }
 }
