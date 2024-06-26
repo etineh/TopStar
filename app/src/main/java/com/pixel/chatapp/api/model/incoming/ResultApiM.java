@@ -1,4 +1,4 @@
-package com.pixel.chatapp.api.model;
+package com.pixel.chatapp.api.model.incoming;
 
 public class ResultApiM {
 

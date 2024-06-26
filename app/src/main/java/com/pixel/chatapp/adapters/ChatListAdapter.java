@@ -4,6 +4,7 @@ import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
 import static com.pixel.chatapp.home.MainActivity.myUserName;
+import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
 import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 import static com.pixel.chatapp.home.MainActivity.textViewMsgTyping;
@@ -40,6 +41,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.MyFirebaseMessagingService;
 import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
 import com.pixel.chatapp.all_utils.TimeUtils;
 import com.pixel.chatapp.constants.AllConstants;
@@ -283,6 +285,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                previousView.setClickable(true);
 //                previousView.setBackgroundColor(((ColorDrawable) v.getBackground()).getColor());
 //            }
+
+//            MyFirebaseMessagingService firebaseMessagingService = new MyFirebaseMessagingService();
+//            firebaseMessagingService.showNotification(mContext, "New chat", "How are you", null);
 
             if (MainActivity.getLastTimeChat != null)
                 MainActivity.getLastTimeChat.put(otherId, otherUsersId.get(position_).getTimeSent());    // enable add up new time card
@@ -571,7 +576,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        ChatsFragment.notifyItemChanged(i);
+                        final int position = i;
+                        AllConstants.handler.post(() -> ChatsFragment.notifyItemChanged(position));
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -633,7 +639,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 {
                     otherUsersId.get(i).setNumberOfNewChat(0);  // reset it to 0
 
-                    ChatsFragment.notifyItemChanged(i);
+                    final int position = i;
+                    AllConstants.handler.post(()-> ChatsFragment.notifyItemChanged(position) );
+
                     MainActivity.chatViewModel.updateUser(otherUsersId.get(i));     // update room db
 
                     refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(0);
@@ -677,19 +685,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                     otherUsersId.add(0, getUser);   // Insert the item at the first position
 
-                    ChatsFragment.notifyItemChanged(i);     // notify the adapter of the item changes
+                    final int position = i;
+                    AllConstants.handler.post(()->{
+                        ChatsFragment.notifyItemChanged(position);     // notify the adapter of the item changes
 
-                    ChatsFragment.notifyUserMoved(i);   // Notify the adapter that the user has moved.
+                        ChatsFragment.notifyUserMoved(position);   // Notify the adapter that the user has moved.
+                    });
 
                     MainActivity.chatViewModel.updateUser(getUser);     // update room db
-
+                    
                     if(numberOfNewChat > 0){    // update firebase with the new chat number
                         refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
                     } else {
                         // stop from removing new chat number count    -- inside chat // message adapter will do it
                         if(!MainActivity.adapterMap.get(otherId).alreadySighted) {
                             new Thread(()-> MainActivity.adapterMap.get(otherId).getChatByPinTypeAndDelete()).start();
-
                         };
                     }
 
@@ -710,7 +720,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                     // update outside chat in ROOM
 //                    MainActivity.chatViewModel.updateOutsideChat(userUid, chat, emojiOnly, statusNum, timeSent, chatID, type);
-
                     break;
                 }
             }
@@ -731,18 +740,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         } else if (type == AllConstants.type_photo)
         {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.PHOTO_ICON + " " + mContext.getString(R.string.photoCap);
-            else chat = AllConstants.PHOTO_ICON + " " + chat;
+            if(chat == null || chat.isEmpty()) chat = AllConstants.PHOTO_ICON + mContext.getString(R.string.photoCap);
+            else chat = AllConstants.PHOTO_ICON + chat;
         }
         else if (type == AllConstants.type_video)
         {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.VIDEO_ICON + " " + mContext.getString(R.string.videoCap);
-            else chat = AllConstants.VIDEO_ICON + " " + chat;
+            if(chat == null || chat.isEmpty()) chat = AllConstants.VIDEO_ICON + mContext.getString(R.string.videoCap);
+            else chat = AllConstants.VIDEO_ICON + chat;
 
         } else if (type == AllConstants.type_document)
         {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.DOCUMENT_ICON + " " + emojiOnly;
-            else chat = AllConstants.DOCUMENT_ICON + " " + chat;
+            if(chat == null || chat.isEmpty()) chat = AllConstants.DOCUMENT_ICON + emojiOnly;
+            else chat = AllConstants.DOCUMENT_ICON + chat;
 
         }else if (type == AllConstants.type_call)
         {
@@ -753,12 +762,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 chat = mContext.getString(R.string.ongoingCall) + " " + chat;
 
             } else if (emojiOnly.equals(mContext.getString(R.string.incomingCall))) {
-                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.incomingAudioCall);
-                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.incomingVideoCall);
+                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON +  mContext.getString(R.string.incomingAudioCall);
+                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.incomingVideoCall);
 
             } else{
-                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
-                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + " " + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
+                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
+                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
             }
 
         } else if (type == AllConstants.type_pin)
@@ -1051,37 +1060,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
-    // get number of unread message count
-    private void unreadMsgNumber(ChatViewHolder holder, String otherUid){
-
-//        referenceCheck.keepSynced(true);
-        referenceCheck.child(user.getUid())
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        try{
-                            long unreadMsg = (long) snapshot.child(otherUid).child("unreadMsg").getValue();
-                            if(unreadMsg > 0) {
-                                holder.textViewMsgCount.setVisibility(View.VISIBLE);
-                                holder.textViewMsgCount.setText(""+unreadMsg);
-                            } else{
-                                holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-                            }
-                        } catch (Exception e){
-                            referenceCheck.child(user.getUid()).child(otherUid)
-                                    .child("unreadMsg").setValue(0);
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-    }
 
     // get user typing state
     private void getTypingState(ChatViewHolder holder, String otherUid){
@@ -1116,6 +1094,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         });
     }
 
+    //  get other user name and photo
     private void updateNameAndPhoto(ChatViewHolder holder, String otherUid, int position)
     {
         referenceUsers.keepSynced(true);
@@ -1124,41 +1103,56 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                // Will later change it to Display Names
-                String otherUsername = snapshot.child("userName").getValue().toString();
+                AllConstants.executors.execute(()->
+                {
+                    // Will later change it to Display Names
+                    String otherUsername = snapshot.child("userName").getValue().toString();
 
-                String otherDisplayName = snapshot.child("displayName").exists()
-                        && !snapshot.child("displayName").getValue().toString().isEmpty()
-                        ? snapshot.child("displayName").getValue().toString() : null;
+                    String otherDisplayName = snapshot.child("displayName").exists()
+                            && !snapshot.child("displayName").getValue().toString().isEmpty()
+                            ? snapshot.child("displayName").getValue().toString() : null;
 
-                String otherContactName = contactNameShareRef.getString(otherUid, null);
+                    String otherFcmToken = !snapshot.child("fcmToken").exists() ? null :
+                            snapshot.child("fcmToken").getValue().toString();
 
-                if(otherContactName != null){
-                    holder.textViewUser.setText(otherContactName);     //set users contact name
-                } else if (otherDisplayName != null) {
-                    holder.textViewUser.setText(otherDisplayName);     //set users display name
-                } else {
-                    holder.textViewUser.setText(otherUsername);     //set users username name
-                }
+                    otherUserFcmTokenRef.edit().putString(otherUid, otherFcmToken).apply();
 
-                // set users image
-                String imageUrl = snapshot.child("image").exists()
-                        && !snapshot.child("image").getValue().toString().equals("null")
-                        && !snapshot.child("image").getValue().toString().isEmpty()
-                        ? snapshot.child("image").getValue().toString() : null;
+                    String otherContactName = contactNameShareRef.getString(otherUid, otherDisplayName);
 
-                if (imageUrl != null && !imageUrl.isEmpty()) {
-                    Picasso.get().load(imageUrl).into(holder.imageView);
+                    // set users image
+                    String imageUrl = snapshot.child("image").exists()
+                            && !snapshot.child("image").getValue().toString().equals("null")
+                            && !snapshot.child("image").getValue().toString().isEmpty()
+                            ? snapshot.child("image").getValue().toString() : null;
 
-                } else {
-                    holder.imageView.setImageResource(R.drawable.person_round);
-                }
+                    AllConstants.handler.post(()->
+                    {
+                        if(otherContactName != null){
+                            holder.textViewUser.setText(otherContactName);     //set users contact name
+                        } else {
+                            holder.textViewUser.setText(otherUsername);     //set users username name
+                        }
 
-                otherUsersId.get(position).setOtherUserName(otherUsername);
-                otherUsersId.get(position).setOtherDisplayName(otherDisplayName);
-                otherUsersId.get(position).setImageUrl(imageUrl);
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            Picasso.get().load(imageUrl).into(holder.imageView);
 
-                MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
+                        } else {
+                            holder.imageView.setImageResource(R.drawable.person_round);
+                        }
+                    });
+
+                    otherUsersId.get(position).setOtherUserName(otherUsername);
+                    otherUsersId.get(position).setOtherDisplayName(otherDisplayName);
+                    otherUsersId.get(position).setImageUrl(imageUrl);
+
+                    MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
+
+//                    // save the contact name to my database
+//                    referenceCheck.child(user.getUid()).child(otherUid).child("contactName")
+//                            .setValue(otherContactName != null ? otherContactName : otherUsername);
+
+                });
+
             }
 
             @Override

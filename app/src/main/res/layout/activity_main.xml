@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintCover"
@@ -14,44 +15,121 @@
         layout="@layout/inc_return_back_to_call"
         android:visibility="gone" />
 
-    <include
+    <ViewStub
         android:id="@+id/incomingCallLayout"
-        layout="@layout/inc_call_alert"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/inc_call_alert"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <include
+    <ViewStub
         android:id="@+id/videoOrAudioOptionLayout"
-        layout="@layout/inc_call_option"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/inc_call_option"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
-    <include
+    <ViewStub
         android:id="@+id/networkCheckLayout"
-        layout="@layout/inc_network_check" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/inc_network_check"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <include
+    <ViewStub
         android:id="@+id/walletVerifyLayout"
-        layout="@layout/inc_wallet_verify_pin"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/inc_wallet_verify_pin"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <include
+
+    <ViewStub
         android:id="@+id/sideBarMenuContainer"
-        layout="@layout/inc_bar_menu_home"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/inc_bar_menu_home"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
-    <include
+    <ViewStub
         android:id="@+id/chatOptions"
-        layout="@layout/inc_longpress_chat_options"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout="@layout/inc_longpress_chat_options"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/moreOptionContainer"
-        layout="@layout/inc_longpress_chats_moreoption"
-        android:visibility="gone" />
+    <ViewStub
+        android:id="@+id/moreOptionViewStub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/inc_longpress_chats_moreoption"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <include
+    <ViewStub
+        android:id="@+id/deleteUserOrClearChatContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_delete_user_or_clearchat"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/chatMenuViewStub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_chat_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
+
+    <ViewStub
+        android:id="@+id/firstTopContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/vs_chat_first_top"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/returnBackToCAll" />
+
+    <ViewStub
         android:id="@+id/moreHomeContainer"
-        layout="@layout/inc_home_more"
-        android:visibility="gone" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/inc_home_more"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainViewConstraint"
@@ -71,66 +149,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+
+        <ViewStub
             android:id="@+id/forwardConstraint"
-            style="@style/card"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:elevation="3dp"
-            android:visibility="gone"
+            android:layout="@layout/vs_forward_top_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/forwardCancel_IV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_cancel_24"
-                app:tint="@color/orange" />
-
-            <ProgressBar
-                android:id="@+id/progressBarForward"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="26dp"
-                android:layout_height="27dp"
-                android:indeterminateTint="@color/orange"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/forwardSearchIV"
-                app:layout_constraintStart_toEndOf="@+id/textView29"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/forwardSearchIV"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/baseline_search_24" />
-
-            <TextView
-                android:id="@+id/textView29"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:text="@string/forward"
-                android:textSize="20sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/forwardCancel_IV"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/HomeTopConstr"
@@ -249,512 +276,22 @@
             android:id="@+id/viewPageMain"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLastLayer"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tabLayerMain">
 
         </androidx.viewpager2.widget.ViewPager2>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <ViewStub
             android:id="@+id/constraintLastLayer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout="@layout/vs_home_last_layer"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"/>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/forwardLastConstr"
-                style="@style/BackgroundW_B"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:elevation="5dp"
-                android:padding="5dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/constraintDownBar">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/lineTop"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:background="@color/dark_orange1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/circleForwardSend"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="5dp"
-                    android:background="@drawable/msg_count"
-                    android:padding="7dp"
-                    android:src="@drawable/baseline_send_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.5" />
-
-                <TextView
-                    android:id="@+id/userSelectedCount_TV"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text="0 selected"
-                    android:textSize="20sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintDownBar"
-                style="@style/BackgroundW_B"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLine"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="@color/orange"
-                    app:layout_constraintBottom_toTopOf="@+id/homePage_IV"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <ImageView
-                    android:id="@+id/homePage_IV"
-                    style="@style/BackgroundTintDarkOrange"
-                    android:layout_width="@dimen/_35dp"
-                    android:layout_height="30dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="13dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_home_24" />
-
-                <ImageView
-                    android:id="@+id/liveWatch_IV"
-                    style="@style/BackgroundTint"
-                    android:layout_width="@dimen/_35dp"
-                    android:layout_height="30dp"
-                    android:adjustViewBounds="false"
-                    app:layout_constraintEnd_toStartOf="@+id/games_IV"
-                    app:layout_constraintStart_toEndOf="@+id/homePage_IV"
-                    app:layout_constraintTop_toBottomOf="@+id/constraintLine"
-                    app:srcCompat="@drawable/baseline_connected_tv_24"
-                    app:tint="@color/orange" />
-
-                <TextView
-                    android:id="@+id/textView6"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-5dp"
-                    android:layout_marginBottom="3dp"
-                    android:fontFamily="monospace"
-                    android:text="@string/home"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/homePage_IV"
-                    app:layout_constraintStart_toStartOf="@+id/homePage_IV"
-                    app:layout_constraintTop_toBottomOf="@+id/homePage_IV"
-                    app:layout_constraintVertical_bias="1.0" />
-
-                <TextView
-                    android:id="@+id/textView5"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="3dp"
-                    android:fontFamily="monospace"
-                    android:text="@string/games_"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/games_IV"
-                    app:layout_constraintStart_toStartOf="@+id/games_IV"
-                    app:layout_constraintTop_toBottomOf="@+id/games_IV" />
-
-                <TextView
-                    android:id="@+id/textView7"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-7dp"
-                    android:layout_marginBottom="3dp"
-                    android:fontFamily="monospace"
-                    android:text="@string/more_"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/imageViewMore"
-                    app:layout_constraintStart_toStartOf="@+id/imageViewMore"
-                    app:layout_constraintTop_toBottomOf="@+id/imageViewMore" />
-
-                <TextView
-                    android:id="@+id/textView9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-3dp"
-                    android:layout_marginBottom="3dp"
-                    android:fontFamily="monospace"
-                    android:text="@string/deposit"
-                    android:textSize="11sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/p2pHome_IV"
-                    app:layout_constraintStart_toEndOf="@+id/textView5"
-                    app:layout_constraintStart_toStartOf="@+id/p2pHome_IV"
-                    app:layout_constraintTop_toBottomOf="@+id/p2pHome_IV" />
-
-                <TextView
-                    android:id="@+id/textView8"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:scrollIndicators="bottom"
-                    android:text="@string/live"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="@+id/liveWatch_IV"
-                    app:layout_constraintStart_toStartOf="@+id/liveWatch_IV"
-                    app:layout_constraintTop_toBottomOf="@+id/liveWatch_IV" />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/games_IV"
-                    android:layout_width="55dp"
-                    android:layout_height="38dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/msg_count"
-                    android:src="@drawable/baseline_games_24"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/imageViewMore"
-                    android:layout_width="52dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginEnd="20dp"
-                    app:layout_constraintBottom_toTopOf="@+id/textView7"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_read_more_24" />
-
-                <ImageView
-                    android:id="@+id/p2pHome_IV"
-                    style="@style/BackgroundTint"
-                    android:layout_width="35dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="12dp"
-                    app:layout_constraintEnd_toStartOf="@+id/imageViewMore"
-                    app:layout_constraintStart_toEndOf="@+id/games_IV"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/money_round"
-                    app:tint="@color/orange" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout12"
-                    style="@style/Background"
-                    android:layout_width="60dp"
-                    android:layout_height="2dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/homePage_IV"
-                    app:layout_constraintStart_toStartOf="@+id/homePage_IV">
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <TextView
-                    android:id="@+id/textView15"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="-10dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@color/orange"
-                    android:paddingRight="2dp"
-                    android:paddingBottom="1dp"
-                    android:text="@string/p2p"
-                    android:textColor="@color/white"
-                    android:textSize="11sp"
-                    app:layout_constraintStart_toEndOf="@+id/p2pHome_IV"
-                    app:layout_constraintTop_toTopOf="@+id/p2pHome_IV" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/deleteUserOrClearChatContainer"
-        style="@style/trans_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="1dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/BackgroundW_B"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5">
-
-            <TextView
-                android:id="@+id/otherUserName_TV"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="20dp"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:lines="1"
-                android:text="&quot;&quot;"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageViewDel" />
-
-            <TextView
-                android:id="@+id/deleteForMe_TV"
-                style="@style/TV_Orange_CoolOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="20dp"
-                android:gravity="center_vertical"
-                android:text="Delete for me"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/otherUserName_TV" />
-
-            <TextView
-                android:id="@+id/deleteForEveryone_TV"
-                style="@style/TV_Orange_CoolOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="40dp"
-                android:layout_marginBottom="20dp"
-                android:gravity="center_vertical"
-                android:text="Delete for everyone"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/deleteForMe_TV" />
-
-            <ImageView
-                android:id="@+id/imageViewDel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_delete_forever_24" />
-
-            <ImageView
-                android:id="@+id/cancelDelete_IV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="14dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_cancel_24"
-                app:tint="#DD1212" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/chatMenuConstraint"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/trans"
-        android:elevation="6dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ScrollView
-            android:layout_width="230dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintListBox9"
-                style="@style/card"
-                android:layout_width="210dp"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/clearChat_TV"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/clear_chats"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewClearSearchM9" />
-
-                <TextView
-                    android:id="@+id/textView239"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="40dp"
-                    android:layout_marginEnd="100dp"
-                    android:text="View Profile"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/textViewGameHistory9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Game History"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView239" />
-
-                <TextView
-                    android:id="@+id/textViewmute9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Mute"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewJoinTour9" />
-
-                <TextView
-                    android:id="@+id/textViewClearSearchM9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/search"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewFile9" />
-
-                <TextView
-                    android:id="@+id/textViewFile9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/file"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewmute9" />
-
-                <TextView
-                    android:id="@+id/textViewJoinTour9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/join_tour"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewGameHistory9" />
-
-                <TextView
-                    android:id="@+id/textViewBlock_Report9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="25dp"
-                    android:text="@string/blockAndReport"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewDisappearMsg9" />
-
-                <TextView
-                    android:id="@+id/textViewDisappearMsg9"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/disappear_msg"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/clearChat_TV" />
-
-                <ImageView
-                    android:id="@+id/imageViewCancel9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="16dp"
-                    android:tint="#AA0B0B"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_cancel_24" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -800,161 +337,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/firstTopContainer"
-        style="@style/cardTopOrange"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:elevation="5dp"
-        android:gravity="center_vertical"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/returnBackToCAll">
-
-        <ImageView
-            android:id="@+id/backArrow_IV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:padding="7dp"
-            app:layout_constraintBottom_toBottomOf="@+id/circleImageLogo9"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/circleImageLogo9"
-            app:srcCompat="@drawable/baseline_arrow_back_24"
-            app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/userName_TV"
-            style="@style/textColorFullBlack"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="2dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Topperian"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            app:layout_constraintEnd_toStartOf="@+id/gift_IV"
-            app:layout_constraintStart_toEndOf="@+id/circleImageLogo9"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/gift_IV"
-            style="@style/tintWhiteAndCoolOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="9dp"
-            android:padding="7sp"
-            app:layout_constraintEnd_toStartOf="@+id/callMeet_IV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/money_round" />
-
-        <ImageView
-            android:id="@+id/callMeet_IV"
-            style="@style/tintWhiteAndCoolOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="9dp"
-            android:padding="7sp"
-            app:layout_constraintEnd_toStartOf="@+id/chatMenu_IV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_add_ic_call_24" />
-
-        <ImageView
-            android:id="@+id/chatMenu_IV"
-            android:layout_width="30dp"
-            android:layout_height="35dp"
-            android:layout_marginEnd="5sp"
-            android:tint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_more_vert_24" />
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/circleImageLogo9"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/logo"
-            app:layout_constraintStart_toEndOf="@+id/backArrow_IV"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/onlineStatus_TV"
-            style="@style/textColorWhiteAndCoolOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-2dp"
-            android:text="@string/app_name"
-            android:textSize="11sp"
-            app:layout_constraintStart_toStartOf="@+id/userName_TV"
-            app:layout_constraintTop_toBottomOf="@+id/userName_TV" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/line_const"
-            style="@style/Background"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/onlineStatus_TV"
-            app:layout_constraintTop_toBottomOf="@+id/userName_TV">
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:id="@+id/bioHint_TV"
-            style="@style/roundButtonBackground"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="4dp"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:paddingBottom="2dp"
-            android:text="@string/hint2"
-            android:textColor="@color/defaultWhite"
-            android:textSize="13sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/circleImageLogo9"
-            app:layout_constraintTop_toBottomOf="@+id/onlineStatus_TV" />
-
-        <TextView
-            android:id="@+id/isTyping_TV"
-            style="@style/textColorWhiteAndCoolOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="11sp"
-            android:textStyle="italic"
-            app:layout_constraintBottom_toBottomOf="@+id/onlineStatus_TV"
-            app:layout_constraintEnd_toStartOf="@+id/gift_IV"
-            app:layout_constraintStart_toEndOf="@+id/onlineStatus_TV"
-            app:layout_constraintTop_toTopOf="@+id/onlineStatus_TV" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/line2"
-            style="@style/BackgroundB_W"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/bioHint_TV"
-            app:layout_constraintEnd_toEndOf="@+id/bioHint_TV"
-            app:layout_constraintStart_toStartOf="@+id/circleImageLogo9">
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintMsgBody"
+        android:id="@+id/chatBodyLayout"
         style="@style/ChatBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -965,257 +348,6 @@
         app:layout_constraintTop_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/FileAttachOptionContainer"
-            style="@style/trans_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="3dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/fileContainerAnim"
-                style="@style/BackgroundW_B"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
-                android:layout_marginEnd="40dp"
-                android:layout_marginBottom="60dp"
-                android:clickable="true"
-                android:paddingTop="20dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <ImageView
-                    android:id="@+id/galleryIV"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="50dp"
-                    android:layout_marginBottom="40dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toTopOf="@+id/audioIV"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:srcCompat="@drawable/gallery_assistant_navigation_24" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gallery"
-                    app:layout_constraintEnd_toEndOf="@+id/galleryIV"
-                    app:layout_constraintStart_toStartOf="@+id/galleryIV"
-                    app:layout_constraintTop_toBottomOf="@+id/galleryIV" />
-
-                <ImageView
-                    android:id="@+id/documentIV"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginBottom="40dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toTopOf="@+id/contactIV"
-                    app:layout_constraintEnd_toStartOf="@+id/gameIV"
-                    app:layout_constraintStart_toEndOf="@+id/galleryIV"
-                    app:srcCompat="@drawable/baseline_document_scanner_24" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/document"
-                    app:layout_constraintEnd_toEndOf="@+id/documentIV"
-                    app:layout_constraintStart_toStartOf="@+id/documentIV"
-                    app:layout_constraintTop_toBottomOf="@+id/documentIV" />
-
-                <ImageView
-                    android:id="@+id/gameIV"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="50dp"
-                    android:layout_marginBottom="40dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toTopOf="@+id/other"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/baseline_games_24" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/game"
-                    app:layout_constraintEnd_toEndOf="@+id/gameIV"
-                    app:layout_constraintStart_toStartOf="@+id/gameIV"
-                    app:layout_constraintTop_toBottomOf="@+id/gameIV" />
-
-                <ImageView
-                    android:id="@+id/audioIV"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="50dp"
-                    android:layout_marginBottom="35dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:srcCompat="@drawable/baseline_audio_file_24" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/audio"
-                    app:layout_constraintEnd_toEndOf="@+id/audioIV"
-                    app:layout_constraintStart_toStartOf="@+id/audioIV"
-                    app:layout_constraintTop_toBottomOf="@+id/audioIV" />
-
-                <ImageView
-                    android:id="@+id/contactIV"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginBottom="35dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/other"
-                    app:layout_constraintStart_toEndOf="@+id/audioIV"
-                    app:srcCompat="@drawable/add_contact" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/contact"
-                    app:layout_constraintEnd_toEndOf="@+id/contactIV"
-                    app:layout_constraintStart_toStartOf="@+id/contactIV"
-                    app:layout_constraintTop_toBottomOf="@+id/contactIV" />
-
-                <ImageView
-                    android:id="@+id/other"
-                    style="@style/roundBackgroundAndTint2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="50dp"
-                    android:layout_marginBottom="35dp"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/baseline_emoji_events_24" />
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="other"
-                    app:layout_constraintEnd_toEndOf="@+id/other"
-                    app:layout_constraintStart_toStartOf="@+id/other"
-                    app:layout_constraintTop_toBottomOf="@+id/other" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/pinOptionBoxConstr"
-            style="@style/trans_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="5dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                style="@style/BackgroundW_B"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5">
-
-                <TextView
-                    android:id="@+id/textViewPinMine"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="15dp"
-                    android:gravity="center_vertical"
-                    android:text="Pin for me only."
-                    android:textSize="16sp"
-                    app:layout_constraintStart_toEndOf="@+id/imgPrivate"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView8" />
-
-
-                <TextView
-                    android:id="@+id/textViewPinEveryone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="7dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="20dp"
-                    android:gravity="center_vertical"
-                    android:text="Pin for everyone."
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imagePublic"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewPinMine" />
-
-                <ImageView
-                    android:id="@+id/imgPrivate"
-                    style="@style/BackgroundTintDarkOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textViewPinMine"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/textViewPinMine"
-                    app:srcCompat="@drawable/baseline_private_connectivity_24" />
-
-                <ImageView
-                    android:id="@+id/imagePublic"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="12dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textViewPinEveryone"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/textViewPinEveryone"
-                    app:srcCompat="@drawable/baseline_public_24" />
-
-                <ImageView
-                    android:id="@+id/imageView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_push_pin_24" />
-
-                <ImageView
-                    android:id="@+id/imageViewCancelPin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="14dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_cancel_24"
-                    app:tint="#DD1212" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chatBoxContainer"
@@ -1472,11 +604,11 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:paddingLeft="3dp"
-                                    android:tint="#FF5722"
                                     app:layout_constraintBottom_toBottomOf="parent"
                                     app:layout_constraintEnd_toEndOf="parent"
                                     app:layout_constraintTop_toTopOf="parent"
-                                    app:srcCompat="@drawable/baseline_cancel_24" />
+                                    app:srcCompat="@drawable/baseline_cancel_24"
+                                    app:tint="#FF5722" />
 
                                 <androidx.constraintlayout.widget.ConstraintLayout
                                     android:id="@+id/constraintLayout119"
@@ -1568,12 +700,12 @@
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/fab9"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
-                    android:padding="7dp"
+                    android:padding="@dimen/_11dp"
                     android:src="@drawable/baseline_send_24"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -1599,387 +731,16 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constDelBody"
-            style="@style/trans_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                style="@style/BackgroundW_B"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5">
-
-                <TextView
-                    android:id="@+id/deleteChatForOnlyMe_TV"
-                    style="@style/TV_Orange_CoolOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="20dp"
-                    android:gravity="center_vertical"
-                    android:text="Delete for me"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView8" />
-
-                <TextView
-                    android:id="@+id/deleteChatForOnlyOther_TV"
-                    style="@style/TV_Orange_CoolOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="30dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="30dp"
-                    android:gravity="center_vertical"
-                    android:text="Delete for other"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/deleteChatForOnlyMe_TV" />
-
-                <TextView
-                    android:id="@+id/deleteChatsForEveryone_TV"
-                    style="@style/TV_Orange_CoolOrange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="40dp"
-                    android:layout_marginBottom="20dp"
-                    android:gravity="center_vertical"
-                    android:text="Delete for everyone"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/deleteChatForOnlyOther_TV" />
-
-                <ImageView
-                    android:id="@+id/imageView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_delete_forever_24" />
-
-                <ImageView
-                    android:id="@+id/imageViewCancelDel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="14dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_cancel_24"
-                    app:tint="#DD1212" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/pinMsgConst"
+    <ViewStub
+        android:id="@+id/pinMsgViewStub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:layout="@layout/inc_pin_chat_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/firstTopContainer">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/openPinMsg_Constr"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/newPinIndicator_TV"
-                style="@style/drawableBG"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="-12dp"
-                android:elevation="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="@string/newMsg"
-                android:textColor="@color/white"
-                android:textSize="9dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@id/pinsPublic_IV"
-                app:layout_constraintLeft_toLeftOf="@id/pinsPublic_IV"
-                app:layout_constraintRight_toRightOf="@id/pinsPublic_IV" />
-
-            <TextView
-                android:id="@+id/totalPinMsgPublic_TV"
-                style="@style/drawableBG"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="-8dp"
-                android:elevation="2dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="2dp"
-                android:paddingRight="3dp"
-                android:paddingBottom="2dp"
-                android:textColor="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/pinsPublic_IV"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/public_IV"
-                style="@style/roundBackgroundAndTint2"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_marginEnd="10dp"
-                android:elevation="4dp"
-                android:padding="1dp"
-                app:layout_constraintBottom_toBottomOf="@+id/pinsPublic_IV"
-                app:layout_constraintEnd_toStartOf="@+id/line_"
-                app:layout_constraintTop_toTopOf="@+id/pinsPublic_IV"
-                app:srcCompat="@drawable/baseline_public_24" />
-
-            <ImageView
-                android:id="@+id/pinsPublic_IV"
-                style="@style/roundBackgroundAndTint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="-10dp"
-                android:padding="5dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/public_IV"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/baseline_push_pin_24" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/line_"
-                android:layout_width="2dp"
-                android:layout_height="30dp"
-                android:background="@color/cool_orange"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/pinsPrivate_IV"
-                style="@style/roundBackgroundAndTint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="-10dp"
-                android:padding="5dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/private_IV"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/baseline_push_pin_24" />
-
-            <ImageView
-                android:id="@+id/private_IV"
-                style="@style/roundBackgroundAndTint2"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_marginStart="10dp"
-                android:padding="1dp"
-                app:layout_constraintBottom_toBottomOf="@id/pinsPrivate_IV"
-                app:layout_constraintStart_toEndOf="@+id/line_"
-                app:layout_constraintTop_toTopOf="@id/pinsPrivate_IV"
-                app:srcCompat="@drawable/lock" />
-
-            <TextView
-                android:id="@+id/totalPinMsgPrivate_TV"
-                style="@style/drawableBG"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="-8dp"
-                android:elevation="2dp"
-                android:paddingLeft="4dp"
-                android:paddingTop="2dp"
-                android:paddingRight="5dp"
-                android:paddingBottom="2dp"
-                android:textColor="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/pinsPrivate_IV"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/pinMsgBox"
-            style="@style/backgroundWhite_coolBlack"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="3dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/pinClose_IV"
-                android:layout_width="15dp"
-                android:layout_height="@dimen/_15dp"
-                android:layout_marginTop="2dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@+id/pinByWho_TV"
-                app:layout_constraintEnd_toEndOf="@+id/view_IV"
-                app:layout_constraintStart_toStartOf="@+id/view_IV"
-                app:layout_constraintTop_toTopOf="@+id/pinByWho_TV"
-                app:srcCompat="@drawable/baseline_push_pin_24"
-                app:tint="#FF5722" />
-
-            <ImageView
-                android:id="@+id/closePinBox_TV"
-                style="@style/Tint_Orange_CoolOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_cancel_24" />
-
-            <TextView
-                android:id="@+id/pinByWho_TV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="Noble"
-                app:layout_constraintStart_toStartOf="@+id/linearLayout4"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/lineEnd"
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="5dp"
-                android:background="@color/cool_orange"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/closePinBox_TV"
-                app:layout_constraintTop_toTopOf="parent">
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/line4"
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="3dp"
-                android:background="@color/cool_orange"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/downArrow_IV"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <LinearLayout
-                android:id="@+id/linearLayout4"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="7dp"
-                android:layout_marginBottom="5dp"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/pinCount_TV"
-                app:layout_constraintStart_toEndOf="@id/view_IV"
-                app:layout_constraintTop_toBottomOf="@+id/pinByWho_TV">
-
-                <TextView
-                    android:id="@+id/pinMsg_TV"
-                    style="@style/textColorFullBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:text="A pin message going to be here I can see it" />
-            </LinearLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/line3"
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="3dp"
-                android:background="@color/cool_orange"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/upArrow_IV"
-                app:layout_constraintTop_toTopOf="parent">
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <ImageView
-                android:id="@+id/downArrow_IV"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_arrow_downward_24" />
-
-            <ImageView
-                android:id="@+id/view_IV"
-                android:layout_width="15dp"
-                android:layout_height="25dp"
-                android:layout_marginLeft="4dp"
-                app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                app:layout_constraintLeft_toRightOf="@id/line4"
-                app:layout_constraintTop_toTopOf="@+id/linearLayout4"
-                app:srcCompat="@drawable/baseline_disabled_visible_view_24" />
-
-            <TextView
-                android:id="@+id/pinCount_TV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="3dp"
-                android:text="(1/200)"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                app:layout_constraintEnd_toStartOf="@+id/line3"
-                app:layout_constraintTop_toTopOf="@+id/linearLayout4" />
-
-            <ImageView
-                android:id="@+id/upArrow_IV"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/lineEnd"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_arrow_upward_24" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@id/firstTopContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

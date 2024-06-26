@@ -14,7 +14,6 @@ import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.filePositionMap;
-import static com.pixel.chatapp.home.MainActivity.firstTopUserDetailsContainer;
 import static com.pixel.chatapp.home.MainActivity.networkOk;
 import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.photoAndVideoMap;
@@ -184,6 +183,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public static boolean isOnlongPress = false; // the will enable the background highlight checker for onLongPress
 
+    private final MainActivity mainActivity = new MainActivity();
+
     public MessageAdapter( List<MessageModel> modelList, String userName, String uId,
                           Context mContext, ViewGroup parent) {
         this.modelList = modelList;
@@ -338,7 +339,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 modelList.remove(i);    // delete from list
                 int finalPosition = i;
-                handler.post(()-> notifyItemRemoved(finalPosition));
+                handler.post(()-> {
+                    notifyItemRemoved(finalPosition);
+                    notifyItemRangeChanged(finalPosition, modelList.size());
+                });
 
                 count = 1;
             }
@@ -552,6 +556,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }   //  reset chat textView and size
             if(holder.emojiOnly_TV != null){        // reset emoji only
                 holder.emojiOnly_TV.setText("");
+                holder.emojiOnly_TV.setVisibility(View.GONE);
             }
             holder.timeMsg.setText("");             // time reset
             if(holder.constraintChatTop != null){
@@ -567,7 +572,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // reset reply box
         if(holder.linearLayoutReplyBox != null){
             holder.linearLayoutReplyBox.setVisibility(View.GONE);
-            holder.linearLayoutClick.setVisibility(View.GONE);
+            if(holder.linearLayoutClick != null) holder.linearLayoutClick.setVisibility(View.GONE);
             holder.senderNameTV.setText(null);
             holder.replyChat_TV.setText(null);
         }
@@ -684,12 +689,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         // set forward icon on chat
-        if(modelChats.getIsChatForward() != null && modelChats.getIsChatForward()){
+        if(modelChats.getChatIsForward()){
             holder.forwardIcon_IV.setVisibility(View.VISIBLE);
         }
 
         // set pin icon on chat
-        if(modelChats.getIsChatPin() != null && modelChats.getIsChatPin()){
+        if(modelChats.getChatIsPin()){
             holder.pinIcon_IV.setVisibility(View.VISIBLE);
         }
 
@@ -857,7 +862,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
 
-        // ----- Voice Note and Audio setting and auto sending
+        // ----- Voice NoteDocumentation and Audio setting and auto sending
         int visible = (int) modelChats.getType();   //  1 is visible, 4 is invisible, 8 is Gone
         if( holder.seekBarProgress != null && (visible == 1 || visible == 4) ){
             // display the view setting
@@ -930,7 +935,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         View.OnLongClickListener longClick = (view -> {
             MainActivity.isOnlongClick =1;
 
-            if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+            if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE){
                 // activate long click press and send data to MainActivity
                 if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
                 {
@@ -985,9 +990,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.documentContainer.setOnLongClickListener(longClick);
 
             // for single onClick =>    type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
-            View.OnClickListener imageOrDocOnClick = view -> {
+            View.OnClickListener imageOrDocOnClick = view ->
+            {
                 // check if longPress is activated yet or not
-                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+                if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE)
+                {
                     // open image if I was the one that sent them photo
                     if(modelChats.getFromUid().equals(myId) ||
                             (!modelChats.getFromUid().equals(myId) && holder.progressBarLoad.getVisibility() == View.GONE) )
@@ -1034,7 +1041,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             holder.loadProgressTV.setOnClickListener(view ->
             {
-                if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+                if(MainActivity.chatOptionView.getVisibility() != View.VISIBLE){
 
                     if(modelChats.getPhotoUriOriginal() != null){
                         if(modelChats.getFromUid().equals(myId)){
@@ -1285,7 +1292,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // single onClick -- scroll and highlight reply message
         View.OnClickListener scrollToReplyChat = view -> {
 
-            if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE)
+            if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE)
             {
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent_orange));
 
@@ -1362,9 +1369,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         chatViewModel.deleteChat(modelChats);    // delete from room
 
                         modelList.remove(modelChats);    // delete from list
-                        notifyItemRemoved(position_);
+                        notifyItemRemoved(chatPosition);
+                        notifyItemRangeChanged(chatPosition, modelList.size());
 
                         alreadySighted = false;
+
+//                        int chatPosition = modelList.indexOf(modelChat);
+//                        if (chatPosition != -1) {
+//                            modelList.remove(chatPosition);
+//                            notifyItemRemoved(chatPosition);
+//                            notifyItemRangeChanged(chatPosition, modelList.size());
+//                        }
                     };
 
                     handlerNewChatNum.postDelayed(runnableNewChatNum, 5000);
@@ -1515,7 +1530,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(modelChats.getType() != empty && modelChats.getType() != 6 && modelChats.getType() != 7 && modelChats.getType() != 8)
         {
             // process onClick if longPress is not yet activated
-            if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE)
+            if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE)
             {
                 // Close the previously open chat options
                 closePreviousChatOption(modelChats, holder);
@@ -1546,7 +1561,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
     private void openUserProfile(String username, MessageModel modelChats, int chatPosition, MessageViewHolder holder)
     {
-        if(MainActivity.chatOptionsConstraints.getVisibility() != View.VISIBLE){
+        if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE)
+        {
             Toast.makeText(mContext, "what is username: " + username, Toast.LENGTH_SHORT).show();
 
         } else {
@@ -1693,14 +1709,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         Uri uriOnPhone = modelChats.getPhotoUriOriginal().startsWith("/storage/") ? Uri.fromFile(new File(modelChats.getPhotoUriOriginal()))
                 : Uri.parse(modelChats.getPhotoUriOriginal());  // change from /storage to file://
 
-        if( isFileLessThan150Kb(uriOnPhone, mContext) && modelChats.getId().equals(myId) &&
+        if( isFileLessThan150Kb(uriOnPhone, mContext) && modelChats.getOtherUid().equals(myId) &&
             !modelChats.getPhotoUriOriginal().startsWith("/storage/")
                 && !modelChats.getPhotoUriOriginal().startsWith("file:/"))
         {
             String imageSize = modelChats.getImageSize();
             holder.loadProgressTV.setText(imageSize);
 
-        } else if(!modelChats.getId().equals(myId)) {
+        } else if(!modelChats.getOtherUid().equals(myId)) {
             String imageSize = modelChats.getImageSize();
             holder.loadProgressTV.setText(imageSize);
 
@@ -1755,11 +1771,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // display pin icon, is it private or public
             pinStatusIcon(null, modelChats);
 
-            firstTopUserDetailsContainer.setVisibility(View.GONE);
+            MainActivity.firstTopChatViews.setVisibility(View.GONE);
             // make the menu option visible
-            MainActivity.chatOptionsConstraints.setVisibility(View.VISIBLE);
+            MainActivity.chatOptionView.setVisibility(View.VISIBLE);
 
-            MainActivity.pinMsgContainer.setVisibility(View.GONE);
+            if (MainActivity.pinChatViews != null) MainActivity.pinChatViews.setVisibility(View.VISIBLE);
             // Close the previously open chat options
             closePreviousChatOption(modelChats, holder);
             // close mine chatTop Constraint
@@ -1767,7 +1783,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             // Highlight the clicked item
             View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
-            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
+            itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.transparent_orangeLow));
 
             // remove previous highlight is any
             if(chatPosition != lastPosition) clearHighlight();
@@ -1780,87 +1796,91 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     // if onLongPress mood is activated, add or remove chat from list when user click a chat
-    private void addOrRemoveChatFromList(MessageModel modelChats, int chatPosition){
-        // Highlight the clicked item
-        View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
-        // Check the current background color
-        int currentColor = ((ColorDrawable) itemView.getBackground()).getColor();
-        // Define the highlighted color
-        int highlightedColor = ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow);
+    private void addOrRemoveChatFromList(MessageModel modelChats, int chatPosition)
+    {
+        if(MainActivity.chatOptionView != null)
+        {
+            // Highlight the clicked item
+            View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
+            // Check the current background color
+            int currentColor = ((ColorDrawable) itemView.getBackground()).getColor();
+            // Define the highlighted color
+            int highlightedColor = ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow);
 
-        MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
+            MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
 
-        // Add or remove item after checking if the item is not already in the list
-        if (!MainActivity.chatModelList.contains(modelChats)) {
-            // only add chat to list when it less than 10 chats on the list
-            if(MainActivity.chatModelList.size() < 10){
+            // Add or remove item after checking if the item is not already in the list
+            if (!MainActivity.chatModelList.contains(modelChats)) {
+                // only add chat to list when it less than 10 chats on the list
+                if(MainActivity.chatModelList.size() < 10){
 
-                if(modelChats.getMsgStatus() != 700033){
-                    MainActivity.chatModelList.add(modelChats);
+                    if(modelChats.getMsgStatus() != 700033){
+                        MainActivity.chatModelList.add(modelChats);
 
-                    // make icon invisible
-                    if(MainActivity.chatModelList.size() > 1){
-                        MainActivity.editChatOption_IV.setVisibility(View.GONE);
-                        MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                        MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                        // make icon invisible
+                        if(MainActivity.chatModelList.size() > 1){
+                            MainActivity.editChatOption_IV.setVisibility(View.GONE);
+                            MainActivity.replyChatOption_IV.setVisibility(View.GONE);
+                            MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                        }
+
+                        // add position to list to help retain the background color when user scroll
+                        chatPositionList.add(chatPosition);
+
+                        // Set the background color to the highlighted color
+                        if (currentColor != highlightedColor)
+                            itemView.setBackgroundColor(highlightedColor);
+
+                    } else {
+                        Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
                     }
 
-                    // add position to list to help retain the background color when user scroll
-                    chatPositionList.add(chatPosition);
-
-                    // Set the background color to the highlighted color
-                    if (currentColor != highlightedColor)
-                        itemView.setBackgroundColor(highlightedColor);
-
                 } else {
-                    Toast.makeText(mContext, mContext.getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, mContext.getString(R.string.subscribe), Toast.LENGTH_SHORT).show();
                 }
 
             } else {
-                Toast.makeText(mContext, mContext.getString(R.string.subscribe), Toast.LENGTH_SHORT).show();
+                // remove chat from list if chat already exist
+                MainActivity.chatModelList.remove(modelChats);
+
+                if(MainActivity.chatModelList.size() == 0 ){
+                    // close the chatOption container if list is empty
+                    MainActivity.cancelChatOption();
+                } else if (MainActivity.chatModelList.size() == 1){
+                    MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
+                    MainActivity.replyChatOption_IV.setVisibility(View.VISIBLE);
+                    MainActivity.moreOption_IV.setVisibility(View.VISIBLE);
+                    // show if chat is pin publicly or privately
+                    pinStatusIcon(null, MainActivity.chatModelList.get(0));
+                } else {
+                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
+                    MainActivity.replyChatOption_IV.setVisibility(View.GONE);
+                    MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                }
+
+                // Remove the background color
+                if (currentColor == highlightedColor)
+                    itemView.setBackgroundColor(Color.TRANSPARENT);
+
             }
 
-        } else {
-            // remove chat from list if chat already exist
-            MainActivity.chatModelList.remove(modelChats);
+            // toggle edit icon
+            for(MessageModel model : MainActivity.chatModelList){
+                if ( (model.getType() != 0) || !model.getFromUid().equals(myId))
+                {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
+                    MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
+                    MainActivity.onShare = true;
+                } else {
+                    MainActivity.onShare = false;
+                }
 
-            if(MainActivity.chatModelList.size() == 0 ){
-                // close the chatOption container if list is empty
-                MainActivity.cancelChatOption();
-            } else if (MainActivity.chatModelList.size() == 1){
-                MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
-                MainActivity.replyChatOption_IV.setVisibility(View.VISIBLE);
-                MainActivity.moreOption_IV.setVisibility(View.VISIBLE);
-                // show if chat is pin publicly or privately
-                pinStatusIcon(null, MainActivity.chatModelList.get(0));
-            } else {
-                MainActivity.editChatOption_IV.setVisibility(View.GONE);
-                MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                MainActivity.modelChatsOption = model;  // assign the last model
             }
 
-            // Remove the background color
-            if (currentColor == highlightedColor)
-                itemView.setBackgroundColor(Color.TRANSPARENT);
-
+            // display the total number of chat selected in the List
+            String totalChatSelected = MainActivity.chatModelList.size() + "";
+            MainActivity.chatSelected_TV.setText(totalChatSelected);
         }
-
-        // toggle edit icon
-        for(MessageModel model : MainActivity.chatModelList){
-            if ( (model.getType() != 0) || !model.getFromUid().equals(myId))
-            {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-                MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
-                MainActivity.onShare = true;
-            } else {
-                MainActivity.onShare = false;
-            }
-
-            MainActivity.modelChatsOption = model;  // assign the last model
-        }
-
-        // display the total number of chat selected in the List
-        String totalChatSelected = MainActivity.chatModelList.size() + "";
-        MainActivity.chatSelected_TV.setText(totalChatSelected);
 
     }
 
@@ -2313,7 +2333,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         {
             Intent intent = new Intent(mContext, ViewImageActivity.class);
             // Put the modelList as an extra
-            intent.putExtra("modelList", new ArrayList<>(photoAndVideoMap.get(modelChats.getId())));
+            intent.putExtra("modelList", new ArrayList<>(photoAndVideoMap.get(modelChats.getOtherUid())));
             intent.putExtra("photoId", (modelChats.getIdKey()));  // scroll to the file position
             intent.putExtra("photoIdPosition", MainActivity.filePositionMap.get(modelChats.getIdKey()));  // scroll to the file position
 
@@ -2962,9 +2982,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         String imageSize, String imageLinkToFBStorage, String vnPathToStorage)
     {
         Map<String, Object> messageMap = new HashMap<>();
-        String myDisplayName = MainActivity.myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, modelChats.getFrom());
+        String myDisplayName = MainActivity.myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, modelChats.getSenderName());
 
-        messageMap.put("from", myDisplayName);
+        messageMap.put("senderName", myDisplayName);
         messageMap.put("fromUid", myId);
         messageMap.put("type", modelChats.getType());            // 8 is for text while 1 is for voice note
         messageMap.put("idKey", modelChats.getIdKey());
@@ -2978,8 +2998,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         messageMap.put("newChatNumberID", modelChats.getNewChatNumberID());
         messageMap.put("replyID", modelChats.getReplyID());
         messageMap.put("replyMsg", modelChats.getReplyMsg());
-        messageMap.put("isChatPin", modelChats.getIsChatPin());
-        messageMap.put("isChatForward", modelChats.getIsChatForward());
+        messageMap.put("chatIsPin", modelChats.getChatIsPin());
+        messageMap.put("chatIsForward", modelChats.getChatIsForward());
         messageMap.put("photoUriPath", imageLinkToFBStorage);
         if(modelChats.getType() == 4 || modelChats.getType() == 1) { // it's audio | voice note
             messageMap.put("photoUriOriginal", null);
@@ -2998,9 +3018,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         Map<String, Object> latestChatMap = new HashMap<>();
         // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-        String myDisplayName = MainActivity.myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, modelChats.getFrom());
+        String myDisplayName = MainActivity.myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, modelChats.getSenderName());
         latestChatMap.put("fromUid", myId);
-        latestChatMap.put("from", myDisplayName);
+        latestChatMap.put("senderName", myDisplayName);
         latestChatMap.put("emojiOnly", modelChats.getEmojiOnly());
         latestChatMap.put("message", modelChats.getMessage());
         latestChatMap.put("type", modelChats.getType());
@@ -3162,7 +3182,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 for (int i = modelList.size()-1; i >= 0; i--) {
                     if (modelList.get(i).getIdKey().equals(messageId)) {
 
-                        modelList.get(i).setChatPin(status);
+                        modelList.get(i).setChatIsPin(status);
                         // update icon on local database
                         chatViewModel.updateChat(modelList.get(i));
                     }

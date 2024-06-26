@@ -60,37 +60,37 @@ public interface UserChatDao {
     void updateChat(MessageModel chatModel);
 
     // update emoji reaction field
-    @Query("UPDATE chats SET emoji = :emoji WHERE id = :otherId AND idKey = :idKey")
+    @Query("UPDATE chats SET emoji = :emoji WHERE otherUid = :otherId AND idKey = :idKey")
     void updateChatEmoji(String otherId, String idKey, String emoji);
 
     // update delivery status
-    @Query("UPDATE chats SET msgStatus = :msgStatus WHERE id = :otherId AND idKey = :idKey")
+    @Query("UPDATE chats SET msgStatus = :msgStatus WHERE otherUid = :otherId AND idKey = :idKey")
     void updateDeliveryStatus(String otherId, String idKey, int msgStatus);
 
     // update pin icon
-    @Query("UPDATE chats SET isChatPin = :status WHERE id = :otherId AND idKey = :idKey")
+    @Query("UPDATE chats SET chatIsPin = :status WHERE otherUid = :otherId AND idKey = :idKey")
     void updateChatPin(String otherId, String idKey, boolean status);
 
     // update image path field
     @Query("UPDATE chats SET photoUriPath = :photoLowPath, photoUriOriginal = :photoHighPath, " +
-            "imageSize = :imageSize, msgStatus = :delivery WHERE id = :otherId AND idKey = :idKey")
+            "imageSize = :imageSize, msgStatus = :delivery WHERE otherUid = :otherId AND idKey = :idKey")
     void updatePhotoUriPath( String idKey, String otherId, String photoLowPath,
                              String photoHighPath, String imageSize, int delivery );
 
     // update voice note download
-    @Query("UPDATE chats SET voiceNote = :voiceNotePath, vnDuration = :voiceNoteDur WHERE id = :otherId AND idKey = :idKey")
+    @Query("UPDATE chats SET voiceNote = :voiceNotePath, vnDuration = :voiceNoteDur WHERE otherUid = :otherId AND idKey = :idKey")
     void updateVoiceNotePath(String otherId, String idKey, String voiceNotePath, String voiceNoteDur);
 
 
     @Delete
     void deleteChat(MessageModel chatModel);
 
-    // Delete a user chats based on the id
-    @Query("DELETE FROM chats WHERE id = :id AND myUid = :myId")
-    void deleteUserChatsById(String id, String myId);
+    // Delete a user chats based on the id (otherID)
+    @Query("DELETE FROM chats WHERE otherUid = :otherId AND myUid = :myId")
+    void deleteUserChatsById(String otherId, String myId);
 
     // get the chats of each user based on the id
-    @Query("SELECT * FROM chats WHERE id = :userUid AND myUid = :myId")
-    List<MessageModel> getEachUserChat_(String userUid, String myId);
+    @Query("SELECT * FROM chats WHERE otherUid = :otherUid AND myUid = :myId")
+    List<MessageModel> getEachUserChat_(String otherUid, String myId);
 
 }

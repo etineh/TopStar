@@ -74,6 +74,14 @@ public class Permission {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.USE_BIOMETRIC}, AllConstants.BIOMETRIC_REQUEST_CODE);
     }
 
+    public boolean isNotificationOk(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public void requestNotification(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.POST_NOTIFICATIONS}, AllConstants.NOTIFICATION_REQUEST_CODE);
+    }
+
 }
 
 

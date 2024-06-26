@@ -1,20 +1,6 @@
-package com.pixel.chatapp;
+package com.pixel.chatapp.AAA;
 
-public class Note {
-
-    // ======= lesson
-
-    // 1. ============ get the error message from the error body api  (PhoneLoginActivity L200)
-
-//    String error = response.errorBody().string();
-//    JsonObject jsonObject = new Gson().fromJson(error, JsonObject.class);
-//    String message = jsonObject.get("message").getAsString();
-
-//                    future.completeExceptionally(new NotFoundException("user not found"));
-
-
-//    2.
-
+public class NoteDocumentation {
 
 
     //  ============    Documentation
@@ -28,9 +14,15 @@ public class Note {
     //  3. New date
     //  When I receive a chat, I compare the date to the last chat date (via outside room db for speed) if it's a new date
 
+    //  4. Username
+    //  on saving, I don't add @, but on retrieving, I add @
 
 
+    // type 0 - text-chat, type 1 is voice_note, type 2 is photo, type 3 is document,
+    // type 4 is audio (mp3), type 5 is video, 6 is call, 7 is game, 8 is pin, 10 is empty card
 
+
+    // 1 - typing, 2 - editing, 3 - sending photo, 4 - sending file, 5 - sending voice note
 }
 
 

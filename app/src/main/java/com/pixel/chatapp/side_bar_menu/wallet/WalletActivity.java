@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -114,6 +115,16 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallet);
+//
+//        ViewStub viewStub = findViewById(R.id.viewstub);
+//
+//        new Handler().postDelayed(()->
+//        {
+//            view = viewStub.inflate();
+//            if (view != null) {
+//                Toast.makeText(this, "Done inflating all views", Toast.LENGTH_SHORT).show();
+//            }
+//        }, 50);
 
         resetPinButton = findViewById(R.id.resetPin_IV);
         customerCareButton = findViewById(R.id.support_IV);

@@ -27,11 +27,9 @@ import com.pixel.chatapp.all_utils.IdTokenUtil;
 import com.pixel.chatapp.all_utils.OTPGenerator;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.ProfileApiDao;
-import com.pixel.chatapp.api.model.ResultApiM;
+import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.api.model.ThreeValueM;
-import com.pixel.chatapp.api.model.TwoValueM;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.signup_login.EmailOrPhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
 

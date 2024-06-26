@@ -22,7 +22,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.SendImageOrVideoActivity;
 import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.OtherMethods;
+import com.pixel.chatapp.all_utils.AnimUtils;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
 
@@ -162,7 +162,7 @@ public class ViewImageAdapter extends PagerAdapter {
 
         photoView.setOnClickListener(v -> {
 //            SendImageOrVideoActivity.recyclerPhoto.setVisibility(View.VISIBLE);
-            OtherMethods.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
+            AnimUtils.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         });
 
 
@@ -172,11 +172,11 @@ public class ViewImageAdapter extends PagerAdapter {
 
     private void fadeInAndOut(ConstraintLayout videoSeekBarContainer){
         if(videoSeekBarContainer.getVisibility() == View.VISIBLE){
-            OtherMethods.fadeOutSeekBar(videoSeekBarContainer);
-            OtherMethods.fadeOutRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
+            AnimUtils.fadeOutSeekBar(videoSeekBarContainer);
+            AnimUtils.fadeOutRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         } else {
-            OtherMethods.fadeInSeekBar(videoSeekBarContainer);
-            OtherMethods.fadeInRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
+            AnimUtils.fadeInSeekBar(videoSeekBarContainer);
+            AnimUtils.fadeInRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         }
     }
 

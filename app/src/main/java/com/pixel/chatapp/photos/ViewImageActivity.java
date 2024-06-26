@@ -1,7 +1,9 @@
 package com.pixel.chatapp.photos;
 
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
+import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -70,7 +72,7 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         viewPager.setCurrentItem(getCurrentPosition);
 
         //  ========  onClicks
-        arrowBack.setOnClickListener(view -> onBackPressed());
+        arrowBack.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         forwardPhoto_IV.setOnClickListener(view -> {
             view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
@@ -123,9 +125,12 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
             Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
         });
 
+        getOnBackPressedDispatcher().addCallback(callback);
+
     }
 
-    //  ======= methods
+    //  ==========     methods
+
     private void sharePhoto(View view) {    // send photo to another app
         view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
         {
@@ -148,12 +153,11 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
     @Override
     public void getCurrentModelChat(MessageModel messageModel, int position) {
         currentModelChat = messageModel;    // to enable user forward the right photo
-        // set from who
-        String from = "";
-        if(messageModel.getFrom() != null){
-            from = messageModel.getFrom().length() > 10 ? messageModel.getFrom().substring(0, 10) : messageModel.getFrom();
-        }
-        fromWho_TV.setText("From: " + from);
+
+        // get the contact name or displayed name of other user
+        String getFromWho = contactNameShareRef.getString(messageModel.getFromUid(), messageModel.getSenderName());
+
+        fromWho_TV.setText("From: " + getFromWho);
 
         showChatTV.setText(messageModel.getMessage());
 
@@ -180,16 +184,19 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
         return 0; // Default to the first position if not found
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
 
-        // Start or bring MainActivity to the front
-        Intent mainActivityIntent = new Intent(this, MainActivity.class);
-        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(mainActivityIntent);
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed()
+        {
+            // Start or bring MainActivity to the front
+            Intent mainActivityIntent = new Intent(ViewImageActivity.this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(mainActivityIntent);
+
+            finish();
+        }
+    };
 
     @Override
     public void sendImageData(Uri imageUriPath) {

@@ -109,7 +109,7 @@ public class UserChatRepository {
     public void insertChats(String userId, MessageModel chatModel){
 
         executors.execute(() -> {
-            chatModel.setId(userId);
+            chatModel.setOtherUid(userId);
             userChatDao.insertChat(chatModel);
         });
 

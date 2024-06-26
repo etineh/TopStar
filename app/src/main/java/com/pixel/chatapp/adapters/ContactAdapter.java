@@ -151,7 +151,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
                             // check if network is okay and remove the network bar constraint
                             new Handler().postDelayed(() -> {
                                 if(MainActivity.networkListener.equals("yes"))
-                                    MainActivity.constrNetConnect.setVisibility(View.GONE);
+                                    if(MainActivity.checkNetworkView != null) MainActivity.checkNetworkView.setVisibility(View.GONE);
                             }, 1000);
 
                         } else {

@@ -61,7 +61,7 @@ import com.pixel.chatapp.adapters.SendImageAdapter;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
 import com.pixel.chatapp.all_utils.FileUtils;
 import com.pixel.chatapp.all_utils.FolderUtils;
-import com.pixel.chatapp.all_utils.OtherMethods;
+import com.pixel.chatapp.all_utils.AnimUtils;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
@@ -710,7 +710,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
                                 // make the recycler visible only when the photo on the list is above 1
                                 if(countPhotoPick > 1 || chatModelList.size() > 1) {
                                     recyclerPhoto.setVisibility(View.VISIBLE);
-                                    OtherMethods.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
+                                    AnimUtils.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
                                 }
 
                             }

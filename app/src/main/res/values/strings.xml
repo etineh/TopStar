@@ -18,17 +18,17 @@
     <string name="move">Move</string>
     <string name="mute">Mute</string>
     <string name="Copy">Copy</string>
-    <string name="blockAndReport">Block &amp; report</string>
+    <string name="blockAndReport">Block &amp; Report</string>
     <string name="lastSeen">Online</string>
     <string name="typing">Typing...</string>
     <string name="clear_chats">Clear Chats</string>
-    <string name="disappear_msg">Set disappear message</string>
+    <string name="disappear_msg">Set Disappear Message</string>
     <string name="search">Search</string>
     <string name="join_tour">Join Tournament</string>
     <string name="forward">Forward to…</string>
     <string name="file">File</string>
     <string name="hintTitle">Hint</string>
-    <!--    <string name="changeHint">Change Hint</string>-->
+    <string name="clearPin">Clear Pins</string>
     <string name="hint">Hint</string>
     <string name="hint2">Hello! Alert me let\'s play live stream game together!</string>
     <string name="add_message">Add message</string>
@@ -428,7 +428,7 @@
     <string name="serverError">Server error.</string>
     <string name="invalidDetails">Incorrect details.</string>
     <string name="noInternetConnection">No internet connection 😔</string>
-<!--    <string name="uninstall">R 😔</string>-->
+    <string name="scrollUpForPin">Scroll up for more pin chats!</string>
 
     <string name="errorWithOtp">Error with code. Resend again.</string>
     <string name="timeout">timeout</string>
@@ -465,6 +465,7 @@
     <string name="saveToGallery">Save to gallery</string>
     <string name="react">React 😀</string>
 
+    <string name="reply">Reply</string>
 
     <string name="gallery">Gallery</string>
     <string name="document">Document</string>

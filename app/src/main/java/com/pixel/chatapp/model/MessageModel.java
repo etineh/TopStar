@@ -1,60 +1,54 @@
 package com.pixel.chatapp.model;
 
-import android.view.View;
-
 import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 @Entity(tableName = "chats")
 public class MessageModel implements Serializable {
 //public class MessageModel {
-
-    @PrimaryKey
-    @NonNull
-    private String idKey;
+@PrimaryKey
+@NonNull
+private String idKey;
 
     private String myUid;
     private String fromUid;
     private String message;
     private String emojiOnly;
-    private String from;
+    private String senderName; // changed from "from"
     private String replyFrom;
     private String edit;
     private String replyMsg;
 
     @NonNull
     private long timeSent;
-//    @NonNull
-//    @ColumnInfo(defaultValue = "sfrssrfsffsessfesefsef")
     private String newChatNumberID;
     private int msgStatus;
     private int type;
     private String imageSize;
     private String replyID;
-    private boolean isChatPin;
-    private boolean isChatForward;
+    private boolean chatIsPin; // changed from "isChatPin"
+    private boolean chatIsForward; // changed from "isChatForward"
     private String emoji;
-    private String id;
+    private String otherUid;    // otherUid
     private String voiceNote;
     private String vnDuration;
     private String photoUriPath;
     private String photoUriOriginal;
 
-
+    // Default constructor
     public MessageModel() {
     }
 
-    public MessageModel(String message, String from, String fromUid, String replyFrom, long timeSent, String idKey,
+    // Constructor with parameters
+    public MessageModel(String message, String senderName, String fromUid, String replyFrom, long timeSent, String idKey,
                         String edit, String newChatNumberID, String replyMsg, int msgStatus, int type, String imageSize,
-                        String replyID, Boolean isChatPin, Boolean isChatForward, String emoji, String emojiOnly,
+                        String replyID, boolean chatIsPin, boolean chatIsForward, String emoji, String emojiOnly,
                         String voiceNote, String vnDuration, String photoUriPath, String photoUriOriginal) {
         this.message = message;
-        this.from = from;
+        this.senderName = senderName;
         this.timeSent = timeSent;
         this.idKey = idKey;
         this.edit = edit;
@@ -65,8 +59,8 @@ public class MessageModel implements Serializable {
         this.type = type;
         this.imageSize = imageSize;
         this.replyID = replyID;
-        this.isChatPin = isChatPin;
-        this.isChatForward = isChatForward;
+        this.chatIsPin = chatIsPin;
+        this.chatIsForward = chatIsForward;
         this.emoji = emoji;
         this.emojiOnly = emojiOnly;
         this.fromUid = fromUid;
@@ -77,6 +71,8 @@ public class MessageModel implements Serializable {
         this.photoUriPath = photoUriPath;
         this.photoUriOriginal = photoUriOriginal;
     }
+
+
     public String getMessage() {
         return message;
     }
@@ -93,14 +89,15 @@ public class MessageModel implements Serializable {
         this.myUid = myUid;
     }
 
-    public String getFrom() {
-        return from;
+    public String getSenderName() {
+        return senderName;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
-//
+
+    //
     public long getTimeSent() {
         return timeSent;
     }
@@ -189,20 +186,20 @@ public class MessageModel implements Serializable {
         this.replyID = replyID;
     }
 
-    public Boolean getIsChatPin() {
-        return isChatPin;
+    public boolean getChatIsPin() {
+        return chatIsPin;
     }
 
-    public void setChatPin(boolean chatPin) {
-        isChatPin = chatPin;
+    public void setChatIsPin(boolean chatIsPin) {
+        this.chatIsPin = chatIsPin;
     }
 
-    public Boolean getIsChatForward() {
-        return isChatForward;
+    public boolean getChatIsForward() {
+        return chatIsForward;
     }
 
-    public void setChatForward(boolean chatForward) {
-        isChatForward = chatForward;
+    public void setChatIsForward(boolean chatIsForward) {
+        this.chatIsForward = chatIsForward;
     }
 
     public String getEmoji() {
@@ -221,12 +218,12 @@ public class MessageModel implements Serializable {
         this.emojiOnly = emojiOnly;
     }
 
-    public String getId() {
-        return id;
+    public String getOtherUid() {
+        return otherUid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setOtherUid(String otherUid) {
+        this.otherUid = otherUid;
     }
 
     public String getVoiceNote() {

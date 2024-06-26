@@ -18,7 +18,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.OTPActivity;
 import com.pixel.chatapp.api.Dao_interface.OtpApiDao;
 import com.pixel.chatapp.api.model.TwoValueM;
-import com.pixel.chatapp.api.model.ResultApiM;
+import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.constants.AllConstants;
 
 import java.util.concurrent.TimeUnit;

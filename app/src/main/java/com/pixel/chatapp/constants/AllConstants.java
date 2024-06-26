@@ -1,5 +1,8 @@
 package com.pixel.chatapp.constants;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.google.android.gms.common.data.SingleRefDataBufferIterator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -50,21 +53,23 @@ public interface AllConstants {
     String PHOTO_OTHERUID = "PHOTO_UID";
     String VOICENOTE_UID = "VOICENOTE_UID";
     String CONTACTNAME = "CONTACT_NAME";
+    String FCMTOKEN = "FCM_TOKEN";
+    Handler handler = new Handler(Looper.getMainLooper());
 
     String PICKED_IMAGE_URI_PATH = "ImageUriPath";
 
     String MIC_ICON = "\uD83C\uDFA4  ";
     String MUSIC_ICON = "\uD83C\uDFB5 ";
 
-    String DELETE_ICON = "\uD83D\uDDD1\uFE0F  ";
+    String DELETE_ICON = "\uD83D\uDDD1\uFE0F ";
 //    String PHOTO_ICON = "\uD83D\uDCF7  ";
-    String PHOTO_ICON = "\uD83C\uDF03";
-    String VIDEO_ICON ="\uD83C\uDFA5  ";
-    String PIN_ICON = "\uD83D\uDCCC  ";
+    String PHOTO_ICON = "\uD83C\uDF03 ";
+    String VIDEO_ICON ="\uD83C\uDFA5 ";
+    String PIN_ICON = "\uD83D\uDCCC ";
     String EDIT_ICON = "✏\uFE0F  ";
-    String CALL_ICON = "☎️  ";
+    String CALL_ICON = "☎️ ";
     String GAME_ICON = "🎮  ";
-    String DOCUMENT_ICON = "\uD83D\uDCDC";
+    String DOCUMENT_ICON = "\uD83D\uDCDC ";
 
     String URI_PREF = "UriPrefs";
     String OLD_URI_LIST = "oldPhotoEditedUri";
@@ -98,6 +103,7 @@ public interface AllConstants {
     int CALL_CAMERA_REQUEST_CODE = 11;
     int CALL_RECORDING_REQUEST_CODE = 12;
     int BIOMETRIC_REQUEST_CODE = 13;
+    int NOTIFICATION_REQUEST_CODE = 14;
 
     String CHANNEL_ID = "1000";
     int NOTIFICATION_ID = 100;

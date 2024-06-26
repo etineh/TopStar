@@ -15,9 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
@@ -29,9 +27,8 @@ import com.pixel.chatapp.all_utils.OTPGenerator;
 import com.pixel.chatapp.all_utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
 import com.pixel.chatapp.api.model.LoginDetailM;
-import com.pixel.chatapp.api.model.ResultApiM;
+import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.home.MainActivity;
 
 import java.io.IOException;
 

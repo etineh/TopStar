@@ -941,17 +941,17 @@ public class MessageActivity extends AppCompatActivity {
 
                 // fetch data
                 idKey = modelList.get(position).getIdKey();
-                replyFrom = modelList.get(position).getFrom();
+                replyFrom = modelList.get(position).getSenderName();
                 String msg = modelList.get(position).getMessage();
                 listener = "reply";
 
                 // set reply name and replying hint
-                if (modelList.get(position).getFrom().equals(userName)) {
+                if (modelList.get(position).getSenderName().equals(userName)) {
                     nameReply.setText("From You.");
                 }
                 else {
-                    nameReply.setText(modelList.get(position).getFrom() +
-                            " (@" +modelList.get(position).getFrom()+")");
+                    nameReply.setText(modelList.get(position).getSenderName() +
+                            " (@" +modelList.get(position).getSenderName()+")");
                 }
                 nameReply.setVisibility(View.VISIBLE);
                 replyVisible.setVisibility(View.VISIBLE);
