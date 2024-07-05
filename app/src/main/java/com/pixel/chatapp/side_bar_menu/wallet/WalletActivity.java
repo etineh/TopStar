@@ -2,26 +2,21 @@ package com.pixel.chatapp.side_bar_menu.wallet;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -40,16 +35,13 @@ import com.journeyapps.barcodescanner.ScanOptions;
 import com.pixel.chatapp.activities.CaptureAct;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.FundTransferUserAdapter;
-import com.pixel.chatapp.all_utils.BarcodeUtils;
-import com.pixel.chatapp.all_utils.PhoneUtils;
-import com.pixel.chatapp.constants.AllConstants;
+import com.pixel.chatapp.utils.BarcodeUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.model.FundTransferUser;
 import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
-import com.pixel.chatapp.peer2peer.exchange.SellerPaymentInfoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class WalletActivity extends AppCompatActivity implements FundTransferUserAdapter.ProceedToTransferPage {
 

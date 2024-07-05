@@ -73,7 +73,7 @@
         android:id="@+id/chatOptions"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout="@layout/inc_longpress_chat_options"
+        android:layout="@layout/vs_longpress_chat_options"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +83,7 @@
         android:id="@+id/moreOptionViewStub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout="@layout/inc_longpress_chats_moreoption"
+        android:layout="@layout/vs_chats_moreoption"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -126,10 +126,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout="@layout/inc_home_more"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainViewConstraint"
@@ -155,9 +156,29 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout="@layout/vs_forward_top_layout"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ViewStub
+            android:id="@+id/userLongPressVS"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout="@layout/vs_user_longpress"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
+
+        <ViewStub
+            android:id="@+id/userLongPressMoreVS"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout="@layout/vs_user_more_longpress"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/HomeTopConstr"
@@ -348,6 +369,16 @@
         app:layout_constraintTop_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ViewStub
+            android:id="@+id/FileAttachOptionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout="@layout/vs_more_files"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chatBoxContainer"
@@ -734,10 +765,53 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ViewStub
+        android:id="@+id/onChatClickVS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_chat_click"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ViewStub
+        android:id="@+id/constDelBody"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_delete_for"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/pinOptionBoxConstr"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_pin_for"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/topEmojiViewStub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/vs_top_emoji"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
         android:id="@+id/pinMsgViewStub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout="@layout/inc_pin_chat_layout"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/firstTopContainer" />

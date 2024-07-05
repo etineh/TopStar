@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 
 public class SupportActivity extends AppCompatActivity {
 

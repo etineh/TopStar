@@ -1,7 +1,7 @@
 package com.pixel.chatapp.photos;
 
-import static com.pixel.chatapp.all_utils.FileUtils.getFileName;
-import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
+import static com.pixel.chatapp.utils.FileUtils.getFileName;
+import static com.pixel.chatapp.utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.handlerTyping;
@@ -61,9 +61,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.GalleryAdapter;
-import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.FolderUtils;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.FileUtils;
+import com.pixel.chatapp.utils.FolderUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;

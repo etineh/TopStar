@@ -6,16 +6,18 @@ import android.content.Context;
 import androidx.recyclerview.widget.RecyclerView;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.model.MessageModel;
+import com.pixel.chatapp.model.UserOnChatUI_Model;
 
 import java.lang.reflect.AccessibleObject;
 
 public interface FragmentListener {
 
-    //    void logoutOption();
+    void openChatClickOption(boolean open, MessageModel messageModel, int totalSize, int chatPosition);
 
-//    void onRequestPermission(MessageAdapter.MessageViewHolder holder, MessageModel modelChats);
+    void setDelAndPinForWho(boolean makeVisible, boolean makeTopViewVisible);
 
-    void firstCallLoadPage(String otherUid);
+    void onLongPressUser(UserOnChatUI_Model userModel);
+
     void chatBodyVisibility(String otherName, String imageUrl, String userName, String uID, Context mContext_, RecyclerView recyclerChat);
 
     void sendRecyclerView(RecyclerView recyclerChat, String otherUid);
@@ -30,12 +32,4 @@ public interface FragmentListener {
 
     void onNetworkStatusChanged(boolean isConnected);
 
-    void onEditOrReplyMessage(MessageModel messageModel, String editOrReply, String status, int icon,
-                              int visible, MessageAdapter.MessageViewHolder holder);
-    void onDeleteMessage();
-    void onForwardChat();
-    void onPinData(String msgId_, String message_, Object timeStamp_, MessageAdapter.MessageViewHolder holder);
-
-    void onUserDelete(String otherName, String otherUid);
-    void onEmojiReact(MessageAdapter.MessageViewHolder holder, String chatID);
 }

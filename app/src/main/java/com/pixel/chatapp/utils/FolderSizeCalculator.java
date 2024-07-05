@@ -1,8 +1,7 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 import android.content.Context;
 
-import com.pixel.chatapp.R;
 import com.pixel.chatapp.model.FileItem;
 
 import java.io.File;

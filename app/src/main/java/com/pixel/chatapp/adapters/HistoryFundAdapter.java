@@ -6,13 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
 import com.pixel.chatapp.model.WalletHistory;
 import com.pixel.chatapp.side_bar_menu.wallet.TransactionReceiptActivity;
 

@@ -1,6 +1,6 @@
 package com.pixel.chatapp.photos;
 
-import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getThumbnailFolder;
 import static com.pixel.chatapp.home.MainActivity.chatModelList;
 import static com.pixel.chatapp.home.MainActivity.deleteOldUriFromAppMemory;
 import static com.pixel.chatapp.home.MainActivity.deleteUnusedPhotoFromSharePrefsAndAppMemory;
@@ -59,10 +59,10 @@ import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.SendImageAdapter;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
-import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.FolderUtils;
-import com.pixel.chatapp.all_utils.AnimUtils;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.FileUtils;
+import com.pixel.chatapp.utils.FolderUtils;
+import com.pixel.chatapp.utils.AnimUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;

@@ -1,4 +1,4 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -7,7 +7,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
-import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 

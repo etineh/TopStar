@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.GameRankAdapter;
 import com.pixel.chatapp.adapters.UpcomingHostAdapter;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.model.GameRankM;
 import com.pixel.chatapp.model.UpcomingHostM;
 import com.pixel.chatapp.side_bar_menu.settings.SettingsActivity;

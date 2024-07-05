@@ -21,7 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.CameraActivity;
-import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.utils.FileUtils;
 import com.pixel.chatapp.model.MessageModel;
 
 import java.util.List;

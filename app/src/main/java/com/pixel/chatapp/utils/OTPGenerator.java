@@ -1,4 +1,4 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 import android.app.Activity;
 import android.content.Context;

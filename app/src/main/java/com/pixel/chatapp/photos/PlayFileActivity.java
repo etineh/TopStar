@@ -17,7 +17,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.utils.FileUtils;
 import com.pixel.chatapp.side_bar_menu.settings.StorageRecyclerActivity;
 
 import java.io.File;

@@ -1,6 +1,5 @@
 package com.pixel.chatapp.side_bar_menu.wallet;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
@@ -12,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 
 public class TransactionReceiptActivity extends AppCompatActivity {
 

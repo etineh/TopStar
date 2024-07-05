@@ -18,10 +18,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.BankNamesUtils;
-import com.pixel.chatapp.all_utils.CountryNumCodeUtils;
+import com.pixel.chatapp.utils.BankNamesUtils;
+import com.pixel.chatapp.utils.CountryNumCodeUtils;
 
 import java.util.ArrayList;
 import java.util.List;

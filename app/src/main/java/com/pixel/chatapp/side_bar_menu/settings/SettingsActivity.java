@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.peer2peer.P2pSetupActivity;

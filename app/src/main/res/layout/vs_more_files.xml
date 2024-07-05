@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/trans_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="3dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fileContainerAnim"
+        style="@style/roundRadiusBackground2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="60dp"
+        android:clickable="true"
+        android:paddingTop="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/galleryIV"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="40dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/audioIV"
+            app:layout_constraintEnd_toStartOf="@+id/documentIV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/gallery_assistant_navigation_24" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/gallery"
+            app:layout_constraintEnd_toEndOf="@+id/galleryIV"
+            app:layout_constraintStart_toStartOf="@+id/galleryIV"
+            app:layout_constraintTop_toBottomOf="@+id/galleryIV" />
+
+        <ImageView
+            android:id="@+id/documentIV"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="40dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/contactIV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/baseline_document_scanner_24" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/document"
+            app:layout_constraintEnd_toEndOf="@+id/documentIV"
+            app:layout_constraintStart_toStartOf="@+id/documentIV"
+            app:layout_constraintTop_toBottomOf="@+id/documentIV" />
+
+        <ImageView
+            android:id="@+id/gameIV"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="40dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/other"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/documentIV"
+            app:srcCompat="@drawable/baseline_games_24" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/game"
+            app:layout_constraintEnd_toEndOf="@+id/gameIV"
+            app:layout_constraintStart_toStartOf="@+id/gameIV"
+            app:layout_constraintTop_toBottomOf="@+id/gameIV" />
+
+        <ImageView
+            android:id="@+id/audioIV"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="35dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/contactIV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/baseline_audio_file_24" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/audio"
+            app:layout_constraintEnd_toEndOf="@+id/audioIV"
+            app:layout_constraintStart_toStartOf="@+id/audioIV"
+            app:layout_constraintTop_toBottomOf="@+id/audioIV" />
+
+        <ImageView
+            android:id="@+id/contactIV"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="35dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/add_contact" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/contact"
+            app:layout_constraintEnd_toEndOf="@+id/contactIV"
+            app:layout_constraintStart_toStartOf="@+id/contactIV"
+            app:layout_constraintTop_toBottomOf="@+id/contactIV" />
+
+        <ImageView
+            android:id="@+id/other"
+            style="@style/roundBackgroundAndTint2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="35dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/contactIV"
+            app:srcCompat="@drawable/baseline_emoji_events_24" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="other"
+            app:layout_constraintEnd_toEndOf="@+id/other"
+            app:layout_constraintStart_toStartOf="@+id/other"
+            app:layout_constraintTop_toBottomOf="@+id/other" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

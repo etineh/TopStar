@@ -1,4 +1,4 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 import static com.pixel.chatapp.home.MainActivity.nightMood;
 

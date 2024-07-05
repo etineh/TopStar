@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.SharePhotoUtil;
+import com.pixel.chatapp.utils.SharePhotoUtil;
 import com.squareup.picasso.Picasso;
 
 public class ZoomImage extends AppCompatActivity {

@@ -21,8 +21,8 @@ import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.SendImageOrVideoActivity;
-import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.AnimUtils;
+import com.pixel.chatapp.utils.FileUtils;
+import com.pixel.chatapp.utils.AnimUtils;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;
 

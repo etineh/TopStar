@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
-import com.pixel.chatapp.all_utils.SharePhotoUtil;
+import com.pixel.chatapp.utils.SharePhotoUtil;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.model.MessageModel;

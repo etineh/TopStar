@@ -14,10 +14,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.CacheUtils;
-import com.pixel.chatapp.all_utils.FolderSizeCalculator;
-import com.pixel.chatapp.all_utils.FolderUtils;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.CacheUtils;
+import com.pixel.chatapp.utils.FolderSizeCalculator;
+import com.pixel.chatapp.utils.FolderUtils;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 
 import java.io.File;
 import java.util.ArrayList;

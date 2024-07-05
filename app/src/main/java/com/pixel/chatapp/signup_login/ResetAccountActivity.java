@@ -1,7 +1,6 @@
 package com.pixel.chatapp.signup_login;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,15 +10,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.window.OnBackInvokedDispatcher;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.OTPActivity;
-import com.pixel.chatapp.all_utils.IdTokenUtil;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.IdTokenUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 public class ResetAccountActivity extends AppCompatActivity {

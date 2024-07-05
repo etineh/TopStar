@@ -1,20 +1,16 @@
 package com.pixel.chatapp.contacts;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -25,26 +21,18 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ContactAdapter;
-import com.pixel.chatapp.all_utils.CountryNumCodeUtils;
-import com.pixel.chatapp.all_utils.PhoneUtils;
-import com.pixel.chatapp.all_utils.SharePhotoUtil;
+import com.pixel.chatapp.utils.PhoneUtils;
+import com.pixel.chatapp.utils.SharePhotoUtil;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.model.ContactModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class UsersContactActivity extends AppCompatActivity implements ContactAdapter.BackButtonClickListener, FetchContacts.RefreshContactListener {
 

@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 
 public class SoundActivity extends AppCompatActivity {
 

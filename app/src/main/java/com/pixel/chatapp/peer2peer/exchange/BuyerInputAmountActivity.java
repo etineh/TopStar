@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 
 public class BuyerInputAmountActivity extends AppCompatActivity {
 

@@ -4,18 +4,15 @@ import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
 import static com.pixel.chatapp.home.MainActivity.myUserName;
+import static com.pixel.chatapp.home.MainActivity.onForward;
+import static com.pixel.chatapp.home.MainActivity.onUserLongPress;
 import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
-import static com.pixel.chatapp.home.MainActivity.otherUserUid;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
-import static com.pixel.chatapp.home.MainActivity.textViewMsgTyping;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -41,9 +38,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.pixel.chatapp.MyFirebaseMessagingService;
 import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
-import com.pixel.chatapp.all_utils.TimeUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
@@ -68,27 +63,24 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>  {
 
-    private ChatViewHolder lastOpenViewHolder = null;
     public static List<UserOnChatUI_Model> otherUsersId;
-//    private static List<String> otherUsersId;
 
     private static Context mContext;
     private static Activity activity;
-    private static String userName;
 
     private final DatabaseReference referenceUsers;
     private final DatabaseReference refUsersLast;
     private final DatabaseReference referenceCheck;
-    private DatabaseReference refChatList;
-    private DatabaseReference refChat;
-    private DatabaseReference refMsgFast;
-    private DatabaseReference refPinPublic;
-    private DatabaseReference refPinPrivate;
+    private final DatabaseReference refChatList;
+    private final DatabaseReference refChat;
+    private final DatabaseReference refMsgFast;
+    private final DatabaseReference refPinPublic;
+    private final DatabaseReference refPinPrivate;
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
 
-//    private static Map<String, ChatViewHolder> viewHolderMap = new HashMap<>();
+    public static List<String> otherUidLongPressList = new ArrayList<>();
 
     private Handler handler = new Handler(Looper.getMainLooper());
     private List<View> viewClickList = new ArrayList<>();
@@ -138,7 +130,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     @Override
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.users_card, parent, false);
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.users_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.userlist_card, parent, false);
+
         return new ChatViewHolder(view);
     }
 
@@ -153,12 +147,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         holder.imageView.setImageResource(R.drawable.person_round);
         holder.imageViewDeliver.setImageResource(0);
         holder.textViewMsg.setText(null);
+        holder.textViewUser.setText(null);
+//        holder.imageView.setImageResource(0);
+
+        holder.checkBoxContainer.setVisibility(View.GONE);
+        holder.checkBoxToWho.setChecked(false);
+
 //        holder.textViewMsg.setTextAppearance(android.R.style.TextAppearance);
         if(MainActivity.nightMood){
             holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultWhite));
         } else holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultBlack));
-
-        holder.textViewUser.setText(null);
 
         int position_ = position;
         String otherUid = otherUsersId.get(position_).getOtherUid();
@@ -181,7 +179,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         }
 
         // set display name
-        String otherName__ = contactNameShareRef.getString(otherUid, otherDisplayName != null ? otherDisplayName : otherUserName);
+        String otherName__ = contactNameShareRef.getString(otherUid, otherDisplayName != null ? otherDisplayName : "@"+otherUserName);
 
         holder.textViewUser.setText(otherName__);     //set user name
 
@@ -228,6 +226,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             holder.textViewMsgCount.setText(String.valueOf(newChatNumbers));
         }
 
+        // set checkbox when scrolling, if user is among the onLongPress
+        if(otherUidLongPressList.contains(otherUid)){
+            holder.checkBoxContainer.setVisibility(View.VISIBLE);
+            holder.checkBoxToWho.setChecked(true);
+        }
 
         //  ----------- call methods    ---------------------
 
@@ -238,8 +241,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
             try{
+                String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
-                listener.getMessage(userName, otherUid, mContext, false);
+                listener.getMessage(myUsername_, otherUid, mContext, false);
+
             } catch (Exception e){
                 System.out.println("what is Error (ChatListAdapter L220)"+ e.getMessage());
             }
@@ -256,7 +262,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             if(position_ == getItemCount() - 1){
                 MainActivity.loadMsg = false;    // stop the getVIew method from loading at every instance
-                listener.firstCallLoadPage(otherUid);   // call the method to load the all message
+//                listener.firstCallLoadPage(otherUid);   // call the method to load the all message
             }
 
         }
@@ -266,8 +272,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             holder.checkBoxContainer.setVisibility(View.VISIBLE);
         }
 
+
         // -------- open user chat box on MainActivity
-        holder.constraintLast.setOnClickListener(v ->
+        holder.itemView.setOnClickListener(v ->
         {
             String otherDisplayName__ = otherUsersId.get(position_).getOtherDisplayName();
             String otherUserName__ = otherUsersId.get(position_).getOtherUserName();
@@ -275,7 +282,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             String otherId = otherUsersId.get(position_).getOtherUid();
 
             // get the contact name or displayed name of other user
-            String getUserName = contactNameShareRef.getString(otherUid, otherDisplayName__ != null ? otherDisplayName__ : otherUserName__);
+            String getUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
 
             String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
             String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
@@ -292,7 +299,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             if (MainActivity.getLastTimeChat != null)
                 MainActivity.getLastTimeChat.put(otherId, otherUsersId.get(position_).getTimeSent());    // enable add up new time card
 
-            if(!MainActivity.onForward){
+            if(!MainActivity.onForward && !MainActivity.onUserLongPress)
+            {
 
                 // open the user chats
                 try {
@@ -430,19 +438,39 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
 //                }
 
-            } else {    // check if user is forwarding chat
-                if(holder.checkBoxContainer.getVisibility() != View.VISIBLE){
-                    holder.checkBoxToWho.setChecked(true); //
-                    holder.checkBoxContainer.setVisibility(View.VISIBLE);
-                    activateForwardCheckBox(holder, otherUid);
-                    // add holder if it doesn't contain
-                    if(!MainActivity.myHolderNew.contains(holder)){
-                        MainActivity.myHolder_.add(holder);
-                        MainActivity.myHolderNew.add(holder);
+            } else // check if user is forwarding chat or onUserLongPress
+            {
+                if(holder.checkBoxContainer.getVisibility() != View.VISIBLE)
+                {
+                    if(onForward){
+                        holder.checkBoxToWho.setChecked(true); //
+                        holder.checkBoxContainer.setVisibility(View.VISIBLE);
+                        activateForwardCheckBox(holder, otherUid);
+                        // add holder if it doesn't contain
+                        if(!MainActivity.myHolderNew.contains(holder)){
+                            MainActivity.myHolder_.add(holder);
+                            MainActivity.myHolderNew.add(holder);
+                        }
                     }
+
+                    if(onUserLongPress) {
+                        UserOnChatUI_Model userModel = otherUsersId.get(position_);
+                        activateOnUserLongPress(holder, userModel);
+                    }
+
                 }
             }
 
+        });
+
+        //   ===========   onLongPress   ===========================
+        holder.itemView.setOnLongClickListener(v ->
+        {
+            UserOnChatUI_Model userModel = otherUsersId.get(position_);
+
+            activateOnUserLongPress(holder, userModel);
+
+            return true;
         });
 
 
@@ -455,61 +483,63 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             mContext.startActivity(i);
         });
 
-        //  open option menu
-        holder.imageViewMenu.setOnClickListener(view -> {
-
-            if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
-                lastOpenViewHolder.constraintTop.setVisibility(View.GONE);
-            }
-
-            checkConstraintVisibilityAndToggle(holder);
-
-            lastOpenViewHolder = holder;
-        });
-
-        //  close option menu
-        holder.imageViewCancel.setOnClickListener(view -> holder.constraintTop.setVisibility(View.GONE));
-
-
-        //  delete user from chat list
-        holder.imageViewDel.setOnClickListener(view -> {
-
-            String otherName = holder.textViewUser.getText().toString();    // get user username
-
-            listener.onUserDelete(otherName, otherUid);
-
-            holder.constraintTop.setVisibility(View.GONE);
-        });
-
 
         // forward option   -- checkbox
-        holder.checkBoxToWho.setOnClickListener(view -> {
-            activateForwardCheckBox(holder, otherUid);
+        holder.checkBoxToWho.setOnClickListener(view ->
+        {
+            if(onUserLongPress)
+            {
+                holder.checkBoxToWho.setChecked(false);
+                holder.checkBoxContainer.setVisibility(View.GONE);
+
+                UserOnChatUI_Model userModel = otherUsersId.get(position_);
+
+                otherUidLongPressList.remove(userModel.getOtherUid());
+
+                listener.onLongPressUser(userModel);
+            }
+
+            if(onForward) activateForwardCheckBox(holder, otherUid);
+
         });
 
         // forward option   -- checkbox Container
-        holder.checkBoxContainer.setOnClickListener(view -> {
-            CheckBox checkBox = holder.checkBoxToWho;
-            String otherName = holder.textViewUser.getText().toString();    // get user username
+        holder.checkBoxContainer.setOnClickListener(view ->
+        {
+            if(onForward)
+            {
+                CheckBox checkBox = holder.checkBoxToWho;
+                String otherName = holder.textViewUser.getText().toString();    // get user username
 
-            if(checkBox.isChecked()) {
-                MainActivity.selectCount--;
-                checkBox.setChecked(false);
-                forwardChatUserId.removeIf(name -> name.equals(otherUid));
-                selectedUserNames.removeIf(name -> name.equals(otherName));
+                if(checkBox.isChecked()) {
+                    MainActivity.selectCount--;
+                    checkBox.setChecked(false);
+                    forwardChatUserId.removeIf(name -> name.equals(otherUid));
+                    selectedUserNames.removeIf(name -> name.equals(otherName));
+                } else {
+                    MainActivity.selectCount++;
+                    checkBox.setChecked(true);
+                    if( !forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);  // Add other user id to the List
+                    if( !selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
+                }
+                String totalUser = MainActivity.selectCount + " " + mContext.getString(R.string.selected);
+                MainActivity.totalUser_TV.setText(totalUser);
+
+                if(forwardChatUserId.size() > 0){           //  make send button invisible
+                    MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
+                } else
+                    MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
+
+            }else if(onUserLongPress)
+            {
+                UserOnChatUI_Model userModel = otherUsersId.get(position_);
+
+                activateOnUserLongPress(holder, userModel);
+
             } else {
-                MainActivity.selectCount++;
-                checkBox.setChecked(true);
-                if( !forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);  // Add other user id to the List
-                if( !selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
+                holder.checkBoxToWho.setChecked(false);
+                holder.checkBoxContainer.setVisibility(View.GONE);
             }
-            String totalUser = MainActivity.selectCount + " " + mContext.getString(R.string.selected);
-            MainActivity.totalUser_TV.setText(totalUser);
-
-            if(forwardChatUserId.size() > 0){           //  make send button invisible
-                MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
-            } else
-                MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
 
         });
 
@@ -518,6 +548,23 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     //      --------- methods -----------
+
+    private void activateOnUserLongPress(ChatViewHolder holder, UserOnChatUI_Model userModel )
+    {
+        holder.checkBoxContainer.setVisibility(View.VISIBLE);
+        CheckBox checkBox = holder.checkBoxToWho;
+
+        if(checkBox.isChecked()){
+            checkBox.setChecked(false);
+            holder.checkBoxContainer.setVisibility(View.GONE);
+            otherUidLongPressList.remove(userModel.getOtherUid());
+
+        } else {
+            otherUidLongPressList.add(userModel.getOtherUid());
+            checkBox.setChecked(true);
+        }
+        listener.onLongPressUser(userModel);
+    }
 
     private void activateForwardCheckBox(ChatViewHolder holder, String otherUid){
         CheckBox checkBox = holder.checkBoxToWho;
@@ -661,7 +708,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             for (int i = 0; i < otherUsersId.size(); i++) {
                 if (otherUsersId.get(i).getOtherUid().equals(otherId)) {
                     // Store the item in a temporary variable.
-                    UserOnChatUI_Model getUser = otherUsersId.get(i);
+                    final int position = i;
+
+                    UserOnChatUI_Model getUser = otherUsersId.get(position);
                     String chat = modelChats.getMessage();
                     String emojiOnly = modelChats.getEmojiOnly();
                     String vnDuration = modelChats.getVnDuration();
@@ -681,16 +730,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     getUser.setTimeSent(timeSent);
                     getUser.setNumberOfNewChat(numberOfNewChat);
 
-                    otherUsersId.remove(i);     // Remove the item from its old position.
+                    otherUsersId.remove(position);     // Remove the item from its old position.
 
                     otherUsersId.add(0, getUser);   // Insert the item at the first position
-
-                    final int position = i;
-                    AllConstants.handler.post(()->{
-                        ChatsFragment.notifyItemChanged(position);     // notify the adapter of the item changes
-
-                        ChatsFragment.notifyUserMoved(position);   // Notify the adapter that the user has moved.
-                    });
 
                     MainActivity.chatViewModel.updateUser(getUser);     // update room db
                     
@@ -703,6 +745,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         };
                     }
 
+                    AllConstants.handler.post(()->{
+                        ChatsFragment.notifyItemChanged(position);     // notify the adapter of the item changes
+
+                        ChatsFragment.notifyUserMoved(position);   // Notify the adapter that the user has moved.
+                    });
 
                     // last user date and time
 //                    Date d = new Date(timeSent);    // convert the timestamp to current time
@@ -819,8 +866,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 holder.textViewMsg.setText(vn);
             }
 
-            holder.textViewDay.setText("Today");    // change later
-            holder.textViewTime.setText(timeSent);
+            holder.dateTime_TV.setText(timeSent);
 
             // delivery status
             int delivery = R.drawable.message_load;
@@ -839,23 +885,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
-    private void checkConstraintVisibilityAndToggle(ChatViewHolder holder){
-        // Now you can access the constraint programmatically
-//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.constraintTop.getLayoutParams();
-//        int desiredHeight = (int) mContext.getResources().getDimensionPixelSize(R.dimen.constraint_height);
-//        if(params.height == desiredHeight){
-//            params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
-//            holder.constraintTop.setLayoutParams(params);
-//        } else{
-//            params.height = desiredHeight; // change it back to 2dp
-//            holder.constraintTop.setLayoutParams(params);
-//        }
-
-        if(holder.constraintTop.getVisibility() == View.GONE){
-            holder.constraintTop.setVisibility(View.VISIBLE);
-        } else holder.constraintTop.setVisibility(View.GONE);
-
-    }
 
     public void forwardCheckBoxVisibility(List<ChatViewHolder> holder){
 
@@ -875,71 +904,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         //  make send forward button invisible
         MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
-
-    }
-
-    // get lastMessage, and Date/Time sent, and set delivery msg status
-    private void getLastMsg_TimeSent_MsgDeliveryVisible(ChatViewHolder holder, String otherUid){
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-        refUsersLast.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                try{
-                    String lastMsg;
-                    try{
-                        lastMsg = snapshot.child(otherUid).child("message").getValue().toString();
-                    } catch (Exception e){
-                        lastMsg = snapshot.child(otherUid).child("emojiOnly").getValue().toString();
-                    }
-                    long lastTime = (long)  snapshot.child(otherUid).child("timeSent").getValue();
-                    String lastSender = snapshot.child(otherUid).child("from").getValue().toString();
-
-                    //  set the delivery status
-                    try{
-                        long statusNum = (long) snapshot.child(otherUid).child("msgStatus").getValue();
-
-                        int numMsg = R.drawable.message_load;
-
-                        if(statusNum == 700024){   // delivery
-                            numMsg = R.drawable.message_tick_one;
-                        } else if (statusNum == 700016) {  // read
-                            numMsg = R.drawable.baseline_grade_24;
-                        }
-                        holder.imageViewDeliver.setImageResource(numMsg);
-
-                        // set message delivery visibility
-                        if(lastSender.equals(userName)){
-                            holder.imageViewDeliver.setVisibility(View.VISIBLE);
-                        } else {
-                            holder.imageViewDeliver.setVisibility(View.INVISIBLE);
-                        }
-
-                    }catch (Exception e){
-                        refUsersLast.child(user.getUid()).child(otherUid).child("msgStatus").setValue(700024);
-                    }
-
-                    // set last message
-                    holder.textViewMsg.setText(lastMsg);
-
-                    timeAndDateSent(lastTime, holder);
-
-                } catch (Exception e){
-
-                    System.out.println(otherUid + " Error occur for deleting user CL540" + e.getMessage());
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-//            }
-//        }).start();
 
     }
 
@@ -998,64 +962,58 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             {
                 if(curDay - lastDay == 0)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.today));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(time.toLowerCase());
 
                 } else if (curDay - lastDay == 1)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.yesterday));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.yesterday));
 
                 } else if (curDay - lastDay == 2)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.day2ago));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.day2ago));
+//                    holder.dateTime_TV.setText(time.toLowerCase());
 
                 } else if (curDay - lastDay == 3)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.day3ago));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.day3ago));
+//                    holder.dateTime_TV.setText(time.toLowerCase());
 
                 } else if (curDay - lastDay == 4)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.day4ago));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.day4ago));
+//                    holder.dateTime_TV.setText(time.toLowerCase());
 
                 } else if (curDay - lastDay == 5)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.day5ago));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.day5ago));
+//                    holder.dateTime_TV.setText(time.toLowerCase());
 
                 } else if (curDay - lastDay == 6)
                 {
-                    holder.textViewDay.setText(mContext.getString(R.string.day6ago));
-                    holder.textViewTime.setText(time.toLowerCase());
+                    holder.dateTime_TV.setText(mContext.getString(R.string.day6ago));
+//                    holder.dateTime_TV.setText(time.toLowerCase());
                 }
 
             } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14)
             {
-                holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText(mContext.getString(R.string.week1ago));
+                holder.dateTime_TV.setText(mContext.getString(R.string.week1ago));
 
             } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21)
             {
-                holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText(mContext.getString(R.string.week2ago));
+                holder.dateTime_TV.setText(mContext.getString(R.string.week2ago));
 
             } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27)
             {
-                holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText(mContext.getString(R.string.week3ago));
+                holder.dateTime_TV.setText(mContext.getString(R.string.week3ago));
 
             } else {
-                holder.textViewDay.setText(lastDayString);
-                holder.textViewTime.setText(mContext.getString(R.string.monthsAgo));
+                holder.dateTime_TV.setText(mContext.getString(R.string.monthsAgo));
             }
 
         } else
         {
             String lastD = dateLast +"/"+ lastMonth+"/"+ lastYear;
-            holder.textViewTime.setText(lastD);
+            holder.dateTime_TV.setText(lastD);
         }
 
     }
@@ -1196,11 +1154,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     public class ChatViewHolder extends RecyclerView.ViewHolder{
 
         private final CircleImageView imageView;
-        private final ImageView imageViewDeliver, imageViewMenu;
-        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
-        private final ConstraintLayout constraintTop, constraintLast;
-        private final TextView textViewUser, textViewMsg, textViewMsgCount, textViewTime, textViewTyping;
-        private final TextView textViewDay;
+        private final ImageView imageViewDeliver;
+//        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
+        private final ImageView pinIcon_IV, muteIcon_IV;
+//        private final ConstraintLayout constraintTop, constraintLast;
+        private final TextView textViewUser, textViewMsg, textViewMsgCount, dateTime_TV, textViewTyping;
+//        private final TextView textViewDay;
         private final CardView cardView;
         RecyclerView recyclerChat;
 
@@ -1216,20 +1175,20 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             textViewMsg = itemView.findViewById(R.id.textViewMsg);
             textViewMsgCount = itemView.findViewById(R.id.textViewMsgCount);
             imageViewDeliver = itemView.findViewById(R.id.imageViewDelivery);
-            textViewTime = itemView.findViewById(R.id.textViewTime);
-            textViewDay = itemView.findViewById(R.id.textViewDay);
+            dateTime_TV = itemView.findViewById(R.id.dateTime_TV);
+//            textViewDay = itemView.findViewById(R.id.textViewDay);
             textViewTyping = itemView.findViewById(R.id.textViewTyping);
             cardView = itemView.findViewById(R.id.cardView);
-            imageViewPin = itemView.findViewById(R.id.imageViewPin);
-            imageViewPin2 = itemView.findViewById(R.id.imageViewPin2);
-            imageViewDel = itemView.findViewById(R.id.imageViewDel);
-            imageViewMute = itemView.findViewById(R.id.imageViewMute);
-            imageViewUnmute = itemView.findViewById(R.id.imageViewUnmute);
-            imageViewMove = itemView.findViewById(R.id.imageViewMove);
-            imageViewCancel = itemView.findViewById(R.id.imageViewCancel2);
-            imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
-            constraintTop = itemView.findViewById(R.id.constraintTop);
-            constraintLast = itemView.findViewById(R.id.constrainLast);
+            pinIcon_IV = itemView.findViewById(R.id.pinIcon_IV);
+            muteIcon_IV = itemView.findViewById(R.id.muteIcon_IV);
+//            imageViewPin2 = itemView.findViewById(R.id.imageViewPin);
+//            imageViewDel = itemView.findViewById(R.id.imageViewDel);
+//            imageViewMute = itemView.findViewById(R.id.imageViewMute);
+//            imageViewMove = itemView.findViewById(R.id.imageViewMove);
+//            imageViewCancel = itemView.findViewById(R.id.imageViewCancel2);
+//            imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
+//            constraintTop = itemView.findViewById(R.id.constraintTop);
+//            constraintLast = itemView.findViewById(R.id.constrainLast);
             checkBoxToWho = itemView.findViewById(R.id.checkBoxForward);
             checkBoxContainer = itemView.findViewById(R.id.checkBoxContainer);
 

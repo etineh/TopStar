@@ -1,7 +1,6 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;

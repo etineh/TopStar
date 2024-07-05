@@ -62,6 +62,10 @@
         <item name="android:background">@color/white</item>
     </style>
 
+    <style name="mainCardBackground">
+        <item name="android:background">@drawable/user_card_day</item>
+    </style>
+
     <style name="cardTopOrange">
         <item name="android:background">@color/orange</item>
     </style>
@@ -265,6 +269,11 @@
     <style name="drawableBG_WhiteAndBlack">
         <item name="android:background">@drawable/white_circle_bg</item>
         <!--        <item name="android:background">#fedfb9</item>-->
+    </style>
+
+    <style name="roundBackgrounAndText_WhiteAndBlack">
+        <item name="android:background">@drawable/white_circle_bg</item>
+        <item name="android:textColor">@color/black2</item>
     </style>
 
     <style name="drawableText">

@@ -5,18 +5,14 @@ import static com.pixel.chatapp.side_bar_menu.settings.StorageRecyclerActivity.i
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -25,17 +21,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.FileUtils;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.photos.PlayFileActivity;
 import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.side_bar_menu.settings.StorageRecyclerActivity;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class StorageAdapter extends RecyclerView.Adapter<StorageAdapter.ItemViewHolder> {

@@ -1,4 +1,4 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 import java.time.Instant;
 import java.time.LocalDate;

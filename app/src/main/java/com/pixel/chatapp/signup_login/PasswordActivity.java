@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.home.MainActivity;
 
 public class PasswordActivity extends AppCompatActivity {

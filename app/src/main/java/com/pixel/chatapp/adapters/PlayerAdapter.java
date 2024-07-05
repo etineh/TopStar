@@ -13,19 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.TimeUtils;
-import com.pixel.chatapp.model.GameRankM;
+import com.pixel.chatapp.utils.TimeUtils;
 import com.pixel.chatapp.model.PlayerModel;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-
-import okhttp3.internal.Util;
 
 public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerViewHolder> {
 

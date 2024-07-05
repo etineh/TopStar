@@ -1,14 +1,10 @@
 package com.pixel.chatapp.peer2peer.exchange;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -22,9 +18,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
-import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.peer2peer.FingerprintActivity;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.side_bar_menu.wallet.TransactionReceiptActivity;
 
 import java.util.concurrent.Executor;

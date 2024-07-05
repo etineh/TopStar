@@ -13,8 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -22,7 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.CountryNumCodeUtils;
+import com.pixel.chatapp.utils.CountryNumCodeUtils;
 import com.pixel.chatapp.api.Dao_interface.ContactApiDao;
 import com.pixel.chatapp.api.model.UserSearchM;
 import com.pixel.chatapp.constants.AllConstants;
@@ -41,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Handler;
 
 import retrofit2.Call;
 import retrofit2.Callback;

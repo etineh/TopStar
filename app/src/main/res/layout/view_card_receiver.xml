@@ -9,139 +9,17 @@
     android:paddingStart="5dp"
     android:paddingEnd="60dp">
 
-    <TextView
-        android:id="@+id/otherInfo_TV2"
-        style="@style/drawableText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:ellipsize="end"
-        android:lines="1"
-        android:paddingStart="10dp"
-        android:paddingTop="3dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="4dp"
-        android:text="godstime added prince_man"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/constraintReceiveTop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintReceiveTop"
-        style="@style/card"
-        android:layout_width="220dp"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/chatContainerR"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/imageViewReact2"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
-            app:layout_constraintStart_toEndOf="@+id/imageViewReplyMsg2"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_add_reaction_24" />
-
-        <ImageView
-            android:id="@+id/pinALL_R_IV"
-            style="@style/drawableBG"
-            android:layout_width="13dp"
-            android:layout_height="13dp"
-            android:layout_marginBottom="10dp"
-            android:elevation="3dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/imageViewReceivePinMsg"
-            app:layout_constraintEnd_toEndOf="@+id/imageViewReceivePinMsg"
-            app:layout_constraintStart_toStartOf="@+id/imageViewReceivePinMsg"
-            app:srcCompat="@drawable/baseline_disabled_visible_view_24"
-            app:tint="@color/white" />
-
-        <ImageView
-            android:id="@+id/imageViewForward2"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
-            app:layout_constraintStart_toEndOf="@+id/imageViewReceivePinMsg"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_forward_24" />
-
-        <ImageView
-            android:id="@+id/imageViewReceiveDel"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
-            android:tint="#D61515"
-            app:layout_constraintStart_toEndOf="@+id/imageViewReceiveCopyText"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_delete_forever_24" />
-
-        <ImageView
-            android:id="@+id/imageViewReceivePinMsg"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageViewReact2"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/baseline_push_pin_24" />
-
-        <ImageView
-            android:id="@+id/imageViewReceiveCopyText"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
-            app:layout_constraintStart_toEndOf="@+id/imageViewForward2"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/copy" />
-
-        <ImageView
-            android:id="@+id/imageViewReplyMsg2"
-            style="@style/BackgroundTintOrange"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="5dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/reply" />
-
-        <ImageView
-            android:id="@+id/imageEdit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:srcCompat="@drawable/baseline_mode_edit_24"
-            tools:layout_editor_absoluteX="86dp" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chatContainerR"
         style="@style/chatReceiveContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="3dp"
         android:paddingRight="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/pauseAndPlay_IV2"
@@ -367,7 +245,7 @@
 
         <TextView
             android:id="@+id/reactReceiver_TV"
-            style="@style/drawableBG_WhiteAndBlack"
+            style="@style/roundBackgrounAndText_WhiteAndBlack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
@@ -379,7 +257,6 @@
             android:paddingTop="1dp"
             android:paddingRight="5dp"
             android:paddingBottom="1dp"
-            android:text="🙃"
             android:textSize="18sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    android:elevation="6dp">
+    android:elevation="7dp">
 
     <ImageView
-        android:id="@+id/moreOptionIv"
+        android:id="@+id/moreOptionIV"
         style="@style/BackgroundTintOrange"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -44,63 +44,64 @@
         app:tint="@color/orange" />
 
     <ImageView
-        android:id="@+id/forward_IV"
+        android:id="@+id/folderIV"
         style="@style/BackgroundTintOrange"
         android:layout_width="27dp"
         android:layout_height="0dp"
         android:layout_marginEnd="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/copyText_IV"
+        app:layout_constraintEnd_toStartOf="@id/muteUserIV"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5"
-        app:srcCompat="@drawable/baseline_forward_24" />
+        app:srcCompat="@drawable/baseline_create_new_folder_24" />
 
     <ImageView
-        android:id="@+id/delete_IV"
+        android:id="@+id/deleteUser_IV"
         style="@style/BackgroundTintOrange"
         android:layout_width="25dp"
         android:layout_height="0dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/moreOptionIv"
+        app:layout_constraintEnd_toStartOf="@+id/moreOptionIV"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.57"
         app:srcCompat="@drawable/baseline_delete_forever_24"
         app:tint="#D61515" />
 
     <ImageView
-        android:id="@+id/copyText_IV"
+        android:id="@+id/muteUserIV"
         style="@style/BackgroundTintOrange"
-        android:layout_width="20dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/delete_IV"
+        app:layout_constraintEnd_toStartOf="@id/deleteUser_IV"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5"
-        app:srcCompat="@drawable/copy" />
+        app:srcCompat="@drawable/mute" />
 
     <ImageView
-        android:id="@+id/reply_IV"
+        android:id="@+id/playGame_IV"
         style="@style/BackgroundTintOrange"
-        android:layout_width="27dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/edit_IV"
+        app:layout_constraintEnd_toStartOf="@id/pinUser_IV"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5"
-        app:srcCompat="@drawable/reply" />
+        app:srcCompat="@drawable/baseline_videogame_asset_24" />
 
     <ImageView
-        android:id="@+id/edit_IV"
+        android:id="@+id/pinUser_IV"
         style="@style/BackgroundTintOrange"
         android:layout_width="25dp"
         android:layout_height="0dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/forward_IV"
+        app:layout_constraintEnd_toStartOf="@id/folderIV"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5"
-        app:srcCompat="@drawable/baseline_mode_edit_24" />
+        app:srcCompat="@drawable/baseline_push_pin_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

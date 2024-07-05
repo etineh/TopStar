@@ -96,7 +96,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textViewUser" />
 
         <TextView
-            android:id="@+id/textViewTime"
+            android:id="@+id/dateTime_TV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
@@ -119,8 +119,8 @@
             android:textColor="@color/white"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/textViewTime"
-            app:layout_constraintTop_toBottomOf="@+id/textViewTime" />
+            app:layout_constraintEnd_toEndOf="@+id/dateTime_TV"
+            app:layout_constraintTop_toBottomOf="@+id/dateTime_TV" />
 
         <ImageView
             android:id="@+id/verifyIcon_IV"
@@ -137,9 +137,9 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_marginEnd="10dp"
-            app:layout_constraintBottom_toBottomOf="@+id/textViewTime"
-            app:layout_constraintEnd_toStartOf="@id/textViewTime"
-            app:layout_constraintTop_toTopOf="@+id/textViewTime"
+            app:layout_constraintBottom_toBottomOf="@+id/dateTime_TV"
+            app:layout_constraintEnd_toStartOf="@id/dateTime_TV"
+            app:layout_constraintTop_toTopOf="@+id/dateTime_TV"
             app:srcCompat="@drawable/message_tick_one"
             app:tint="@color/orange" />
 

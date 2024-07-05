@@ -11,13 +11,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
 
 public class ConvertFundActivity extends AppCompatActivity {
 

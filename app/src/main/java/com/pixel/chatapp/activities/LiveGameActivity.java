@@ -3,7 +3,6 @@ package com.pixel.chatapp.activities;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +16,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.LiveGameAdapter;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.model.LiveGameM;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.pixel.chatapp.activities;
 
-import static com.pixel.chatapp.all_utils.FileUtils.saveFileFromContentUriToAppStorage;
+import static com.pixel.chatapp.utils.FileUtils.saveFileFromContentUriToAppStorage;
 import static com.pixel.chatapp.home.MainActivity.appActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +19,6 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,7 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.FileUtils;
+import com.pixel.chatapp.utils.FileUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;

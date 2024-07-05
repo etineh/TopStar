@@ -1,9 +1,9 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
-import static com.pixel.chatapp.all_utils.FolderUtils.getAudioFolder;
-import static com.pixel.chatapp.all_utils.FolderUtils.getDocumentFolder;
-import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
-import static com.pixel.chatapp.all_utils.FolderUtils.getVideoFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getAudioFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getDocumentFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getThumbnailFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getVideoFolder;
 
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;

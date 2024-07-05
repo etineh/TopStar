@@ -1,8 +1,5 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
-import android.os.Message;
-
-import com.google.firebase.messaging.FirebaseMessaging;
 //import com.google.firebase.messaging.Message;
 //import com.google.firebase.messaging.Notification;
 

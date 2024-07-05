@@ -1,4 +1,4 @@
-package com.pixel.chatapp.all_utils;
+package com.pixel.chatapp.utils;
 
 public class NumberSpacing {
 

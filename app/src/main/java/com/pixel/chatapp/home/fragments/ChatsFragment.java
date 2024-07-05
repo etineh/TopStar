@@ -26,10 +26,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.pixel.chatapp.MyFirebaseMessagingService;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.adapters.ChatListAdapter;
-import com.pixel.chatapp.all_utils.AnimUtils;
+import com.pixel.chatapp.utils.AnimUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
@@ -182,6 +181,9 @@ public class ChatsFragment extends Fragment {
         }
     }
 
+    public static void notifyDataFullSet(){
+        adapter.notifyDataSetChanged();
+    }
     public static void findUserAndEditChat(String userUid, String chatId, String chat, String emoji)
     {
         List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;

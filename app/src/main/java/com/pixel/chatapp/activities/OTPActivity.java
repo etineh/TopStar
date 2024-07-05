@@ -1,6 +1,6 @@
 package com.pixel.chatapp.activities;
 
-import static com.pixel.chatapp.all_utils.NumberSpacing.formatPhoneNumber;
+import static com.pixel.chatapp.utils.NumberSpacing.formatPhoneNumber;
 import static com.pixel.chatapp.home.MainActivity.resetLoginSharePref;
 
 import androidx.annotation.NonNull;
@@ -23,9 +23,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.IdTokenUtil;
-import com.pixel.chatapp.all_utils.OTPGenerator;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.IdTokenUtil;
+import com.pixel.chatapp.utils.OTPGenerator;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.ProfileApiDao;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.api.model.ThreeValueM;

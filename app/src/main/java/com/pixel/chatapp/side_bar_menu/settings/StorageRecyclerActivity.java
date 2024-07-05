@@ -19,8 +19,8 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.StorageAdapter;
-import com.pixel.chatapp.all_utils.FolderSizeCalculator;
-import com.pixel.chatapp.all_utils.FolderUtils;
+import com.pixel.chatapp.utils.FolderSizeCalculator;
+import com.pixel.chatapp.utils.FolderUtils;
 import com.pixel.chatapp.photos.PlayFileActivity;
 
 import java.io.File;

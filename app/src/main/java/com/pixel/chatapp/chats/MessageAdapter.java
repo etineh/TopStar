@@ -1,16 +1,16 @@
 package com.pixel.chatapp.chats;
 
-import static com.pixel.chatapp.all_utils.FileUtils.compressVideo;
-import static com.pixel.chatapp.all_utils.FileUtils.createVideoThumbnail;
-import static com.pixel.chatapp.all_utils.FileUtils.downloadThumbnailFile;
-import static com.pixel.chatapp.all_utils.FileUtils.formatDuration;
-import static com.pixel.chatapp.all_utils.FileUtils.isFileLessThan150Kb;
-import static com.pixel.chatapp.all_utils.FileUtils.parseDuration;
-import static com.pixel.chatapp.all_utils.FileUtils.replaceSnapPhotoWithCompressFile;
-import static com.pixel.chatapp.all_utils.FileUtils.saveFileFromContentUriToAppStorage;
-import static com.pixel.chatapp.all_utils.FolderUtils.getAudioFolder;
-import static com.pixel.chatapp.all_utils.FolderUtils.getThumbnailFolder;
-import static com.pixel.chatapp.all_utils.FolderUtils.getVoiceNoteFolder;
+import static com.pixel.chatapp.utils.FileUtils.compressVideo;
+import static com.pixel.chatapp.utils.FileUtils.createVideoThumbnail;
+import static com.pixel.chatapp.utils.FileUtils.downloadThumbnailFile;
+import static com.pixel.chatapp.utils.FileUtils.formatDuration;
+import static com.pixel.chatapp.utils.FileUtils.isFileLessThan150Kb;
+import static com.pixel.chatapp.utils.FileUtils.parseDuration;
+import static com.pixel.chatapp.utils.FileUtils.replaceSnapPhotoWithCompressFile;
+import static com.pixel.chatapp.utils.FileUtils.saveFileFromContentUriToAppStorage;
+import static com.pixel.chatapp.utils.FolderUtils.getAudioFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getThumbnailFolder;
+import static com.pixel.chatapp.utils.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.filePositionMap;
@@ -77,10 +77,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pixel.chatapp.adapters.ChatListAdapter;
-import com.pixel.chatapp.all_utils.TimeUtils;
+import com.pixel.chatapp.utils.TimeUtils;
 import com.pixel.chatapp.photos.ViewImageActivity;
-import com.pixel.chatapp.all_utils.FileUtils;
-import com.pixel.chatapp.all_utils.FolderUtils;
+import com.pixel.chatapp.utils.FileUtils;
+import com.pixel.chatapp.utils.FolderUtils;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.R;
@@ -88,6 +88,7 @@ import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.PinMessageModel;
+import com.pixel.chatapp.utils.ToggleUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -147,7 +148,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     Map<String, Integer> dateMonth = new HashMap<>();
     DatabaseReference refCheck, refUsers, refMsgFast, refLastDetails, refOnReadRequest, refPinMessages;
     private StorageReference deletePathRef = FirebaseStorage.getInstance().getReference();
-    private MessageViewHolder lastOpenViewHolder = null;
     Handler handler;
     private static final String VOICE_NOTE = "MyPreferences";
     private static final String KEY_LIST = "myList";
@@ -269,7 +269,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    public void updateMessage(MessageModel chatModel, MessageViewHolder replyHolder)
+    public void updateMessage(MessageModel chatModel)
     {
         int numLoop = modelList.size() > 100 ? modelList.size() - 50 : 0;
         for (int i = modelList.size()-1; i >= numLoop; i--) {
@@ -277,9 +277,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if (chatModel.getIdKey().equals(all_IDs)) { // Use equals() for string comparison
                 modelList.remove(i);
                 modelList.add(i, chatModel);
-                if(chatModel.getEmojiOnly() == null){
-                    replyHolder.emojiOnly_TV.setVisibility(View.GONE);
-                }
                 notifyItemChanged(i, new Object());
                 break;
             }
@@ -559,10 +556,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.emojiOnly_TV.setVisibility(View.GONE);
             }
             holder.timeMsg.setText("");             // time reset
-            if(holder.constraintChatTop != null){
-                closeMyOwnOption(modelList.get(position_), holder);
-//            holder.constraintChatTop.setVisibility(View.GONE);
-            }   // top chat option reset
+
             if(holder.react_TV != null){
                 holder.react_TV.setVisibility(View.GONE);
             }       // react emoji reset
@@ -1015,8 +1009,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         } else {
                             Toast.makeText(mContext, mContext.getString(R.string.notSentYet), Toast.LENGTH_SHORT).show();
                         }
-                        // Close the previously open chat options
-                        closePreviousChatOption(modelChats, holder);
 
                     } else{ // download the photo other user sent to me
                         if(fileDownloadTaskMap.get(modelChats.getIdKey()) != null){
@@ -1070,224 +1062,94 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             });
         }
 
-        //  top chats option onClick settings
-        if(holder.imageViewReply != null ){
+        // voice note play button
+        if(holder.pauseAndPlay_IV != null) holder.pauseAndPlay_IV.setOnClickListener(view -> {
 
-            // voice note play button
-            holder.pauseAndPlay_IV.setOnClickListener(view -> {
+            if(lastIdKeyChat != null){
 
-                if(lastIdKeyChat != null){
-
-                    if(lastIdKeyChat.equals(modelChats.getIdKey())){
+                if(lastIdKeyChat.equals(modelChats.getIdKey())){
 //                        mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
-                        playOrPauseVoiceNote(holder, modelChats);
-                    } else {
-
-                        MediaPlayer mediaPlayer = mediaPlayerMap.get(lastIdKeyChat);
-                        if(mediaPlayer.isPlaying()){
-                            // pause previous voice note if playing
-                            mediaPlayer.pause();
-                            lastHolder_.pauseAndPlay_IV.setImageResource(R.drawable.baseline_play_arrow_24);
-                            mapLastDuration.put(lastIdKeyChat, mediaPlayer.getCurrentPosition());
-                            handler1.removeCallbacks(runnable);
-
-                            // change back to the total time duration
-                            String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(mediaPlayer.getDuration()) +  " ~ Audio"
-                                    : formatDuration(mediaPlayer.getDuration());
-                            lastHolder_.totalMinute_TV.setText(timeLabel);
-
-                            // stop media player and create new instance
-                            mediaPlayer.release();
-                            mediaPlayerMap.put(lastIdKeyChat, new MediaPlayer());
-
-                            // play the new selected voice note
-                            mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
-                            playOrPauseVoiceNote(holder, modelChats);
-
-                        } else {
-                            mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
-                            playOrPauseVoiceNote(holder, modelChats);
-                        }
-
-                        lastHolder_ = holder;
-                        lastIdKeyChat = modelChats.getIdKey();
-
-                    }
-
-                } else {    // media is playing for the first time.
-                    mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
                     playOrPauseVoiceNote(holder, modelChats);
-                    lastIdKeyChat = modelChats.getIdKey();
+                } else {
+
+                    MediaPlayer mediaPlayer = mediaPlayerMap.get(lastIdKeyChat);
+                    if(mediaPlayer.isPlaying()){
+                        // pause previous voice note if playing
+                        mediaPlayer.pause();
+                        lastHolder_.pauseAndPlay_IV.setImageResource(R.drawable.baseline_play_arrow_24);
+                        mapLastDuration.put(lastIdKeyChat, mediaPlayer.getCurrentPosition());
+                        handler1.removeCallbacks(runnable);
+
+                        // change back to the total time duration
+                        String timeLabel = modelChats.getVnDuration().contains("Audio") ? formatDuration(mediaPlayer.getDuration()) +  " ~ Audio"
+                                : formatDuration(mediaPlayer.getDuration());
+                        lastHolder_.totalMinute_TV.setText(timeLabel);
+
+                        // stop media player and create new instance
+                        mediaPlayer.release();
+                        mediaPlayerMap.put(lastIdKeyChat, new MediaPlayer());
+
+                        // play the new selected voice note
+                        mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
+                        playOrPauseVoiceNote(holder, modelChats);
+
+                    } else {
+                        mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
+                        playOrPauseVoiceNote(holder, modelChats);
+                    }
+
                     lastHolder_ = holder;
+                    lastIdKeyChat = modelChats.getIdKey();
+
                 }
 
-                seekBarListener(modelChats, holder);
+            } else {    // media is playing for the first time.
+                mediaPlayerMap.put(modelChats.getIdKey(), new MediaPlayer());
+                playOrPauseVoiceNote(holder, modelChats);
+                lastIdKeyChat = modelChats.getIdKey();
+                lastHolder_ = holder;
+            }
 
-            });
+            seekBarListener(modelChats, holder);
 
-            // forward chat option
-            holder.imageViewForward.setOnClickListener(view -> {
+        });
 
-                // clear list and save to chat list
-                MainActivity.chatModelList.clear();
-                MainActivity.chatModelList.add(modelChats);
+        if(holder.imageViewOptions != null) holder.imageViewOptions.setOnClickListener(optionClickListener);
 
-                fragmentListener.onForwardChat();
-
-                holder.constraintChatTop.setVisibility(View.GONE);  // close option menu
-
-                // reverse arrow
-                closeMyOwnOption(modelChats, holder);
-            });
-
-            // reply option
-            holder.imageViewReply.setOnClickListener(view -> {
-                replyChat(modelChats, holder);
-                closeMyOwnOption(modelChats, holder);
-            });
-
-            // edit option
-            holder.imageViewEdit.setOnClickListener(view -> {
-
-                int deliveryStatus = modelChats.getMsgStatus();
-                int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
-
-                if(deliveryStatus == 700033){
-                    Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
-                } else if (positionCheck > 100)
-                {
-                    Toast.makeText(mContext, "Edit recent message", Toast.LENGTH_SHORT).show();
-                } else if(modelChats.getType() == 1 || modelChats.getType() == 4){
-                    Toast.makeText(mContext, "This chat can't be edited for now!", Toast.LENGTH_SHORT).show();
-                }else {
-                    // send data to MainActivity via interface listener
-                    fragmentListener.onEditOrReplyMessage(modelChats,"edit", "editing...",
-                            android.R.drawable.ic_menu_edit, View.GONE, holder);
-                }
-                // reverse arrow
-                closeMyOwnOption(modelChats, holder);
-
-            });
-
-            // delete option
-            holder.imageViewDel.setOnClickListener(view -> {
-
-                if(modelChats.getMsgStatus() == 700033){
-                    Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
-                } else {
-
-                    holder.constraintChatTop.setVisibility(View.GONE);
-
-                    // for saving chatModel to chat list
-                    MainActivity.chatModelList.clear();
-                    MainActivity.chatModelList.add(modelChats);
-
-                    fragmentListener.onDeleteMessage();  // call method on MainActivity(L700)
-
-                    // reverse arrow
-                    closeMyOwnOption(modelChats, holder);
-                }
-            });
-
-            // emoji react onClick option
-            holder.imageViewReact.setOnClickListener(view -> {
-
-                // Highlight the clicked item
-                View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.transparent_orangeLow));
-
-                // remove previous highlight is any
-                if(chatPosition != lastPosition) {
-                    View itemView2 = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(lastPosition);
-                    if(itemView2 != null){
-                        itemView2.setBackgroundColor(0);
-                    }
-                }
-
-                //re-assign last chat position for deleting highlight
-                lastPosition = chatPosition;
-
-                try{
-                    fragmentListener.onEmojiReact(holder, modelChats.getIdKey());
-                }catch (Exception e){
-                    System.out.println("Urgent error at MessageAdapter L1030" + e.getMessage());
-                };
-
-                // reverse arrow
-                closeMyOwnOption(modelChats, holder);
-
-            });
-
-            // copy option
-            holder.imageViewCopy.setOnClickListener(view -> {
-
-                String selectedText = modelChats.getMessage();
-                ClipboardManager clipboard =  (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("label", selectedText);
-
-                if (clipboard == null || clip == null) return;
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(mContext, mContext.getString(R.string.copied), Toast.LENGTH_SHORT).show();
-                // for paste code
-//                ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-//                try {
-//                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
-//                } catch (Exception e) {
-//                    return;
-//                }
-                // reverse arrow
-                closeMyOwnOption(modelChats, holder);
-                holder.constraintChatTop.setVisibility(View.GONE);
-
-            });
-
-            // pin options -- (for me or everyone)
-            holder.imageViewPin.setOnClickListener(view -> {
-
-                // send pin chat data to MainActivity
-                fragmentListener.onPinData(modelChats.getIdKey(), modelChats.getMessage(), ServerValue.TIMESTAMP, holder);
-
-                closeMyOwnOption(modelChats, holder);
-            });
-
-            holder.imageViewOptions.setOnClickListener(optionClickListener);
-
-            // download / send voice note
-            holder.circleDownload.setOnClickListener(view -> {
-                // check if the voice note is from me.
-                if(modelChats.getFromUid().equals(myId)){
-                    // get the photo uid owner and the sending state
-                    String photoCheck = MainActivity.voiceNoteIdShareRef.getString(modelChats.getIdKey(), "");
-                    String[] splitX = photoCheck.split(AllConstants.JOIN);
-                    // check if the ref is not empty
-                    if(splitX.length > 1) {
-                        String otherId = splitX[0];
-                        String isSending = splitX[1];
-                        if(MainActivity.networkOk){
-                            if(isSending.equals("no") || holder.circleDownload.getVisibility() == View.VISIBLE){
-                                // send voice note
-                                sendMyVoiceNote(modelChats, holder, otherId, chatPosition);    // for button click
-                            }
-                        } else Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
-                    }
-
-                } else {
-                    // download the voice note sent from other user
-                    if(networkOk){
-                        // check if download is already in progress and if voice note duration is less than 5minutes
-                        if(fileDownloadTaskMap.get(modelChats.getIdKey()) == null && holder.circleDownload.getVisibility() == View.VISIBLE){
-
-                            downloadOtherUserVoiceNote(modelChats, holder, position_);  // onClick
-
+        // download / send voice note
+        if(holder.circleDownload != null) holder.circleDownload.setOnClickListener(view -> {
+            // check if the voice note is from me.
+            if(modelChats.getFromUid().equals(myId)){
+                // get the photo uid owner and the sending state
+                String photoCheck = MainActivity.voiceNoteIdShareRef.getString(modelChats.getIdKey(), "");
+                String[] splitX = photoCheck.split(AllConstants.JOIN);
+                // check if the ref is not empty
+                if(splitX.length > 1) {
+                    String otherId = splitX[0];
+                    String isSending = splitX[1];
+                    if(MainActivity.networkOk){
+                        if(isSending.equals("no") || holder.circleDownload.getVisibility() == View.VISIBLE){
+                            // send voice note
+                            sendMyVoiceNote(modelChats, holder, otherId, chatPosition);    // for button click
                         }
                     } else Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
-
                 }
 
-            });
+            } else {
+                // download the voice note sent from other user
+                if(networkOk){
+                    // check if download is already in progress and if voice note duration is less than 5minutes
+                    if(fileDownloadTaskMap.get(modelChats.getIdKey()) == null && holder.circleDownload.getVisibility() == View.VISIBLE){
 
-        }
+                        downloadOtherUserVoiceNote(modelChats, holder, position_);  // onClick
+
+                    }
+                } else Toast.makeText(mContext, mContext.getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
+
+            }
+
+        });
+
 
         // single onClick -- scroll and highlight reply message
         View.OnClickListener scrollToReplyChat = view -> {
@@ -1532,11 +1394,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // process onClick if longPress is not yet activated
             if(MainActivity.chatOptionView != null && MainActivity.chatOptionView.getVisibility() != View.VISIBLE)
             {
-                // Close the previously open chat options
-                closePreviousChatOption(modelChats, holder);
-
-                // make option menu visible if it's gone
-                makeChatOptionVisible(modelChats, holder, chatPosition);
+                fragmentListener.openChatClickOption(true, modelChats, modelList.size(), chatPosition);
 
             } else
             {
@@ -1582,123 +1440,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         }
     }
-    private void closePreviousChatOption(MessageModel modelChats, MessageViewHolder holder){
-        // Close the previously open chat options
-        if (lastOpenViewHolder != null && lastOpenViewHolder != holder) {
-            // check if the lastHolder has the chatTop Constraint
-            if(lastOpenViewHolder.constraintChatTop != null){
-                lastOpenViewHolder.constraintChatTop.setVisibility(View.GONE);
 
-                // reverse the image resource to it's original imageView
-                if(modelChats.getFromUid().equals(myId)){
-                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-                } else{
-                    lastOpenViewHolder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-                }
-            }
-        }
-    }
-
-    private void closeMyOwnOption(MessageModel modelChats, MessageViewHolder holder){
-        if(holder.constraintChatTop != null){
-            holder.constraintChatTop.setVisibility(View.GONE);
-            // reverse the image resource to it's original imageView
-            if(modelChats.getFromUid().equals(myId)){
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_left);
-            } else{
-                holder.imageViewOptions.setImageResource(R.drawable.arrow_right_);
-            }
-        }
-    }
     // make option menu visible if it's gone
-    private void makeChatOptionVisible(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
-        // make option menu visible if it's gone
-        if(holder.constraintChatTop != null){
-            if(holder.constraintChatTop.getVisibility() == View.GONE){
+    private void makeChatOptionVisible(MessageModel modelChats, int chatPosition){
 
-                holder.constraintChatTop.setVisibility(View.VISIBLE);
-
-                // indicate sign that msg can't be edited
-                if(modelList.size() - chatPosition > 100){
-                    int fadedOrangeColor = ContextCompat.getColor(mContext, R.color.transparent_orange);
-                    holder.imageViewEdit.setColorFilter(fadedOrangeColor);
-                }
-
-                holder.imageViewOptions.setImageResource(R.drawable.baseline_cancel_24);
-
-                // change the pin icon to unpin/view
-                pinStatusIcon(holder, modelChats);
-
-            } else{ // hide if it's visible and return arrow image
-                // close mine chatTop Constraint
-                closeMyOwnOption( modelChats, holder );
-            }
-        }
-
-        // Update the last open ViewHolder
-        lastOpenViewHolder = holder;
-    }
-
-    // check if the chat is pin privately or publicly
-    private void pinStatusIcon(MessageViewHolder holder, MessageModel modelChats){
-        boolean isPrivatePin = false;
-        boolean isPublicPin = false;
-        for (PinMessageModel pinMes :
-                MainActivity.pinPrivateChatMap.get(otherUserUid)) {
-
-            if (pinMes.getMsgId().equals(modelChats.getIdKey())) {
-                isPrivatePin = true;
-                break;
-            }
-        }
-        for (PinMessageModel pinChatEveryone :
-                MainActivity.pinPublicChatMap.get(otherUserUid)) {
-
-            if (pinChatEveryone.getMsgId().equals(modelChats.getIdKey())) {
-                isPublicPin = true;
-                break;
-            }
-        }
-
-        if(isPrivatePin && isPublicPin){
-            if(holder != null){
-                holder.pinALL_IV.setVisibility(View.VISIBLE);
-                holder.pinALL_IV.setImageResource(R.drawable.baseline_disabled_visible_view_24);
-            }
-            MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
-
-            MainActivity.pinMineTV.setText("Unpin for me");
-            MainActivity.pinEveryoneTV.setText("Unpin for everyone");
-
-        }else {
-            if(isPrivatePin){
-                if(holder != null) {
-                    holder.pinALL_IV.setVisibility(View.VISIBLE);
-                    holder.pinALL_IV.setImageResource(R.drawable.lock);
-                }
-                MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
-
-                MainActivity.pinMineTV.setText("Unpin for me");
-                MainActivity.pinEveryoneTV.setText("Pin for everyone");
-            } else if (isPublicPin) {
-                if(holder != null){
-                    holder.pinALL_IV.setVisibility(View.VISIBLE);
-                    holder.pinALL_IV.setImageResource(R.drawable.baseline_public_24);
-                }
-                MainActivity.pinTV.setText(mContext.getString(R.string.unpin));
-
-                MainActivity.pinEveryoneTV.setText("Unpin for everyone");
-                MainActivity.pinMineTV.setText("Pin for me only");
-            } else {
-                if(holder != null){
-                    holder.pinALL_IV.setVisibility(View.GONE);
-                }
-                MainActivity.pinTV.setText(mContext.getString(R.string.pinChat));
-
-                MainActivity.pinMineTV.setText("Pin for me only");
-                MainActivity.pinEveryoneTV.setText("Pin for everyone");
-            }
-        }
     }
 
     //  return to previous state of progressLoad Bar when file fails to send
@@ -1733,12 +1478,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     //  =============== on Long Click methods
 
-    private void activateOnLongClick(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
+    private void activateOnLongClick(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
+    {
 //        if(modelChats.getMsgStatus() != 700033){
+
             // send the chats details
             MainActivity.modelChatsOption = modelChats;
             MainActivity.chatPosition = chatPosition;
-            MainActivity.chatHolder = holder;
 
             // clear all list first
             MainActivity.chatModelList.clear();
@@ -1757,29 +1503,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             int positionCheck = modelList.size() - chatPosition;    // 1000 - 960 => 40
 
             MainActivity.onShare = false;
-            if(positionCheck < 100){
+            if(positionCheck < 100 && modelChats.getFromUid().equals(myId))
+            {
                 MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
                 MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
+
+            } else {
+                MainActivity.editChatOption_IV.setVisibility(View.GONE);
             }
-            if (modelChats.getType() != 0 || !modelChats.getFromUid().equals(myId) )
+
+            if (modelChats.getType() != 0 || (!modelChats.getFromUid().equals(myId) && modelChats.getType() != 0) )
             {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
                 MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
                 MainActivity.onShare = true;
-//                Toast.makeText(mContext, "what is type: " + modelChats.getType(), Toast.LENGTH_SHORT).show();
+                MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
             }
 
+            fragmentListener.setDelAndPinForWho(true, false);
+
             // display pin icon, is it private or public
-            pinStatusIcon(null, modelChats);
-
-            MainActivity.firstTopChatViews.setVisibility(View.GONE);
-            // make the menu option visible
-            MainActivity.chatOptionView.setVisibility(View.VISIBLE);
-
-            if (MainActivity.pinChatViews != null) MainActivity.pinChatViews.setVisibility(View.VISIBLE);
-            // Close the previously open chat options
-            closePreviousChatOption(modelChats, holder);
-            // close mine chatTop Constraint
-            closeMyOwnOption( modelChats, holder );
+            fragmentListener.openChatClickOption(false, modelChats, modelList.size(), chatPosition);
 
             // Highlight the clicked item
             View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
@@ -1800,6 +1543,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     {
         if(MainActivity.chatOptionView != null)
         {
+            fragmentListener.setDelAndPinForWho(false, false);
+
             // Highlight the clicked item
             View itemView = recyclerMap.get(otherUserUid).getLayoutManager().findViewByPosition(chatPosition);
             // Check the current background color
@@ -1821,7 +1566,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         if(MainActivity.chatModelList.size() > 1){
                             MainActivity.editChatOption_IV.setVisibility(View.GONE);
                             MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                            MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                            MainActivity.moreOption_IV.setVisibility(View.GONE);
                         }
 
                         // add position to list to help retain the background color when user scroll
@@ -1843,47 +1588,43 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 // remove chat from list if chat already exist
                 MainActivity.chatModelList.remove(modelChats);
 
-                if(MainActivity.chatModelList.size() == 0 ){
-                    // close the chatOption container if list is empty
+                if(MainActivity.chatModelList.size() == 0 )     // close the chatOption container if list is empty
+                {
                     MainActivity.cancelChatOption();
-                } else if (MainActivity.chatModelList.size() == 1){
-                    MainActivity.editChatOption_IV.setVisibility(View.VISIBLE);
+                    fragmentListener.setDelAndPinForWho(false, true);
+
+                } else if (MainActivity.chatModelList.size() == 1)
+                {
+                    MainActivity.editChatOption_IV.setVisibility(View.GONE);
                     MainActivity.replyChatOption_IV.setVisibility(View.VISIBLE);
                     MainActivity.moreOption_IV.setVisibility(View.VISIBLE);
+
+                    MessageModel model = MainActivity.chatModelList.get(0);
+                    int position = findMessagePositionById(model.getIdKey());
+                    ToggleUtils.togglePinAndShareIcon(model, modelList.size(), position, myId);
+
                     // show if chat is pin publicly or privately
-                    pinStatusIcon(null, MainActivity.chatModelList.get(0));
-                } else {
+                    fragmentListener.openChatClickOption(false, MainActivity.chatModelList.get(0), 0,0);
+
+                } else
+                {
                     MainActivity.editChatOption_IV.setVisibility(View.GONE);
                     MainActivity.replyChatOption_IV.setVisibility(View.GONE);
-                    MainActivity.moreOption_IV.setVisibility(View.INVISIBLE);
+                    MainActivity.moreOption_IV.setVisibility(View.GONE);
                 }
 
                 // Remove the background color
-                if (currentColor == highlightedColor)
-                    itemView.setBackgroundColor(Color.TRANSPARENT);
+                if (currentColor == highlightedColor) itemView.setBackgroundColor(Color.TRANSPARENT);
 
-            }
-
-            // toggle edit icon
-            for(MessageModel model : MainActivity.chatModelList){
-                if ( (model.getType() != 0) || !model.getFromUid().equals(myId))
-                {   // set image and document => type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-                    MainActivity.editChatOption_IV.setImageResource(R.drawable.baseline_share_24);
-                    MainActivity.onShare = true;
-                } else {
-                    MainActivity.onShare = false;
-                }
-
-                MainActivity.modelChatsOption = model;  // assign the last model
             }
 
             // display the total number of chat selected in the List
             String totalChatSelected = MainActivity.chatModelList.size() + "";
             MainActivity.chatSelected_TV.setText(totalChatSelected);
         }
-
     }
 
+//
 
     //  =============== sending image or document methods
     private void sendMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
@@ -1911,8 +1652,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private void loadMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition, String otherUid)
     {
-        // Close the previously open chat options
-        closePreviousChatOption(modelChats, holder);
 
         // create the path where it should save to firebase storage
         String photo_location_original_DB = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
@@ -3133,19 +2872,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     // add my own emoji reaction
-    public void addEmojiReact(MessageViewHolder holder, String emoji, String chatID, String otherId)
+    public void addEmojiReact(String emoji, String chatID, String otherId)
     {
         int chatPosition = findMessagePositionById(chatID);
-        // concat previous emoji to the new one
-        String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
-                modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
 
-        // update local list
-        setEmojiReact(holder, addEmoji);
-        modelList.get(chatPosition).setEmoji(addEmoji);
+        if(chatPosition != -1)
+        {   // concat previous emoji to the new one
+            String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
+                    modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
 
-        // add to ROOM database
-        chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
+            // update local list
+            modelList.get(chatPosition).setEmoji(addEmoji);
+            notifyItemChanged(chatPosition, new Object());
+
+            // add to ROOM database
+            chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
+        }
 
     }
 
@@ -3167,30 +2909,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    public void pinIconDisplay(MessageViewHolder holder_, String messageId, boolean status){
-        holder_.pinIcon_IV.setVisibility(View.VISIBLE);
-        updatePinIcon(messageId, status);   //  ROOM DB
-    }
-    public void pinIconHide(MessageViewHolder holder_, String messageId, boolean status){
-        holder_.pinIcon_IV.setVisibility(View.GONE);
-        updatePinIcon(messageId, status);   //  ROOM DB
-    }
+    public void pinIconDisplay(String messageId, boolean status){
 
-    public void updatePinIcon(String messageId, boolean status) {
         AllConstants.executors.execute(() -> {
             if(modelList != null){
                 for (int i = modelList.size()-1; i >= 0; i--) {
                     if (modelList.get(i).getIdKey().equals(messageId)) {
 
                         modelList.get(i).setChatIsPin(status);
+                        int finalPosition = i;
+                        handler1.post(()-> notifyItemChanged(finalPosition, new Object()) );
+
                         // update icon on local database
                         chatViewModel.updateChat(modelList.get(i));
+
+                        break;
                     }
                 }
             }
         });
 
     }
+
 
     public int findMessagePositionById(String messageId) {
 
@@ -3251,46 +2991,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    public void replyChat(MessageModel messageModel, MessageAdapter.MessageViewHolder holder){
-        // call method in MainActivity and set up the details
-        fragmentListener.onEditOrReplyMessage(messageModel, "reply",
-                "replying...", R.drawable.reply,1, holder);
-    }
-
-    private void newMsgNumber(MessageViewHolder holder, int pos){
-        refCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(!snapshot.child(uId).child("newMsgCount").exists()){
-                    refCheck.child(user.getUid()).child(uId).child("newMsgCount").setValue(0);
-                }
-                else
-                {
-                    long newMsgNumber = (long) snapshot.child(uId).child("newMsgCount").getValue();
-//                            Log.i("Check", "the num "+snapshot.child(uId));
-
-                    if(newMsgNumber == 0) {
-//                        holder.constraintNewMsg.setVisibility(View.GONE);
-                    }
-                    else {
-                        if(pos > (modelList.size() - (newMsgNumber+1)) && pos < (modelList.size() - (newMsgNumber-1))){
-//                            holder.constraintNewMsg.setVisibility(View.VISIBLE);
-                            holder.textViewNewMsg.setText(newMsgNumber +" new messages");
-                        }
-                        else{
-//                            holder.constraintNewMsg.setVisibility(View.GONE);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
 
     @Override
     public int getItemCount() {
@@ -3307,12 +3007,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         private TextView textViewShowMsg, textViewNewMsg, emojiOnly_TV, photoChatTV;
         private ImageView seenMsg, editNotify, pinALL_IV, pinIcon_IV, forwardIcon_IV;
-        private ImageView imageViewReply, imageViewEdit, imageViewPin, imageViewForward;
-        private ImageView imageViewReact, imageViewCopy, imageViewDel, imageViewOptions;
-        private ConstraintLayout constraintChatTop, constraintMsgContainer, chatContainer;
+        private ImageView imageViewOptions;
+        private ConstraintLayout constraintMsgContainer, chatContainer;
         private LinearLayout linearLayoutReplyBox, linearLayoutClick;
         private TextView react_TV;
-        private TextView replyChat_TV, senderNameTV, otherInfo;
+        private TextView replyChat_TV, senderNameTV;
         private TextView timeMsg;
         private ConstraintLayout emptyConstraint;
 
@@ -3356,19 +3055,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 pinIcon_IV = itemView.findViewById(R.id.pinSender_IV);
                 forwardIcon_IV = itemView.findViewById(R.id.forwardS_IV);
 
-                // top layer options
-                imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg);
-                imageViewEdit = itemView.findViewById(R.id.imageViewEdit);
-                imageViewPin = itemView.findViewById(R.id.imageViewPinMsg);
-                imageViewForward = itemView.findViewById(R.id.imageViewForward);
-                imageViewReact = itemView.findViewById(R.id.iVReact);
-                imageViewCopy = itemView.findViewById(R.id.imageViewCopyText);
-                imageViewDel = itemView.findViewById(R.id.imageViewDel2);
-
                 editNotify = itemView.findViewById(R.id.editedSender_IV);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg);
                 chatContainer = itemView.findViewById(R.id.chatContainerS);
-                constraintChatTop = itemView.findViewById(R.id.constraintChatTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBodySend);
 
                 // reply
@@ -3379,7 +3068,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 imageViewOptions = itemView.findViewById(R.id.imageViewOptions);
                 react_TV = itemView.findViewById(R.id.reactSender_TV);
-                otherInfo = itemView.findViewById(R.id.otherInfo_TV1);
 
                 // voice note
                 seekBarProgress = itemView.findViewById(R.id.seekBarMusicProgress);
@@ -3432,16 +3120,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 pinIcon_IV = itemView.findViewById(R.id.pinReceiver_IV);
                 forwardIcon_IV = itemView.findViewById(R.id.forwardR_IV);
 
-                imageViewReply = itemView.findViewById(R.id.imageViewReplyMsg2);
-                imageViewEdit = itemView.findViewById(R.id.imageEdit);
-                imageViewPin = itemView.findViewById(R.id.imageViewReceivePinMsg);
-                imageViewForward = itemView.findViewById(R.id.imageViewForward2);
-                imageViewReact = itemView.findViewById(R.id.imageViewReact2);
-                imageViewCopy = itemView.findViewById(R.id.imageViewReceiveCopyText);
-                imageViewDel = itemView.findViewById(R.id.imageViewReceiveDel);
                 editNotify = itemView.findViewById(R.id.editedReceiver_IV);
                 textViewNewMsg = itemView.findViewById(R.id.textViewNewMsg2);
-                constraintChatTop = itemView.findViewById(R.id.constraintReceiveTop);
                 constraintMsgContainer = itemView.findViewById(R.id.constraintBodyReceive);
                 imageViewOptions = itemView.findViewById(R.id.imageViewOptions2);
 
@@ -3452,7 +3132,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 senderNameTV = itemView.findViewById(R.id.senderName2);
 
                 react_TV = itemView.findViewById(R.id.reactReceiver_TV);
-                otherInfo = itemView.findViewById(R.id.otherInfo_TV2);
 
                 // voice note
                 seekBarProgress = itemView.findViewById(R.id.seekBarMusicProgress2);

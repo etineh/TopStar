@@ -24,11 +24,11 @@ public class ViewPagerMainAdapter extends FragmentStateAdapter {
         Fragment fragment;
 
         switch (position){
-            case 0:
+            case 1:
                 fragment = ChatsFragment.newInstance();
                 break;
 
-            case 1:
+            case 0:
                 fragment = PlayersFragment.newInstance(); // testing
                 break;
 

@@ -13,8 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.PhoneUtils;
-import com.pixel.chatapp.peer2peer.exchange.P2pExchangeActivity;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.side_bar_menu.wallet.WalletActivity;
 
 public class CreatePinActivity extends AppCompatActivity {

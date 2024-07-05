@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/trans_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="7dp"
+    android:visibility="gone">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/animateView"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TableLayout
+            android:id="@+id/tableLayout"
+            style="@style/mainBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:layout_constraintBottom_toTopOf="@+id/replyLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TableRow
+                android:id="@+id/tableRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="👍"
+                    android:textSize="@dimen/txt_size_25" />
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="😂"
+                    android:textSize="@dimen/txt_size_25" />
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="😢"
+                    android:textSize="@dimen/txt_size_25" />
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="🚀"
+                    android:textSize="@dimen/txt_size_25" />
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="🔥"
+                    android:textSize="@dimen/txt_size_25" />
+
+
+                <TextView
+                    style="@style/textColorFullBlack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="❤️"
+                    android:textSize="@dimen/txt_size_25" />
+
+                <TextView
+                    style="@style/TV_Orange_CoolOrange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:paddingTop="@dimen/_10dp"
+                    android:paddingBottom="@dimen/_10dp"
+                    android:text="@string/more_"
+                    android:textSize="@dimen/txt_size_15"
+                    android:textStyle="italic" />
+
+                <!--        <ImageView-->
+                <!--            android:layout_width="wrap_content"-->
+                <!--            android:layout_height="wrap_content"-->
+                <!--            android:layout_weight="1"-->
+                <!--            android:gravity="center"-->
+                <!--            app:srcCompat="@drawable/arrow_right_" />-->
+
+            </TableRow>
+
+
+        </TableLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/replyLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/editLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/reply"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@id/replyIcon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/replyIcon"
+                app:layout_constraintTop_toTopOf="@id/replyIcon"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/replyIcon"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/reply" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/editLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toTopOf="@id/pinLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/editOrShareTV"
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/edit"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@id/editOrShareIcon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/editOrShareIcon"
+                app:layout_constraintTop_toTopOf="@id/editOrShareIcon"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/editOrShareIcon"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/baseline_mode_edit_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pinLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toTopOf="@id/copyLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/pinChatTV"
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/pinChat"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@+id/pinChatIV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pinChatIV"
+                app:layout_constraintTop_toTopOf="@+id/pinChatIV"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/pinChatIV"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/baseline_push_pin_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/copyLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toTopOf="@id/forwardLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/Copy"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@+id/pinChatIV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pinChatIV"
+                app:layout_constraintTop_toTopOf="@+id/pinChatIV"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/pinChatIV"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/copy" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/forwardLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/deleteLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/forwardTV"
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/forward_"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@+id/pinChatIV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pinChatIV"
+                app:layout_constraintTop_toTopOf="@+id/pinChatIV"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/pinChatIV"
+                style="@style/Tint_Orange_CoolOrange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/baseline_forward_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/deleteLayout"
+            style="@style/mainBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:clickable="true"
+            android:padding="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/deleteTV"
+                style="@style/textColorBlack_CoolOrange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:padding="5dp"
+                android:text="@string/delete_"
+                android:textSize="@dimen/txt_size_18"
+                app:layout_constraintBottom_toBottomOf="@id/delIcon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/delIcon"
+                app:layout_constraintTop_toTopOf="@id/delIcon"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <ImageView
+                android:id="@+id/delIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:tint="@color/red"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

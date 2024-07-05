@@ -15,10 +15,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.all_utils.OpenActivityUtil;
+import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 public class CreateLeagueActivity extends AppCompatActivity {

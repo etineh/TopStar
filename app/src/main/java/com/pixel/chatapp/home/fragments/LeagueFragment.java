@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.LeagueAdapter;
-import com.pixel.chatapp.all_utils.PhoneUtils;
+import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.model.LeagueModel;
 
 import java.util.ArrayList;

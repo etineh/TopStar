@@ -236,7 +236,7 @@ public class SupportUserAdapter extends RecyclerView.Adapter<SupportUserAdapter.
             supportPhoto_IV = itemView.findViewById(R.id.imageViewUsers);
             supportName_TV = itemView.findViewById(R.id.textViewUser);
             deliveryStatus_IV = itemView.findViewById(R.id.imageViewDelivery);
-            deliveryTime_TV = itemView.findViewById(R.id.textViewTime);
+            deliveryTime_TV = itemView.findViewById(R.id.dateTime_TV);
             lastChat_TV = itemView.findViewById(R.id.textViewMsg);
             newChatCount_TV = itemView.findViewById(R.id.textViewMsgCount);
 //            supportName_TV = itemView.findViewById(R.id.textViewUser);

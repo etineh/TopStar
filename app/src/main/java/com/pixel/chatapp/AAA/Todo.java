@@ -2,7 +2,7 @@ package com.pixel.chatapp.AAA;
 
 public class Todo {
 
-    // 1. notification
+    // 1. notification and logo toast
     //  Client side -   Send the token and map to server    ==  done
     //  Server side -   receive the token and map   == done
     //  reply from tab notification
@@ -21,6 +21,21 @@ public class Todo {
     //            d. details (or general)
     //            d. settings
 
+
+    //  4.  EMOJI - OnLongPress     ===========================---- done
+
+    //  5.  chat onClick Option - free chat layout      ===========================---- done
+    //  --- slide in and out
+    //  --- onClick for each button
+
+    //  6.  userList onClick option -  free card top layout too     ===========================---- done
+
+
+
+
+    //  ============    Future
+    //  1.  Chats Folder
+    //  2.  compress video from gallery update
 
 }
 
