@@ -216,9 +216,7 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
                 searchContact_ET.setText(null);
 
             } else {
-                searchContact_ET.removeTextChangedListener(textWatcher);
                 onBackButtonClicked();
-                finish();
             }
 
         }
@@ -243,6 +241,7 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(mainActivityIntent);
+        if(textWatcher != null) searchContact_ET.removeTextChangedListener(textWatcher);
         finish();
     }
 

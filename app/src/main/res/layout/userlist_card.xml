@@ -56,7 +56,7 @@
         android:src="@drawable/person_round"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/constrainLast" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textViewUser"
@@ -95,7 +95,7 @@
         android:layout_marginStart="15dp"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="5dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/orange"

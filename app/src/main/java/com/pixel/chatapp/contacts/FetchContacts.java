@@ -3,6 +3,7 @@ package com.pixel.chatapp.contacts;
 import static com.pixel.chatapp.home.MainActivity.contactList;
 import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.handlerInternet;
+import static com.pixel.chatapp.home.MainActivity.otherUserHintRef;
 import static com.pixel.chatapp.home.MainActivity.refUsers;
 
 import android.content.Context;
@@ -196,6 +197,8 @@ public class FetchContacts {
 
                 // save contact name to each user uid
                 contactNameShareRef.edit().putString(contactUid, contactModel.getContactName()).apply();
+                // save each user hint
+                otherUserHintRef.edit().putString(contactUid, hint).apply();
 
                 // Increment the counter
                 int count = counter.incrementAndGet();

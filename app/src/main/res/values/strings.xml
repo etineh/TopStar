@@ -53,6 +53,7 @@
     <string name="more_">More</string>
     <string name="live">Live</string>
     <string name="home">Home</string>
+    <string name="unavailable">Unavailable</string>
 
     <string name="confirmMsg_">Are you sure you want to delete? Item(s) deleted will no longer appear on your chats.</string>
     <string name="thumbDelMsg">Are you sure you want to delete? This might result to irresponsive user interface on previous chats</string>
@@ -873,7 +874,10 @@
     <string name="commLink">Enter community link</string>
     <string name="leagueTitle">League Title:</string>
     <string name="sponsorBy">Sponsored by:</string>
-    <string name="yourContacts">Your contacts</string>
+    <string name="yourContacts">Contacts Players</string>
+    <string name="globalPlayer">Global Players</string>
+    <string name="recentChat">Most recent chats… </string>
+
     <string name="addContact">Add contact</string>
     <string name="contactList">Contacts</string>
 

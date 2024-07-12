@@ -55,10 +55,10 @@ public class AnimUtils {
         animator.start();
     }
 
-    public static void fadeOut_500(final View view) {
+    public static void fadeOutGone(final View view, final int duration) {
         // Animate the alpha property for fading effect
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
-        animator.setDuration(500); // Adjust duration as needed
+        animator.setDuration(duration); // Adjust duration as needed
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -69,10 +69,24 @@ public class AnimUtils {
         animator.start();
     }
 
-    public static void fadeIn_300(final View view) {
+    public static void fadeOutInvisible(final View view, final int duration) {
+        // Animate the alpha property for fading effect
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+        animator.setDuration(duration); // Adjust duration as needed
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(View.INVISIBLE);
+            }
+        });
+        animator.start();
+    }
+
+    public static void fadeInVisible(final View view, final int duration) {
         // Animate the alpha property for fading effect
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
-        animator.setDuration(300); // Adjust duration as needed
+        animator.setDuration(duration); // Adjust duration as needed
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -88,23 +102,23 @@ public class AnimUtils {
         animator.start();
     }
 
-    public static void slideInFromBottom200s(final View view) {
+    public static void slideInFromBottom(final View view, final long duration) {
         view.setTranslationY(view.getHeight());
         view.setVisibility(View.VISIBLE);
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", view.getHeight(), 0);
-        animator.setDuration(200);
+        animator.setDuration(duration);
         animator.start();
     }
 
-    public static void slideInFromTop100s(final View view) {
+    public static void slideInFromTop(final View view, final long duration) {
         // Start the view above the screen (negative value of its height)
         view.setTranslationY(-view.getHeight());
         view.setVisibility(View.VISIBLE);
 
         // Animate the translationY property to 0, so the view moves into the screen
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", -view.getHeight(), 0);
-        animator.setDuration(100); // Adjust duration as needed
+        animator.setDuration(duration); // Adjust duration as needed
         animator.start();
     }
 
@@ -133,9 +147,9 @@ public class AnimUtils {
         animator.start();
     }
 
-    public static void slideOutToBottom(final View view) {
+    public static void slideOutToBottom(final View view, final long duration) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", 0, view.getHeight());
-        animator.setDuration(100);
+        animator.setDuration(duration);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

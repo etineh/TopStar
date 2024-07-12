@@ -12,6 +12,8 @@ import java.lang.reflect.AccessibleObject;
 
 public interface FragmentListener {
 
+//    void openAndCloseTopCon(boolean open);
+
     void openChatClickOption(boolean open, MessageModel messageModel, int totalSize, int chatPosition);
 
     void setDelAndPinForWho(boolean makeVisible, boolean makeTopViewVisible);

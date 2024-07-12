@@ -2,6 +2,7 @@ package com.pixel.chatapp.home.fragments;
 
 import static com.pixel.chatapp.home.MainActivity.handlerInternet;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -58,7 +59,8 @@ public class ChatsFragment extends Fragment {
     private UserChatViewModel userViewModel;
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
-    static ChatListAdapter adapter;
+    @SuppressLint("StaticFieldLeak")
+    public static ChatListAdapter adapter;
     public static CircleImageView openContactList;
 
     private List<UserOnChatUI_Model> chatListID;
@@ -114,13 +116,12 @@ public class ChatsFragment extends Fragment {
         });
 
 
-
         // Go to contact
         openContactList.setOnClickListener(v ->
         {
             if(permissionCheck.isContactOk(getContext()))
             {
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(10).withEndAction(() ->
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(() ->
                 {
                     Intent intent = new Intent(getContext(), UsersContactActivity.class);
                     startActivity(intent);
@@ -143,75 +144,48 @@ public class ChatsFragment extends Fragment {
 
     //  ---------------  All   methods     -----------------
 
-    // find user and delete from the ChatList
-    public static void findUserPositionByUID(String userUid)
-    {
-        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
-
-        if (userModel != null) {
-            for (int i = 0; i < userModel.size(); i++) {
-                if (userModel.get(i).getOtherUid().equals(userUid)) {
-                    // Remove the item from its old position.
-                    userModel.remove(i);
-                    adapter.notifyItemRemoved(i);
-                    // Exit the loop, as we've found the item and moved it.
-                    break;
-                }
-            }
-        }
-    }
-
-    public static void findUserAndDeleteChat(String userUid, String chatId)
-    {
-        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
-        if (userModel != null) {
-            for (int i = 0; i < userModel.size(); i++) {
-                // check if it's same user ID
-                if (userModel.get(i).getOtherUid().equals(userUid)) {
-                    // check if it's same message ID
-                    if(userModel.get(i).getIdKey().equals(chatId)){
-                        // Remove the chat from its old position.
-                        userModel.get(i).setMessage(AllConstants.DELETE_ICON +"  ...");
-//                        mUsersID.get(i).setEmojiOnly("...");
-                        adapter.notifyItemChanged(i, new Object());
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    public static void notifyDataFullSet(){
+    public void notifyDataFullSet(){
         adapter.notifyDataSetChanged();
     }
-    public static void findUserAndEditChat(String userUid, String chatId, String chat, String emoji)
+
+    public void notifyVisibleUser()
     {
-        List<UserOnChatUI_Model> userModel = ChatListAdapter.otherUsersId;
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
-        if (userModel != null) {
-            for (int i = 0; i < userModel.size(); i++) {
-                // check if it's same user ID
-                if (userModel.get(i).getOtherUid().equals(userUid)) {
-                    // check if it's same message ID
-                    if(userModel.get(i).getIdKey().equals(chatId)){
-                        if(chat != null){
-                            userModel.get(i).setMessage(AllConstants.EDIT_ICON + chat);
-                        } else {
-                            userModel.get(i).setMessage(AllConstants.EDIT_ICON + emoji);
-                        }
+        if (layoutManager instanceof LinearLayoutManager) {
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
 
-                        adapter.notifyItemChanged(i, new Object());
-                    }
-                    break;
+            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+            int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+
+            // Ensure the indices are within bounds
+            if (firstVisibleItemPosition < 0 || lastVisibleItemPosition < 0) {
+//                adapter.notifyDataSetChanged();
+                return; // Indicating no valid position found
+            }
+
+            for (int i = lastVisibleItemPosition + 2; i >= firstVisibleItemPosition; i--) {
+
+                assert adapter != null;
+                if (i < adapter.userModelList.size()) { // Check if index is within bounds
+
+                    adapter.notifyItemChanged(i, new Object());
                 }
             }
         }
     }
 
-    public static void notifyUserMoved(int i){
-        adapter.notifyItemMoved(i, 0);
+    public void notifyItemInserted(int i){
+        if(adapter != null) adapter.notifyItemInserted(i);
     }
-    public static void notifyItemChanged(int i){
+
+    public void notifyUserMoved(int i){
+        if(adapter != null) {
+            adapter.notifyItemMoved(i, 0);
+            adapter.notifyItemRangeChanged(i, adapter.userModelList.size(), new Object());
+        }
+    }
+    public void notifyItemChanged(int i){
         adapter.notifyItemChanged(i, new Object());
     }
 
@@ -248,10 +222,10 @@ public class ChatsFragment extends Fragment {
                                 }
                             }
 
-                            if (!userAlreadyExists) {
-                                // If the user doesn't exist, add it to the list
+                            // If the user doesn't exist, add it to the list
+                            if (!userAlreadyExists && userModel.getMessage() != null)
+                            {
                                 mUsersID.add(0, userModel);
-
                                 // add to local database
                                 userViewModel.insertUser(userModel);
 
@@ -260,8 +234,8 @@ public class ChatsFragment extends Fragment {
                             }
                         }
                     } catch (Exception e){
-                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error CFragment L270 " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        System.out.println("what is error in CFragment L270 " + e.getMessage());
+//                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error CFragment L270 " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        System.out.println("what is error in CFragment L230 " + e.getMessage());
                     }
 
                 }).start();

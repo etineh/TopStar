@@ -115,7 +115,7 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
         holder.itemView.setOnLongClickListener(v -> true);
 
-
+//System.out.println("what is printing: " + position);
     }
 
     //  ======  methods

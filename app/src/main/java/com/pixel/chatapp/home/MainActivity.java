@@ -1,5 +1,6 @@
 package com.pixel.chatapp.home;
 
+import static com.pixel.chatapp.utils.AnimUtils.slideOutToBottom;
 import static com.pixel.chatapp.utils.FileUtils.formatDuration;
 import static com.pixel.chatapp.utils.FileUtils.getFileName;
 import static com.pixel.chatapp.utils.FileUtils.isAudioFile;
@@ -55,6 +56,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -102,6 +104,7 @@ import com.pixel.chatapp.activities.CreateLeagueActivity;
 import com.pixel.chatapp.activities.CreatePinActivity;
 import com.pixel.chatapp.activities.LiveGameActivity;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.utils.AnimUtils;
 import com.pixel.chatapp.utils.CacheUtils;
 import com.pixel.chatapp.utils.IdTokenUtil;
@@ -149,6 +152,7 @@ import com.pixel.chatapp.signup_login.LinkNumberActivity;
 import com.pixel.chatapp.signup_login.PhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
 import com.pixel.chatapp.signup_login.SetUpProfileActivity;
+import com.pixel.chatapp.utils.UserChatUtils;
 import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
 
@@ -207,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
             offlineChat, documentIdShareRef, voiceNoteIdShareRef, unusedPhotoShareRef, myProfileShareRef,
-            resetLoginSharePref, contactNameShareRef, deviceFirstloginRef, otherUserFcmTokenRef;
+            resetLoginSharePref, contactNameShareRef, deviceFirstloginRef, otherUserFcmTokenRef, otherUserHintRef;
     public static String getMyUserName;
     public static Boolean nightMood;
 
@@ -220,18 +224,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //    ------- message/chat declares
     public static CircleImageView circleImageLogo;
     public static ConstraintLayout typeMsgContainer;
-    public static ViewStub firstTopUserDetailsContainer;
     private ImageView openChatMenu_IV, arrowBack;
     View firstTopChatViews;
     private static ConstraintLayout mainViewConstraint, topMainContainer;
     private ImageView editOrReplyIV;
     public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible, bioHint_TV;
     private View deleteForWhoView;
-    private static TextView deleteChatForOnlyOther_TV;
+    private TextView deleteChatForOnlyOther_TV;
 
     //  --------    Chat Box Menu Declares
-    private ViewStub chatMenuProfile;
     private View chatMenuViews;
+    ScrollView scrollViewMenu;
 
     private static ImageView emoji_IV, file_IV, camera_IV, gameMe_IV;
 
@@ -314,14 +317,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static DatabaseReference refUsers;
 
-    private ValueEventListener chatReadListener; // Declare the listener as a class variable
+    private ValueEventListener chatReadListener, typingValueListener, lastSeenValueListener; // Declare the listener as a class variable
 
 //    public static FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     public static FirebaseUser user;
 
     public static int scrollNum = 0, chatDeliveryStatus = 700033;
     private static String idKey, listener = "no", replyFrom, replyText;
-    private static boolean insideChat = false;     // for checking when user wants to send photo from other app
+    public static boolean insideChat = false;     // for checking when user wants to send photo from other app
     public static String networkListener = "no";
     public static Boolean networkOk = true, networkTypingOk = true;
 
@@ -373,6 +376,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static Map<String, Long> getLastTimeChat;
     public static Map<String, MessageAdapter> adapterMap; // to prevent it from re-creating all the time
     public static Map<String, RecyclerView> recyclerMap;
+    public static Map<String, Boolean> loopOnceMap;
+
     private static List<String> otherUidList;
     public static Map<String, Object> downMsgCountMap, scrollNumMap;
     private static Map<String, Boolean>  userRecyclerActiveMap;
@@ -478,7 +483,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static List<View> viewPhotoReceive; // List to store views for caching
 
     public static int isOnlongClick = 0;
-    public static boolean ignoreNewChatCountReset;
+//    public static boolean ignoreNewChatCountReset;
+
+    public static int newChatNumberPosition = 0;
 
 
     // =============    onclick
@@ -487,6 +494,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //  ====== onUserLongPress
     View onUserLongPressView, onUserMoreLongPressView;
     TextView count_TV, viewProfile_TV;
+    ConstraintLayout userLongPressMoreSub;
     ImageView deleteUser_IV, pinUser_IV;
 
 
@@ -622,6 +630,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         recyclerMap = new HashMap<>();
         readDatabase = 0;  // 0 is read, 1 is no_read
         contactListFile = new ArrayList<>();
+        loopOnceMap = new HashMap<>();
 
         // pins
         pinNextPublic = 1;
@@ -651,8 +660,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // XXX  =================   get intent when file is share from other app    ================
         sharingPhotoActivated = getIntent().getBooleanExtra("isSharing", false);
         photoModelList = (List<MessageModel>) getIntent().getSerializableExtra("photoModel");   // get all the photos model and add it to chatList
-
-//        adjustRecyclerViewToPhoneScreen();
 
         hideKeyboard();
 
@@ -739,8 +746,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             documentIdShareRef = getSharedPreferences(AllConstants.PHOTO_OTHERUID, Context.MODE_PRIVATE);
             voiceNoteIdShareRef = getSharedPreferences(AllConstants.VOICENOTE_UID, Context.MODE_PRIVATE);
             if(user != null) myProfileShareRef = getSharedPreferences(user.getUid(), Context.MODE_PRIVATE);
+
+            // for other user details
             contactNameShareRef = getSharedPreferences(AllConstants.CONTACTNAME, Context.MODE_PRIVATE);
             otherUserFcmTokenRef = getSharedPreferences(AllConstants.FCMTOKEN, Context.MODE_PRIVATE);
+            otherUserHintRef = getSharedPreferences(AllConstants.OTHERUSERHINT, Context.MODE_PRIVATE);
 
             // Register the NetworkChangeReceiver to receive network connectivity changes
             new Handler().postDelayed(()-> {
@@ -820,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                             } else {
                                 onEditOrReplyMessage_(modelChatsOption,"edit", "editing...",
-                                        android.R.drawable.ic_menu_edit, View.GONE);
+                                        android.R.drawable.ic_menu_edit);
                             }
 
                             // Reset the scale
@@ -830,7 +840,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             if(pinChatViews != null) pinChatViews.setVisibility(View.VISIBLE);
                             generalBackground.setVisibility(View.GONE);
                             if(moreOptionViews != null) moreOptionViews.setVisibility(View.GONE);
-                            if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                            if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                             if(onChatClickView != null) onChatClickView.setVisibility(View.GONE);
                         }).start();
 
@@ -870,7 +880,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             pinIconsVisibility(otherUserUid);
                             generalBackground.setVisibility(View.GONE);
                             moreOptionViews.setVisibility(View.GONE);
-                            if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                            if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                             if(onChatClickView != null) onChatClickView.setVisibility(View.GONE);
 
                         }).start();
@@ -890,7 +900,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                             generalBackground.setVisibility(View.GONE);
                             moreOptionViews.setVisibility(View.GONE);
-                            if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                            if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                             if(onChatClickView != null) onChatClickView.setVisibility(View.GONE);
 
                         }).start();
@@ -914,7 +924,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             pinIconsVisibility(otherUserUid);
                             generalBackground.setVisibility(View.GONE);
                             moreOptionViews.setVisibility(View.GONE);
-                            if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                            if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                             if(onChatClickView != null) onChatClickView.setVisibility(View.GONE);
 
                         }).start();
@@ -1059,32 +1069,34 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             // send message
-            sendMessageButton.setOnClickListener(view -> {
+            View.OnClickListener sendChat = view -> {
 
                 addEmptyChatCard(otherUserUid);     // mine sending
 
                 String message = editTextMessage.getText().toString().trim();
+                editTextMessage.setText(null);
 
-                if (!message.isEmpty()) {
-                    //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
-                    if (containsOnlyEmojis(message)) {
-                        // send as emoji text to increase the size
-                        sendMessage(null, message, 0, null, null, otherUserUid);
+                new Handler().postDelayed(()->{
+                    if (!message.isEmpty()) {
+                        //  0 is text, 1 is voice note, 2 is photo, 3 is document, 4 is audio (mp3), 5 is video
+                        if (containsOnlyEmojis(message)) {
+                            // send as emoji text to increase the size
+                            sendMessage(null, message, 0, null, null, otherUserUid);
 
-                    } else {
-                        // Send as normal text
-                        sendMessage(message, null, 0, null, null, otherUserUid);
+                        } else {
+                            // Send as normal text
+                            sendMessage(message, null, 0, null, null, otherUserUid);
+                        }
+
                     }
+                }, 300);
 
-                }
-
-                sendMessageButton.setVisibility(View.INVISIBLE);
-                recordButton.setVisibility(View.VISIBLE);
-                camera_IV.setVisibility(View.VISIBLE);
-                refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
+                endTyping();
 //                clearInputFields();
-                System.out.println("what is clicking");
-            });
+            };
+            sendMessageButton.setOnClickListener(sendChat);
+            typeMsgContainer.setOnClickListener(sendChat);
+
             gameMe_IV.setOnClickListener(v -> {
                 Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
             });
@@ -1117,19 +1129,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             sideBarMenuOpen.setOnClickListener(view -> {    // open the side bar menu option
                 if(sideBarView == null){
-                    activateSideBarViews();
+                    activateSideBarViews(); // onMenu click
                 }
-                sideBarView.setVisibility(View.VISIBLE);
+                AnimUtils.slideInFromRight(sideBarView, 120);
             });
-//            activateSideBarViews();
 
             // open menu option via logo too
-            imageViewLogo.setOnClickListener(view -> {
-                if(sideBarView == null){
-                    activateSideBarViews();
-                }
-                sideBarView.setVisibility(View.VISIBLE);
-            });
+//            imageViewLogo.setOnClickListener(view -> {
+//                if(sideBarView == null){
+//                    activateSideBarViews();
+//                }
+//                sideBarView.setVisibility(View.VISIBLE);
+//            });
 
 
             // =========    wallet finger print    ==============
@@ -1608,7 +1619,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     {
 
                         onEditOrReplyMessage_(modelChatsOption, "reply", "replying...",
-                                R.drawable.reply,1);
+                                R.drawable.reply);
 
                         // Reset the scale
                         view.setScaleX(1.0f);
@@ -1617,7 +1628,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         pinIconsVisibility(otherUserUid);
                         generalBackground.setVisibility(View.GONE);
                         moreOptionViews.setVisibility(View.GONE);
-                        AnimUtils.fadeOut_500(topEmojiView);
+                        AnimUtils.fadeOutGone(topEmojiView, 500);
 
                     }).start();
 
@@ -1663,7 +1674,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             view.setScaleX(1f);
                             view.setScaleY(1f);
                         }, 100);
-                        AnimUtils.fadeOut_500(topEmojiView);
+                        AnimUtils.fadeOutGone(topEmojiView, 500);
 
                     });
                 });
@@ -1997,7 +2008,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         pinIconsVisibility(otherUserUid);
     }
 
-    private void setDeleteUserOrClearChatViews()
+    private void setDeleteUserOrClearChatViews()    // delete user or clear chats
     {
         //  delete user from chat list ids
         if(deleteUserOrClearChatViews == null)
@@ -2019,129 +2030,159 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // delete user for only me
             deleteUserForMe_TV.setOnClickListener(view -> {
 
-                for (int i = 0; i < userModelList.size(); i++)
+                view.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(() ->
                 {
-                    String otherUid_Del = userModelList.get(i).getOtherUid();
+                    for (int i = 0; i < userModelList.size(); i++)
+                    {
+                        String otherUid_Del = userModelList.get(i).getOtherUid();
 
-                    if(!clearOnlyChatHistory){  // delete user from chat list
-                        refLastDetails.child(myId).child(otherUid_Del).removeValue();
-                        refChecks.child(myId).child(otherUid_Del).removeValue();
-                        // delete user from adapter list
-                        ChatsFragment.findUserPositionByUID(otherUid_Del);
-                        // delete user from ROOM
-                        chatViewModel.deleteUserById(otherUid_Del);
-                    } else {
-                        // delete only chats
-                        refLastDetails.child(myId).child(otherUid_Del)
-                                .child("message").setValue("...");
+                        if(!clearOnlyChatHistory){  // delete user from chat list
+                            refLastDetails.child(myId).child(otherUid_Del).removeValue();
+                            refChecks.child(myId).child(otherUid_Del).removeValue();
 
-                        // delete last chat from ROOM - outside UI
-                        MessageAdapter adapter = adapterMap.get(otherUid_Del);
-                        MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
-                        chatViewModel.editOutsideChat(otherUid_Del, AllConstants.DELETE_ICON + "  ...",
-                                null, model.getIdKey());
+                            // delete user from adapter list
+                            UserChatUtils.findUserAndDelete(PlayersFragment.adapter, otherUid_Del);
+                            if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDelete(ChatsFragment.adapter, otherUid_Del);
 
-                        // update outside user UI chatList model
-                        ChatsFragment.findUserAndDeleteChat(otherUid_Del, model.getIdKey());
+                            // delete user from ROOM
+                            chatViewModel.deleteUserById(otherUid_Del);
 
-                        Toast.makeText(this, getString(R.string.chatClearForMe), Toast.LENGTH_SHORT).show();
-                    }
+                        } else {    // delete only chats
 
-                    refPublicPinChat.child(myId).child(otherUid_Del).removeValue();
-                    refPrivatePinChat.child(myId).child(otherUid_Del).removeValue();
+                            refLastDetails.child(myId).child(otherUid_Del).child("message").setValue(AllConstants.DELETE_ICON +" ...");
 
-                    refMsgFast.child(myId).child(otherUid_Del).removeValue();
+                            MessageAdapter adapter = adapterMap.get(otherUid_Del);
+                            assert adapter != null;
 
-                    // clear chats from ROOM
-                    chatViewModel.deleteChatByUserId(otherUid_Del, myId);
-                    // delete from adapter chat list
-                    try{
-                        if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats();
-                    } catch (Exception e){
-                        System.out.println("what is error Main L2195: " + e.getMessage());
-                    }
+                            // delete last chat from ROOM - outside UI
+                            MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
+                            chatViewModel.editOutsideChat(otherUid_Del, AllConstants.DELETE_ICON + "  ...",
+                                    null, model.getIdKey());
 
-                    if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
+                            // update outside user UI chatList model
+                            if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDeleteChat(ChatsFragment.adapter, otherUid_Del, model.getIdKey());
+                            UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUid_Del, model.getIdKey());
 
-                    if(i == userModelList.size()-1){
-                        if(clearOnlyChatHistory) {
-                            if(adapterMap.get(otherUserUid) != null) adapterMap.get(otherUserUid).notifyDataSetChanged();
+                            Toast.makeText(this, getString(R.string.chatClearForMe), Toast.LENGTH_SHORT).show();
                         }
-                        clearOnlyChatHistory = false;
-                        cancelUserDeleteOption();
-                    }
 
-                }
-                cancelUserDeleteOption();
+                        refPublicPinChat.child(myId).child(otherUid_Del).removeValue();
+                        refPrivatePinChat.child(myId).child(otherUid_Del).removeValue();
+
+                        refMsgFast.child(myId).child(otherUid_Del).removeValue();
+
+                        // clear chats from ROOM
+                        chatViewModel.deleteChatByUserId(otherUid_Del, myId);
+                        // delete from adapter chat list
+                        try{
+                            if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats();
+                        } catch (Exception e){
+                            System.out.println("what is error Main L2195: " + e.getMessage());
+                        }
+
+                        if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
+
+                        if(i == userModelList.size()-1){
+                            if(clearOnlyChatHistory) {
+                                if(adapterMap.get(otherUserUid) != null) adapterMap.get(otherUserUid).notifyDataSetChanged();
+                            }
+                            clearOnlyChatHistory = false;
+                            cancelUserDeleteOption();
+                        }
+
+                    }
+                    cancelUserDeleteOption();
+                    // Reset the scale
+                    view.setScaleX(1.0f);
+                    view.setScaleY(1.0f);
+                }).start();
+
             });
 
             // delete user or clear chat for everyone
             deleteUserForAll_TV.setOnClickListener(view -> {
 
-                for (int i = 0; i < userModelList.size(); i++)
+                view.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(() ->
                 {
-                    String otherUid_Del = userModelList.get(i).getOtherUid();
+                    for (int i = 0; i < userModelList.size(); i++)
+                    {
+                        String otherUid_Del = userModelList.get(i).getOtherUid();
 
-                    if(!clearOnlyChatHistory){  // delete user from chat list
-                        refLastDetails.child(myId).child(otherUid_Del).removeValue();
-                        refChecks.child(myId).child(otherUid_Del).removeValue();
+                        if(!clearOnlyChatHistory){  // delete user from chat list
+                            refLastDetails.child(myId).child(otherUid_Del).removeValue();
+                            refChecks.child(myId).child(otherUid_Del).removeValue();
 
-                        refLastDetails.child(otherUid_Del).child(myId).removeValue();
-                        refChecks.child(otherUid_Del).child(myId).removeValue();
+                            refLastDetails.child(otherUid_Del).child(myId).removeValue();
+                            refChecks.child(otherUid_Del).child(myId).removeValue();
 
-                        // delete user from adapter list
-                        ChatsFragment.findUserPositionByUID(otherUid_Del);
-                        // delete user from ROOM
-                        chatViewModel.deleteUserById(otherUid_Del);
+                            // delete user from adapter list
+                            UserChatUtils.findUserAndDelete(PlayersFragment.adapter, otherUid_Del);
+                            if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDelete(ChatsFragment.adapter, otherUid_Del);
 
-                        refDeleteUser.child(myId).child(otherUid_Del).setValue("clear");
+                            // delete user from ROOM
+                            chatViewModel.deleteUserById(otherUid_Del);
 
-                    } else
-                    {   // clear only chat from outside
-                        refLastDetails.child(myId).child(otherUid_Del)
-                                .child("message").setValue("...");
-                        refLastDetails.child(otherUid_Del).child(myId)
-                                .child("message").setValue("...");
+                            refDeleteUser.child(myId).child(otherUid_Del).setValue("clear");
 
-                        // delete last chat from ROOM - outside UI
-                        MessageAdapter adapter = adapterMap.get(otherUid_Del);
-                        MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
-                        chatViewModel.editOutsideChat(otherUid_Del, AllConstants.DELETE_ICON + "  ...",
-                                null, model.getIdKey());
+                        } else
+                        {   // clear only chat from outside
+                            refLastDetails.child(myId).child(otherUid_Del)
+                                    .child("message").setValue(AllConstants.DELETE_ICON + " ...");
+                            refLastDetails.child(otherUid_Del).child(myId)
+                                    .child("message").setValue( AllConstants.DELETE_ICON + " ...");
 
-                        // update outside user UI chatList model
-                        ChatsFragment.findUserAndDeleteChat(otherUid_Del, model.getIdKey());
+                            // delete last chat from ROOM - outside UI
+                            MessageAdapter adapter = adapterMap.get(otherUid_Del);
+                            assert adapter != null;
+                            MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
+                            chatViewModel.editOutsideChat(otherUid_Del, AllConstants.DELETE_ICON + "  ...",
+                                    null, model.getIdKey());
 
-                        Toast.makeText(this, getString(R.string.chatClearForEveryone), Toast.LENGTH_SHORT).show();
-                    }
+                            // update outside user UI chatList model
+                            if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDeleteChat(ChatsFragment.adapter, otherUid_Del, model.getIdKey());
+                            UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUid_Del, model.getIdKey());
 
-                    // delete pin message from database
-                    refPublicPinChat.child(myId).child(otherUid_Del).removeValue();
-                    refPrivatePinChat.child(myId).child(otherUid_Del).removeValue();
-                    refPublicPinChat.child(otherUid_Del).child(myId).removeValue();
-                    refPrivatePinChat.child(otherUid_Del).child(myId).removeValue();
+                            // help to remove the last chat on outside UI
+                            String lastChatId = adapter.getModelList().get(adapter.getModelList().size() -1).getIdKey();
+                            deleteMap.put("idKey", lastChatId);
+                            refDeleteMsg.child(otherUserUid).child(myId).child(lastChatId).setValue(deleteMap);
 
-                    //  delete chats from  database
-                    refMsgFast.child(otherUid_Del).child(myId).removeValue();
-                    refMsgFast.child(myId).child(otherUid_Del).removeValue();
-
-                    refClearSign.child(myId).child(otherUid_Del).setValue("clear");
-
-                    // clear chats from ROOM
-                    chatViewModel.deleteChatByUserId(otherUid_Del, myId);
-
-                    if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats(); // delete chats
-                    if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
-
-                    if(i == userModelList.size()-1){
-                        if(clearOnlyChatHistory) {
-                            if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUserUid).notifyDataSetChanged();
+                            Toast.makeText(this, getString(R.string.chatClearForEveryone), Toast.LENGTH_SHORT).show();
                         }
-                        clearOnlyChatHistory = false;
-                        cancelUserDeleteOption();
+
+                        // delete pin message from database
+                        refPublicPinChat.child(myId).child(otherUid_Del).removeValue();
+                        refPrivatePinChat.child(myId).child(otherUid_Del).removeValue();
+                        refPublicPinChat.child(otherUid_Del).child(myId).removeValue();
+                        refPrivatePinChat.child(otherUid_Del).child(myId).removeValue();
+
+                        //  delete chats from  database
+                        refMsgFast.child(otherUid_Del).child(myId).removeValue();
+                        refMsgFast.child(myId).child(otherUid_Del).removeValue();
+
+                        refClearSign.child(myId).child(otherUid_Del).setValue("clear");
+
+                        // clear chats from ROOM
+                        chatViewModel.deleteChatByUserId(otherUid_Del, myId);
+
+                        if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats(); // delete chats
+                        if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
+
+                        if(i == userModelList.size()-1){
+                            if(clearOnlyChatHistory) {
+                                if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUserUid).notifyDataSetChanged();
+                            }
+                            clearOnlyChatHistory = false;
+                            cancelUserDeleteOption();
+                        }
+
                     }
 
-                }
+                    // Reset the scale
+                    view.setScaleX(1.0f);
+                    view.setScaleY(1.0f);
+                }).start();
+
 
             });
 
@@ -2153,9 +2194,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(chatMenuViews == null)
         {
             //  Chat Box Menu ids
-            chatMenuProfile = findViewById(R.id.chatMenuViewStub);
+            ViewStub chatMenuProfile = findViewById(R.id.chatMenuViewStub);
             chatMenuViews = chatMenuProfile.inflate();
 
+            scrollViewMenu = chatMenuViews.findViewById(R.id.scrollViewMenu);
             TextView viewProfileTV = chatMenuViews.findViewById(R.id.viewProfileTV);
             TextView joinTour_TV = chatMenuViews.findViewById(R.id.joinTour_TV);
             TextView muteTV = chatMenuViews.findViewById(R.id.muteTV);
@@ -2169,8 +2211,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             //  ===  onClicks
 
             // close user menu
-            closeMenu.setOnClickListener(view -> chatMenuViews.setVisibility(View.GONE));
-            chatMenuViews.setOnClickListener(view -> chatMenuViews.setVisibility(View.GONE));
+            View.OnClickListener close = v -> {
+                scrollViewMenu.setVisibility(View.GONE);
+                chatMenuViews.setVisibility(View.GONE);
+            };
+            closeMenu.setOnClickListener(close);
+            chatMenuViews.setOnClickListener(close);
 
             //  clear user chats
             clearChat_TV.setOnClickListener(view -> {
@@ -2180,6 +2226,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     setDeleteUserOrClearChatViews();
 
                     chatMenuViews.setVisibility(View.GONE);   // hide profile option
+                    scrollViewMenu.setVisibility(View.GONE);
                     otherUserName_TV.setText(R.string.clear_history );
                     deleteUserForMe_TV.setText(R.string.clear_for_me);
                     deleteUserForAll_TV.setText(R.string.clear_for_everyone);
@@ -2223,11 +2270,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
     }
 
+
     private void setFirstTopChatViews()
     {
-        if(firstTopChatViews == null)
+        if (firstTopChatViews == null)
         {
-            firstTopUserDetailsContainer = findViewById(R.id.firstTopContainer);
+            ViewStub firstTopUserDetailsContainer = findViewById(R.id.firstTopContainer);
             firstTopChatViews = firstTopUserDetailsContainer.inflate();
 
             textViewMsgTyping = firstTopChatViews.findViewById(R.id.isTyping_TV);
@@ -2252,6 +2300,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             openChatMenu_IV.setOnClickListener(view -> {
                 setChatMenuViews();
                 chatMenuViews.setVisibility(View.VISIBLE);
+                AnimUtils.slideInFromRight(scrollViewMenu, 100);
             });
 
             callButton.setOnClickListener(view -> {
@@ -2279,6 +2328,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
         }
+
     }
 
     private void setOnForwardTopView()
@@ -2436,7 +2486,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(20).withEndAction(()->
                     {
                         // Start the animation to make it visible
-                        animateVisibility(moreHomeCont2, null);
+                        AnimUtils.slideInFromBottom(moreHomeCont2, 100);
 
                         new Handler().postDelayed(()-> {
                             v.setScaleX(1f);
@@ -2679,8 +2729,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     MessageAdapter adapter = adapterMap.get(otherUserUid);
                     adapter.deleteMessage(chatModel.getIdKey());
 
-                    // update user UI chatList model
-                    ChatsFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                    // update outside user UI chatList model
+                    if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDeleteChat(ChatsFragment.adapter, otherUserUid, chatModel.getIdKey());
+                    UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUserUid, chatModel.getIdKey());
 
                     // delete the ROOM outside UI
                     chatViewModel.editOutsideChat( otherUserUid, AllConstants.DELETE_ICON + " ...",
@@ -2697,7 +2748,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     if(i == size-1){
                         cancelChatOption();
-                        adapter.notifyDataSetChanged();
                         Toast.makeText(MainActivity.this, getString(R.string.deleteForMe), Toast.LENGTH_SHORT).show();
 
                         new Thread(()-> getEachUserAllPhotoAndVideos(otherUserUid, adapterMap.get(otherUserUid).getModelList())).start();
@@ -2744,6 +2794,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     // delete from my local list
                     MessageAdapter adapter = adapterMap.get(otherUserUid);
+                    assert adapter != null;
                     adapter.deleteMessage(chatModel.getIdKey());
 
                     // save to delete database to loop through the other user local list and delete if idKey is found
@@ -2757,7 +2808,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 null, chatModel.getIdKey());
 
                         // update outside user UI chatList model
-                        ChatsFragment.findUserAndDeleteChat(otherUserUid, chatModel.getIdKey());
+                        if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDeleteChat(ChatsFragment.adapter, otherUserUid, chatModel.getIdKey());
+                        UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUserUid, chatModel.getIdKey());
 
                         // delete from ROOM - inside chat room
                         chatViewModel.deleteChat(chatModel);
@@ -2774,7 +2826,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     if(i == size-1){
                         cancelChatOption();
-                        adapter.notifyDataSetChanged();
                         deleteForWhoView.setVisibility(View.GONE);
                         Toast.makeText(MainActivity.this, getString(R.string.deleteForEveryone), Toast.LENGTH_SHORT).show();
 
@@ -2841,8 +2892,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             replyLayout.setOnClickListener(v -> {
-                onEditOrReplyMessage_(modelChatsOption, "reply", "replying...",
-                        R.drawable.reply,1);
+                onEditOrReplyMessage_(modelChatsOption, "reply", "replying...", R.drawable.reply);
             });
 
             editLayout.setOnClickListener(onEdit);
@@ -2882,7 +2932,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         pinIconsVisibility(otherUserUid);
                         generalBackground.setVisibility(View.GONE);
                         moreOptionViews.setVisibility(View.GONE);
-                        if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                        if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                         if(onChatClickView != null) onChatClickView.setVisibility(View.GONE);
 
                     } else {
@@ -2930,9 +2980,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             {
                 if(onUserMoreLongPressView.getVisibility() == View.GONE)
                 {
-                    AnimUtils.slideInFromRight(onUserMoreLongPressView, 100);
+                    onUserMoreLongPressView.setVisibility(View.VISIBLE);
+                    AnimUtils.slideInFromRight(userLongPressMoreSub, 80);
                 } else {
                     onUserMoreLongPressView.setVisibility(View.GONE);
+                    userLongPressMoreSub.setVisibility(View.GONE);
                 }
 
                 if(userModelList.size() > 1) viewProfile_TV.setVisibility(View.GONE);
@@ -2941,6 +2993,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             cancel_IV.setOnClickListener(v -> cancelUserDeleteOption());
+
+            playGame_IV.setOnClickListener(v -> {
+                PlayersFragment.adapter.userModelList.clear();
+                PlayersFragment.adapter.notifyDataSetChanged();
+            });
         }
     }
 
@@ -2951,6 +3008,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             ViewStub userMoreLongPressVS = findViewById(R.id.userLongPressMoreVS);
             onUserMoreLongPressView = userMoreLongPressVS.inflate();
 
+            userLongPressMoreSub = onUserMoreLongPressView.findViewById(R.id.userLongPressMore);
             TextView playGameIV = onUserMoreLongPressView.findViewById(R.id.playGameIV);
             viewProfile_TV = onUserMoreLongPressView.findViewById(R.id.viewProfile_TV);
             TextView markAsRead = onUserMoreLongPressView.findViewById(R.id.markAsRead);
@@ -2975,6 +3033,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         setDeleteUserOrClearChatViews();
 
         onUserLongPressView.setVisibility(View.VISIBLE);
+        deleteUser_IV.setVisibility(View.VISIBLE);
+        pinUser_IV.setVisibility(View.VISIBLE);
 
         if(userModelList.contains(userModel)) userModelList.remove(userModel);
         else userModelList.add(userModel);
@@ -2984,12 +3044,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(listSize == 0) {
             cancelUserDeleteOption();
         }else if(listSize == 1){
-            String name = getOtherUserName(userModelList.get(0));
+            String name = getOtherUserName(userModelList.get(0), null);
             otherUserName_TV.setText(name);
         } else {
             otherUserName_TV.setText(getString(R.string.deleteNow));
-            deleteUser_IV.setVisibility(View.VISIBLE);
-            pinUser_IV.setVisibility(View.VISIBLE);
 
             if(listSize > 4) {
                 deleteUser_IV.setVisibility(View.GONE);
@@ -3001,11 +3059,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    private String getOtherUserName(UserOnChatUI_Model userModel)
+    private String getOtherUserName(UserOnChatUI_Model userModel, MessageModel chatModel)
     {
-        String otherDisplayName__ = userModel.getOtherDisplayName();
-        String otherUserName__ = userModel.getOtherUserName();
-        String otherId = userModel.getOtherUid();
+        String otherDisplayName__ = userModel != null ? userModel.getOtherDisplayName() : chatModel.getSenderName();
+        String otherUserName__ = userModel != null ? userModel.getOtherUserName() : chatModel.getSenderName();
+        String otherId = userModel != null ? userModel.getOtherUid() : chatModel.getFromUid();
+
+        if(otherId.equals(myId)) return getString(R.string.you);
 
         // return the contact name or displayed name of other user
         return contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
@@ -3014,7 +3074,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     @Override
     public void callAllMethods(String otherUid, Context context, Activity activity)
     {
-        getMyUserTyping();
+        getMyUserTyping(otherUid);
         tellUserAmTyping_AddUser();
         getChatReadRequest(otherUid);
 
@@ -3047,7 +3107,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             if(onChatClickView != null)
             {
                 onChatClickView.setVisibility(View.VISIBLE);
-                AnimUtils.slideInFromBottom200s(animateView);
+                AnimUtils.slideInFromBottom(animateView, 200);
 
                 togglePinAndShareIconMain(messageModel, totalSize, chatPosition_, myId);
             }
@@ -3151,11 +3211,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     @Override
-    public void setDelAndPinForWho(boolean makeEmojiVisible, boolean makeTopViewVisible)
+    public void setDelAndPinForWho(boolean makeEmojiVisible, boolean makeTopViewVisible)    // when item is onLongPress
     {
         setTopEmojiView();  // visible emoji layout
-        if(makeEmojiVisible) AnimUtils.fadeIn_300(topEmojiView);
-        else AnimUtils.fadeOut_500(topEmojiView);
+        if(makeEmojiVisible) AnimUtils.fadeInVisible(topEmojiView, 300);
+        else AnimUtils.fadeOutGone(topEmojiView, 500);
 
         setPinForWhoViews();
         setDeleteForWhoView();
@@ -3182,10 +3242,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         recyclerViewChatVisibility(uID);    // make only the active recyclerView to be visible
 
-        setFirstTopChatViews();
+        try {
+            setFirstTopChatViews();
+            firstTopChatViews.setVisibility(View.VISIBLE);
+        } catch (Exception e){
+            System.out.println("what is error MainAct L3255: " + e.getMessage());
+        }
 
+//        AnimUtils.slideInFromRight(constraintMsgBody, 200);
         constraintMsgBody.setVisibility(View.VISIBLE);  // make chat box visible
-        firstTopChatViews.setVisibility(View.VISIBLE);
+        topMainContainer.setVisibility(View.INVISIBLE);
+        tabLayoutGeneral.setVisibility(View.INVISIBLE);
 
         // make progressBar visible at first
         if(userRecyclerActiveMap.get(uID) == null) progressBarLoadChats.setVisibility(View.VISIBLE);
@@ -3225,7 +3292,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     displayOrHideCountArrowDown(downMsgCount, false);
 
-                    if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                    if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
                 }
             });
 
@@ -3237,6 +3304,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }, 100);
 
         textViewOtherUser.setText(otherName);   // display their userName on top of their page
+
+        String otherUserHint = otherUserHintRef.getString(uID, mContext_.getString(R.string.hint2));
+        bioHint_TV.setText(otherUserHint);
+        AnimUtils.animateView(bioHint_TV);
 
         //  get user image
         if (imageUrl == null || imageUrl.equals("null")) {
@@ -3259,9 +3330,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 sendRecyclerView(recyclerChat, uID);
                 getMessage(myUserName_, uID, context, true);
             }
-            else recyclerMap.get(uID).setAdapter(adapterMap.get(uID));   // set the adapter to the recyclerView
+            else{
+                recyclerMap.get(uID).setAdapter(adapterMap.get(uID));   // set the adapter to the recyclerView
+                new Handler().postDelayed(()-> progressBarLoadChats.setVisibility(View.GONE), 100);
+            }
 
-            new Handler().postDelayed(()-> progressBarLoadChats.setVisibility(View.GONE), 100);
 
 //                loadOtherUserChatsToRecycler();
 
@@ -3390,8 +3463,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             try {
                 retrieveMessages(myUsername, otherUID, mContext_, activateRecycler);
             } catch (Exception e){
-                Toast.makeText(this, "error occur retriever M2610", Toast.LENGTH_SHORT).show();
-                System.out.println("Error MainActivity L2690: " + e.getMessage());
+                Toast.makeText(this, "error occur retriever M3610", Toast.LENGTH_SHORT).show();
+                System.out.println("Error MainActivity L3490: " + e.getMessage());
             }
 
             // get pinMessage once
@@ -3410,19 +3483,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public void getLastSeenAndOnline(String otherUid, Context context)
     {
         AnimUtils.animateView(textViewLastSeen);
-        // get last seen
-        try{
-            refUsers.child(otherUid).child("general").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    try{
-                        long onlineValue = (long) snapshot.child("presence").getValue();
-                        if (onlineValue == 1){
+        lastSeenValueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                try{
+                    long onlineValue = snapshot.child("presence").exists() ?
+                            (long) snapshot.child("presence").getValue() : -1;
+                    if(onlineValue != -1)
+                    {
+                        if (onlineValue == 1)
+                        {
                             String online = getString(R.string.online);
                             textViewLastSeen.setText(online);
-                        }
-                        else {
+                        } else {
                             //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
                             // current date and time
                             Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -3515,25 +3590,23 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             }
 
                         }
-                    } catch (Exception e){
-                        String appName = context.getString(R.string.app_name);
-                        textViewLastSeen.setText(appName);
+
+                    } else{
+                        textViewLastSeen.setText(context.getString(R.string.unavailable));
                     }
+                } catch (Exception e){
+                    String appName = context.getString(R.string.app_name);
+                    textViewLastSeen.setText(appName);
                 }
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+            }
+        };
 
-
-        }catch (Exception e){
-            System.out.println("what is error " + e.getMessage());
-            textViewLastSeen.setText(context.getString(R.string.app_name));
-//            Toast.makeText(context, "Error occur on last seen", Toast.LENGTH_SHORT).show();
-        }
-
+        refUsers.child(otherUid).child("general").addValueEventListener(lastSeenValueListener);
     }
 
     // This method will be called by NetworkChangeReceiver whenever network status changes   // reload message loadStatus
@@ -3570,8 +3643,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     @Override
     public void msgBackgroundActivities(String otherUid) {
 
-        AllConstants.executors.execute(() -> {
-
+        AllConstants.executors.execute(() ->
+        {
+            newChatNumberPosition = -1;
             // set my status to be true in case I receive msg, it will be tick as seen
             Map <String, Object> statusAndMSgCount = new HashMap<>();
             statusAndMSgCount.put("status", true);
@@ -3583,9 +3657,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             refChecks.child(myId).child(otherUid).child("vCallResp").setValue("pending");
 
             insideChat = true;     // opening chat
-            ignoreNewChatCountReset = false;
-        });
 
+            try{
+                if (adapterMap.get(otherUid) != null && recyclerMap.get(otherUid) != null){
+                    newChatNumberPosition = UserChatUtils.getNewChatNumberPosition(recyclerMap
+                            .get(otherUid), otherUid, adapterMap.get(otherUid).getModelList());
+                }
+            } catch (Exception e) {
+                System.out.println("what is error MainAct 3670: " + e.getMessage());
+            }
+
+            // just in case newChatDoesExist, but there's count on outside UI
+            if(loopOnceMap.get(otherUid) == null && adapterMap.get(otherUid) != null) {
+                UserChatUtils.checkIfNewCountExist(adapterMap.get(otherUid).getModelList(), otherUid);
+            }
+        });
 
     }
 
@@ -3594,15 +3680,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         clearEmojiReactSetting();
         hideKeyboard();
+        setDeleteForWhoView();
+        deleteChatForOnlyOther_TV.setVisibility(View.VISIBLE);
 
         // user1 should not be unable to delete user2 msg
         for (MessageModel model : chatModelList){
             if(!model.getFromUid().equals(myId)){
                 deleteChatForOnlyOther_TV.setVisibility(View.GONE);
+                break;
             }
         }
 
-        setDeleteForWhoView();
         deleteForWhoView.setVisibility(View.VISIBLE);
 
         chatOptionView.setVisibility(View.GONE);
@@ -3610,7 +3698,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    private void onEditOrReplyMessage_(MessageModel messageModel, String editOrReply, String status, int icon, int visible){
+    private void onEditOrReplyMessage_(MessageModel messageModel, String editOrReply, String status, int icon){
         clearEmojiReactSetting();
         isChatKeyboardON = true;
 
@@ -3619,8 +3707,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.showSoftInput(editTextMessage, InputMethodManager.SHOW_IMPLICIT);
 
-        String chat = ChatListAdapter.getInstance().setChatText(messageModel.getType(),
-                messageModel.getMessage(), messageModel.getEmojiOnly(), messageModel.getVnDuration());
+        String chat = UserChatUtils.setChatText(messageModel.getType(), messageModel.getMessage(),
+                messageModel.getEmojiOnly(), messageModel.getVnDuration(), this);
 
 
         // General settings
@@ -3655,7 +3743,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             replyText = chat;
             replyFrom = messageModel.getFromUid() + AllConstants.JOIN + messageModel.getSenderName();
-            nameReply.setText(messageModel.getSenderName());
+            String from = getOtherUserName(null, messageModel);
+            nameReply.setText(from);
+
 //            if (fromWho.equals(myUserName)) {   // change fromWho from display name to username later
 //                replyFrom = "From You.";
 //            }
@@ -3705,7 +3795,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         myHolderNew.addAll(myHolder_);  // add all users holder that was gotten from chatListAdapter
 
         // call forward setting method to add onForward checkBox container
-        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        ChatsFragment.adapter.forwardCheckBoxVisibility(myHolderNew);
 
         if(sharingPhotoActivated){
             circleForwardSend.setImageResource(R.drawable.baseline_arrow_forward_24);
@@ -3896,6 +3986,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         latestChatMap.put("msgStatus", msgStatus);
         latestChatMap.put( "timeSent", ServerValue.TIMESTAMP);
         latestChatMap.put("idKey", chatKey);
+//        latestChatMap.put("numberOfNewChat", 1);
 
         return latestChatMap;
     }
@@ -3903,7 +3994,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public void sendMessage(final String text, final String emojiOnly, final int type, final String vnPath_,
                             final String durationOrSizeVN, final String otherId)
     {
-        editTextMessage.setText(null);
+//        editTextMessage.setText(null);
 
         if(listener.equals("edit")){ // check if it's on edit mode
             sendEditChat(text, emojiOnly);
@@ -3941,7 +4032,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             if(adapter != null)
             {
                 if(getLastTimeChat.get(otherId) != null){   // check if it's the first chat of the day
-                    notifyFirstChatOfANewDay(getLastTimeChat.get(otherId), messageModel.getTimeSent(),
+                    notifyFirstChatOfANewDay(getLastTimeChat.get(otherId), messageModel.getTimeSent(),  // onSendChat
                             newChatNumberKey, adapter, otherId);
                 }
 
@@ -3975,36 +4066,40 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             excutorSendDB.execute(() ->     // send only text chat to other user -- not photo nor file yet
             {
             // find position and move it to top as recent chat... also update the outside chat details
-            ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, 0);
+                if(ChatsFragment.adapter != null) {
+                    UserChatUtils.findUserPositionByUID(ChatsFragment.adapter.userModelList, otherId, messageModel, 0, this);
+                } else {    //  proceed with only chats on player tab
+                    UserChatUtils.findUserPositionByUID(PlayersFragment.adapter.userModelList, otherId, messageModel, 0, this);
+                }
 
-            // remove the typingRunnable for checking network
-            handlerTyping.removeCallbacks(runnableTyping);
-            networkTypingOk = true;
+                // remove the typingRunnable for checking network
+                handlerTyping.removeCallbacks(runnableTyping);
+                networkTypingOk = true;
 
-            // save to local ROOM database
-            chatViewModel.insertChat(otherId, messageModel);
+                // save to local ROOM database
+                chatViewModel.insertChat(otherId, messageModel);
 
-            String text_1 = text;
-            String emoji_1 = emojiOnly;
+                String text_1 = text;
+                String emoji_1 = emojiOnly;
 
-            if(messageModel.getType() == 6) {   // sending to other user database
-                emoji_1 = getString(R.string.missed);
-                callChatModel = messageModel;
-            } else if (messageModel.getType() == 7) {
-                emoji_1 = getString(R.string.incomingGame);
-                gameModel = messageModel;
-            }
-            final String emoji = emoji_1;
+                if(messageModel.getType() == 6) {   // sending to other user database
+                    emoji_1 = getString(R.string.missed);
+                    callChatModel = messageModel;
+                } else if (messageModel.getType() == 7) {
+                    emoji_1 = getString(R.string.incomingGame);
+                    gameModel = messageModel;
+                }
+                final String emoji = emoji_1;
 
-            if(messageModel.getType() == AllConstants.type_pin)     // @maro pin a chat
-            {
-                String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "@"+myUserName);
-                String pinNoty = emojiOnly.equals(getString(R.string.pin)) ? getString(R.string.pinAChat) : getString(R.string.unPinAChat);
-                text_1 = displayName + " " + pinNoty;
-                messageModel.setReplyID(msgId);
-                idKey = msgId;
-            }
-            final String text_ = text_1;
+                if(messageModel.getType() == AllConstants.type_pin)     // @maro pin a chat
+                {
+                    String displayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, "@"+myUserName);
+                    String pinNoty = emojiOnly.equals(getString(R.string.pin)) ? getString(R.string.pinAChat) : getString(R.string.unPinAChat);
+                    text_1 = displayName + " " + pinNoty;
+                    messageModel.setReplyID(msgId);
+                    idKey = msgId;
+                }
+                final String text_ = text_1;
 
 
                 if(!isSendingVoiceNote){    // send only text chat, don't sent voice note here
@@ -4013,7 +4108,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                 clearInputFields();     // sendMessage
                 isSendingVoiceNote = false; // deactivate voice note boolean not to block sending text
-                ignoreNewChatCountReset = true;
 
             });
 
@@ -4031,6 +4125,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // save last msg for outside chat display
         Map<String, Object> getOutsideChatMap = setOutsideChatMap(text, emojiOnly, messageModel.getType(), messageModel.getIdKey(), chatDeliveryStatus);
         refLastDetails.child(myId).child(otherUid).updateChildren(getOutsideChatMap);
+
+        getOutsideChatMap.put("numberOfNewChat", 1);
         refLastDetails.child(otherUid).child(myId).updateChildren(getOutsideChatMap);
 
         //  send chatKey to other User to read  -- customise later to check user OnRead settings
@@ -4197,7 +4293,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 else MessageAdapter.addNewPhotoOrVideoToViewLists(otherUid, messageModel);
 
                 // find position and move it to top as recent chat... also update the outside chat and ROOM DB
-                ChatListAdapter.getInstance().findUserPositionByUID(otherUid, messageModel, 0);
+                if(ChatsFragment.adapter != null) {
+                    UserChatUtils.findUserPositionByUID(ChatsFragment.adapter.userModelList, otherUid, messageModel, 0, this);
+                } else {    //  proceed with only chats on player tab
+                    UserChatUtils.findUserPositionByUID(PlayersFragment.adapter.userModelList, otherUid, messageModel, 0, this);
+                }
 
                 //  send chatKey to other User to read  -- customise later to check user OnRead settings
                 refOnReadRequest.child(otherUid).child(myId).push().setValue(chatId);
@@ -4226,7 +4326,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             chatViewModel.updateChat(callChatModel);
 
             //  update outside chat adapter      //  update ROOM outside database too
-            ChatListAdapter.getInstance().updateCallOrGameUI(type, currentUserUidOnCall, myId, response);
+            ChatsFragment.adapter.updateCallOrGameUI(type, currentUserUidOnCall, myId, response);
 
         }
 
@@ -4245,7 +4345,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             chatViewModel.updateChat(missCallModel);
 
             //  update outside chat adapter      //  update ROOM outside database too
-            ChatListAdapter.getInstance().updateCallOrGameUI(type, otherId, myId, response);
+            ChatsFragment.adapter.updateCallOrGameUI(type, otherId, myId, response);
 
         }
 
@@ -4273,8 +4373,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         chatViewModel.updateChat(messageModel);
 
         // update user chatList model if it same last chat
-        ChatsFragment.findUserAndEditChat(otherUserUid, idKey,
-                text, emojiOnly);
+        UserChatUtils.findUserAndEditChat(PlayersFragment.adapter, otherUserUid, idKey, text, emojiOnly);
+        if(ChatsFragment.adapter != null) UserChatUtils.findUserAndEditChat(ChatsFragment.adapter,
+                otherUserUid, idKey, text, emojiOnly);
 
         // update the ROOM outside UI
         chatViewModel.editOutsideChat(otherUserUid, AllConstants.EDIT_ICON + text,
@@ -4510,12 +4611,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     if(activateRecycler) {  // for new user not the list previously
                         recyclerMap.get(otherUID).setAdapter(adapter);
+                        progressBarLoadChats.setVisibility(View.GONE);
                     }
 
                     //  delay for like 2 sec to fetch all old data first
                     new Handler().postDelayed( () -> {
                         // add new message directly to local List and interact with few msg in refMsgFast database
-                        newMessageInteraction(adapter, otherUID);
+                        newMessageInteraction(adapter, otherUID, mContext);
 
                         // edit message
                         getEditMessage(adapter, otherUID);
@@ -4673,7 +4775,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
     
     // add new message to local List and interact with few msg in refMsgFast database for delivery and read status
-    private void newMessageInteraction(MessageAdapter adapter, String otherId)
+    private void newMessageInteraction(MessageAdapter adapter, String otherId, Context context)
     {
         refMsgFast.child(myId).child(otherId).addValueEventListener(new ValueEventListener()
         {
@@ -4699,17 +4801,25 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 addEmptyChatCard(otherId);   // other user sending me chat the first time
 
                                 // get the number of previous unread chat, if any.
-                                UserOnChatUI_Model outsideUserModel = ChatListAdapter.getInstance().findUserModelByUid(otherId);
+                                UserOnChatUI_Model outsideUserModel = ChatsFragment.adapter != null ? ChatsFragment.adapter.findUserModelByUid(otherId)
+                                        : PlayersFragment.adapter.findUserModelByUid(otherId) ;
+
+                                String newChatDateKey = refMsgFast.child(myId).push().getKey();  // create an id for each message
 
                                 //  ============    check if it's a new day first chat,
-                                notifyFirstChatOfANewDay(outsideUserModel.getTimeSent(), messageModel.getTimeSent(), messageModel.getNewChatNumberID(), adapter, otherId);
-
-                                int currentNewChatNumber = 0;
+                                if(outsideUserModel != null){
+                                    notifyFirstChatOfANewDay(outsideUserModel.getTimeSent(), messageModel.getTimeSent(),    // onNewChatInteration
+                                            newChatDateKey, adapter, otherId);
+                                } else {
+                                    notifyFirstChatOfNewUser(messageModel.getTimeSent(), newChatDateKey, adapter, otherId);
+                                }
 
                                 // check recycler position before scrolling // or receiving number of new chat alert
                                 int scrollNumCheck = scrollNumMap.get(otherId) == null ? adapter.getItemCount() - 1
                                         : (int) scrollNumMap.get(otherId) ;
                                 int scrollCheck = adapter.getItemCount() - scrollNumCheck;
+
+                                int currentNewChatNumber = 0;
 
                                 // add the new chat alert   ================= 5 new chats
                                 if( (insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck > 5)   // I am inside the chat
@@ -4750,9 +4860,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                 // add to room database -- inside chat
                                 chatViewModel.insertChat(otherId, messageModel);
 
-                                // find position and move it to top as recent chat // add to outside ROOM
-                                ChatListAdapter.getInstance().findUserPositionByUID(otherId, messageModel, currentNewChatNumber);
-
+                                // find position and move it to top as recent chat // add to outside ROOM // update new count
+                                if(ChatsFragment.adapter != null) {
+                                    UserChatUtils.findUserPositionByUID(ChatsFragment.adapter.userModelList,
+                                            otherId, messageModel, currentNewChatNumber, context);
+                                } else {
+                                    UserChatUtils.findUserPositionByUID(PlayersFragment.adapter.userModelList,
+                                            otherId, messageModel, currentNewChatNumber, context);
+                                }
                                 // delete after delivery the chat
                                 refMsgFast.child(myId).child(otherId).child(messageModel.getIdKey()).removeValue();
 
@@ -4764,8 +4879,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                     if(insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck < 10)
                                     {
                                         scrollToPreviousPosition(otherId, (adapter.getItemCount() - 1));     // new message
-                                        ignoreNewChatCountReset = true;
-
                                     }
 
                                     adapter.notifyItemInserted(adapter.getItemCount() - 1);
@@ -4791,7 +4904,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             }
         });
-       
 
     }
 
@@ -4799,23 +4911,57 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         if (TimeUtils.isNotToday(compareTime))  // The timestamp is not today -- add
         {
-            MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
+            MessageModel newDateChatModel = new MessageModel(null, null, myId, null,
                     timeStamp, chatID, "newDate", null,
                     null, 0, AllConstants.type_pin, null, null, false, false,
                     null, null, null, null, null, null);
 
-            newNewCountModel.setMyUid(myId);
+            newDateChatModel.setMyUid(myId);
 
             // add to local chat list
-            adapter.addMyMessageDB(newNewCountModel);
+            adapter.addMyMessageDB(newDateChatModel);
 
             // save to local ROOM database  -- inside chat
-            chatViewModel.insertChat(otherId, newNewCountModel);
+            chatViewModel.insertChat(otherId, newDateChatModel);
 
             getLastTimeChat.put(otherId, System.currentTimeMillis());   // disable sending new time
         }
 
 //1718750571411
+    }
+
+    private void notifyFirstChatOfNewUser(long timeStamp, String chatID, MessageAdapter adapter, String otherId)    // new date and chat count
+    {
+        MessageModel newDateChatModel = new MessageModel(null, null, myId, null,
+                timeStamp, chatID, "newDate", null,
+                null, 0, AllConstants.type_pin, null, null, false, false,
+                null, null, null, null, null, null);
+
+        newDateChatModel.setMyUid(myId);
+
+        // add to local chat list
+        adapter.addMyMessageDB(newDateChatModel);
+
+        // save to local ROOM database  -- inside chat
+        chatViewModel.insertChat(otherId, newDateChatModel);
+
+        getLastTimeChat.put(otherId, System.currentTimeMillis());   // disable sending new time
+
+//1718750571411
+
+        MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
+                System.currentTimeMillis(), chatID, "yes", "1",
+                null, 0, AllConstants.type_pin, null, null, false, false,
+                null, null, null, null, null, null);
+
+        newNewCountModel.setMyUid(myId);
+
+        // add new chat model number count to local list
+        adapter.addMyMessageDB(newNewCountModel);
+
+        // save to local ROOM database
+        chatViewModel.insertChat(otherId, newNewCountModel);
+
     }
 
 
@@ -4879,8 +5025,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                             .child("emojiOnly").setValue(editMessageModel.getEmojiOnly());
 
                                     // update user chatList model
-                                    ChatsFragment.findUserAndEditChat(otherUid, editID,
-                                            editMessageModel.getMessage(), editMessageModel.getEmojiOnly());
+                                    UserChatUtils.findUserAndEditChat(PlayersFragment.adapter, otherUid,
+                                            editID, editMessageModel.getMessage(), editMessageModel.getEmojiOnly());
+                                    if(ChatsFragment.adapter != null) {
+                                        UserChatUtils.findUserAndEditChat(PlayersFragment.adapter,otherUid, editID,
+                                                editMessageModel.getMessage(), editMessageModel.getEmojiOnly());
+                                    }
 
                                     // update the ROOM outside UI
                                     chatViewModel.editOutsideChat(otherUid, editMessageModel.getMessage(),
@@ -4917,52 +5067,67 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                 for (DataSnapshot snapshotDelete: snapshot.getChildren()) {
                     // get the randomID for outside chat, and keyID for inside chat
-                    String deleteChatID = snapshotDelete.child("idKey").getValue().toString();
-                    String deleteIdKey = snapshotDelete.getKey();
-                    // loop through the local list and search for same idKey
-                    for (int i = adapter.getModelList().size() - 1; i >= 0; i--) {
-                        String listMessageID = adapter.getModelList().get(i).getIdKey();
+                    String deleteChatID = snapshotDelete.child("idKey").exists() ?
+                            snapshotDelete.child("idKey").getValue().toString() : null;
+                    if(deleteChatID != null)
+                    {
+                        String deleteIdKey = snapshotDelete.getKey();
+                        // loop through the local list and search for same idKey
+                        for (int i = adapter.getModelList().size() - 1; i >= 0; i--) {
+                            String listMessageID = adapter.getModelList().get(i).getIdKey();
 
-                        if(deleteIdKey.equals(listMessageID)){
-                            MessageModel chatModel = adapter.getModelList().get(i);
+                            if(deleteIdKey.equals(listMessageID)){
+                                MessageModel chatModel = adapter.getModelList().get(i);
 
-                            // delete from ROOM database
-                            chatViewModel.deleteChat(chatModel);
-                            // delete photo from my phone storage if photo exist
-                            if(!chatModel.getFromUid().equals(myId)) {  // other user is not permitted to delete my media except the one they sent me.
-                                deleteFileFromPhoneStorage(chatModel); // get id delete other user
+                                // delete from ROOM database
+                                chatViewModel.deleteChat(chatModel);
+                                // delete photo from my phone storage if photo exist
+                                if(!chatModel.getFromUid().equals(myId)) {  // other user is not permitted to delete my media except the one they sent me.
+                                    deleteFileFromPhoneStorage(chatModel); // get id delete other user
+                                }
+                                // delete from local list if id key matches
+                                adapter.getModelList().remove(i);
+                                adapter.notifyItemRangeChanged(i, adapter.getModelList().size(), new Object());
+                                // delete idKey from database if id key matches
+                                refDeleteMsg.child(myId).child(otherUid).child(deleteIdKey).removeValue();
+                                break;
                             }
-                            // delete from local list if id key matches
-                            adapter.getModelList().remove(i);
-//                            adapter.notifyItemRemoved(i);
-                            adapter.notifyDataSetChanged();
-                            // delete idKey from database if id key matches
-                            refDeleteMsg.child(myId).child(otherUid).child(deleteIdKey).removeValue();
-                            break;
                         }
                     }
 
                     // check outside message if it's same message that was deleted and delete for both user
-                    refLastDetails.child(myId).child(otherUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    refLastDetails.child(myId).child(otherUid).addListenerForSingleValueEvent(new ValueEventListener()
+                    {
                         @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotLast) {
-                            //  check if the random id is same
-                            String outSideChatID = snapshotLast.child("idKey").getValue().toString();
-                            if(deleteChatID.equals(outSideChatID)){
-                                //   the message
-                                refLastDetails.child(myId).child(otherUid)
-                                        .child("message").setValue("...");
-                                refLastDetails.child(otherUid).child(myId)
-                                        .child("message").setValue("...");
+                        public void onDataChange(@NonNull DataSnapshot snapshotLast)
+                        {
+                            try {
+                                //  check if the random id is same
+                                String outSideChatID = snapshotLast.child("idKey").exists() ?
+                                        snapshotLast.child("idKey").getValue().toString() : null;
+                                if(outSideChatID != null)
+                                {
+                                    if(deleteChatID.equals(outSideChatID)){
+                                        //   the message
+                                        refLastDetails.child(myId).child(otherUid)
+                                                .child("message").setValue("...");
+                                        refLastDetails.child(otherUid).child(myId)
+                                                .child("message").setValue("...");
 
-                                // delete the ROOM outside UI
-                                chatViewModel.editOutsideChat(otherUid,
-                                        AllConstants.DELETE_ICON + " ...",
-                                        null, outSideChatID);
+                                        // delete the ROOM outside UI
+                                        chatViewModel.editOutsideChat(otherUid,
+                                                AllConstants.DELETE_ICON + " ...",
+                                                null, outSideChatID);
 
-                                // update user chatList model
-                                ChatsFragment.findUserAndDeleteChat(otherUid, deleteChatID);
+                                        // update user chatList model
+                                        if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDeleteChat(ChatsFragment.adapter, otherUid, deleteChatID);
+                                        UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUid, deleteChatID);
 
+                                    }
+                                }
+
+                            }catch (Exception e){
+                                System.out.println("what is error MainA L5150: " + e.getMessage());
                             }
                         }
 
@@ -4980,6 +5145,83 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             }
         });
+    }
+
+    // check if other user has chats or deleted me from his chat list
+    public void checkClearChatsDB(String otherUid)
+    {
+        refClearSign.child(otherUid).child(myId).addValueEventListener(new ValueEventListener() // check if user delete all chats
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                AllConstants.executors.execute(() -> {
+                    if (snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")) {
+                        if (adapterMap.get(otherUid) != null) {
+                            // clear local list -- adapter
+                            adapterMap.get(otherUid).clearChats();
+                            runOnUiThread(() -> adapterMap.get(otherUid).notifyDataSetChanged());
+                        }
+                        //delete the sign from firebase DB
+                        refClearSign.child(otherUid).child(myId).removeValue();
+                        // delete all chat from ROOM
+                        chatViewModel.deleteChatByUserId(otherUid, myId);
+
+                        if(ChatsFragment.adapter != null)   // reset num of new chat to 0
+                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, AllConstants.fromChatFragment, false);
+                        if(PlayersFragment.adapter != null)
+                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, AllConstants.fromPlayerFragment, false);
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+        // check if other user has deleted me from his chat list
+        refDeleteUser.child(otherUid).child(myId).addValueEventListener(new ValueEventListener()    // check if user delete me from user list
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                AllConstants.executors.execute(()-> {
+                    if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear"))
+                    {
+                        if(adapterMap.get(otherUid) != null )
+                        {
+                            // clear chats from local list -- adapter
+                            adapterMap.get(otherUid).clearChats();
+                            // delete user from adapter list
+                            UserChatUtils.findUserAndDelete(PlayersFragment.adapter, otherUid);
+                            if(ChatsFragment.adapter != null) UserChatUtils.findUserAndDelete(ChatsFragment.adapter, otherUid);
+                        }
+                        //delete the sign from firebase DB
+                        refDeleteUser.child(otherUid).child(myId).removeValue();
+                        // delete user from ROOM
+                        chatViewModel.deleteUserById(otherUid);
+
+//                            if(!clearOnlyChatHistory) { // reactivate valueListener to get accurate result
+//                                PlayersFragment.newInstance().removeValueListener();
+//                                if (ChatsFragment.adapter != null) PlayersFragment.newInstance().removeValueListener();
+//
+//                                PlayersFragment.newInstance().activateValueListener();
+//                                if (ChatsFragment.adapter != null) PlayersFragment.newInstance().activateValueListener();
+//                            }
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     // delete photo from phone storage if a photo is delete from Chat
@@ -5101,7 +5343,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                         runOnUiThread(()-> adapter.notifyItemChanged(chatPosition, new Object()));
 
                                         // update delivery status for outSide chat
-                                        ChatListAdapter.getInstance().updateDeliveryToRead(otherId);
+                                        PlayersFragment.adapter.updateDeliveryToRead(otherId, AllConstants.fromPlayerFragment);
+
+                                        if(ChatsFragment.adapter != null)
+                                            ChatsFragment.adapter.updateDeliveryToRead(otherId, AllConstants.fromChatFragment);
 
                                         // update ROOM for inside chat
                                         chatViewModel.updateDeliveryStatus(otherId, getChatId, 700016);
@@ -5260,7 +5505,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         if(totalPinsPublic > 0 || totalPinsPrivate > 0) {
             pinIconsContainer.setVisibility(View.VISIBLE);
-            AnimUtils.fadeIn_300(pinChatViews);
+            AnimUtils.fadeInVisible(pinChatViews, 300);
             pinChatViews.setClickable(false);    //  allow item on the background clickable
             if(totalPinsPublic > 0 && totalPinsPrivate > 0) line.setVisibility(View.VISIBLE);
         }
@@ -5742,13 +5987,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                 if(modelChats.getType() != 8 && modelChats.getType() != 10)
                 {
-                    onEditOrReplyMessage_(modelChats, "reply", "replying...", R.drawable.reply,1);
+                    onEditOrReplyMessage_(modelChats, "reply", "replying...", R.drawable.reply);
 
                     // notify it to reset the adapter in case onSwipe was called
                     adapterMap.get(otherUserUid).notifyDataSetChanged();
                     // close chatOption is visible
                     cancelChatOption();
-                    if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                    if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
 
                 }
             }
@@ -5780,11 +6025,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // Check if the item is beyond the quarter of the screen and Return 0 to disable both dragging and swiping
                     if (viewHolder.itemView.getX() >= quarterScreen || viewHolder.itemView.getX() <= -quarterScreen) {
 
-                        onEditOrReplyMessage_(modelChats, "reply", "replying...", R.drawable.reply,1);
+                        onEditOrReplyMessage_(modelChats, "reply", "replying...", R.drawable.reply);
 
                         // close chatOption if visible
                         cancelChatOption();
-                        if(topEmojiView != null) AnimUtils.fadeOut_500(topEmojiView);
+                        if(topEmojiView != null) AnimUtils.fadeOutGone(topEmojiView, 500);
 
                         return 0;
                     } else {
@@ -5983,7 +6228,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     // add user id to db when user start typing and (reset newMsgCount to 0  --- change later)
     // Alert the DB when I start typing, to notify the receiver     // interact with send and record buttons
     public void tellUserAmTyping_AddUser(){
-        this.editTextMessage.addTextChangedListener(new TextWatcher() {
+        editTextMessage.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -6003,25 +6248,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         }
                     }
 
-                    sendMessageButton.setVisibility(View.VISIBLE);
-                    recordButton.setVisibility(View.INVISIBLE);
-                    camera_IV.setVisibility(View.INVISIBLE);
-                    gameMe_IV.setVisibility(View.INVISIBLE);
-                    refChecks.child(otherUserUid).child(myId).child("typing").setValue(1);
+                    onTyping();
 
                 } else {
                     if(listener.equals("edit")){
-                        sendMessageButton.setVisibility(View.VISIBLE);
-                        recordButton.setVisibility(View.INVISIBLE);
-                        camera_IV.setVisibility(View.INVISIBLE);
-                        gameMe_IV.setVisibility(View.INVISIBLE);
-                        refChecks.child(otherUserUid).child(myId).child("typing").setValue(1);
+                        onTyping();
                     } else {
-                        sendMessageButton.setVisibility(View.INVISIBLE);
-                        recordButton.setVisibility(View.VISIBLE);
-                        camera_IV.setVisibility(View.VISIBLE);
-                        gameMe_IV.setVisibility(View.VISIBLE);
-                        refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
+                        endTyping();
                     }
                 }
 
@@ -6070,33 +6303,56 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         });
     }
 
-    // show when other user is typing
-    public void getMyUserTyping()
+    private void onTyping()
     {
-        AllConstants.executors.execute(() -> refChecks.child(myId).addValueEventListener(new ValueEventListener() {
+        if(camera_IV.getVisibility() == View.VISIBLE) AnimUtils.slideOutToRight(camera_IV, 100);
+        if(gameMe_IV.getVisibility() == View.VISIBLE) AnimUtils.slideOutToRight(gameMe_IV, 100);
+
+        sendMessageButton.setVisibility(View.VISIBLE);
+        recordButton.setVisibility(View.INVISIBLE);
+        refChecks.child(otherUserUid).child(myId).child("typing").setValue(1);
+    }
+
+    private void endTyping()
+    {
+        if(camera_IV.getVisibility() != View.VISIBLE ) AnimUtils.slideInFromRight(camera_IV, 100);
+        if(gameMe_IV.getVisibility() != View.VISIBLE) AnimUtils.slideInFromRight(gameMe_IV, 100);
+
+        sendMessageButton.setVisibility(View.INVISIBLE);
+        recordButton.setVisibility(View.VISIBLE);
+        refChecks.child(otherUserUid).child(myId).child("typing").setValue(0);
+    }
+
+    // show when other user is typing
+    public void getMyUserTyping(String otherUid)
+    {
+        typingValueListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 try {
-                    long typing = (long) snapshot.child(otherUserUid).child("typing").getValue();
+                    long typing = snapshot.child("typing").exists() ?
+                            (long) snapshot.child("typing").getValue() : -1;
 
-                    handler.post(() -> {
+                    if(typing == 0){
+                        textViewMsgTyping.setText("");
 
-                        if(typing == 1){
-                            textViewMsgTyping.setText("typing...");
-                        } else{
-                            textViewMsgTyping.setText("");
-                        }
-                    });
+                    } else if (typing == 1){
+                        AnimUtils.fadeInVisible(textViewMsgTyping, 300);
+                        textViewMsgTyping.setText("typing...");
+                    }
+
                 } catch (Exception e){
-                    refChecks.child(myId).child(otherUserUid).child("typing").setValue(0);
+                    if(otherUserUid != null)refChecks.child(myId).child(otherUserUid).child("typing").setValue(0);
+                    System.out.println("what is error MainAct: " + e.getMessage());
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        }));
+        };
+
+        refChecks.child(myId).child(otherUid).addValueEventListener(typingValueListener);
 
     }
 
@@ -6126,7 +6382,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             adapter.notifyItemChanged(chatPosition, new Object());
 
                             // update delivery status for outSide chat
-                            ChatListAdapter.getInstance().updateDeliveryStatus(otherUID_);
+                            PlayersFragment.adapter.updateDeliveryStatus(otherUID_, AllConstants.fromPlayerFragment);
+                            if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUID_, AllConstants.fromChatFragment);
 
                             // update ROOM for inside chat
                             chatViewModel.updateDeliveryStatus(otherUID_, chatKey, 700024);
@@ -6634,7 +6891,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(pinChatViews!= null) pinChatViews.setVisibility(View.VISIBLE);
         firstTopChatViews.setVisibility(View.VISIBLE);
         constraintMsgBody.setVisibility(View.VISIBLE);
-        tabLayoutGeneral.setVisibility(View.VISIBLE);
+//        tabLayoutGeneral.setVisibility(View.INVISIBLE);
 
         onForwardTopView.setVisibility(View.GONE);
         forwardDownContainer.setVisibility(View.INVISIBLE);
@@ -6642,7 +6899,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // call forward setting method to remove the checkBox
         myHolderNew.clear();
         myHolderNew.addAll(myHolder_);  // add up all user holder
-        ChatListAdapter.getInstance().forwardCheckBoxVisibility(myHolderNew);
+        ChatsFragment.newInstance().adapter.forwardCheckBoxVisibility(myHolderNew);
 
         // remove the typingRunnable for checking network
         handlerTyping.removeCallbacks(runnableTyping);
@@ -6652,7 +6909,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(appActivity || otherUserUid == null || !insideChat) {
             constraintMsgBody.setVisibility(View.INVISIBLE);
             topMainContainer.setVisibility(View.VISIBLE);
-            firstTopChatViews.setVisibility(View.INVISIBLE);
+//            firstTopChatViews.setVisibility(View.INVISIBLE);
             closePinIcons();    // for sharing photo from other app
 
             // open the previous Activity it was on before user shared
@@ -6688,7 +6945,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         moreOption_IV.setVisibility(View.VISIBLE);
         editChatOption_IV.setImageResource(R.drawable.baseline_mode_edit_24);
         isOnlongClick = 0;
-        if(deleteChatForOnlyOther_TV != null )deleteChatForOnlyOther_TV.setVisibility(View.VISIBLE);
 
         if(pinChatViews != null) pinChatViews.setVisibility(View.VISIBLE);
 
@@ -6732,14 +6988,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private void cancelUserDeleteOption()
     {
         userModelList.clear();
-        ChatListAdapter.otherUidLongPressList.clear();
+        if(ChatsFragment.adapter != null) ChatsFragment.adapter.otherUidLongPressList.clear();
+        if(PlayersFragment.adapter != null) PlayersFragment.adapter.otherUidLongPressList.clear();
+
         otherUserName_TV.setText(null);
         deleteUserOrClearChatViews.setVisibility(View.GONE);
-        if(onUserMoreLongPressView != null) onUserMoreLongPressView.setVisibility(View.GONE);
+        if(onUserMoreLongPressView != null){
+            userLongPressMoreSub.setVisibility(View.GONE);
+            onUserMoreLongPressView.setVisibility(View.GONE);
+        }
         if(onUserLongPressView != null) onUserLongPressView.setVisibility(View.GONE);
         onUserLongPress = false;
 
-        ChatsFragment.notifyDataFullSet();
+        if(ChatsFragment.adapter != null) ChatsFragment.newInstance().notifyVisibleUser();
+        if(PlayersFragment.adapter != null) PlayersFragment.newInstance().notifyVisibleUser();
+
     }
 
     private void cancelChatDeleteOption(){
@@ -6779,7 +7042,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) constraintLayoutAdjust.getLayoutParams();
         layoutParams.bottomToTop = R.id.typeMsgContainer; // Replace with the actual ID
 
-        layoutParams.bottomMargin = screenHeight-220;
+        layoutParams.bottomMargin = screenHeight;
         // Apply the changes
         constraintLayoutAdjust.setLayoutParams(layoutParams);
 
@@ -6834,66 +7097,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 unusedPhotoShareRef.edit().remove(AllConstants.OLD_URI_LIST).apply();
             }
         }
-    }
-    
-    // check if other user deleted me from his chat list, if yes, then clear all the user chat
-    public void checkClearChatsDB(String otherUid){
-
-        AllConstants.executors.execute(() -> {
-
-            // check if other user has deleted or cleared our chats histories from his chat list
-            refClearSign.child(otherUid).child(myId).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")){
-                        if(adapterMap.get(otherUid) != null ){
-                            // clear local list -- adapter
-                            adapterMap.get(otherUid).clearChats();
-                            runOnUiThread(() -> adapterMap.get(otherUid).notifyDataSetChanged());
-                        }
-                        //delete the sign from firebase DB
-                        refClearSign.child(otherUid).child(myId).removeValue();
-                        // chat all chat from ROOM
-                        chatViewModel.deleteChatByUserId(otherUid, myId);
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-
-            // check if other user has deleted me from his chat list
-            refDeleteUser.child(otherUid).child(myId).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")){
-                        if(adapterMap.get(otherUid) != null ){
-                            // clear local list -- adapter
-                            adapterMap.get(otherUid).clearChats();
-                            //  remove user from chatList
-                            runOnUiThread(() -> ChatsFragment.findUserPositionByUID(otherUid));
-                        }
-                        //delete the sign from firebase DB
-                        refDeleteUser.child(otherUid).child(myId).removeValue();
-                        // delete user from ROOM
-                        chatViewModel.deleteUserById(otherUid);
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-        });
-
     }
 
     public void clearInputFields(){
@@ -7033,6 +7236,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
     }
 
+    private void removeValueListeners()
+    {
+        if(typingValueListener != null) {   // remove the typing listener
+            refChecks.child(myId).child(otherUserUid).removeEventListener(typingValueListener);
+        }
+
+        if (chatReadListener != null) {     // remove the read receipt listener
+            refOnReadRequest.child(myId).child(otherUserUid).removeEventListener(chatReadListener);
+        }
+
+        if(lastSeenValueListener != null){
+            refUsers.child(otherUserUid).child("general").removeEventListener(lastSeenValueListener);
+        }
+    }
+
     @Override
     protected void onPause() {
 
@@ -7145,6 +7363,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 } else if (chatMenuViews != null && chatMenuViews.getVisibility() == View.VISIBLE)
                 {
                     chatMenuViews.setVisibility(View.GONE); // close profile menu
+                    scrollViewMenu.setVisibility(View.GONE);
+
                 } else if (fileOptionViews != null && fileOptionViews.getVisibility() == View.VISIBLE)
                 {
                     fileOptionViews.setVisibility(View.GONE);
@@ -7179,7 +7399,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     // General settings
                     constraintMsgBody.setVisibility(View.INVISIBLE);
                     topMainContainer.setVisibility(View.VISIBLE);
-                    if(firstTopChatViews != null) firstTopChatViews.setVisibility(View.INVISIBLE);
+                    tabLayoutGeneral.setVisibility(View.VISIBLE);
                     if(topEmojiView != null) topEmojiView.setVisibility(View.GONE);
                     emoji_IV.setImageResource(R.drawable.baseline_add_reaction_24);
                     isEmojiVisible = false;
@@ -7189,8 +7409,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     receiveIndicator.setVisibility(View.GONE);
                     sendIndicator.setVisibility(View.GONE);
                     textViewLastSeen.setVisibility(View.INVISIBLE);
-//                    textViewLastSeen.setText(getString(R.string.app_name));   // clear last seen
-                    textViewLastSeen.setText(null);   // clear last seen
+                    textViewLastSeen.setText(getString(R.string.app_name));   // clear last seen
+                    bioHint_TV.setVisibility(View.INVISIBLE);
+                    bioHint_TV.setText(null);   // clear last seen
 
                     // remove the typingRunnable for checking network
                     handlerTyping.removeCallbacks(runnableTyping);
@@ -7225,29 +7446,18 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             System.out.println("M3052 I have saved scroll " + scrollNum + " uid: " + otherUserUid);
 
                             // reset new chat count number -- inside and outside
-                            if( !ignoreNewChatCountReset && adapterMap.get(otherUserUid).getItemCount() - scrollNum < 10)
-                            {
-                                if(adapterMap.get(otherUserUid).alreadySighted) {
-                                    adapterMap.get(otherUserUid).getChatByPinTypeAndDelete();   // onBackPress
-                                };
-                                // reset new chat count -- outside outside
-                                ChatListAdapter.getInstance().findUserModelByUidAndResetNewChatNum(otherUserUid);
-                                System.out.println("I didn't ignore");
-
-                            } else {
-                                System.out.println("I ignore");
+                            try{
+                                adapterMap.get(otherUserUid).getChatByPinTypeAndDeleteViaRecycler(recyclerMap.get(otherUserUid), otherUserUid);   // onBackPress
+                            } catch (Exception e) {
+                                System.out.println("what is error homeA L7320: " + e.getMessage());
                             }
-                            ignoreNewChatCountReset = false;
+
                             insideChatMap.put(otherUserUid, false);
 
-                            // Remove the ValueEventListener when the back button is pressed
-                            if (chatReadListener != null) {
-                                refOnReadRequest.child(myId).child(otherUserUid).removeEventListener(chatReadListener);
-                            }
+                            removeValueListeners();
 
                             insideChat = false;  // onBackPress
                             idKey = null;
-
                         }
 
                     });
@@ -7272,6 +7482,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             } else if (moreOptionHomeView != null && moreOptionHomeView.getVisibility() == View.VISIBLE)
             {
                 moreOptionHomeView.setVisibility(View.GONE);
+                moreHomeCont2.setVisibility(View.GONE);
             } else if (viewPager2General.getCurrentItem() != 0)
             {
                 viewPager2General.setCurrentItem(0, true);

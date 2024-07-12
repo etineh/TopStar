@@ -34,7 +34,7 @@ public interface AllConstants {
     int type_video = 5;
     int type_call = 6;
     int type_game = 7;
-    int type_pin = 8;
+    int type_pin = 8;   // use for pin, number of new chat and new chat date
     int type_empty = 10;
 
     String MYUSERNAME = "MYUSERNAME";
@@ -54,6 +54,8 @@ public interface AllConstants {
     String VOICENOTE_UID = "VOICENOTE_UID";
     String CONTACTNAME = "CONTACT_NAME";
     String FCMTOKEN = "FCM_TOKEN";
+    String OTHERUSERHINT = "OTHER_USER_HINT";
+
     Handler handler = new Handler(Looper.getMainLooper());
 
     String PICKED_IMAGE_URI_PATH = "ImageUriPath";
@@ -76,7 +78,8 @@ public interface AllConstants {
 
     ExecutorService executors = Executors.newSingleThreadExecutor();
 
-//    String FIREBASE_PHOTO_LOCATION = "media/photos/" + user.getUid() + "/" + System.currentTimeMillis();
+    String fromChatFragment = "CHAT_FRAGMENT";
+    String fromPlayerFragment = "PLAYER_FRAGMENT";
 
     String JOIN = "TopstarChatJoinPaths";
 

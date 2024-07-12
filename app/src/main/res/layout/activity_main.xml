@@ -105,11 +105,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout="@layout/vs_chat_menu"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ViewStub
         android:id="@+id/firstTopContainer"
@@ -133,165 +133,166 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/HomeTopConstr"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:clickable="true"
+        android:elevation="5dp">
+
+        <ImageView
+            android:id="@+id/imageViewMenu"
+            style="@style/BackgroundTint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:scaleType="fitXY"
+            android:scaleY="1.7"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/menu_" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleUserImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/logo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageViewMenu"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/textViewUsername"
+            style="@style/appName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/app_name"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/circleUserImage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <ImageView
+            android:id="@+id/imageViewSearch"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/baseline_search_24" />
+
+        <ImageView
+            android:id="@+id/viewWalletIcon"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewSearch"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/money" />
+
+        <ImageView
+            android:id="@+id/imageViewGift"
+            style="@style/BackgroundTintOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/viewWalletIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:srcCompat="@drawable/baseline_create_new_folder_24" />
+
+        <ImageView
+            android:id="@+id/imageView7"
+            style="@style/BackgroundTint"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="-7dp"
+            app:layout_constraintBottom_toTopOf="@+id/viewWalletIcon"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewSearch"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/lock" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayerMain"
+        style="@style/CustomTab"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/HomeTopConstr"
+        app:tabMode="fixed"
+        app:tabTextAppearance="@style/CustomTab">
+
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <ViewStub
+        android:id="@+id/forwardConstraint"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout="@layout/vs_forward_top_layout"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/userLongPressVS"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout="@layout/vs_user_longpress"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/userLongPressMoreVS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_user_more_longpress"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainViewConstraint"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/returnBackToCAll">
+        app:layout_constraintTop_toBottomOf="@+id/tabLayerMain">
 
         <EditText
             android:id="@+id/et_emoji"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/fullTransparent"
             android:ems="10"
             android:inputType="textPersonName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-
-        <ViewStub
-            android:id="@+id/forwardConstraint"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout="@layout/vs_forward_top_layout"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ViewStub
-            android:id="@+id/userLongPressVS"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout="@layout/vs_user_longpress"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <ViewStub
-            android:id="@+id/userLongPressMoreVS"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout="@layout/vs_user_more_longpress"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/HomeTopConstr"
-            style="@style/mainBackground"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:clickable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/imageViewMenu"
-                style="@style/BackgroundTint"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:scaleType="fitXY"
-                android:scaleY="1.7"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/menu_" />
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleUserImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/logo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/imageViewMenu"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <TextView
-                android:id="@+id/textViewUsername"
-                style="@style/appName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="@string/app_name"
-                android:textSize="20sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/circleUserImage"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-
-            <ImageView
-                android:id="@+id/imageViewSearch"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/baseline_search_24" />
-
-            <ImageView
-                android:id="@+id/viewWalletIcon"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewSearch"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/money" />
-
-            <ImageView
-                android:id="@+id/imageViewGift"
-                style="@style/BackgroundTintOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/viewWalletIcon"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/baseline_create_new_folder_24" />
-
-            <ImageView
-                android:id="@+id/imageView7"
-                style="@style/BackgroundTint"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="-7dp"
-                app:layout_constraintBottom_toTopOf="@+id/viewWalletIcon"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewSearch"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/lock" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayerMain"
-            style="@style/CustomTab"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/HomeTopConstr"
-            app:tabMode="fixed"
-            app:tabTextAppearance="@style/CustomTab">
-
-
-        </com.google.android.material.tabs.TabLayout>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPageMain"
@@ -300,7 +301,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tabLayerMain">
+            app:layout_constraintTop_toTopOf="parent">
 
         </androidx.viewpager2.widget.ViewPager2>
 
@@ -311,7 +312,7 @@
             android:layout="@layout/vs_home_last_layer"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -451,22 +452,10 @@
                 app:layout_constraintTop_toBottomOf="@id/scrollToPositionIV" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/lineDepartConstr"
-                android:layout_width="2dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="40dp"
-                android:background="@color/cool_orange"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toLeftOf="@id/constraintRecyler"
-                app:layout_constraintTop_toTopOf="parent">
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayoutAdjust"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="801dp"
+                android:layout_marginBottom="800dp"
                 android:background="@color/light_orange"
                 android:elevation="30dp"
                 app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
@@ -475,11 +464,24 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lineDepartConstr"
+                android:layout_width="2dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="40dp"
+                android:background="@color/cool_orange"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/constraintRecyler"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintRecyler"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginStart="6dp"
-                android:layout_marginBottom="7dp"
+                android:layout_marginBottom="5dp"
                 app:layout_constraintBottom_toTopOf="@+id/typeMsgContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -514,6 +516,7 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="7dp"
                     android:layout_marginBottom="4dp"
+                    android:clickable="true"
                     android:elevation="2dp"
                     app:cardCornerRadius="20dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -731,14 +734,13 @@
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/fab9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="4dp"
                     android:background="@drawable/msg_count"
                     android:padding="@dimen/_11dp"
                     android:src="@drawable/baseline_send_24"
-                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 

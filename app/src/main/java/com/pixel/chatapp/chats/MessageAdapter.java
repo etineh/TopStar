@@ -1,5 +1,7 @@
 package com.pixel.chatapp.chats;
 
+import static com.pixel.chatapp.home.MainActivity.insideChat;
+import static com.pixel.chatapp.home.MainActivity.newChatNumberPosition;
 import static com.pixel.chatapp.utils.FileUtils.compressVideo;
 import static com.pixel.chatapp.utils.FileUtils.createVideoThumbnail;
 import static com.pixel.chatapp.utils.FileUtils.downloadThumbnailFile;
@@ -59,6 +61,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -66,17 +69,15 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.home.fragments.ChatsFragment;
+import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.utils.TimeUtils;
 import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.utils.FileUtils;
@@ -87,7 +88,6 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
-import com.pixel.chatapp.model.PinMessageModel;
 import com.pixel.chatapp.utils.ToggleUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -115,18 +115,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    public  List<MessageModel> modelList;
+    private List<MessageModel> modelList;
 
     // Define a HashSet to store unique message IDs
     private Set<String> messageIdSet = new HashSet<>(); // to avoid duplicate adding chat, store each id chat here
 
     public static int lastPosition = 0;
-    int count = 0;
 
     public static List<Integer> chatPositionList = new ArrayList<>();
     public String uId;
     public String userName;
-    public boolean alreadySighted;
     private Map<String, Runnable> sightedRunnableMap = new HashMap<>();
     private Map<String, Handler> handlerNewChatNumMap = new HashMap<>();
 
@@ -301,50 +299,90 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     {
         for (int i = modelList.size()-1; i >= 0; i--)
         {
-            int type = modelList.get(i).getType();
+            int finalPosition = i;
 
-            String edit = modelList.get(i).getEdit();
+            int type = modelList.get(finalPosition).getType();
+
+            String edit = modelList.get(finalPosition).getEdit();
 
             if(type == AllConstants.type_pin && edit != null && edit.equals("yes"))
             {
-                modelList.get(i).setNewChatNumberID(number);
+                modelList.get(finalPosition).setNewChatNumberID(number);
 
-                int finalPosition = i;
                 handler.post(()-> notifyItemChanged(finalPosition, new Object()));
 
-                chatViewModel.updateChat(modelList.get(i));    // delete from room
+                chatViewModel.updateChat(modelList.get(finalPosition));    // delete from room
 
                 break;
             }
         }
     }
 
-    public void getChatByPinTypeAndDelete()
+    public void getChatByPinTypeAndDelete(int i)    // get the position on first sight and delete when user press back
     {
-        for (int i = modelList.size()-1; i >= 0; i--)
+        int type = modelList.get(i).getType();
+        String edit = modelList.get(i).getEdit();
+
+        if(type == AllConstants.type_pin && edit != null && edit.equals("yes"))
         {
-            int type = modelList.get(i).getType();
+            chatViewModel.deleteChat(modelList.get(i));    // delete from room
 
-            String edit = modelList.get(i).getEdit();
-
-            if(count > 0) count++;
-
-            if(type == AllConstants.type_pin && edit != null && edit.equals("yes")){
-
-                count = 0;
-                chatViewModel.deleteChat(modelList.get(i));    // delete from room
-
+            handler.post(()-> {
                 modelList.remove(i);    // delete from list
-                int finalPosition = i;
-                handler.post(()-> {
-                    notifyItemRemoved(finalPosition);
-                    notifyItemRangeChanged(finalPosition, modelList.size());
-                });
+                notifyItemRemoved(i);
+                notifyItemRangeChanged(i, modelList.size(), new Object());
+            });
+        }
 
-                count = 1;
+    }
+
+    public void getChatByPinTypeAndDeleteViaRecycler(RecyclerView recyclerView, String otherId)
+    {
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+        if (layoutManager instanceof LinearLayoutManager) {
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+
+            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+            int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+
+            // Ensure the indices are within bounds
+            if (firstVisibleItemPosition < 0 || lastVisibleItemPosition < 0) {
+                return;
             }
-            if(count == 10) {   // to check in if any card is left, by bug in case
-                break;
+
+            for (int i = lastVisibleItemPosition; i >= firstVisibleItemPosition; i--)
+            {
+                int finalPosition = i;
+                int type = modelList.get(finalPosition).getType();
+                String edit = modelList.get(finalPosition).getEdit();
+                MessageModel modelChats = modelList.get(finalPosition);
+
+                if (type == AllConstants.type_pin && edit != null && edit.equals("yes"))
+                {
+                    chatViewModel.deleteChat(modelChats); // delete from room
+
+                    AllConstants.handler.post(()->{
+                        modelList.remove(finalPosition); // delete from list
+                        notifyItemRemoved(finalPosition);
+                        notifyItemRangeChanged(finalPosition, modelList.size(), new Object());
+                    });
+                    // reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
+                    if(ChatsFragment.adapter != null)
+                        ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, AllConstants.fromChatFragment, true);
+                    if(PlayersFragment.adapter != null)
+                        PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, AllConstants.fromPlayerFragment, true);
+
+                    // remove the previous runnable to prevent the onBindView calling it again
+                    Runnable runnableNewChatNum = sightedRunnableMap.get(modelChats.getIdKey());
+                    if(handlerNewChatNum != null && runnableNewChatNum != null) {
+                        handlerNewChatNum.removeCallbacks(runnableNewChatNum);
+                    }
+                    break;
+
+                } else if (i == firstVisibleItemPosition){
+                    if(newChatNumberPosition != -1) getChatByPinTypeAndDelete(newChatNumberPosition);
+                }
             }
         }
     }
@@ -354,6 +392,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             String all_IDs = modelList.get(i).getIdKey();
             if (id.equals(all_IDs)) { // Use equals() for string comparison
                 modelList.remove(i);
+                notifyItemRangeChanged(i, modelList.size(), new Object());
                 break;
             }
         }
@@ -497,18 +536,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(viewType == send)
             {
                 layer = R.layout.view_card;
-                Toast.makeText(mContext, "view sender", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "view sender", Toast.LENGTH_SHORT).show();
             } else if (viewType == sendPhoto)
             {
                 layer = R.layout.photo_send_card;
-                Toast.makeText(mContext, "view photo send", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "view photo send", Toast.LENGTH_SHORT).show();
             } else if (viewType == receivePhoto)
             {
                 layer = R.layout.photo_receive_card;
-                Toast.makeText(mContext, "view photo receive", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "view photo receive", Toast.LENGTH_SHORT).show();
             } else if (viewType == receive) {
                 layer = R.layout.view_card_receiver;
-                Toast.makeText(mContext, "view receiver", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "view receiver", Toast.LENGTH_SHORT).show();
             } else if (viewType == callSend) {
                 layer = R.layout.call_sender_card;
             } else if (viewType == callReceive) {
@@ -1165,7 +1204,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     // Scroll to the original message's position
                     if (originalPosition != RecyclerView.NO_POSITION) {
 
-                        recyclerMap.get(otherUserUid).scrollToPosition(originalPosition-2);
+                        recyclerMap.get(otherUserUid).scrollToPosition(originalPosition-4);
 
                         highlightItem(originalPosition);
 
@@ -1213,44 +1252,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         {
             if(modelChats.getType() == AllConstants.type_pin)   // set pin chat and scroll to chat onClick
             {
-                if( modelChats.getEdit()!= null && modelChats.getEdit().equals("yes")
+                if( modelChats.getEdit()!= null && modelChats.getEdit().equals("yes")   //  for number of new chat
                         && modelChats.getNewChatNumberID() != null && Integer.parseInt(modelChats.getNewChatNumberID()) > 0)
                 {
                     String newChatNo = modelChats.getNewChatNumberID() + " " + mContext.getString(R.string.newMessage);
                     holder.pinAlertTV.setText(newChatNo);
 
-                    Runnable runnableNewChatNum = sightedRunnableMap.get(modelChats.getIdKey());
+                    if(insideChat){
+                        Runnable runnableNewChatNum = sightedRunnableMap.get(modelChats.getIdKey());
 
-                    // remove the previous runnable if sighted twice (incase user scroll to same position b4 it delete)
-                    if(handlerNewChatNum != null && runnableNewChatNum != null) {
-                        handlerNewChatNum.removeCallbacks(runnableNewChatNum);
+                        // remove the previous runnable if sighted twice (in case user scroll to same position b4 it delete)
+                        if(handlerNewChatNum != null && runnableNewChatNum != null) {
+                            handlerNewChatNum.removeCallbacks(runnableNewChatNum);
+                        }
+
+                        runnableNewChatNum = ()->{  // create new runnable
+
+                            chatViewModel.deleteChat(modelChats);    // delete from room
+
+                            modelList.remove(modelChats);    // delete from list
+                            notifyItemRemoved(chatPosition);
+                            notifyItemRangeChanged(chatPosition, modelList.size());
+
+                        };
+
+                        assert handlerNewChatNum != null;
+                        handlerNewChatNum.postDelayed(runnableNewChatNum, 10_000);
+
+                        sightedRunnableMap.put(modelChats.getIdKey(), runnableNewChatNum);  // save the new runnable
+
+                        // reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
+                        if(ChatsFragment.adapter != null)
+                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, AllConstants.fromChatFragment, true);
+                        if(PlayersFragment.adapter != null)
+                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, AllConstants.fromPlayerFragment, true);
+
                     }
-
-                    runnableNewChatNum = ()->{  // create new runnable
-
-                        chatViewModel.deleteChat(modelChats);    // delete from room
-
-                        modelList.remove(modelChats);    // delete from list
-                        notifyItemRemoved(chatPosition);
-                        notifyItemRangeChanged(chatPosition, modelList.size());
-
-                        alreadySighted = false;
-
-//                        int chatPosition = modelList.indexOf(modelChat);
-//                        if (chatPosition != -1) {
-//                            modelList.remove(chatPosition);
-//                            notifyItemRemoved(chatPosition);
-//                            notifyItemRangeChanged(chatPosition, modelList.size());
-//                        }
-                    };
-
-                    handlerNewChatNum.postDelayed(runnableNewChatNum, 5000);
-
-                    alreadySighted = true;
-                    sightedRunnableMap.put(modelChats.getIdKey(), runnableNewChatNum);  // save the new runnable
-
-                    // reset new chat count -- outside outside
-                    ChatListAdapter.getInstance().findUserModelByUidAndResetNewChatNum(otherUserUid);
 
                 } else if (modelChats.getEdit()!= null && modelChats.getEdit().equals("newDate"))
                 {
@@ -1268,7 +1305,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         holder.pinAlertTV.setText(formattedDate);
                     }
 
-                } else holder.pinAlertTV.setText(modelChats.getMessage());
+                } else holder.pinAlertTV.setText(modelChats.getMessage());  // for user Pin a Chat
 
                 holder.pinAlertTV.setOnClickListener(scrollToReplyChat);
 
@@ -1291,7 +1328,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // check it's on onLongPress and retain chat position highlight
         retainHighlight(chatPosition);
 
-    }
+    }         //    =====  onBind
 
 
     // ---------------------- methods ---------------------------
@@ -1441,10 +1478,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    // make option menu visible if it's gone
-    private void makeChatOptionVisible(MessageModel modelChats, int chatPosition){
-
-    }
 
     //  return to previous state of progressLoad Bar when file fails to send
     private void loadBarVisibility(MessageViewHolder holder, MessageModel modelChats){
@@ -2784,7 +2817,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refOnReadRequest.child(otherUid).child(myId).push().setValue(modelChats.getIdKey());
 
         // update delivery status for outSide chat
-        ChatListAdapter.getInstance().updateDeliveryStatus(otherUid);
+        if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUid, AllConstants.fromChatFragment);
+        if(PlayersFragment.adapter != null) PlayersFragment.adapter.updateDeliveryStatus(otherUid, AllConstants.fromPlayerFragment);
+
         // update delivery status ROOM for outside chat
         chatViewModel.updateOutsideDelivery(otherUid, 700024);
 

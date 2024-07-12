@@ -7,6 +7,7 @@ import static com.pixel.chatapp.home.MainActivity.myUserName;
 import static com.pixel.chatapp.home.MainActivity.onForward;
 import static com.pixel.chatapp.home.MainActivity.onUserLongPress;
 import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
+import static com.pixel.chatapp.home.MainActivity.otherUserHintRef;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 
 import android.annotation.SuppressLint;
@@ -41,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
+import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.photos.ZoomImage;
@@ -48,6 +50,8 @@ import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
+import com.pixel.chatapp.utils.AnimUtils;
+import com.pixel.chatapp.utils.UserChatUtils;
 import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;
@@ -63,10 +67,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>  {
 
-    public static List<UserOnChatUI_Model> otherUsersId;
+    public final List<UserOnChatUI_Model> userModelList;
 
-    private static Context mContext;
-    private static Activity activity;
+    private final Context mContext;
+    private final Activity activity;
 
     private final DatabaseReference referenceUsers;
     private final DatabaseReference refUsersLast;
@@ -79,12 +83,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
+    Map<String, ValueEventListener> typeValueListenerMap;
 
-    public static List<String> otherUidLongPressList = new ArrayList<>();
+    public List<String> otherUidLongPressList = new ArrayList<>();
 
     private Handler handler = new Handler(Looper.getMainLooper());
     private List<View> viewClickList = new ArrayList<>();
-    public static View previousView;
+    public View previousView;
 
     private FragmentListener listener;
 
@@ -92,12 +97,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         this.listener = listener;
     }
 
-    private static ChatListAdapter instance;
 
-    // constructor
-    public ChatListAdapter(List<UserOnChatUI_Model> otherUsersId, Context mContext, Activity activity)
+    // =======  constructor
+    public ChatListAdapter(List<UserOnChatUI_Model> userModelList, Context mContext, Activity activity)
     {
-        this.otherUsersId = otherUsersId;
+        this.userModelList = userModelList;
         this.mContext = mContext;
         this.activity = activity;
 //        MainActivity.myHolder_ = new ArrayList<>();
@@ -117,20 +121,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         offlinePresenceAndStatus = new HashMap<>();
         dateMonth = new HashMap<>();
         dateNum = new HashMap<>();
+        typeValueListenerMap = new HashMap<>();
     }
 
-    public static ChatListAdapter getInstance() {
-        if (instance == null) {
-            instance = new ChatListAdapter(otherUsersId, mContext, activity);
-        }
-        return instance;
-    }
 
     @NonNull
     @Override
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.users_card, parent, false);
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.userlist_card, parent, false);
 
         return new ChatViewHolder(view);
@@ -147,7 +145,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         holder.imageView.setImageResource(R.drawable.person_round);
         holder.imageViewDeliver.setImageResource(0);
         holder.textViewMsg.setText(null);
-        holder.textViewUser.setText(null);
+        holder.textViewUser.setText("");
 //        holder.imageView.setImageResource(0);
 
         holder.checkBoxContainer.setVisibility(View.GONE);
@@ -159,18 +157,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         } else holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultBlack));
 
         int position_ = position;
-        String otherUid = otherUsersId.get(position_).getOtherUid();
-        String emojiOnly = otherUsersId.get(position_).getEmojiOnly();
-        String message = otherUsersId.get(position_).getMessage();
-        String otherUserName = otherUsersId.get(position_).getOtherUserName();
-        String otherDisplayName = otherUsersId.get(position_).getOtherDisplayName();
-        String otherContactName = otherUsersId.get(position_).getOtherContactName();
-        String imageLink = otherUsersId.get(position_).getImageUrl();
-        int type = otherUsersId.get(position_).getType();
-        int newChatNumbers = otherUsersId.get(position_).getNumberOfNewChat();
-        int msgStatus = otherUsersId.get(position_).getMsgStatus();
+        String otherUid = userModelList.get(position_).getOtherUid();
+        String emojiOnly = userModelList.get(position_).getEmojiOnly();
+        String message = userModelList.get(position_).getMessage();
+        String otherUserName = userModelList.get(position_).getOtherUserName();
+        String otherDisplayName = userModelList.get(position_).getOtherDisplayName();
+        String otherContactName = userModelList.get(position_).getOtherContactName();
+        String imageLink = userModelList.get(position_).getImageUrl();
+        int type = userModelList.get(position_).getType();
+        int newChatNumbers = userModelList.get(position_).getNumberOfNewChat();
+        int msgStatus = userModelList.get(position_).getMsgStatus();
 //        String imgUrl = "https://firebasestorage.googleapis.com/v0/b/chatapp-9b7ce.appspot.com/o/images%2Fcd89b442-735a-4cae-8da0-2b7f36817e17.jpg?alt=media&token=21b05768-df6e-4be1-b9a2-12d5f944c641";
-        long timeSent = otherUsersId.get(position_).getTimeSent();
+        long timeSent = userModelList.get(position_).getTimeSent();
 
 
         // save user holders in List to MainActivity for forward chat
@@ -192,6 +190,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // set last message
         if(message != null)
         {
+//            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
             holder.textViewMsg.setText(message);
 
             if(type == AllConstants.type_call || type ==AllConstants.type_game) // add colour if on call or game
@@ -223,6 +222,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // set number of new number
         if(newChatNumbers > 0){
             holder.textViewMsgCount.setVisibility(View.VISIBLE);
+            holder.imageViewDeliver.setImageResource(0);
             holder.textViewMsgCount.setText(String.valueOf(newChatNumbers));
         }
 
@@ -236,7 +236,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         getTypingState(holder, otherUid);      // show when other user is typing
 
-        updateNameAndPhoto(holder, otherUid, position);
+        updateNameAndPhoto(holder, otherUid, position_);
 
         // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
@@ -276,10 +276,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // -------- open user chat box on MainActivity
         holder.itemView.setOnClickListener(v ->
         {
-            String otherDisplayName__ = otherUsersId.get(position_).getOtherDisplayName();
-            String otherUserName__ = otherUsersId.get(position_).getOtherUserName();
-            String imageLink__ = otherUsersId.get(position_).getImageUrl();
-            String otherId = otherUsersId.get(position_).getOtherUid();
+            String otherDisplayName__ = userModelList.get(position_).getOtherDisplayName();
+            String otherUserName__ = userModelList.get(position_).getOtherUserName();
+            String imageLink__ = userModelList.get(position_).getImageUrl();
+            String otherId = userModelList.get(position_).getOtherUid();
 
             // get the contact name or displayed name of other user
             String getUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
@@ -297,11 +297,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //            firebaseMessagingService.showNotification(mContext, "New chat", "How are you", null);
 
             if (MainActivity.getLastTimeChat != null)
-                MainActivity.getLastTimeChat.put(otherId, otherUsersId.get(position_).getTimeSent());    // enable add up new time card
+                MainActivity.getLastTimeChat.put(otherId, userModelList.get(position_).getTimeSent());    // enable add up new time card
 
             if(!MainActivity.onForward && !MainActivity.onUserLongPress)
             {
-
                 // open the user chats
                 try {
                     listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
@@ -329,9 +328,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                     MainActivity.offMainDatabase();
                     Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
-                    System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
+                    System.out.println("What is Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
                 }
-
 
                 holder.checkBoxContainer.setVisibility(View.GONE);  // close forward chat checkbox if visible by bug
 
@@ -454,7 +452,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     }
 
                     if(onUserLongPress) {
-                        UserOnChatUI_Model userModel = otherUsersId.get(position_);
+                        UserOnChatUI_Model userModel = userModelList.get(position_);
                         activateOnUserLongPress(holder, userModel);
                     }
 
@@ -466,7 +464,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         //   ===========   onLongPress   ===========================
         holder.itemView.setOnLongClickListener(v ->
         {
-            UserOnChatUI_Model userModel = otherUsersId.get(position_);
+            UserOnChatUI_Model userModel = userModelList.get(position_);
 
             activateOnUserLongPress(holder, userModel);
 
@@ -492,14 +490,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 holder.checkBoxToWho.setChecked(false);
                 holder.checkBoxContainer.setVisibility(View.GONE);
 
-                UserOnChatUI_Model userModel = otherUsersId.get(position_);
+                UserOnChatUI_Model userModel = userModelList.get(position_);
 
                 otherUidLongPressList.remove(userModel.getOtherUid());
 
                 listener.onLongPressUser(userModel);
+            } else if(onForward) activateForwardCheckBox(holder, otherUid);
+            else {
+                holder.checkBoxToWho.setChecked(false);
+                holder.checkBoxContainer.setVisibility(View.GONE);
             }
-
-            if(onForward) activateForwardCheckBox(holder, otherUid);
 
         });
 
@@ -532,7 +532,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
             }else if(onUserLongPress)
             {
-                UserOnChatUI_Model userModel = otherUsersId.get(position_);
+                UserOnChatUI_Model userModel = userModelList.get(position_);
 
                 activateOnUserLongPress(holder, userModel);
 
@@ -558,12 +558,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             checkBox.setChecked(false);
             holder.checkBoxContainer.setVisibility(View.GONE);
             otherUidLongPressList.remove(userModel.getOtherUid());
-
         } else {
             otherUidLongPressList.add(userModel.getOtherUid());
             checkBox.setChecked(true);
         }
         listener.onLongPressUser(userModel);
+
+//        System.out.println("what is adapter: " +ChatsFragment.adapter.userModelList.size() + " most recent " + PlayersFragment.adapter.userModelList.size());
     }
 
     private void activateForwardCheckBox(ChatViewHolder holder, String otherUid){
@@ -590,41 +591,53 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     // update failed status to delivery status when network is okay
-    public void updateDeliveryStatus(String otherUid){
-        if(otherUsersId != null){
-            for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getOtherUid().equals(otherUid)) {
-                    // Store the item in a temporary variable.
-                    UserOnChatUI_Model getUser = otherUsersId.get(i);
-                    // check the delivery status and update
-                    if(getUser.getMsgStatus() == 700033){
-                        getUser.setMsgStatus(700024);
-                        // update the UI
-                        ChatsFragment.notifyItemChanged(i);
+    public void updateDeliveryStatus(String otherUid, String from){
+        AllConstants.executors.execute(()->
+        {
+            if(userModelList != null){
+                for (int i = userModelList.size() - 1; i >= 0; i--)
+                {
+                    final int position = i;
+                    if (userModelList.get(position).getOtherUid().equals(otherUid)) {
+                        // Store the item in a temporary variable.
+                        UserOnChatUI_Model getUser = userModelList.get(position);
+                        // check the delivery status and update
+                        if(getUser.getMsgStatus() == 700033){
+                            getUser.setMsgStatus(700024);
+                            // update the UI
+                            AllConstants.handler.post(() ->{
+                                if(from.equals(AllConstants.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                                if(from.equals(AllConstants.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                            });
 
-                        // update the firebase
-                        refUsersLast.child(user.getUid()).child(otherUid)
-                                .child("msgStatus").setValue(700024);
+                            // update the firebase
+                            refUsersLast.child(user.getUid()).child(otherUid).child("msgStatus").setValue(700024);
 
+                        }
                     }
                 }
             }
-        }
+
+        });
     }
 
-    public void updateDeliveryToRead(String otherUid){
-        if(otherUsersId != null){
-            for (int i = otherUsersId.size() - 1; i >= 0; i--) {
-                if (otherUsersId.get(i).getOtherUid().equals(otherUid)) {
+    public void updateDeliveryToRead(String otherUid, String from){
+        if(userModelList != null){
+            for (int i = userModelList.size() - 1; i >= 0; i--)
+            {
+                final int position = i;
+                if (userModelList.get(position).getOtherUid().equals(otherUid)) {
                     // Store the item in a temporary variable.
-                    UserOnChatUI_Model getUser = otherUsersId.get(i);
+                    UserOnChatUI_Model getUser = userModelList.get(position);
                     // check the delivery status and update
                     if(getUser.getMsgStatus() != 700016){
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        final int position = i;
-                        AllConstants.handler.post(() -> ChatsFragment.notifyItemChanged(position));
+                        AllConstants.handler.post(() ->{
+                            if(from.equals(AllConstants.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                            if(from.equals(AllConstants.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                        });
 
                         // update the firebase
                         refUsersLast.child(user.getUid()).child(otherUid)
@@ -639,22 +652,22 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     //  update outside chat adapter for call or game     //  update ROOM outside database too
     public void updateCallOrGameUI(int type, String otherUID, String myUid, String emojiOnly)
     {
-        if(otherUsersId != null)
+        if(userModelList != null)
         {
-            for (int i = otherUsersId.size() - 1; i >= 0; i--)
+            for (int i = userModelList.size() - 1; i >= 0; i--)
             {
-                String otherId = otherUsersId.get(i).getOtherUid();
-                String myId = otherUsersId.get(i).getMyUid();
+                String otherId = userModelList.get(i).getOtherUid();
+                String myId = userModelList.get(i).getMyUid();
                 if(otherId.equals(otherUID) && myId.equals(myUid))
                 {
-                    String headingMsg = otherUsersId.get(i).getMessage();
-                    String chat = setChatText(type, headingMsg, emojiOnly, null);
+                    String headingMsg = userModelList.get(i).getMessage();
+                    String chat = UserChatUtils.setChatText(type, headingMsg, emojiOnly, null, mContext);
 
-                    otherUsersId.get(i).setMessage(chat);
-                    otherUsersId.get(i).setEmojiOnly(emojiOnly);
+                    userModelList.get(i).setMessage(chat);
+                    userModelList.get(i).setEmojiOnly(emojiOnly);
 
                     // notify the adapter of the item changes - outside chat
-                    ChatsFragment.notifyItemChanged(i);
+                    ChatsFragment.newInstance().notifyItemChanged(i);
 
                     // update outside chat in ROOM
                     MainActivity.chatViewModel.updateUserCallOrGame(otherUID, myId, chat);
@@ -666,11 +679,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     public UserOnChatUI_Model findUserModelByUid(String otherID)
     {
-        if (otherUsersId != null) {
-            for (int i = 0; i < otherUsersId.size(); i++) {
-                if (otherUsersId.get(i).getOtherUid().equals(otherID))
+        if (userModelList != null) {
+            for (int i = 0; i < userModelList.size(); i++) {
+                if (userModelList.get(i).getOtherUid().equals(otherID))
                 {
-                    return otherUsersId.get(i);
+                    return userModelList.get(i);
                 }
             }
         }
@@ -678,209 +691,29 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
-    public void findUserModelByUidAndResetNewChatNum(String otherId)
+    public void findUserModelByUidAndResetNewChatNum(String otherId, String fromFragment, boolean databaseUpdate)   // reset to zero
     {
-        if (otherUsersId != null) {
-            for (int i = 0; i < otherUsersId.size(); i++) {
-                if (otherUsersId.get(i).getOtherUid().equals(otherId))
+        if (userModelList != null) {
+            for (int i = 0; i < userModelList.size(); i++) {
+                if (userModelList.get(i).getOtherUid().equals(otherId))
                 {
-                    otherUsersId.get(i).setNumberOfNewChat(0);  // reset it to 0
+                    userModelList.get(i).setNumberOfNewChat(0);  // reset it to 0
 
                     final int position = i;
-                    AllConstants.handler.post(()-> ChatsFragment.notifyItemChanged(position) );
-
-                    MainActivity.chatViewModel.updateUser(otherUsersId.get(i));     // update room db
-
-                    refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(0);
-
-                    break;
-                }
-            }
-        }
-
-    }
-
-
-    // find user and update the outside chat list with the new chat
-    public void findUserPositionByUID(String otherId, MessageModel modelChats, int numberOfNewChat) {
-
-        if (otherUsersId != null) {
-            for (int i = 0; i < otherUsersId.size(); i++) {
-                if (otherUsersId.get(i).getOtherUid().equals(otherId)) {
-                    // Store the item in a temporary variable.
-                    final int position = i;
-
-                    UserOnChatUI_Model getUser = otherUsersId.get(position);
-                    String chat = modelChats.getMessage();
-                    String emojiOnly = modelChats.getEmojiOnly();
-                    String vnDuration = modelChats.getVnDuration();
-                    long timeSent = modelChats.getTimeSent();
-                    String chatID = modelChats.getIdKey();
-                    int type = modelChats.getType();
-
-                    chat = setChatText(type, chat, emojiOnly, vnDuration);
-
-                    // update user outside chat data
-                    getUser.setFromUid(modelChats.getFromUid());
-                    getUser.setIdKey(chatID);
-                    getUser.setMessage(chat);
-                    getUser.setType(type);
-                    getUser.setEmojiOnly(emojiOnly);
-                    getUser.setMsgStatus(modelChats.getMsgStatus());
-                    getUser.setTimeSent(timeSent);
-                    getUser.setNumberOfNewChat(numberOfNewChat);
-
-                    otherUsersId.remove(position);     // Remove the item from its old position.
-
-                    otherUsersId.add(0, getUser);   // Insert the item at the first position
-
-                    MainActivity.chatViewModel.updateUser(getUser);     // update room db
-                    
-                    if(numberOfNewChat > 0){    // update firebase with the new chat number
-                        refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
-                    } else {
-                        // stop from removing new chat number count    -- inside chat // message adapter will do it
-                        if(!MainActivity.adapterMap.get(otherId).alreadySighted) {
-                            new Thread(()-> MainActivity.adapterMap.get(otherId).getChatByPinTypeAndDelete()).start();
-                        };
+                    if(fromFragment.equals(AllConstants.fromChatFragment)) {
+                        AllConstants.handler.post(()-> ChatsFragment.newInstance().notifyItemChanged(position) );
+                    }
+                    if(fromFragment.equals(AllConstants.fromPlayerFragment)) {
+                        AllConstants.handler.post(()-> PlayersFragment.newInstance().notifyItemChanged(position) );
                     }
 
-                    AllConstants.handler.post(()->{
-                        ChatsFragment.notifyItemChanged(position);     // notify the adapter of the item changes
+                    MainActivity.chatViewModel.updateUser(userModelList.get(position));     // update room db
 
-                        ChatsFragment.notifyUserMoved(position);   // Notify the adapter that the user has moved.
-                    });
+                    if(databaseUpdate) refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(0);
 
-                    // last user date and time
-//                    Date d = new Date(timeSent);    // convert the timestamp to current time
-//                    DateFormat formatter = new SimpleDateFormat("h:mm a");
-//                    String time = formatter.format(d).toLowerCase();
-//
-//                    ChatViewHolder userHolder = viewHolderMap.get(userUid);
-//
-//                    ((Activity) mContext).runOnUiThread(()->{
-//
-//                    });
-//                        setOutsideTextView(userHolder, chat, emojiOnly, statusNum, time, vnDuration);
-
-
-
-                    // update outside chat in ROOM
-//                    MainActivity.chatViewModel.updateOutsideChat(userUid, chat, emojiOnly, statusNum, timeSent, chatID, type);
                     break;
                 }
             }
-        }
-    }
-
-    public String setChatText(int type, String chat, String emojiOnly, String vnDuration){
-
-        if (type == AllConstants.type_text){
-            if(chat == null || chat.isEmpty()) chat = emojiOnly;
-
-        } else if (type == AllConstants.type_voice_note){
-            chat = AllConstants.MIC_ICON + vnDuration;
-
-        }  if (type == AllConstants.type_audio)
-        {
-            chat = AllConstants.MUSIC_ICON + vnDuration;
-
-        } else if (type == AllConstants.type_photo)
-        {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.PHOTO_ICON + mContext.getString(R.string.photoCap);
-            else chat = AllConstants.PHOTO_ICON + chat;
-        }
-        else if (type == AllConstants.type_video)
-        {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.VIDEO_ICON + mContext.getString(R.string.videoCap);
-            else chat = AllConstants.VIDEO_ICON + chat;
-
-        } else if (type == AllConstants.type_document)
-        {
-            if(chat == null || chat.isEmpty()) chat = AllConstants.DOCUMENT_ICON + emojiOnly;
-            else chat = AllConstants.DOCUMENT_ICON + chat;
-
-        }else if (type == AllConstants.type_call)
-        {
-            if(emojiOnly.equals(mContext.getString(R.string.ongoingCall))){
-
-                if(chat.contains("Audio")) chat = mContext.getString(R.string.audio_callCap);
-                if(chat.contains("Video")) chat = mContext.getString(R.string.video_callCap);
-                chat = mContext.getString(R.string.ongoingCall) + " " + chat;
-
-            } else if (emojiOnly.equals(mContext.getString(R.string.incomingCall))) {
-                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON +  mContext.getString(R.string.incomingAudioCall);
-                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.incomingVideoCall);
-
-            } else{
-                if(chat.contains("Audio")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
-                if(chat.contains("Video")) chat = AllConstants.CALL_ICON + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
-            }
-
-        } else if (type == AllConstants.type_pin)
-        {
-            chat = AllConstants.PIN_ICON + chat;
-        }
-
-        return chat;
-
-//        if(chat == null) {
-//            if(emojiOnly != null) {
-//                chat = emojiOnly;
-//            } else if(vnDuration != null){
-//                chat = AllConstants.MIC_ICON + vnDuration;
-//            } else {
-//                chat = AllConstants.PHOTO_ICON + " Photo";
-//            }
-//        } else {
-//            if(chat.isEmpty()) {
-//                if (emojiOnly != null) {
-//                    chat = emojiOnly;
-//                } else if (vnDuration != null) {
-//                    chat = AllConstants.MIC_ICON + vnDuration;
-//                } else {
-//                    chat = AllConstants.PHOTO_ICON + " Photo";
-//                }
-//            } else {
-//                if (photoUri != null) chat = AllConstants.PHOTO_ICON + " " + chat;
-//            }
-//        }
-
-    }
-
-    public void setOutsideTextView(ChatViewHolder holder, String chat, String emoji, int statusNum, String timeSent, String vnDuration){
-
-        if(holder != null){
-
-            if(!chat.isEmpty()){
-                holder.textViewMsg.setText(chat);
-            } else if (emoji != null) {
-                holder.textViewMsg.setText(emoji);
-            } else{
-                String vn;// change to gallery image
-                if(vnDuration != null){
-                    vn = AllConstants.MIC_ICON + vnDuration;
-                } else {
-                    vn = AllConstants.MIC_ICON;
-                }
-                holder.textViewMsg.setText(vn);
-            }
-
-            holder.dateTime_TV.setText(timeSent);
-
-            // delivery status
-            int delivery = R.drawable.message_load;
-
-            if(statusNum == 700024){   // delivery
-                delivery = R.drawable.message_tick_one;
-            } else if (statusNum == 700016) {  // read
-                delivery = R.drawable.baseline_grade_24;
-            } else if (statusNum == 0) {  // read
-                delivery = 0;
-            }
-
-            holder.imageViewDeliver.setImageResource(delivery);
-
         }
 
     }
@@ -1022,26 +855,29 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     // get user typing state
     private void getTypingState(ChatViewHolder holder, String otherUid){
 //// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
-        referenceCheck.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+
+        ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 try {
-                    if(snapshot.child(otherUid).child("typing").getValue() != null){
-                        long typing = (long) snapshot.child(otherUid).child("typing").getValue();
+                    if(snapshot.child("typing").getValue() != null){
+                        long typing = snapshot.child("typing").exists() ?
+                                (long) snapshot.child("typing").getValue() : -1;
 
                         if(typing == 0)
                         {
-                            holder.textViewMsg.setVisibility(View.VISIBLE);
+                            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
                             holder.textViewTyping.setVisibility(View.GONE);
-                        } else {
+
+                        } else if(typing == 1){
+                            AnimUtils.fadeInVisible(holder.textViewTyping, 300);
                             holder.textViewMsg.setVisibility(View.INVISIBLE);
-                            holder.textViewTyping.setVisibility(View.VISIBLE);
                             holder.textViewTyping.setText(mContext.getString(R.string.typing));
                         }
                     }
                 } catch (Exception e){
-                    System.out.println(otherUid + " Catch error CL600 " + e.getMessage());
+                    System.out.println("what is error ChatListAdap L880 " + e.getMessage());
                 }
 //
             }
@@ -1049,13 +885,19 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        };
+
+        if(typeValueListenerMap.get(otherUid) == null) {
+            typeValueListenerMap.put(otherUid, valueEventListener);
+            referenceCheck.child(user.getUid()).child(otherUid).addValueEventListener(valueEventListener);
+        }
+
     }
 
     //  get other user name and photo
     private void updateNameAndPhoto(ChatViewHolder holder, String otherUid, int position)
     {
-        referenceUsers.keepSynced(true);
+//        referenceUsers.keepSynced(true);
         referenceUsers.child(otherUid).child("general").addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
@@ -1063,47 +905,57 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                 AllConstants.executors.execute(()->
                 {
-                    // Will later change it to Display Names
-                    String otherUsername = snapshot.child("userName").getValue().toString();
-
-                    String otherDisplayName = snapshot.child("displayName").exists()
-                            && !snapshot.child("displayName").getValue().toString().isEmpty()
-                            ? snapshot.child("displayName").getValue().toString() : null;
-
-                    String otherFcmToken = !snapshot.child("fcmToken").exists() ? null :
-                            snapshot.child("fcmToken").getValue().toString();
-
-                    otherUserFcmTokenRef.edit().putString(otherUid, otherFcmToken).apply();
-
-                    String otherContactName = contactNameShareRef.getString(otherUid, otherDisplayName);
-
-                    // set users image
-                    String imageUrl = snapshot.child("image").exists()
-                            && !snapshot.child("image").getValue().toString().equals("null")
-                            && !snapshot.child("image").getValue().toString().isEmpty()
-                            ? snapshot.child("image").getValue().toString() : null;
-
-                    AllConstants.handler.post(()->
+                    if(position < userModelList.size())
                     {
-                        if(otherContactName != null){
-                            holder.textViewUser.setText(otherContactName);     //set users contact name
-                        } else {
-                            holder.textViewUser.setText(otherUsername);     //set users username name
-                        }
+                        // Will later change it to Display Names
+                        String otherUsername = snapshot.child("userName").getValue().toString();
 
-                        if (imageUrl != null && !imageUrl.isEmpty()) {
-                            Picasso.get().load(imageUrl).into(holder.imageView);
+                        String otherDisplayName = snapshot.child("displayName").exists()
+                                && !snapshot.child("displayName").getValue().toString().isEmpty()
+                                ? snapshot.child("displayName").getValue().toString() : null;
 
-                        } else {
-                            holder.imageView.setImageResource(R.drawable.person_round);
-                        }
-                    });
+                        String otherContactName = contactNameShareRef.getString(otherUid, otherDisplayName);
 
-                    otherUsersId.get(position).setOtherUserName(otherUsername);
-                    otherUsersId.get(position).setOtherDisplayName(otherDisplayName);
-                    otherUsersId.get(position).setImageUrl(imageUrl);
+                        String otherFcmToken = !snapshot.child("fcmToken").exists() ? null :
+                                snapshot.child("fcmToken").getValue().toString();
 
-                    MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
+                        otherUserFcmTokenRef.edit().putString(otherUid, otherFcmToken).apply();
+
+                        String hint = !snapshot.child("hint").exists() ? mContext.getString(R.string.hint2) :
+                                snapshot.child("hint").getValue().toString();
+
+                        otherUserHintRef.edit().putString(otherUid, hint).apply();
+
+                        // set users image
+                        String imageUrl = snapshot.child("image").exists()
+                                && !snapshot.child("image").getValue().toString().equals("null")
+                                && !snapshot.child("image").getValue().toString().isEmpty()
+                                ? snapshot.child("image").getValue().toString() : null;
+
+                        AllConstants.handler.post(()->
+                        {
+                            if(otherContactName != null){
+                                holder.textViewUser.setText(otherContactName);     //set users contact name
+                            } else {
+                                holder.textViewUser.setText("@"+otherUsername);     //set users username name
+                            }
+
+                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                Picasso.get().load(imageUrl).into(holder.imageView);
+
+                            } else {
+                                holder.imageView.setImageResource(R.drawable.person_round);
+                            }
+                        });
+
+
+                        userModelList.get(position).setOtherUserName(otherUsername);
+                        userModelList.get(position).setOtherDisplayName(otherDisplayName);
+                        userModelList.get(position).setImageUrl(imageUrl);
+
+                        MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
+
+                    }
 
 //                    // save the contact name to my database
 //                    referenceCheck.child(user.getUid()).child(otherUid).child("contactName")
@@ -1147,7 +999,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
     @Override
     public int getItemCount() {
-        return otherUsersId.size();
+        return userModelList.size();
     }
 
 
