@@ -103,14 +103,22 @@ public class UserChatRepository {
         });
     }
 
+    public List<UserOnChatUI_Model> getUsers(String myUid){
+        return userChatDao.getEachUser(myUid);
+    }
 
+    public UserOnChatUI_Model findUserByUid(String otherUid, String myUid){
+        return userChatDao.findUserByUid(otherUid, myUid);
+    }
 
     //  ---------   inside chat ----------------
     public void insertChats(String userId, MessageModel chatModel){
 
         executors.execute(() -> {
-            chatModel.setOtherUid(userId);
-            userChatDao.insertChat(chatModel);
+            if(chatModel.getIdKey() != null){
+                chatModel.setOtherUid(userId);
+                userChatDao.insertChat(chatModel);
+            }
         });
 
     }
@@ -195,8 +203,9 @@ public class UserChatRepository {
 
     }
 
-    public List<UserOnChatUI_Model> getUsers(String myUid){
-        return userChatDao.getEachUser(myUid);
+    public MessageModel findNewChatNumber(String otherId, String myId, int type, String yes)
+    {
+        return userChatDao.findNewChatNumber(otherId, myId, type, yes);
     }
 
     // get all the chats of each user

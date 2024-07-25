@@ -8,13 +8,11 @@ public class ChatNotificationM {
 
     String fcmToken;
     String otherUid;
-    String myContactName;
     Map<String, Object> messageMap;
 
-    public ChatNotificationM(String fcmToken, String otherUid, String myContactName, Map<String, Object> messageMap) {
+    public ChatNotificationM(String fcmToken, String otherUid, Map<String, Object> messageMap) {
         this.fcmToken = fcmToken;
         this.otherUid = otherUid;
-        this.myContactName = myContactName;
         this.messageMap = messageMap;
     }
 
@@ -33,14 +31,6 @@ public class ChatNotificationM {
 
     public void setOtherUid(String otherUid) {
         this.otherUid = otherUid;
-    }
-
-    public String getMyContactName() {
-        return myContactName;
-    }
-
-    public void setMyContactName(String myContactName) {
-        this.myContactName = myContactName;
     }
 
     public Map<String, Object> getMessageMap() {

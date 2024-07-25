@@ -5,6 +5,7 @@ import static com.pixel.chatapp.home.MainActivity.chatViewModel;
 import static com.pixel.chatapp.home.MainActivity.loopOnceMap;
 import static com.pixel.chatapp.home.MainActivity.recyclerMap;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
@@ -25,13 +26,15 @@ import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
+import com.pixel.chatapp.roomDatabase.repositories.UserChatRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 public class UserChatUtils {
 
     private final static DatabaseReference refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
-    private final static FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private static final String myId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
 
     // find user and update the outside chat list with the new chat
@@ -39,9 +42,10 @@ public class UserChatUtils {
                                              MessageModel modelChats, int numberOfNewChat, Context context)
     {
         if (userModelList != null) {
-            for (int i = 0; i < userModelList.size(); i++) {
-                if (userModelList.get(i).getOtherUid().equals(otherId)) {
-                    // Store the item in a temporary variable.
+            for (int i = 0; i < userModelList.size(); i++)
+            {
+                if (userModelList.get(i).getOtherUid().equals(otherId))
+                {
                     final int position = i;
                     UserOnChatUI_Model getUser = setUserModel(userModelList, modelChats, position, numberOfNewChat, context);
 
@@ -68,14 +72,14 @@ public class UserChatUtils {
                     MainActivity.chatViewModel.updateUser(getUser);     // update room db
 
                     if(numberOfNewChat > 0){    // update firebase with the new chat number
-                        refUsersLast.child(user.getUid()).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
+                        refUsersLast.child(myId).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
                     } else {
                         // reset new chat count number -- inside and outside
                         AllConstants.handler.post(()-> new Handler().postDelayed(()-> new Thread(()-> {
                             try{
                                 adapterMap.get(otherId).getChatByPinTypeAndDeleteViaRecycler(recyclerMap.get(otherId), otherId);   // UserChatUtil
                             } catch (Exception e) {
-                                System.out.println("what is error UserChatUtil L70: " + e.getMessage());
+                                System.out.println("what is error UserChatUtil L80: " + e.getMessage());
                             }
                         }).start(), 500));
                     }
@@ -150,8 +154,11 @@ public class UserChatUtils {
 
     }
 
-    private static UserOnChatUI_Model setUserModel(List<UserOnChatUI_Model> userModelList, MessageModel modelChats, int position, int numberOfNewChat, Context context)
+    public static UserOnChatUI_Model setUserModel(List<UserOnChatUI_Model> userModelList, MessageModel modelChats,
+                                                   int position, int numberOfNewChat, Context context)
     {
+        if (userModelList == null || position == -1) return null;
+
         UserOnChatUI_Model getUser = userModelList.get(position);
         String chat = modelChats.getMessage();
         String emojiOnly = modelChats.getEmojiOnly();
@@ -343,11 +350,14 @@ public class UserChatUtils {
     }
 
 
-    public static void checkIfNewCountExist(List<MessageModel> modelList, String otherId)
+    public static void checkIfNewCountExist(List<MessageModel> modelList, String otherId, boolean fromNotification, UserChatRepository userChatRepository)
     {
-        if (modelList == null || otherId == null || PlayersFragment.adapter == null) {
-            return; // Early exit if any of the required elements are null
-        }
+        if(!fromNotification){
+            if (modelList == null || otherId == null || PlayersFragment.adapter == null) {
+                return; // Early exit if any of the required elements are null
+            }
+        } else if (modelList == null || otherId == null) return;
+
         new Thread(() -> {
             int startCount = modelList.size() > 5000 ? 5000 : 0;
             for (int i = modelList.size() - 1; i >= startCount; i--)
@@ -358,9 +368,16 @@ public class UserChatUtils {
 
                 if (type == AllConstants.type_pin && edit != null && edit.equals("yes"))
                 {
-                    break;
+//                    System.out.println("what is calling2222: " + i);
 
-                } else if(i == startCount){
+                    if (!fromNotification) break;
+                    else
+                    {   // delete from ROOM
+                        userChatRepository.deleteChats(modelList.get(i)); // delete from room
+//                        System.out.println("what is i have found and delete UserChatUtil L380: " + i + " chat: " + modelList.get(i));
+                    }
+
+                } else if(i == startCount && !fromNotification){
                     // Reset new chat count if at the startCount boundary and it hasn't been reset yet
                     if (ChatsFragment.adapter != null) {
                         ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, AllConstants.fromChatFragment, true);
@@ -368,9 +385,9 @@ public class UserChatUtils {
                     if (PlayersFragment.adapter != null) {
                         PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, AllConstants.fromPlayerFragment, true);
                     }
+                    loopOnceMap.put(otherId, true);
                 }
             }
-            loopOnceMap.put(otherId, true);
 
         }).start();
     }

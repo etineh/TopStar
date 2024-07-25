@@ -46,6 +46,9 @@ public interface UserChatDao {
     @Query("DELETE FROM usersOnChatUI WHERE otherUid = :otherUid")
     void deleteUserById(String otherUid);
 
+    @Query("SELECT * FROM usersOnChatUI WHERE otherUid = :otherUid AND myUid = :myId LIMIT 1")
+    UserOnChatUI_Model findUserByUid(String otherUid, String myId);
+
     @Query("SELECT * FROM usersOnChatUI WHERE myUid = :myUid ORDER BY timeSent DESC")
     List<UserOnChatUI_Model> getEachUser(String myUid);
 
@@ -53,7 +56,7 @@ public interface UserChatDao {
 
     //  ==========================   user chats     ==========================
 
-    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertChat(MessageModel chatModel);
 
     @Update
@@ -88,6 +91,9 @@ public interface UserChatDao {
     // Delete a user chats based on the id (otherID)
     @Query("DELETE FROM chats WHERE otherUid = :otherId AND myUid = :myId")
     void deleteUserChatsById(String otherId, String myId);
+
+    @Query("SELECT * FROM chats WHERE otherUid = :otherId AND myUid = :myId AND type = :type AND edit = :yes")
+    MessageModel findNewChatNumber(String otherId, String myId, int type, String yes);
 
     // get the chats of each user based on the id
     @Query("SELECT * FROM chats WHERE otherUid = :otherUid AND myUid = :myId")

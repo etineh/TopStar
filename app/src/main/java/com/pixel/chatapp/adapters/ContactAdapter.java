@@ -127,7 +127,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
         // what happen when the cardView is click
         holder.itemView.setOnClickListener(view -> {
-            String myUsername = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+            String myUsername = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
             String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
 
             view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(50)
@@ -141,7 +141,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
                             listener.msgBackgroundActivities(otherUid);
 
-                            listener.callAllMethods(otherUid, getmContext(), new Activity());
+                            listener.callAllMethods(otherUid, getmContext(), new Activity(), false);
 
                             // activate adapter for user if null
                             if(MainActivity.adapterMap.get(otherUid) == null){

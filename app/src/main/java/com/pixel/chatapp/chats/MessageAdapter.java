@@ -1,7 +1,9 @@
 package com.pixel.chatapp.chats;
 
 import static com.pixel.chatapp.home.MainActivity.insideChat;
+import static com.pixel.chatapp.home.MainActivity.insideChatMap;
 import static com.pixel.chatapp.home.MainActivity.newChatNumberPosition;
+import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
 import static com.pixel.chatapp.utils.FileUtils.compressVideo;
 import static com.pixel.chatapp.utils.FileUtils.createVideoThumbnail;
 import static com.pixel.chatapp.utils.FileUtils.downloadThumbnailFile;
@@ -78,6 +80,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.home.fragments.PlayersFragment;
+import com.pixel.chatapp.utils.ChatUtils;
 import com.pixel.chatapp.utils.TimeUtils;
 import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.utils.FileUtils;
@@ -89,6 +92,7 @@ import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.utils.ToggleUtils;
+import com.pixel.chatapp.utils.UserChatUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -118,13 +122,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private List<MessageModel> modelList;
 
     // Define a HashSet to store unique message IDs
-    private Set<String> messageIdSet = new HashSet<>(); // to avoid duplicate adding chat, store each id chat here
+    public Set<String> messageIdSet = new HashSet<>(); // to avoid duplicate adding chat, store each id chat here
 
     public static int lastPosition = 0;
 
     public static List<Integer> chatPositionList = new ArrayList<>();
     public String uId;
-    public String userName;
+    public String myUsername;
     private Map<String, Runnable> sightedRunnableMap = new HashMap<>();
     private Map<String, Handler> handlerNewChatNumMap = new HashMap<>();
 
@@ -183,10 +187,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private final MainActivity mainActivity = new MainActivity();
 
-    public MessageAdapter( List<MessageModel> modelList, String userName, String uId,
+    public MessageAdapter( List<MessageModel> modelList, String myUsername, String uId,
                           Context mContext, ViewGroup parent) {
         this.modelList = modelList;
-        this.userName = userName;
+        this.myUsername = myUsername;
         this.uId = uId;
         this.mContext = mContext;
         this.parent = parent;
@@ -307,11 +311,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             if(type == AllConstants.type_pin && edit != null && edit.equals("yes"))
             {
-                modelList.get(finalPosition).setNewChatNumberID(number);
+                handler.post(()-> {
+                    modelList.get(finalPosition).setNewChatNumberID(number);
+                    notifyItemChanged(finalPosition, new Object());
+                });
 
-                handler.post(()-> notifyItemChanged(finalPosition, new Object()));
-
-                chatViewModel.updateChat(modelList.get(finalPosition));    // delete from room
+                chatViewModel.updateChat(modelList.get(finalPosition));    // update room
 
                 break;
             }
@@ -331,6 +336,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 modelList.remove(i);    // delete from list
                 notifyItemRemoved(i);
                 notifyItemRangeChanged(i, modelList.size(), new Object());
+//                System.out.println("what is found222");
+
             });
         }
 
@@ -366,6 +373,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         modelList.remove(finalPosition); // delete from list
                         notifyItemRemoved(finalPosition);
                         notifyItemRangeChanged(finalPosition, modelList.size(), new Object());
+//                        System.out.println("what is found");
                     });
                     // reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
                     if(ChatsFragment.adapter != null)
@@ -749,7 +757,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         // ----------------- reply msg setting
-        if(modelChats.getReplyFrom() != null && modelChats.getReplyMsg() != null)
+        if(modelChats.getReplyFrom() != null && modelChats.getReplyMsg() != null && holder.linearLayoutReplyBox != null)
         {
             if(holder.linearLayoutClick != null) holder.linearLayoutClick.setVisibility(View.VISIBLE);
             holder.linearLayoutReplyBox.setVisibility(View.VISIBLE);    // set reply container to visibility
@@ -1258,7 +1266,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     String newChatNo = modelChats.getNewChatNumberID() + " " + mContext.getString(R.string.newMessage);
                     holder.pinAlertTV.setText(newChatNo);
 
-                    if(insideChat){
+                    if(insideChatMap.get(modelChats.getOtherUid()) != null && insideChatMap.get(modelChats.getOtherUid()))
+                    {
                         Runnable runnableNewChatNum = sightedRunnableMap.get(modelChats.getIdKey());
 
                         // remove the previous runnable if sighted twice (in case user scroll to same position b4 it delete)
@@ -2785,8 +2794,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     private Map<String, Object> setOutsideChatMap(MessageModel modelChats)
-    {
-        // 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
+    {// 700024 --- tick one msg  // 700016 -- seen msg   // 700033 -- load
+
+        String chat = UserChatUtils.setChatText(modelChats.getType(), modelChats.getMessage(), modelChats.getEmojiOnly(), modelChats.getVnDuration(), mContext);
 
         Map<String, Object> latestChatMap = new HashMap<>();
         // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
@@ -2794,11 +2804,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         latestChatMap.put("fromUid", myId);
         latestChatMap.put("senderName", myDisplayName);
         latestChatMap.put("emojiOnly", modelChats.getEmojiOnly());
-        latestChatMap.put("message", modelChats.getMessage());
+        latestChatMap.put("message", chat);
         latestChatMap.put("type", modelChats.getType());
         latestChatMap.put("msgStatus", 0);
         latestChatMap.put( "timeSent", ServerValue.TIMESTAMP);
         latestChatMap.put("idKey", modelChats.getIdKey());
+
 
         return latestChatMap;
     }
@@ -2826,6 +2837,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // update inside chat ROOM DB
         chatViewModel.updatePhotoUriPath(modelChats.getIdKey(), otherUid,
                 modelChats.getPhotoUriPath(), modelChats.getPhotoUriOriginal(), null, 700024);
+
+        // notify other user
+        String chat = UserChatUtils.setChatText(modelChats.getType(), modelChats.getMessage(), modelChats.getEmojiOnly(), modelChats.getVnDuration(), mContext);
+        String fcmToken = otherUserFcmTokenRef.getString(otherUid, null);
+        Map<String, Object> getInsideChatMap = sendMap;
+        getInsideChatMap.put("message", chat);
+
+        ChatUtils.sentChatNotification( otherUid, getInsideChatMap, fcmToken );
 
     }
 
@@ -2906,28 +2925,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    // add my own emoji reaction
-    public void addEmojiReact(String emoji, String chatID, String otherId)
+
+    // add emoji reaction from me or other user
+    public String addEmojiReact(String emoji, String chatID, String otherId)
     {
-        int chatPosition = findMessagePositionById(chatID);
-
-        if(chatPosition != -1)
-        {   // concat previous emoji to the new one
-            String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
-                    modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
-
-            // update local list
-            modelList.get(chatPosition).setEmoji(addEmoji);
-            notifyItemChanged(chatPosition, new Object());
-
-            // add to ROOM database
-            chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
-        }
-
-    }
-
-    // get the other user emoji reaction and add
-    public void emojiReactSignal(String emoji, String chatID, String otherId){
         int chatPosition = findMessagePositionById(chatID) != -1 ? findMessagePositionById(chatID) : -1;
         // check if the chatPosition exist
         if(chatPosition != -1){
@@ -2935,13 +2936,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
                     modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
 
-            modelList.get(chatPosition).setEmoji(addEmoji);
-            notifyItemChanged(chatPosition, new Object());
+            AllConstants.handler.post(()->{
+                modelList.get(chatPosition).setEmoji(addEmoji);
+                notifyItemChanged(chatPosition, new Object());
+            });
 
             // add to ROOM database
             chatViewModel.updateChatEmoji(otherId, chatID, addEmoji);
+
+            return modelList.get(chatPosition).getMessage() != null ? modelList.get(chatPosition).getMessage()
+                    : modelList.get(chatPosition).getEmojiOnly();
         }
 
+        return null;
     }
 
     public void pinIconDisplay(String messageId, boolean status){
@@ -2967,12 +2974,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
 
-    public int findMessagePositionById(String messageId) {
-
-        if(modelList != null){
-            for (int i = modelList.size()-1; i >= 0; i--) {
-                if (modelList.get(i).getIdKey().equals(messageId)) {
-                    return i;
+    public int findMessagePositionById(String messageId)
+    {
+        if(modelList != null && messageId != null){
+            for (int i = modelList.size()-1; i >= 0; i--)
+            {
+                if (modelList.get(i).getIdKey() != null) {
+                    if(modelList.get(i).getIdKey().equals(messageId)) return i;
+                } else {
+                    chatViewModel.deleteChat(modelList.get(i));
                 }
             }
         }

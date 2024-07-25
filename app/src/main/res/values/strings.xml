@@ -205,8 +205,8 @@
     <string name="pinBy">Pin by: </string>
     <string name="pinAChat">pin a chat </string>
     <string name="unPinAChat">unpin a chat </string>
-<!--    <string name="you">You pin a chat privately </string>-->
-<!--    <string name="youUnpinPrivate">You unpin a chat private </string>-->
+    <!--    <string name="you">You pin a chat privately </string>-->
+    <!--    <string name="youUnpinPrivate">You unpin a chat private </string>-->
     <string name="youPinPublicly">You pin a chat  🌏 </string>
     <string name="youUnpinPublicly">You unpin a chat  🌏</string>
 
@@ -643,6 +643,7 @@
     <string name="convert_from">Convert from:</string>
     <string name="available_balance">Available balance:</string>
     <string name="to">To:</string>
+    <string name="to_">to</string>
     <string name="proceed">Proceed</string>
     <string name="convertForUser">User will receive: </string>
     <string name="convertForAddress">Address will receive: </string>

@@ -8,6 +8,8 @@ public class Todo {
     //  reply from tab notification
     //  add the chat to recycler
 
+    // if I am insideChat, dont add.
+
     //  2. ViewImageActivity    - L120
     // save image to gallery and open image in chat
 

@@ -1,5 +1,6 @@
 package com.pixel.chatapp.side_bar_menu.settings;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.calls.CallCenterActivity;
 import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
@@ -41,10 +43,10 @@ public class SettingsActivity extends AppCompatActivity {
         ConstraintLayout securityClick = findViewById(R.id.securityClick);
         TextView terms_TV = findViewById(R.id.terms_TV);
         TextView logOut = findViewById(R.id.logOut_TV);
-
+        Toast.makeText(this, "testing here", Toast.LENGTH_SHORT).show();
         DatabaseReference walletRef = FirebaseDatabase.getInstance().getReference("WalletApi");
 
-        arrowBackS.setOnClickListener(v -> onBackPressed());
+        arrowBackS.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         profileClick.setOnClickListener(v ->
         {
@@ -86,6 +88,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         logOut.setOnClickListener(v -> logoutOption());
 
+        getOnBackPressedDispatcher().addCallback(callback);
 
     }
 
@@ -109,11 +112,15 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            Intent mainActivityIntent = new Intent(SettingsActivity.this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(mainActivityIntent);
+            finish();
+        }
+    };
 
 
 }

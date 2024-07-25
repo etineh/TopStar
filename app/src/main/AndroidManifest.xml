@@ -34,10 +34,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-
-    <!-- Permissions for FCM -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Permissions for FCM -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -48,7 +45,6 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/logo_icon"
-
         android:label="@string/app_name"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
@@ -56,6 +52,9 @@
         android:theme="@style/Theme.ChatApp"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.RedirectToHomeActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.LiveGameActivity"
             android:exported="false" />
@@ -300,40 +299,31 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Firebase Messaging Service -->
+        </activity> <!-- Firebase Messaging Service -->
         <service
-            android:name=".MyFirebaseMessagingService"
-            android:launchMode="singleTask"
-            android:exported="true">
+            android:name=".notification.MyFirebaseMessagingService"
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- Default notification icon -->
+        </service> <!-- Default notification icon -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/logo" />
-
-        <!-- Default notification color -->
+            android:resource="@drawable/logo" /> <!-- Default notification color -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/orange" />
-
-        <!-- Broadcast receiver to handle FCM messages -->
+            android:resource="@color/orange" /> <!-- Broadcast receiver to handle FCM messages -->
         <receiver
             android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.pixel.chatapp" />
             </intent-filter>
         </receiver>
-
-
         <receiver
             android:name=".notification.ReplyReceiver"
             android:exported="true">
@@ -341,8 +331,6 @@
                 <action android:name="com.pixel.chatapp.REPLY_ACTION" />
             </intent-filter>
         </receiver>
-
-
     </application>
 
 </manifest>

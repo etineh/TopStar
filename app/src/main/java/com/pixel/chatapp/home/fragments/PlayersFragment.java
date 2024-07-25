@@ -260,7 +260,11 @@ public class PlayersFragment extends Fragment {
                 new Thread(()->
                 {
                     try{
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()){
+//                        int itemCount = (int) snapshot.getChildrenCount();
+//                        int processedItems = 0;
+
+                        for (DataSnapshot snapshot1 : snapshot.getChildren())
+                        {
                             UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
                             String otherUid = snapshot1.getKey();
                             assert userModel != null; assert otherUid != null;
@@ -278,7 +282,6 @@ public class PlayersFragment extends Fragment {
                             if (!userAlreadyExists && userModel.getMessage() != null && userList.size() < 4)
                             {
                                 userList.add(0, userModel);
-
                                 getActivity().runOnUiThread(() -> {
                                     adapter.notifyDataSetChanged();
                                     progressBar.setVisibility(View.GONE);
@@ -288,7 +291,7 @@ public class PlayersFragment extends Fragment {
                         }
                     } catch (Exception e){
 //                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error CFragment L270 " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        System.out.println("what is error in CFragment L290 " + e.getMessage());
+                        System.out.println("what is error in PlayerFragment L300 " + e.getMessage());
                     }
 
                 }).start();

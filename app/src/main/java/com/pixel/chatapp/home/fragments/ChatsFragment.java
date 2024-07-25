@@ -83,7 +83,7 @@ public class ChatsFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        if(!MainActivity.sharingPhotoActivated){
+        if(!MainActivity.sharingPhotoActivated && !MainActivity.onForward){
             AnimUtils.animateView(openContactList);
         } else {
             openContactList.setVisibility(View.INVISIBLE);
@@ -208,7 +208,11 @@ public class ChatsFragment extends Fragment {
                 new Thread(()->
                 {
                     try{
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()){
+                        for (DataSnapshot snapshot1 : snapshot.getChildren())
+                        {
+//                            int itemCount = (int) snapshot.getChildrenCount();
+//                            int processedItems = 0;
+
                             UserOnChatUI_Model userModel = snapshot1.getValue(UserOnChatUI_Model.class);
                             String otherUid = snapshot1.getKey();
                             userModel.setOtherUid(otherUid);
@@ -232,6 +236,7 @@ public class ChatsFragment extends Fragment {
                                 getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
 
                             }
+
                         }
                     } catch (Exception e){
 //                        handlerInternet.post(()-> Toast.makeText(getContext(), "Error CFragment L270 " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -270,10 +275,6 @@ public class ChatsFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString() + " must implement FragmentListener");
         }
-    }
-
-    public static void setOpenContactList() {
-        openContactList.setVisibility(View.INVISIBLE);
     }
 
 //    @Override

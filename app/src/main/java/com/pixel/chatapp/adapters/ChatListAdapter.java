@@ -83,8 +83,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
-    Map<String, ValueEventListener> typeValueListenerMap;
-
+//    Map<String, ValueEventListener> typeValueListenerMap;
+    private boolean typeListenerActivated;
     public List<String> otherUidLongPressList = new ArrayList<>();
 
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -121,7 +121,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         offlinePresenceAndStatus = new HashMap<>();
         dateMonth = new HashMap<>();
         dateNum = new HashMap<>();
-        typeValueListenerMap = new HashMap<>();
     }
 
 
@@ -171,9 +170,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         long timeSent = userModelList.get(position_).getTimeSent();
 
 
-        // save user holders in List to MainActivity for forward chat
-        if(!MainActivity.myHolder_.contains(holder)){
-            MainActivity.myHolder_.add(holder);
+        if(MainActivity.onForward){
+            holder.checkBoxContainer.setVisibility(View.VISIBLE);
+            if(forwardChatUserId.contains(otherUid)) holder.checkBoxToWho.setChecked(true);
         }
 
         // set display name
@@ -232,6 +231,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             holder.checkBoxToWho.setChecked(true);
         }
 
+
         //  ----------- call methods    ---------------------
 
         getTypingState(holder, otherUid);      // show when other user is typing
@@ -241,7 +241,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
             try{
-                String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+                String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
 
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
                 listener.getMessage(myUsername_, otherUid, mContext, false);
@@ -267,6 +267,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         }
 
+        if(MainActivity.recyclerMap.get(otherUid) == null)  // receiving for new user the first time
+        {
+            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            listener.sendRecyclerView(holder.recyclerChat, otherUid);
+            listener.getMessage(myUsername_, otherUid, mContext, true);
+        }
+
         // add the checkbox icon for forward if user is sharing photo from another app
         if(MainActivity.sharingPhotoActivated){
             holder.checkBoxContainer.setVisibility(View.VISIBLE);
@@ -284,7 +291,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             // get the contact name or displayed name of other user
             String getUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
 
-            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, MainActivity.getMyUserName);
+            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
             String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
 
             // make previous view clickable if any
@@ -309,7 +316,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                     listener.msgBackgroundActivities(otherUid);
 
-                    listener.callAllMethods(otherUid, mContext, activity);
+                    listener.callAllMethods(otherUid, mContext, activity, false);
 
                 } catch (Exception e){
 
@@ -323,7 +330,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                     listener.msgBackgroundActivities(otherUid);
 
-                    listener.callAllMethods(otherUid, mContext, activity);
+                    listener.callAllMethods(otherUid, mContext, activity, false);
 
 
                     MainActivity.offMainDatabase();
@@ -444,11 +451,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         holder.checkBoxToWho.setChecked(true); //
                         holder.checkBoxContainer.setVisibility(View.VISIBLE);
                         activateForwardCheckBox(holder, otherUid);
-                        // add holder if it doesn't contain
-                        if(!MainActivity.myHolderNew.contains(holder)){
-                            MainActivity.myHolder_.add(holder);
-                            MainActivity.myHolderNew.add(holder);
-                        }
                     }
 
                     if(onUserLongPress) {
@@ -650,7 +652,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     //  update outside chat adapter for call or game     //  update ROOM outside database too
-    public void updateCallOrGameUI(int type, String otherUID, String myUid, String emojiOnly)
+    public void updateCallOrGameUI(int type, String otherUID, String myUid, String emojiOnly, boolean onChat, boolean onPlayer)
     {
         if(userModelList != null)
         {
@@ -667,10 +669,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     userModelList.get(i).setEmojiOnly(emojiOnly);
 
                     // notify the adapter of the item changes - outside chat
-                    ChatsFragment.newInstance().notifyItemChanged(i);
+                    if(onChat) ChatsFragment.newInstance().notifyItemChanged(i);
+                    if(onPlayer) PlayersFragment.newInstance().notifyItemChanged(i);
 
                     // update outside chat in ROOM
                     MainActivity.chatViewModel.updateUserCallOrGame(otherUID, myId, chat);
+                    refUsersLast.child(user.getUid()).child(otherUID).child("message").setValue(chat);
 
                 }
             }
@@ -718,27 +722,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     }
 
-
-    public void forwardCheckBoxVisibility(List<ChatViewHolder> holder){
-
-        for (int i = 0; i < holder.size(); i++) {
-
-            if(MainActivity.onForward){
-                holder.get(i).checkBoxContainer.setVisibility(View.VISIBLE);
-                ChatsFragment.openContactList.setVisibility(View.INVISIBLE);
-
-            } else {
-                holder.get(i).checkBoxContainer.setVisibility(View.GONE);
-                holder.get(i).checkBoxToWho.setChecked(false); // Toggle the checked state
-                ChatsFragment.openContactList.setVisibility(View.VISIBLE);
-            }
-
-        }
-
-        //  make send forward button invisible
-        MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
-
-    }
 
     private void timeAndDateSent(long lastTime, ChatViewHolder holder){
 
@@ -855,27 +838,26 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     // get user typing state
     private void getTypingState(ChatViewHolder holder, String otherUid){
 //// Bug ("typing" reflecting on previous position) -- solved by starting ref with user.getUid() and add the rest child to onDataChange
-
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 try {
-                    if(snapshot.child("typing").getValue() != null){
-                        long typing = snapshot.child("typing").exists() ?
-                                (long) snapshot.child("typing").getValue() : -1;
+                    long typing = snapshot.child(otherUid).child("typing").exists() ?
+                            (long) snapshot.child(otherUid).child("typing").getValue() : -1;
 
-                        if(typing == 0)
-                        {
-                            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
-                            holder.textViewTyping.setVisibility(View.GONE);
+                    if(typing == 0)
+                    {
+//                            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
+                        holder.textViewTyping.setVisibility(View.GONE);
+                        holder.textViewMsg.setVisibility(View.VISIBLE);
 
-                        } else if(typing == 1){
-                            AnimUtils.fadeInVisible(holder.textViewTyping, 300);
-                            holder.textViewMsg.setVisibility(View.INVISIBLE);
-                            holder.textViewTyping.setText(mContext.getString(R.string.typing));
-                        }
+                    } else if(typing == 1){
+                        AnimUtils.fadeInVisible(holder.textViewTyping, 300);
+                        holder.textViewMsg.setVisibility(View.INVISIBLE);
+                        holder.textViewTyping.setText(mContext.getString(R.string.typing));
                     }
+
                 } catch (Exception e){
                     System.out.println("what is error ChatListAdap L880 " + e.getMessage());
                 }
@@ -887,10 +869,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             }
         };
 
-        if(typeValueListenerMap.get(otherUid) == null) {
-            typeValueListenerMap.put(otherUid, valueEventListener);
-            referenceCheck.child(user.getUid()).child(otherUid).addValueEventListener(valueEventListener);
-        }
+        referenceCheck.child(user.getUid()).removeEventListener(valueEventListener);
+        referenceCheck.child(user.getUid()).addValueEventListener(valueEventListener);
 
     }
 
@@ -1045,8 +1025,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             checkBoxContainer = itemView.findViewById(R.id.checkBoxContainer);
 
 //
-            recyclerChat = itemView.findViewById(R.id.recyclerChat);
 //            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+            recyclerChat = itemView.findViewById(R.id.recyclerChat);
 
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManagerWrapper(itemView.getContext(), LinearLayoutManager.VERTICAL, false);
 

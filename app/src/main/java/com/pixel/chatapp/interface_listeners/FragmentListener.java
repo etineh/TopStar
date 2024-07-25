@@ -30,7 +30,7 @@ public interface FragmentListener {
 
     void msgBackgroundActivities(String otherUid);
 
-    void callAllMethods(String otherUid, Context context, Activity activity);
+    void callAllMethods(String otherUid, Context context, Activity activity, boolean onNotification);
 
     void onNetworkStatusChanged(boolean isConnected);
 
