@@ -25,7 +25,7 @@ import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
 import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.side_bar_menu.support.SupportActivity;
 
 import java.io.IOException;

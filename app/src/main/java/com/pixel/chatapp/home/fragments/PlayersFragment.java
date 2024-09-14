@@ -4,6 +4,7 @@ import static com.pixel.chatapp.home.MainActivity.handlerInternet;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -55,6 +57,7 @@ public class PlayersFragment extends Fragment {
         return new PlayersFragment();
     }
 
+    ConstraintLayout mainBackground;
     RecyclerView recyclerViewPlayer, recyclerViewChat;
     private NestedScrollView nestedScrollView;
     private ConstraintLayout constraintLayout;
@@ -62,7 +65,7 @@ public class PlayersFragment extends Fragment {
     PlayerAdapter playerAdapter, player2;
     List<PlayerModel> playerModelList, playerList;
     ProgressBar progressBar, progressBarRefresh;
-    TextView amountTV, sort_TV, filterTV;
+    TextView amountTV, sort_TV, filterTV, recentChatTV;
     ImageView filterIV, refreshIV, searchNow_IV, cancelSearchAmountIV;
     CardView searchAmountContainer;
     EditText searchAmountET;
@@ -82,6 +85,8 @@ public class PlayersFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.players_fragment, container, false);
 
+        mainBackground = view.findViewById(R.id.mainBackground);
+        recentChatTV = view.findViewById(R.id.recentChatTV);
         recyclerViewChat = view.findViewById(R.id.recyclerChat);
         nestedScrollView = view.findViewById(R.id.nestedScrollView);
         constraintLayout = view.findViewById(R.id.subTopContainer);
@@ -100,6 +105,7 @@ public class PlayersFragment extends Fragment {
         searchNow_IV = view.findViewById(R.id.searchNow_IV);
         cancelSearchAmountIV = view.findViewById(R.id.cancelSearchIV);
 
+        setColours();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         refUsers = FirebaseDatabase.getInstance().getReference("UsersList").child(user.getUid());
@@ -219,6 +225,28 @@ public class PlayersFragment extends Fragment {
 
 
     //  =========   methods
+    private void setColours()
+    {
+        if(MainActivity.nightMood)
+        {
+            mainBackground.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blackApp));
+            sort_TV.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+            amountTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+            progressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+            recentChatTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+            refreshIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+            filterIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+        } else {
+            mainBackground.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
+            sort_TV.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            amountTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            progressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+            recentChatTV.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            refreshIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+            filterIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+        }
+
+    }
 
     public void notifyUserMoved(int i){
         if(adapter != null) {

@@ -1,5 +1,6 @@
 package com.pixel.chatapp.peer2peer;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -37,15 +38,20 @@ public class P2pSetupActivity extends AppCompatActivity {
         });
 
 
-        arrowBackS.setOnClickListener(v -> onBackPressed());
+        getOnBackPressedDispatcher().addCallback(callback);
+
+        arrowBackS.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
     }
 
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+
+            finish();
+        }
+    };
 }
 
 

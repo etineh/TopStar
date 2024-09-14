@@ -1,5 +1,6 @@
 package com.pixel.chatapp.home.fragments;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -14,17 +15,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.LeagueAdapter;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.model.LeagueModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LeagueFragment extends Fragment {
 
@@ -32,6 +37,7 @@ public class LeagueFragment extends Fragment {
         return new LeagueFragment();
     }
 
+    ConstraintLayout backgroundConst;
     RecyclerView recyclerViewHost;
     LeagueAdapter leagueAdapter;
     List<LeagueModel> leagueModelList;
@@ -44,6 +50,8 @@ public class LeagueFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.league_fragment, container, false);
+
+        backgroundConst = view.findViewById(R.id.backgroundConst);
 
         recyclerViewHost = view.findViewById(R.id.recyclerViewPlayer);
         progressBar = view.findViewById(R.id.progressBar8);
@@ -61,6 +69,8 @@ public class LeagueFragment extends Fragment {
         recyclerViewHost.setLayoutManager(new LinearLayoutManager(getContext()));
 
         leagueModelList = new ArrayList<>();
+
+        setColours();
 
         addHostList();
 
@@ -144,6 +154,25 @@ public class LeagueFragment extends Fragment {
 
 
         return view;
+    }
+
+    private void setColours() {
+
+        if(MainActivity.nightMood){
+            backgroundConst.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blackApp));
+            refreshIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+            filterIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+            progressBarRefresh.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+            progressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+
+        } else {
+            backgroundConst.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white));
+            refreshIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+            filterIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+            progressBarRefresh.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+            progressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+
+        }
     }
 
     private void addHostList() {

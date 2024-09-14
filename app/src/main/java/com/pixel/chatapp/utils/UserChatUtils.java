@@ -30,12 +30,35 @@ import com.pixel.chatapp.roomDatabase.repositories.UserChatRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class UserChatUtils {
 
     private final static DatabaseReference refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
     private static final String myId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
+    public static List<UserOnChatUI_Model> getAllUsersFromRoom(Context context) {
+        try {
+            CompletableFuture<List<UserOnChatUI_Model>> future = new CompletableFuture<>();
+            new Thread(()->{
+
+                // activate ROOM
+                Application application = (Application) context.getApplicationContext();
+                UserChatRepository userRepository = new UserChatRepository(application);
+
+                future.complete(userRepository.getUsers(myId));
+
+            }).start();
+
+            return future.get();
+
+        } catch (ExecutionException | InterruptedException e) {
+            System.out.println("Error occur UserChatUtils L60: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+    }
 
     // find user and update the outside chat list with the new chat
     public static void findUserPositionByUID(List<UserOnChatUI_Model> userModelList, String otherId,

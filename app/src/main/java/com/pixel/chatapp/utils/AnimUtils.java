@@ -2,8 +2,11 @@ package com.pixel.chatapp.utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
@@ -147,6 +150,31 @@ public class AnimUtils {
         animator.start();
     }
 
+    public static void slideInFromLeft(final View view, final long duration) {
+        // Start the view out of the screen (to the left)
+        view.setTranslationX(-view.getWidth());
+        view.setVisibility(View.VISIBLE);
+
+        // Animate the translationX property to 0, so the view moves into the screen
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationX", -view.getWidth(), 0);
+        animator.setDuration(duration);
+        animator.start();
+    }
+
+    public static void slideOutToLeft(final View view, final long duration) {
+        // Animate the translationX property to the negative width of the view, so the view moves out of the screen to the left
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationX", 0, -view.getWidth());
+        animator.setDuration(duration); // Adjust duration as needed
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(View.GONE);
+            }
+        });
+        animator.start();
+    }
+
     public static void slideOutToBottom(final View view, final long duration) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", 0, view.getHeight());
         animator.setDuration(duration);
@@ -264,6 +292,38 @@ public class AnimUtils {
         animation.setInterpolator(new OvershootInterpolator()); // Apply an overshoot interpolator for a spring-like effect
 
         return animation;
+    }
+
+    public static void linearSlidingAnimation(final View headingTV, Long duration) {
+        headingTV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                headingTV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                // Set up the slide in animation (from outside left to original position)
+                ObjectAnimator slideIn = ObjectAnimator.ofFloat(headingTV, "translationX", -headingTV.getWidth(), 0f);
+                slideIn.setDuration(duration); // Duration in milliseconds
+
+                // Set up the slide out animation (from original position to outside right)
+                ObjectAnimator slideOut = ObjectAnimator.ofFloat(headingTV, "translationX", 0f, headingTV.getWidth());
+                slideOut.setDuration(duration); // Duration in milliseconds
+
+                // Set up the AnimatorSet to play the animations sequentially
+                final AnimatorSet animatorSet = new AnimatorSet();
+                animatorSet.playSequentially(slideIn, slideOut);
+
+                // Make the animation loop indefinitely
+                animatorSet.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        animatorSet.start();
+                    }
+                });
+
+                // Start the animation
+                animatorSet.start();
+            }
+        });
     }
 
 }

@@ -24,6 +24,18 @@ public class NoteDocumentation {
 
 
     // 1 - typing, 2 - editing, 3 - sending photo, 4 - sending file, 5 - sending voice note
+
+
+    //  ============    Game signal
+
+    // 1.   hosting user send game alert.   setHomeLastViews() -> sendToDataBase() -> server
+    //      server do the signal (first check if user grant permission),
+    // 2.   each user in recyclerView start with "signalling"
+    // 3.   if delivers to receiving user, "signalling" changes to "Awaiting"
+    // 4.   if user rejects, change "Awaiting" to "rejected"
+    // 5.   if user accepted, change "Awaiting" to "joined"
+
+
 }
 
 

@@ -56,7 +56,7 @@ public class EachAssetActivity extends AppCompatActivity {
         if(getAssetType.equals("gameAsset"))
         {
             setEachAssetName_TV.setText(getString(R.string.totalGameAsset));
-            eachAssetTotalAmount.setText("N 5,000");
+            eachAssetTotalAmount.setText("$ 5,000");
             historyRecord_TV.setText(getString(R.string.gameRewardHistory));
 
         } else if (getAssetType.equals("localAsset")) 
@@ -68,19 +68,23 @@ public class EachAssetActivity extends AppCompatActivity {
         } else if (getAssetType.equals("USDTAsset")) 
         {
             setEachAssetName_TV.setText(getString(R.string.totalUSDTAsset));
-            eachAssetTotalAmount.setText("$ 20");
+            eachAssetTotalAmount.setText("$ 200.00");
             historyRecord_TV.setText(getString(R.string.USDTHistory));
 
         } else if (getAssetType.equals("BonusAsset")) 
         {
             setEachAssetName_TV.setText(getString(R.string.totalBonusAsset));
-            eachAssetTotalAmount.setText("0.00");
+            eachAssetTotalAmount.setText("$ 500.00");
             historyRecord_TV.setText(getString(R.string.bonusRewardHistory));
 
         } else if (getAssetType.equals("MerchantAsset"))
         {
             setEachAssetName_TV.setText(getString(R.string.totalMerchantAsset));
             eachAssetTotalAmount.setText("N 220,000.00");
+            historyRecord_TV.setText(getString(R.string.merchantRewardHistory));
+        } else if (getAssetType.equals("LockAsset")) {
+            setEachAssetName_TV.setText(getString(R.string.totalLockAsset));
+            eachAssetTotalAmount.setText("$ 30.00");
             historyRecord_TV.setText(getString(R.string.merchantRewardHistory));
         }
 

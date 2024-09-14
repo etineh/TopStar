@@ -5,14 +5,14 @@
     style="@style/trans_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:elevation="6dp">
+    android:elevation="6dp"
+    android:visibility="gone">
 
     <ScrollView
         android:id="@+id/scrollViewMenu"
         android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -64,7 +64,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/viewProfileTV" />
 
             <TextView
-                android:id="@+id/muteTV"
+                android:id="@+id/muteIV"
                 style="@style/textColorFullBlack"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/muteTV" />
+                app:layout_constraintTop_toBottomOf="@+id/muteIV" />
 
             <TextView
                 android:id="@+id/joinTour_TV"

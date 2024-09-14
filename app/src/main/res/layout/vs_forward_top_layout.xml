@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="3dp"
-    android:visibility="visible">
+    android:visibility="gone">
 
     <ImageView
         android:id="@+id/forwardCancel_IV"
@@ -30,7 +30,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/forwardSearchIV"
-        app:layout_constraintStart_toEndOf="@+id/textView29"
+        app:layout_constraintStart_toEndOf="@+id/titleTV_"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
@@ -48,7 +48,7 @@
         app:srcCompat="@drawable/baseline_search_24" />
 
     <TextView
-        android:id="@+id/textView29"
+        android:id="@+id/titleTV_"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"

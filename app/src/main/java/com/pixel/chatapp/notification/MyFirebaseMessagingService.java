@@ -18,6 +18,9 @@ import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -67,7 +70,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String myId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     private static final DatabaseReference refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
     private static final DatabaseReference refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
-    private final static DatabaseReference refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
+//    private final static DatabaseReference refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -90,8 +93,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             String title = contactNameShareRef.getString(otherUid, senderName);
             String body = messageModel.getMessage();
 
-            NotificationHelper.showNotification(this, otherUid, title, body, remoteMessage.getData());
-
             // If there's new message from otherUser, add here to adapter UI
             if(messageModel.getFromUid() != null)
             {
@@ -106,6 +107,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 });
             }
+
+            NotificationHelper.showNotification(this, otherUid, title, body, remoteMessage.getData());
 
         }
 
@@ -127,7 +130,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             // check if it's first chat for today
             ChatUtils.notifyFirstChatOfANewDay(getUserModel.getTimeSent(), messageModel.getTimeSent(),    // onNotification
-                    newChatDateKey, null, otherUid);
+                    newChatDateKey, null, otherUid, context);
 
 
             int currentNewChatNumber = getUserModel.getNumberOfNewChat() + 1;
@@ -161,8 +164,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // update the outside ROOM
             getUserModel.setNumberOfNewChat(currentNewChatNumber);
             userRepository.updateUser(getUserModel);
-
-            refUsersLast.child(myId).child(otherUid).child("numberOfNewChat").setValue(currentNewChatNumber);
+//System.out.println("what is number: " + currentNewChatNumber);
+            refLastDetails.child(myId).child(otherUid).child("numberOfNewChat").setValue(currentNewChatNumber).addOnCompleteListener(task ->
+            {
+                if(task.isSuccessful()) System.out.println("it is success: " + task.getResult()+"");
+                else System.out.println("it is failed: " + task.getException().getMessage());
+            });
 
         } else  // first time user - add to database
         {
@@ -185,7 +192,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 }
             });
 
-            refUsersLast.child(myId).child(otherUid).child("numberOfNewChat").setValue(1);
+            refLastDetails.child(myId).child(otherUid).child("numberOfNewChat").setValue(1);
         }
 
         // add to room database -- inside chat
@@ -197,15 +204,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // update last msg for outside chat display chat, since it will show msg new count
         refLastDetails.child(myId).child(otherUid).child("msgStatus").setValue(0);
 
-
-
-        // create messageModel
-//        MessageModel messageModel = new MessageModel(chat, myDisplayName, myId, null,
-//                System.currentTimeMillis(), chatKey, null, newChatNumberKey, null,
-//                700024, 0, null, null, false, false, null,
-//                null, null, null, null, null);
-
-//        messageModel.setMyUid(myId);
     }
 
     private MessageModel messageModelMethod(Map<String, String> data)

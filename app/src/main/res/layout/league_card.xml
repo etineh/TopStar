@@ -8,7 +8,7 @@
     app:cardCornerRadius="@dimen/_12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constrainLast"
+        android:id="@+id/cardContainer"
         style="@style/mainBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,7 +18,6 @@
 
         <TextView
             android:id="@+id/lineH"
-            style="@style/recyclerBackground"
             android:layout_width="0dp"
             android:layout_height="2dp"
             app:layout_constraintBottom_toBottomOf="parent"

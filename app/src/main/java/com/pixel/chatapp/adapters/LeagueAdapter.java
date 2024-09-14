@@ -1,6 +1,7 @@
 package com.pixel.chatapp.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.LeagueModel;
 
 import java.text.DateFormat;
@@ -38,6 +42,8 @@ public class LeagueAdapter extends RecyclerView.Adapter<LeagueAdapter.HostViewHo
 
     @Override
     public void onBindViewHolder(@NonNull HostViewHolder holder, int position) {
+
+        setColours(holder);
 
         LeagueModel leagueModel = leagueModelList.get(position);
 
@@ -87,6 +93,33 @@ public class LeagueAdapter extends RecyclerView.Adapter<LeagueAdapter.HostViewHo
 
 
     //  =======     methods
+
+    private void setColours(HostViewHolder holder)
+    {
+        if(MainActivity.nightMood){
+            holder.cardContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.blackApp));
+            holder.hostTitle_TV.setTextColor(ContextCompat.getColor(context, R.color.cool_orange));
+            holder.shareIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.cool_orange)));
+            holder.entryFee_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.reward_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.join.setBackgroundResource(R.drawable.round_button_dark);
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+
+        } else {
+            holder.cardContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            holder.hostTitle_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.shareIV.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.orange)));
+            holder.entryFee_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.reward_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.join.setBackgroundResource(R.drawable.round_button_orange);
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+
+        }
+    }
+
+
     private void timeAndDateSent(long lastTime, HostViewHolder holder)
     {
         Date d = new Date(lastTime);    // convert the timestamp to current time
@@ -128,10 +161,11 @@ public class LeagueAdapter extends RecyclerView.Adapter<LeagueAdapter.HostViewHo
 
     public class HostViewHolder extends RecyclerView.ViewHolder {
 
-        TextView hostTitle_TV;
+        ConstraintLayout cardContainer;
+        TextView hostTitle_TV, lineH;
         TextView entryFee_TV;
         TextView reward_TV;
-        TextView gameType_TV;
+        TextView gameType_TV , join;
         TextView timeCreated_TV;
         ImageView shareIV;
         ImageView gamePhoto_IV;
@@ -139,7 +173,10 @@ public class LeagueAdapter extends RecyclerView.Adapter<LeagueAdapter.HostViewHo
         public HostViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            join = itemView.findViewById(R.id.playOnclick);
+            cardContainer = itemView.findViewById(R.id.cardContainer);
             hostTitle_TV = itemView.findViewById(R.id.hostTitle_TV);
+            lineH = itemView.findViewById(R.id.lineH);
             entryFee_TV = itemView.findViewById(R.id.entryFee_TV);
             reward_TV = itemView.findViewById(R.id.reward_TV);
             gameType_TV = itemView.findViewById(R.id.gameType_TV);

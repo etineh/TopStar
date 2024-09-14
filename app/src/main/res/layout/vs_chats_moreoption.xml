@@ -9,7 +9,8 @@
     android:elevation="7dp"
     android:gravity="right"
     android:paddingTop="40dp"
-    android:paddingEnd="10dp">
+    android:paddingEnd="10dp"
+    android:visibility="gone">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/roundRadiusBackground2"

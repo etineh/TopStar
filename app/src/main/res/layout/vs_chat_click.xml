@@ -224,8 +224,8 @@
             <ImageView
                 android:id="@+id/pinChatIV"
                 style="@style/Tint_Orange_CoolOrange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_22dp"
+                android:layout_height="@dimen/_22dp"
                 android:layout_marginStart="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

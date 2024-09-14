@@ -10,6 +10,7 @@
 
     <color name="white">#FFFBEF</color>     <!-- project white colour -->
     <color name="blackApp">#111111</color>  <!-- project black colour -->
+<!--    <color name="blackApp">#2C3039</color>  &lt;!&ndash; project black colour &ndash;&gt;-->
     <color name="cool_orange">#E6CBB7</color>   <!-- project fade orange colour -->
     <color name="cool_black">#222020</color>
     <color name="orange">#ED7014</color>        <!-- project orange colour -->
@@ -25,6 +26,7 @@
     <color name="transparent_orange">#55FFA500</color>
     <color name="transparent_orangeLow">#33FFA500</color> <!-- 80% transparent -->
     <color name="whiteTransparent">#80FFFFFF</color>
+    <color name="replyNa">#59514A</color>
 
     <color name="fullTransparent">#00FFFFFF</color>    <!-- full transparent -->
 

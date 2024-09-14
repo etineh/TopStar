@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp"
+    app:cardCornerRadius="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constrainLast"
+        style="@style/mainBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/userPhotoIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:src="@drawable/person_round"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/constrainLast" />
+
+        <TextView
+            android:id="@+id/playerName_TV"
+            style="@style/textColorFullBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:maxEms="10"
+            android:maxLines="1"
+            android:text="Sophia"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@id/signalUpdate_TV"
+            app:layout_constraintStart_toEndOf="@id/userPhotoIV" />
+
+        <TextView
+            android:id="@+id/signalUpdate_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/awaiting"
+            android:textColor="@color/orange"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/userPhotoIV" />
+
+        <ImageView
+            android:id="@+id/verifyIcon_IV"
+            android:layout_width="0dp"
+            android:layout_height="14dp"
+            android:layout_marginStart="-2dp"
+            android:layout_marginTop="3dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/playerName_TV"
+            app:layout_constraintTop_toTopOf="@id/playerName_TV"
+            app:srcCompat="@drawable/verified" />
+
+        <ImageView
+            android:id="@+id/removePlayerIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:padding="@dimen/_10dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/micStatusIV"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_delete_forever_24" />
+
+        <ImageView
+            android:id="@+id/micStatusIV"
+            style="@style/Tint_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:padding="@dimen/_10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_mic_off_24" />
+
+        <TextView
+            android:id="@+id/readdTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/re_add"
+            app:layout_constraintBottom_toBottomOf="@+id/signalUpdate_TV"
+            app:layout_constraintEnd_toStartOf="@id/removePlayerIV"
+            app:layout_constraintStart_toEndOf="@+id/signalUpdate_TV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

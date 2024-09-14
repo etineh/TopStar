@@ -485,6 +485,31 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/baseline_arrow_forward_24" />
 
+                    <TextView
+                        android:id="@+id/gameCurrency_TV"
+                        style="@style/textColorFullBlack"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="5dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="25dp"
+                        android:paddingBottom="5dp"
+                        android:text="NGN"
+                        android:textSize="13sp"
+                        app:layout_constraintEnd_toStartOf="@+id/imageView13"
+                        app:layout_constraintStart_toEndOf="@+id/textView30"
+                        app:layout_constraintTop_toTopOf="@+id/textView30" />
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/gameCurrency_TV"
+                        app:layout_constraintEnd_toEndOf="@+id/gameCurrency_TV"
+                        app:layout_constraintTop_toTopOf="@+id/gameCurrency_TV"
+                        app:srcCompat="@drawable/arrow_exchange"
+                        app:tint="@color/orange" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
@@ -586,37 +611,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="N 5,000"
+                        android:text="$ 5,000"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView30" />
-
-                    <TextView
-                        android:id="@+id/gameCurrency_TV"
-                        style="@style/textColorFullBlack"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="30dp"
-                        android:paddingStart="5dp"
-                        android:paddingTop="5dp"
-                        android:paddingEnd="25dp"
-                        android:paddingBottom="5dp"
-                        android:text="NGN"
-                        android:textSize="13sp"
-                        app:layout_constraintBottom_toBottomOf="@+id/textView30"
-                        app:layout_constraintStart_toEndOf="@+id/textView30"
-                        app:layout_constraintTop_toTopOf="@+id/textView30" />
-
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
-                        android:layout_marginEnd="10dp"
-                        app:layout_constraintBottom_toBottomOf="@+id/gameCurrency_TV"
-                        app:layout_constraintEnd_toEndOf="@+id/gameCurrency_TV"
-                        app:layout_constraintTop_toTopOf="@+id/gameCurrency_TV"
-                        app:srcCompat="@drawable/arrow_exchange"
-                        app:tint="@color/orange" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -676,6 +674,59 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewLockAsset"
+                style="@style/userCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cardViewBonusAsset">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    style="@style/cardTop2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:id="@+id/imageView13"
+                        style="@style/Tint_Orange_CoolOrange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="15dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/baseline_arrow_forward_24" />
+
+                    <TextView
+                        android:id="@+id/textView30"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/localAsset"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/lockAmount_TV"
+                        style="@style/textColorFullBlack"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="$ 30.00"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView30" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewBonusAsset"
                 style="@style/userCard"
                 android:layout_width="0dp"
@@ -719,7 +770,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="0.00"
+                        android:text="$ 0.00"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView30" />
@@ -742,7 +793,7 @@
                 android:textSize="13sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cardViewBonusAsset" />
+                app:layout_constraintTop_toBottomOf="@id/cardViewLockAsset" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pinContainer"
-    style="@style/backgroundWhite_coolBlack"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="3dp"
@@ -12,8 +11,9 @@
     <TextView
         android:id="@+id/pinAlertTV"
         style="@style/textOrangeAndCoolOrange"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:padding="5dp"
         android:text="Ndifreke pin a chat"
         app:layout_constraintEnd_toEndOf="parent"

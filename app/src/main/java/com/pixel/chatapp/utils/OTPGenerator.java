@@ -17,7 +17,7 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.OTPActivity;
 import com.pixel.chatapp.api.Dao_interface.OtpApiDao;
-import com.pixel.chatapp.api.model.TwoValueM;
+import com.pixel.chatapp.api.model.outgoing.TwoValueM;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.constants.AllConstants;
 

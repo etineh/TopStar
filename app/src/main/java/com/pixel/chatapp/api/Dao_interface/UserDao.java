@@ -1,8 +1,8 @@
 package com.pixel.chatapp.api.Dao_interface;
 
-import com.pixel.chatapp.api.model.LoginDetailM;
+import com.pixel.chatapp.api.model.outgoing.LoginDetailM;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

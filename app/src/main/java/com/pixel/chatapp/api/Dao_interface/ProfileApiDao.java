@@ -1,8 +1,8 @@
 package com.pixel.chatapp.api.Dao_interface;
 
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.api.model.ThreeValueM;
-import com.pixel.chatapp.api.model.TwoValueM;
+import com.pixel.chatapp.api.model.outgoing.ThreeValueM;
+import com.pixel.chatapp.api.model.outgoing.TwoValueM;
 import com.pixel.chatapp.api.model.SetUpM;
 
 import retrofit2.Call;

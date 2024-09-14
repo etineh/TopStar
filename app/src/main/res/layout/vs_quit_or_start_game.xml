@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/trans_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:elevation="4dp"
+    android:visibility="gone">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/roundRadiusBackground2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:paddingStart="@dimen/_10dp"
+        android:paddingEnd="@dimen/_10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
+
+        <TextView
+            android:id="@+id/sureNoticeTV"
+            style="@style/TV_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/quitGameSure"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/noTV"
+            style="@style/TV_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="40dp"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/_20dp"
+            android:paddingEnd="@dimen/_20dp"
+            android:text="@string/no"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sureNoticeTV" />
+
+        <TextView
+            android:id="@+id/yesTV"
+            style="@style/TV_Orange_CoolOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="40dp"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/_20dp"
+            android:paddingEnd="@dimen/_20dp"
+            android:text="@string/yes_"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sureNoticeTV" />
+
+        <TextView
+            android:id="@+id/textView22"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/orange"
+            app:layout_constraintBottom_toBottomOf="@+id/noTV"
+            app:layout_constraintEnd_toStartOf="@+id/yesTV"
+            app:layout_constraintStart_toEndOf="@+id/noTV"
+            app:layout_constraintTop_toTopOf="@+id/noTV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

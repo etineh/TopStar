@@ -22,4 +22,15 @@ public class NumberSpacing {
 
         return formattedNumber.toString().trim();
     }
+
+    public static String formatNumberWithCommas(String number) {
+        try {
+            double parsedNumber = Double.parseDouble(number);
+            return String.format("%,.2f", parsedNumber); // Format as double with commas and 2 decimal places
+        } catch (NumberFormatException e) {
+            return "Invalid number ";
+        }
+    }
+
+
 }

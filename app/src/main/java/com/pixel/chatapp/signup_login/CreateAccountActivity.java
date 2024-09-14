@@ -26,7 +26,7 @@ import com.pixel.chatapp.utils.NumberSpacing;
 import com.pixel.chatapp.utils.OTPGenerator;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
-import com.pixel.chatapp.api.model.LoginDetailM;
+import com.pixel.chatapp.api.model.outgoing.LoginDetailM;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.constants.AllConstants;
 

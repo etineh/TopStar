@@ -28,7 +28,7 @@ import com.pixel.chatapp.utils.OTPGenerator;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.ProfileApiDao;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.api.model.ThreeValueM;
+import com.pixel.chatapp.api.model.outgoing.ThreeValueM;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.signup_login.EmailOrPhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
@@ -287,7 +287,7 @@ public class OTPActivity extends AppCompatActivity{
                 }
             });
 
-        });
+        }, this);
     }
 
 

@@ -2,7 +2,7 @@ package com.pixel.chatapp.AAA;
 
 public class Todo {
 
-    // 1. notification and logo toast
+    // 1. notification and logo toast``     ===========================---- done
     //  Client side -   Send the token and map to server    ==  done
     //  Server side -   receive the token and map   == done
     //  reply from tab notification

@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.app.Person;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -70,10 +71,10 @@ public class ReplyReceiver extends BroadcastReceiver{
                     NotificationHelper.showNotification(context, otherUid, you, replyText, null);   // this removes the notification icon
 
                     // send chat to database
-                    if(chatListener != null){
+                    if(chatListener != null){   // app is active
                         chatListener.sendMessage(replyText.trim(), null, 0, null, null, otherUid, false);
 
-                    } else {
+                    } else {    // app is offline
                         new Thread(()-> sendToDatabase(context, otherUid, replyText)).start();
                     }
 
@@ -115,10 +116,9 @@ public class ReplyReceiver extends BroadcastReceiver{
         userRepository.insertChats(otherUid, messageModel);
 
         // save to user -- outside chat update
-        List<UserOnChatUI_Model> userModelList = userRepository.getUsers(myId);
-        int userPosition = findPositionUserByUid(userModelList, otherUid);  // find the position of the user
-        UserOnChatUI_Model getUser = UserChatUtils.setUserModel(userModelList, messageModel, userPosition, 0, context);
-        userRepository.updateUser(getUser);
+        UserOnChatUI_Model getUserFromRoom = userRepository.findUserByUid(otherUid, myId);     // getUserFromRoom
+        UserOnChatUI_Model getUser = setUserModel(getUserFromRoom, messageModel, 0, context);
+        if(getUser != null) userRepository.updateUser(getUser);
 
         //  loop through chats first 500 and delete new count chat if found
         UserChatUtils.checkIfNewCountExist(userRepository.getEachUserChats_(otherUid, myId), otherUid, true, userRepository);
@@ -147,6 +147,34 @@ public class ReplyReceiver extends BroadcastReceiver{
 
         refLastDetails.child(myId).child(otherUid).child("numberOfNewChat").setValue(0);
     }
+
+    public static UserOnChatUI_Model setUserModel(UserOnChatUI_Model getUser, MessageModel modelChats,
+                                                  int numberOfNewChat, Context context)
+    {
+        if(getUser == null) return null;
+
+        String chat = modelChats.getMessage();
+        String emojiOnly = modelChats.getEmojiOnly();
+        String vnDuration = modelChats.getVnDuration();
+        long timeSent = modelChats.getTimeSent();
+        String chatID = modelChats.getIdKey();
+        int type = modelChats.getType();
+
+        chat = UserChatUtils.setChatText(type, chat, emojiOnly, vnDuration, context);
+
+        // update user outside chat data
+        getUser.setFromUid(modelChats.getFromUid());
+        getUser.setIdKey(chatID);
+        getUser.setMessage(chat);
+        getUser.setType(type);
+        getUser.setEmojiOnly(emojiOnly);
+        getUser.setMsgStatus(modelChats.getMsgStatus());
+        getUser.setTimeSent(timeSent);
+        getUser.setNumberOfNewChat(numberOfNewChat);
+
+        return getUser;
+    }
+
 
     private int findPositionUserByUid(List<UserOnChatUI_Model> userModelList, String otherUid)
     {

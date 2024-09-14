@@ -95,6 +95,7 @@ public class NotificationHelper {
                 .setColor(ContextCompat.getColor(context, R.color.orange))
                 .setAutoCancel(true)
                 .setStyle(messagingStyle)
+                .setFullScreenIntent(pendingIntent, true)
                 .setContentIntent(pendingIntent)
                 .addAction(setReplyOption(context, otherUid, title, body, notificationId, data))
                 .setGroup(otherUid);

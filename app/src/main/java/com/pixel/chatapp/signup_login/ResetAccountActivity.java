@@ -82,7 +82,7 @@ public class ResetAccountActivity extends AppCompatActivity {
 
                                         startActivity(intent);
                                         finish();
-                                    });
+                                    }, this);
 
 
                                 } else Toast.makeText(this, getString(R.string.passwordAbove5), Toast.LENGTH_SHORT).show();

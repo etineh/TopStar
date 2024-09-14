@@ -10,6 +10,7 @@ import static com.pixel.chatapp.home.MainActivity.scrollNumMap;
 import static com.pixel.chatapp.home.MainActivity.scrollPositionIV;
 import static com.pixel.chatapp.home.MainActivity.sendIndicator;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -32,6 +33,7 @@ import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
+import com.pixel.chatapp.roomDatabase.repositories.UserChatRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +81,7 @@ public class ChatUtils {
                 if(outsideUserModel != null)
                 {
                     notifyFirstChatOfANewDay(outsideUserModel.getTimeSent(), messageModel.getTimeSent(),    // onNewChatInteraction
-                            newChatDateKey, adapter, otherId);
+                            newChatDateKey, adapter, otherId, context);
 
                     // add the new chat alert   ================= 5 new chats
                     if( (insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck > 5)   // I am inside the chat
@@ -190,7 +192,8 @@ public class ChatUtils {
 
     }
 
-    public static void notifyFirstChatOfANewDay(long compareTime, long timeStamp, String chatID, MessageAdapter adapter, String otherId)
+    public static void notifyFirstChatOfANewDay(long compareTime, long timeStamp, String chatID,
+                                                MessageAdapter adapter, String otherId, Context context)
     {
         if (TimeUtils.isNotToday(compareTime))  // The timestamp is not today -- add
         {
@@ -202,13 +205,22 @@ public class ChatUtils {
             newDateChatModel.setMyUid(myId);
 
             // add to local chat list
-            if(adapter != null){
+            if(adapter != null)
+            {
                 adapter.addMyMessageDB(newDateChatModel);
                 getLastTimeChat.put(otherId, System.currentTimeMillis());   // disable sending new time
+                // save to local ROOM database  -- inside chat
+                chatViewModel.insertChat(otherId, newDateChatModel);
+
+            } else  // it is coming from notification, app is offline
+            {
+                // activate ROOM
+                Application application = (Application) context.getApplicationContext();
+                UserChatRepository userRepository = new UserChatRepository(application);
+                // add to ROOM
+                userRepository.insertChats(otherId, newDateChatModel);
             }
 
-            // save to local ROOM database  -- inside chat
-            chatViewModel.insertChat(otherId, newDateChatModel);
         }
 
 //1718750571411
@@ -317,7 +329,7 @@ public class ChatUtils {
 
         ChatNotificationM notificationM = new ChatNotificationM(fcmToken, otherUid, getInsideChatMap);
 
-        notificationDao.chatNotify(notificationM).enqueue(new Callback<Void>() {
+        notificationDao.chatNotify(notificationM).enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
 

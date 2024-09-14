@@ -23,7 +23,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.utils.CountryNumCodeUtils;
 import com.pixel.chatapp.api.Dao_interface.ContactApiDao;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.ContactModel;

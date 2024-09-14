@@ -8,6 +8,8 @@
 
     <string name="playGame">Play Game</string>
     <string name="viewProfile">View Profile</string>
+    <string name="viewDetails">View details ↓↓</string>
+
     <string name="markAsRead">Mark as read</string>
 
     <string name="resendFile">Resend file boss</string>
@@ -37,6 +39,8 @@
     <string name="search">Search</string>
     <string name="join_tour">Join Tournament</string>
     <string name="forward">Forward to…</string>
+    <string name="selectPlayer">Select player(s)…</string>
+
     <string name="file">File</string>
     <string name="hintTitle">Hint</string>
     <string name="clearPin">Clear Pins</string>
@@ -146,8 +150,10 @@
     <string name="createLeague">Create League</string>
     <string name="createComm">Create Community</string>
     <string name="buyDate">Buy Data</string>
-    <string name="unknow">Unknown</string>
     <string name="unknown">Unknown</string>
+
+    <string name="asideRewardFun">Aside the reward, have fun!</string>
+    <string name="haveFun">Have fun!</string>
 
 
     <!--    settings bar    -->
@@ -162,6 +168,70 @@
     <string name="securityInfo">Change password, pin &amp; un/activate fingerprint.</string>
     <string name="Games">Account</string>
     <string name="P2PInfo">Setup payment account, register as P2P Merchant.</string>
+
+    <!--    game string    -->
+    <string name="card">Card(s)</string>
+    <string name="waiting">Awaiting</string>
+    <string name="toJoin">to join.</string>
+    <string name="quitGameSure">Quit game?</string>
+    <string name="quitGameForEveryone">Quit game for everyone?</string>
+    <string name="yes_">Yes</string>
+    <string name="quit">Quit</string>
+    <string name="whotGame">Whot Game</string>
+    <string name="incoming">Incoming </string>
+    <string name="from">from </string>
+    <string name="silent">Silent </string>
+    <string name="gameMode">Game mode </string>
+    <string name="amountPerPlayer">Amount per player (0.1 min.) </string>
+    <string name="remarkToPlayers">Remark (optional) </string>
+    <string name="gameBal">Game balance:  </string>
+    <string name="topUp">TopUp ></string>
+    <string name="notice">Note: \n1. The stake amount will be deducted from your wallet and other players who joined.
+        \n2. The staking funds will be moved to \'Locked Asset\'. Which means you can\'t access the fund till the end of the game.
+        \n3. The total stake funds will be credited to the winner\'s wallet immediately the game ends.</string>
+    <string name="onboarding">Onboarding Players </string>
+    <string name="startNow">Start now </string>
+    <string name="mode_">Mode: </string>
+    <string name="free">Free </string>
+    <string name="stake">Stake </string>
+    <string name="gameType">Game type: </string>
+    <string name="expectedPlayer">Players: </string>
+    <string name="hostRemark">Host remark: </string>
+    <string name="hostBy">Host by:  </string>
+    <string name="winnerPrize">Winner prize: </string>
+    <string name="awaiting">Awaiting… </string>
+    <string name="signalling">Signalling… </string>
+    <string name="joined">Joined</string>
+    <string name="gameDecision"> will be transferred from your Game Asset to your Lock Asset,
+        where it will be held until the game is over.</string>
+    <string name="yesJoin">Yes, join.</string>
+    <string name="noCancel">No, cancel.</string>
+    <string name="insufficientBal">Insufficient Game Balance. Kindly TopUp!</string>
+    <string name="joinHost">Joined ~ Host</string>
+    <string name="rejected">Rejected</string>
+    <string name="gameRejected">Game rejected!</string>
+    <string name="re_add">re-add:</string>
+    <string name="playerRemoved">Player removed.</string>
+    <string name="estWin">Est. reward: </string>
+    <string name="gameAsset_">Game Asset:</string>
+    <string name="workInProgress">work in progress</string>
+    <string name="toGame">to game?</string>
+    <string name="addPlayer">Add player</string>
+    <string name="cantRemovePlayer">You can\'t remove player here</string>
+    <string name="awaitingPlayer">Awaiting player(s)</string>
+    <string name="awaitingGame">Awaiting game</string>
+    <string name="reAddNotice">Add player after time count</string>
+    <string name="startGameWith">Start game with</string>
+    <string name="players_">players</string>
+    <string name="remove">Remove</string>
+    <string name="hostRemovePlayer">You were removed by host</string>
+    <string name="youHaveIncomingGame">You have incoming game from :</string>
+    <string name="playerAlreadyInGame">Player already in game list</string>
+    <string name="onGoingGameAlready">You have on going game already</string>
+    <string name="allowOneMore">Allow minimum of two (2) joined player!</string>
+    <string name="finishIncomingGame">Finish active/incoming game first</string>
+<!--    <string name="connected">Connected to game!</string>-->
+
 
     <!--    premium bar    -->
     <string name="whoCalls">Permit who can call you</string>
@@ -441,6 +511,7 @@
     <string name="invalidDetails">Incorrect details.</string>
     <string name="noInternetConnection">No internet connection 😔</string>
     <string name="scrollUpForPin">Scroll up for more pin chats!</string>
+    <string name="checkInternet">Check internet connection 😔</string>
 
     <string name="errorWithOtp">Error with code. Resend again.</string>
     <string name="timeout">timeout</string>
@@ -526,12 +597,15 @@
     <string name="totalUSDTAsset">Total USDT Asset</string>
     <string name="totalBonusAsset">Total Bonus/Airdrop Asset</string>
     <string name="totalMerchantAsset">Total P2P Merchant Asset</string>
+    <string name="totalLockAsset">Total Lock Asset</string>
 
     <string name="localAsset">Local Asset</string>
     <string name="usdtAsset">USDT Asset</string>
-    <string name="gameAsset">Game Rewards</string>
+    <string name="gameAsset">Game Asset</string>
     <string name="p2pMerchant">P2P Merchant</string>
     <string name="bonusAsset">Bonus/Airdrop</string>
+    <string name="lockAsset">Lock Asset</string>
+
     <string name="uniCountryCurrencySymbol">₦ 250,000.00</string>
     <string name="uniCountryCurrencySymbol_">＄ 20.00</string>
     <string name="transfer">Transfer</string>
@@ -875,7 +949,7 @@
     <string name="commLink">Enter community link</string>
     <string name="leagueTitle">League Title:</string>
     <string name="sponsorBy">Sponsored by:</string>
-    <string name="yourContacts">Contacts Players</string>
+    <string name="yourContacts">Contact Players</string>
     <string name="globalPlayer">Global Players</string>
     <string name="recentChat">Most recent chats… </string>
 

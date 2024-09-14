@@ -27,7 +27,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.utils.CountryNumCodeUtils;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 

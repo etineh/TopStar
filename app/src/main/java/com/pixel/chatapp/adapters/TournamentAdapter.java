@@ -9,9 +9,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.TournamentModel;
 
 import java.text.DateFormat;
@@ -69,6 +71,8 @@ public class TournamentAdapter extends RecyclerView.Adapter<TournamentAdapter.To
 
         } else {
 
+            setColours(holder);
+
             holder.gameTitle_TV.setText(null);
             holder.rewardPool_TV.setText(null);
             holder.sponsoredBy_TV.setText(null);
@@ -78,6 +82,7 @@ public class TournamentAdapter extends RecyclerView.Adapter<TournamentAdapter.To
                 holder.startDateTV.setText(null);
                 holder.entryFeeTV.setText(null);
             }
+
         }
 
         String title = tourModel.getTitle();
@@ -136,6 +141,28 @@ public class TournamentAdapter extends RecyclerView.Adapter<TournamentAdapter.To
 
     }
 
+    private void setColours(TourViewHolder holder)
+    {
+        if (MainActivity.nightMood) {
+            holder.liveOrRegisterTV.setBackgroundResource(R.drawable.round_button_dark);
+            holder.gameTitle_TV.setTextColor(ContextCompat.getColor(context, R.color.cool_orange));
+            holder.rewardPool_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.sponsoredBy_TV.setTextColor(ContextCompat.getColor(context, R.color.cool_orange));
+//            if(holder.startDateTV != null) holder.startDateTV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            if(holder.entryFeeTV != null) holder.entryFeeTV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+
+        } else {
+            holder.liveOrRegisterTV.setBackgroundResource(R.drawable.round_button_orange);
+            holder.gameTitle_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.rewardPool_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.sponsoredBy_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+//            if(holder.startDateTV != null) holder.startDateTV.setTextColor(ContextCompat.getColor(context, R.color.defaultBlack));
+            if(holder.entryFeeTV != null) holder.entryFeeTV.setTextColor(ContextCompat.getColor(context, R.color.black));
+
+        }
+
+    }
+
     //  ==========      methods
 
     private void StartDate(long lastTime, TourViewHolder holder)
@@ -171,7 +198,7 @@ public class TournamentAdapter extends RecyclerView.Adapter<TournamentAdapter.To
 
     public class TourViewHolder extends RecyclerView.ViewHolder {
 
-        TextView gameTitle_TV;
+        TextView gameTitle_TV, liveOrRegisterTV;
         TextView rewardPool_TV;
         TextView sponsoredBy_TV;
         TextView startDateTV;
@@ -193,6 +220,7 @@ public class TournamentAdapter extends RecyclerView.Adapter<TournamentAdapter.To
                 rewardPool_TV = itemView.findViewById(R.id.rewardPool_TV);
                 sponsoredBy_TV = itemView.findViewById(R.id.sponsoredByTV);
                 gameLogo_IV = itemView.findViewById(R.id.gameLogo_IV);
+                liveOrRegisterTV = itemView.findViewById(R.id.playOnclick);
 
                 if (status == upcoming) {
                     startDateTV = itemView.findViewById(R.id.startDateTV);

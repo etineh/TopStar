@@ -14,6 +14,7 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:windowAnimationStyle">@null</item>
         <!-- Customize your theme here. -->
+
     </style>
 
 <!--    No action back for the msg view-->
@@ -92,7 +93,7 @@
 
 <!--    textColor - cool_orange and black-->
     <style name="replyName">
-        <item name="android:textColor">#59514A</item>
+        <item name="android:textColor">@color/replyNa</item>
     </style>
 
     <style name="replyName2">
@@ -323,6 +324,28 @@
         <item name="tabTextColor">@color/white</item>
         <item name="tabIndicatorColor">@color/black</item>
         <item name="android:textColor">@color/white</item>
+    </style>
+
+
+    <!-- Full-screen theme for WhotGameActivity -->
+    <style name="FullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!--        change top bar color here-->
+        <item name="colorPrimaryVariant">@color/orange</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:windowAnimationStyle">@null</item>
+
+        <!-- remove status bar. -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+
     </style>
 
 </resources>

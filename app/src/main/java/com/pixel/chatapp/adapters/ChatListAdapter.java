@@ -4,10 +4,12 @@ import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
 import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
 import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
 import static com.pixel.chatapp.home.MainActivity.myUserName;
+import static com.pixel.chatapp.home.MainActivity.newPlayerMList;
 import static com.pixel.chatapp.home.MainActivity.onForward;
 import static com.pixel.chatapp.home.MainActivity.onUserLongPress;
 import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
 import static com.pixel.chatapp.home.MainActivity.otherUserHintRef;
+import static com.pixel.chatapp.home.MainActivity.selectedPlayerMList;
 import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
 
 import android.annotation.SuppressLint;
@@ -43,14 +45,17 @@ import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.fragments.ChatsFragment;
 import com.pixel.chatapp.home.fragments.PlayersFragment;
+import com.pixel.chatapp.interface_listeners.ChatListener;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.model.AwaitPlayerM;
 import com.pixel.chatapp.photos.ZoomImage;
 import com.pixel.chatapp.chats.MessageAdapter;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.MessageModel;
 import com.pixel.chatapp.model.UserOnChatUI_Model;
 import com.pixel.chatapp.utils.AnimUtils;
+import com.pixel.chatapp.utils.ProfileUtils;
 import com.pixel.chatapp.utils.UserChatUtils;
 import com.squareup.picasso.Picasso;
 
@@ -92,11 +97,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     public View previousView;
 
     private FragmentListener listener;
+    private ChatListener chatListener;
 
     public void setFragmentListener(FragmentListener listener) {
         this.listener = listener;
     }
 
+    public void setChatListener(ChatListener chatListener) {
+        this.chatListener = chatListener;
+    }
 
     // =======  constructor
     public ChatListAdapter(List<UserOnChatUI_Model> userModelList, Context mContext, Activity activity)
@@ -137,6 +146,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
 
+        setColours(holder);
+
         // reset data
         holder.textViewMsgCount.setText(null);
         holder.textViewMsgCount.setVisibility(View.INVISIBLE);
@@ -151,9 +162,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         holder.checkBoxToWho.setChecked(false);
 
 //        holder.textViewMsg.setTextAppearance(android.R.style.TextAppearance);
-        if(MainActivity.nightMood){
-            holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultWhite));
-        } else holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultBlack));
 
         int position_ = position;
         String otherUid = userModelList.get(position_).getOtherUid();
@@ -170,7 +178,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         long timeSent = userModelList.get(position_).getTimeSent();
 
 
-        if(MainActivity.onForward){
+        if(MainActivity.onForward || MainActivity.sharingPhotoActivated || MainActivity.onSelectNewPlayer){
             holder.checkBoxContainer.setVisibility(View.VISIBLE);
             if(forwardChatUserId.contains(otherUid)) holder.checkBoxToWho.setChecked(true);
         }
@@ -267,16 +275,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
         }
 
-        if(MainActivity.recyclerMap.get(otherUid) == null)  // receiving for new user the first time
+        // receiving for new user the first time
+        if(MainActivity.allUsersFromRoom != null && MainActivity.allUsersFromRoom.contains(userModelList.get(position_)))
         {
             String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
             listener.sendRecyclerView(holder.recyclerChat, otherUid);
             listener.getMessage(myUsername_, otherUid, mContext, true);
-        }
+            System.out.println("checking loadMsg from CHLAdapter L270");
 
-        // add the checkbox icon for forward if user is sharing photo from another app
-        if(MainActivity.sharingPhotoActivated){
-            holder.checkBoxContainer.setVisibility(View.VISIBLE);
         }
 
 
@@ -306,7 +312,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             if (MainActivity.getLastTimeChat != null)
                 MainActivity.getLastTimeChat.put(otherId, userModelList.get(position_).getTimeSent());    // enable add up new time card
 
-            if(!MainActivity.onForward && !MainActivity.onUserLongPress)
+            if(!MainActivity.onForward && !MainActivity.onUserLongPress && !MainActivity.onSelectNewPlayer)
             {
                 // open the user chats
                 try {
@@ -450,7 +456,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     if(onForward){
                         holder.checkBoxToWho.setChecked(true); //
                         holder.checkBoxContainer.setVisibility(View.VISIBLE);
-                        activateForwardCheckBox(holder, otherUid);
+                        String playerName = otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__;
+                        activateForwardCheckBox(holder, otherId, imageLink__, playerName);
                     }
 
                     if(onUserLongPress) {
@@ -497,7 +504,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                 otherUidLongPressList.remove(userModel.getOtherUid());
 
                 listener.onLongPressUser(userModel);
-            } else if(onForward) activateForwardCheckBox(holder, otherUid);
+            } else if(onForward){
+                String playerName = otherDisplayName != null ? otherDisplayName : "@"+otherUserName;
+                activateForwardCheckBox(holder, otherUid, imageLink, playerName);
+            }
             else {
                 holder.checkBoxToWho.setChecked(false);
                 holder.checkBoxContainer.setVisibility(View.GONE);
@@ -512,25 +522,46 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             {
                 CheckBox checkBox = holder.checkBoxToWho;
                 String otherName = holder.textViewUser.getText().toString();    // get user username
+                String playerName = otherDisplayName != null ? otherDisplayName : "@"+otherUserName;
 
                 if(checkBox.isChecked()) {
-                    MainActivity.selectCount--;
-                    checkBox.setChecked(false);
-                    forwardChatUserId.removeIf(name -> name.equals(otherUid));
-                    selectedUserNames.removeIf(name -> name.equals(otherName));
+                    if(MainActivity.onSelectNewPlayer) {
+                        checkBox.setChecked(true);
+                        Toast.makeText(mContext, mContext.getString(R.string.cantRemovePlayer), Toast.LENGTH_SHORT).show();
+                    } else {
+
+                        MainActivity.selectCount--;
+                        checkBox.setChecked(false);
+
+                        forwardChatUserId.removeIf(name -> name.equals(otherUid));
+                        selectedUserNames.removeIf(name -> name.equals(otherName));
+                        selectedPlayerMList.removeIf(name -> name.getPlayerUid().equals(otherUid));  // Add imageUri to the List
+                    }
+
                 } else {
                     MainActivity.selectCount++;
                     checkBox.setChecked(true);
+
+                    String safeImageLink = imageLink != null ? imageLink : "null"; // Provide a default value or handle null
+                    if(MainActivity.onSelectNewPlayer){
+                        newPlayerMList.add(new AwaitPlayerM(safeImageLink, playerName, otherUid, "signal", false));
+                        chatListener.openAddPlayerLayout(ProfileUtils.getOtherDisplayOrUsername(otherUid, playerName));
+                    } else {
+                        selectedPlayerMList.add(new AwaitPlayerM(safeImageLink, playerName, otherUid, "signal", false) );
+                    }
                     if( !forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);  // Add other user id to the List
                     if( !selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
-                }
-                String totalUser = MainActivity.selectCount + " " + mContext.getString(R.string.selected);
-                MainActivity.totalUser_TV.setText(totalUser);
 
-                if(forwardChatUserId.size() > 0){           //  make send button invisible
+                }
+
+                if(forwardChatUserId.size() > 0 && !MainActivity.onSelectNewPlayer){           //  make send button invisible
+                    String totalUser = MainActivity.selectCount + " " + mContext.getString(R.string.selected);
+                    MainActivity.totalUser_TV.setText(totalUser);
                     MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
-                } else
+                } else {
                     MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
+                    MainActivity.totalUser_TV.setText(null);
+                }
 
             }else if(onUserLongPress)
             {
@@ -550,6 +581,23 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
     //      --------- methods -----------
+    private void setColours(ChatViewHolder holder)
+    {
+        if(MainActivity.nightMood){
+            holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultWhite));
+            holder.userBackground.setBackgroundResource(R.drawable.user_card_dark);
+            holder.checkBoxToWho.setBackgroundColor(ContextCompat.getColor(mContext, R.color.blackApp));
+            holder.textViewUser.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+
+        } else {
+            holder.textViewMsg.setTextColor(ContextCompat.getColor(mContext, R.color.defaultBlack));
+            holder.userBackground.setBackgroundResource(R.drawable.user_card_day);
+            holder.checkBoxToWho.setBackgroundColor(ContextCompat.getColor(mContext, R.color.white));
+            holder.textViewUser.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+
+        }
+
+    }
 
     private void activateOnUserLongPress(ChatViewHolder holder, UserOnChatUI_Model userModel )
     {
@@ -569,27 +617,46 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //        System.out.println("what is adapter: " +ChatsFragment.adapter.userModelList.size() + " most recent " + PlayersFragment.adapter.userModelList.size());
     }
 
-    private void activateForwardCheckBox(ChatViewHolder holder, String otherUid){
+    private void activateForwardCheckBox(ChatViewHolder holder, String otherUid, String imageLink, String playerName){
         CheckBox checkBox = holder.checkBoxToWho;
         checkBox.setChecked(checkBox.isChecked()); // Toggle the checked state
         String otherName = holder.textViewUser.getText().toString();    // get user username
 
-        if(checkBox.isChecked()) {
+        if(checkBox.isChecked())
+        {
             MainActivity.selectCount++;
             if (!forwardChatUserId.contains(otherUid)) forwardChatUserId.add(otherUid);
-            if (!selectedUserNames.contains(otherUid))selectedUserNames.add(otherName);  // Add username to the List
+            if (!selectedUserNames.contains(otherUid)) selectedUserNames.add(otherName);  // Add username to the List
+
+            String safeImageLink = imageLink != null ? imageLink : "null"; // Provide a default value or handle null
+            if(MainActivity.onSelectNewPlayer){
+                newPlayerMList.add(new AwaitPlayerM(safeImageLink, playerName, otherUid, "signal", false));
+                chatListener.openAddPlayerLayout(ProfileUtils.getOtherDisplayOrUsername(otherUid, playerName));
+            } else {
+                selectedPlayerMList.add(new AwaitPlayerM(safeImageLink, playerName, otherUid, "signal", false));
+            }
+
         } else {
-            MainActivity.selectCount--;
-            forwardChatUserId.removeIf(name -> name.equals(otherUid)); // remove user id
-            selectedUserNames.removeIf(name -> name.equals(otherName)); // remove user name
+            if(MainActivity.onSelectNewPlayer) {
+                checkBox.setChecked(true);
+                Toast.makeText(mContext, mContext.getString(R.string.cantRemovePlayer), Toast.LENGTH_SHORT).show();
+            } else {
+                MainActivity.selectCount--;
+                forwardChatUserId.removeIf(name -> name.equals(otherUid)); // remove user id
+                selectedUserNames.removeIf(name -> name.equals(otherName)); // remove user name
+                selectedPlayerMList.removeIf(name -> name.getPlayerUid().equals(otherUid));  // Add imageUri to the List
+            }
+
         }
 
-        MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
 
-        if(forwardChatUserId.size() > 0){           //  make send button invisible
+        if(forwardChatUserId.size() > 0 && !MainActivity.onSelectNewPlayer) {           //  make send button invisible
+            MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
             MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
-        } else
+        } else {
+            MainActivity.totalUser_TV.setText(null);
             MainActivity.circleForwardSend.setVisibility(View.INVISIBLE);
+        }
     }
 
     // update failed status to delivery status when network is okay
@@ -985,13 +1052,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     public class ChatViewHolder extends RecyclerView.ViewHolder{
 
+        private final ConstraintLayout userBackground;
         private final CircleImageView imageView;
         private final ImageView imageViewDeliver;
-//        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
+        //        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
         private final ImageView pinIcon_IV, muteIcon_IV;
-//        private final ConstraintLayout constraintTop, constraintLast;
+        //        private final ConstraintLayout constraintTop, constraintLast;
         private final TextView textViewUser, textViewMsg, textViewMsgCount, dateTime_TV, textViewTyping;
-//        private final TextView textViewDay;
         private final CardView cardView;
         RecyclerView recyclerChat;
 
@@ -1002,6 +1069,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            userBackground = itemView.findViewById(R.id.userBackground);
             imageView = itemView.findViewById(R.id.imageViewUsers);
             textViewUser = itemView.findViewById(R.id.textViewUser);
             textViewMsg = itemView.findViewById(R.id.textViewMsg);

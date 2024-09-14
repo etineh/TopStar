@@ -29,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pixel.chatapp.Permission.Permission;
 import com.pixel.chatapp.adapters.ChatListAdapter;
+import com.pixel.chatapp.interface_listeners.ChatListener;
 import com.pixel.chatapp.utils.AnimUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
@@ -103,6 +104,7 @@ public class ChatsFragment extends Fragment {
 
                 adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
                 adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
+                adapter.setChatListener((ChatListener) getActivity());
 
                 getActivity().runOnUiThread(() -> {
                     recyclerView.setAdapter(adapter);
@@ -194,6 +196,7 @@ public class ChatsFragment extends Fragment {
         if(isRoomDbNull){
             adapter = new ChatListAdapter(mUsersID, getContext(), getActivity());
             adapter.setFragmentListener((FragmentListener) getActivity());       // // Set MainActivity as the listener
+            adapter.setChatListener((ChatListener) getActivity());
             recyclerView.setAdapter(adapter);
             progressBarLoadChatList.setVisibility(View.GONE);
         }

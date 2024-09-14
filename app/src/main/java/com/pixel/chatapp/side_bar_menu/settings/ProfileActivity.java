@@ -54,8 +54,8 @@ import com.pixel.chatapp.api.Dao_interface.UserDao;
 import com.pixel.chatapp.api.model.VerificationResponse;
 import com.pixel.chatapp.api.model.RequestBody;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.api.model.TwoValueM;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.outgoing.TwoValueM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
@@ -662,7 +662,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
                 }
             });
 
-        });
+        }, this);
     }
 
     private void copy(View v, TextView textView){

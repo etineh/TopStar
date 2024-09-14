@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.interface_listeners.TriggerOnForward;
 import com.pixel.chatapp.utils.FileUtils;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
@@ -43,6 +44,7 @@ import java.util.List;
 public class RedirectHome extends AppCompatActivity {
 
     MainActivity mainActivity = new MainActivity();
+    public static TriggerOnForward triggerOnForward;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private DatabaseReference refMsgFast;
 
@@ -312,7 +314,7 @@ public class RedirectHome extends AppCompatActivity {
                     bringMainActivityToFront();
                 }
             }
-            if(mainActivity != null) mainActivity.setForwardChat();
+            if(triggerOnForward != null) triggerOnForward.openOnForwardView();
             finish();
         }, 300);
     }
@@ -329,7 +331,7 @@ public class RedirectHome extends AppCompatActivity {
                         bringMainActivityToFront();
                     }
                 }
-                if(mainActivity != null) mainActivity.setForwardChat();
+                if(triggerOnForward != null) triggerOnForward.openOnForwardView();
                 finish();
             }, 300);
         }

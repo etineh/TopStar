@@ -1,12 +1,10 @@
 package com.pixel.chatapp.calls;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.NewEventCallBack;
-import com.pixel.chatapp.model.CallModel;
 import com.pixel.chatapp.calls.webrtc.MyPeerConnectionObserver;
 import com.pixel.chatapp.calls.webrtc.WebRTCClient;
 
@@ -16,7 +14,7 @@ import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceViewRenderer;
 
-public class MainRepository implements WebRTCClient.Listener {
+public class MainRepository {
 
     public Listener listener;
     private final Gson gson = new Gson();
@@ -24,18 +22,9 @@ public class MainRepository implements WebRTCClient.Listener {
 
     private WebRTCClient webRTCClient;
 
-    private String currentUsername;
 
     private SurfaceViewRenderer remoteView;
 
-    private String target;
-    private void updateCurrentUsername(String username){
-        this.currentUsername = username;
-    }
-
-//    private MainRepository(){
-//        this.firebaseClient = new FirebaseClient();
-//    }
 
     MainActivity mainActivity = new MainActivity();
 
@@ -133,49 +122,35 @@ public class MainRepository implements WebRTCClient.Listener {
 
     public void subscribeForLatestEvent(String targetUid, NewEventCallBack callBack){
         mainActivity.observeIncomingLatestEvent(targetUid, model -> {
-            switch (model.getType()){
-
-                case Offer:
+            switch (model.getType()) {
+                case Offer -> {
 //                    this.target = model.getSenderUid();
                     webRTCClient.onRemoteSessionReceived(new SessionDescription(
-                            SessionDescription.Type.OFFER,model.getData()
+                            SessionDescription.Type.OFFER, model.getData()
                     ));
                     webRTCClient.answer(model.getSenderUid());
-
-                    break;
-                case Answer:
+                }
+                case Answer ->
 //                    this.target = model.getSenderUid();
-                    webRTCClient.onRemoteSessionReceived(new SessionDescription(
-                            SessionDescription.Type.ANSWER,model.getData()
-                    ));
-
-                    break;
-                case IceCandidate:
-                        try{
-                            IceCandidate candidate = gson.fromJson(model.getData(),IceCandidate.class);
+                        webRTCClient.onRemoteSessionReceived(new SessionDescription(
+                                SessionDescription.Type.ANSWER, model.getData()
+                        ));
+                case IceCandidate -> {
+                    try {
+                        IceCandidate candidate = gson.fromJson(model.getData(), IceCandidate.class);
 //                            System.out.println("what is ice here - " + candidate);
-                            webRTCClient.addIceCandidate(candidate);
+                        webRTCClient.addIceCandidate(candidate);
 
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    break;
-                case AudioCall:
-                case VideoCall:
-                case AcceptVideo:
-                case RejectVideo:
-                case None:
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                case AudioCall, VideoCall, AcceptVideo, RejectVideo, None ->
 //                    this.target = model.getSenderUid();
-                    callBack.onNewEventReceived(model);
-                    break;
+                        callBack.onNewEventReceived(model);
             }
 
         });
-    }
-
-    @Override
-    public void onTransferDataToOtherPeer(CallModel model) {
-//        firebaseClient.sendMessageToOtherUser(model,()->{});
     }
 
 

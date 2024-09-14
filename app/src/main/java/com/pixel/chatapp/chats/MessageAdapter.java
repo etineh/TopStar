@@ -229,8 +229,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return modelList;
     }
 
-    public void setModelList(List<MessageModel> modelList)
-    {
+    public void setModelList(List<MessageModel> modelList) {
         // Set the new modelList
         this.modelList = modelList;
 
@@ -239,12 +238,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // Iterate through the modelList to extract message IDs and add them to the messageIdSet
         new Thread(() -> {
-            for (MessageModel message : modelList) {
-                messageIdSet.add(message.getIdKey());
+            synchronized (this.modelList) {
+                for (MessageModel message : modelList) {
+                    messageIdSet.add(message.getIdKey());
+                }
             }
         }).start();
-
     }
+
 
     // add new message to list method
     public void addNewMessageDB(MessageModel newMessage) {
@@ -479,7 +480,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 if(i == 9) {
                     ((Activity) mContext).runOnUiThread(() -> {
-                        Toast.makeText(mContext, "Test view MsgAdapter L310", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(mContext, "Test view MsgAdapter L310", Toast.LENGTH_SHORT).show();
                     });
                 }
 
@@ -577,6 +578,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // type 0 - text-chat, type 1 is voice_note, type 2 is photo, type 3 is document,
         // type 4 is audio (mp3), type 5 is video, 6 is call, 7 is game, 8 is pin, 10 is empty card
+        setColours(holder);
 
         int chatPosition = position_;     //   to get the position of each chat
         MessageModel modelChats = modelList.get(chatPosition);    // get the model position of each chat
@@ -1341,6 +1343,92 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
     // ---------------------- methods ---------------------------
+
+    private void setColours(MessageViewHolder holder)
+    {
+        if(MainActivity.nightMood)
+        {
+            if(holder.pauseAndPlay_IV != null) holder.pauseAndPlay_IV.setImageTintList(ColorStateList
+                    .valueOf(ContextCompat.getColor(mContext, R.color.cool_orange)));
+            if(holder.speedTV != null) holder.speedTV.setBackgroundResource(R.drawable.cool_black_circle_round);
+            if(holder.emojiOnly_TV != null) holder.emojiOnly_TV.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+
+            if(holder.textViewShowMsg != null) holder.textViewShowMsg.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+            if(holder.photoChatTV != null) holder.photoChatTV.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+            if(holder.callOrGameHeading_TV != null) holder.callOrGameHeading_TV.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+
+            if(holder.react_TV != null) holder.react_TV.setTextColor(ContextCompat.getColor(mContext, R.color.whitePure));
+            if(holder.react_TV != null) holder.react_TV.setBackgroundResource(R.drawable.black_circle_round);
+
+            if(status == receive){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_receive_dark);
+                holder.linearLayoutClick.setBackgroundResource(R.drawable.reply_background_night2);
+                holder.linearLayoutReplyBox.setBackgroundResource(R.drawable.reply_background_night2);
+                holder.senderNameTV.setTextColor(ContextCompat.getColor(mContext, R.color.cool_orange));
+                holder.imageViewOptions.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.cool_orange)));
+
+            } else if (status == send) {
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_send_dark);
+                holder.linearLayoutClick.setBackgroundResource(R.drawable.reply_background_night1);
+                holder.linearLayoutReplyBox.setBackgroundResource(R.drawable.reply_background_night1);
+                holder.senderNameTV.setTextColor(ContextCompat.getColor(mContext, R.color.cool_orange));
+                holder.imageViewOptions.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.cool_orange)));
+
+            } else if(status == receivePhoto || status == callReceive){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_receive_dark);
+
+            } else if(status == sendPhoto || status == callSend){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_send_dark);
+
+            } else if(status == pinChat) {
+                holder.pinAlertTV.setBackgroundColor(ContextCompat.getColor(mContext, R.color.blackApp));
+                holder.pinAlertTV.setTextColor(ContextCompat.getColor(mContext, R.color.cool_orange));
+
+            }
+
+        } else
+        {
+            if(holder.pauseAndPlay_IV != null) holder.pauseAndPlay_IV.setImageTintList(ColorStateList
+                    .valueOf(ContextCompat.getColor(mContext, R.color.orange)));
+            if(holder.speedTV != null) holder.speedTV.setBackgroundResource(R.drawable.msg_count);
+
+            if(holder.textViewShowMsg != null) holder.textViewShowMsg.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+            if(holder.photoChatTV != null) holder.photoChatTV.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+            if(holder.callOrGameHeading_TV != null) holder.callOrGameHeading_TV.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+
+            if(holder.emojiOnly_TV != null) holder.emojiOnly_TV.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+            if(holder.react_TV != null) holder.react_TV.setTextColor(ContextCompat.getColor(mContext, R.color.black2));
+            if(holder.react_TV != null) holder.react_TV.setBackgroundResource(R.drawable.white_circle_bg);
+
+            if(status == receive){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_receive_day);
+                holder.linearLayoutClick.setBackgroundResource(R.drawable.reply_background_day2);
+                holder.linearLayoutReplyBox.setBackgroundResource(R.drawable.reply_background_day2);
+                holder.senderNameTV.setTextColor(ContextCompat.getColor(mContext, R.color.replyNa));
+                holder.imageViewOptions.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.orange)));
+
+            } else if (status == send) {
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_send_day);
+                holder.linearLayoutClick.setBackgroundResource(R.drawable.reply_background_day1);
+                holder.linearLayoutReplyBox.setBackgroundResource(R.drawable.reply_background_day1);
+                holder.senderNameTV.setTextColor(ContextCompat.getColor(mContext, R.color.black2));
+                holder.imageViewOptions.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.white)));
+
+            } else if(status == receivePhoto || status == callReceive){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_receive_day);
+
+            } else if(status == sendPhoto || status == callSend){
+                holder.chatContainer.setBackgroundResource(R.drawable.view_card_send_day);
+
+            } else if(status == pinChat) {
+                holder.pinAlertTV.setBackgroundColor(ContextCompat.getColor(mContext, R.color.white));
+                holder.pinAlertTV.setTextColor(ContextCompat.getColor(mContext, R.color.orange));
+
+            }
+
+        }
+
+    }
 
     private SpannableString seperateUsernameFromText(String message, MessageModel modelChats, MessageViewHolder holder, int chatPosition)
     {
@@ -3124,7 +3212,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             } else if (status == sendPhoto || status == receivePhoto)
             {
-//                chatContainer = itemView.findViewById(R.id.photoContainer);
+                chatContainer = itemView.findViewById(R.id.photoContainer);
                 constraintMsgContainer = itemView.findViewById(R.id.senderLayerContainer);
 
                 // photo and progress bar
@@ -3201,6 +3289,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 timeMsg = itemView.findViewById(R.id.timeCall_TV);
                 response_TV = itemView.findViewById(R.id.response_TV);
                 callOrGame_IV = itemView.findViewById(R.id.callOrGame_IV);
+
+                chatContainer = itemView.findViewById(R.id.chatContainer);
 
             }
 

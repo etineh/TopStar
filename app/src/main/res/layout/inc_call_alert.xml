@@ -8,7 +8,8 @@
     android:background="@color/orange"
     android:clickable="true"
     android:elevation="7dp"
-    android:padding="4dp">
+    android:padding="4dp"
+    android:visibility="gone">
 
     <TextView
         android:id="@+id/incomingNameTV"

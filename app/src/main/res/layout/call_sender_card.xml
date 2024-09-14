@@ -10,6 +10,7 @@
     android:paddingBottom="3dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainer"
         style="@style/ChatMsgContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,13 +27,12 @@
             android:paddingStart="1dp"
             android:paddingEnd="@dimen/_10dp"
             android:text="Video call"
-            android:textSize="16dp"
+            android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/callOrGame_IV"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/callOrGame_IV"
-            style="@style/drawableBG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"

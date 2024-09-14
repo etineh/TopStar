@@ -190,12 +190,13 @@
 
         <ImageView
             android:id="@+id/photoSeen_IV"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="10dp"
+            android:layout_height="7dp"
             android:layout_marginTop="3dp"
             android:layout_marginEnd="7dp"
             app:layout_constraintEnd_toStartOf="@+id/photoChatTimeTV"
-            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV" />
+            app:layout_constraintTop_toBottomOf="@+id/photoChatSender_TV"
+            app:tint="@color/orange" />
 
         <ImageView
             android:id="@+id/pinPhotoSender_IV"

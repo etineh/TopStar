@@ -11,6 +11,7 @@
     android:paddingEnd="60dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainer"
         style="@style/chatReceiveContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,7 +34,6 @@
 
         <ImageView
             android:id="@+id/callOrGame_IV"
-            style="@style/drawableBG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"

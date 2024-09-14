@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ViewImageAdapter;
+import com.pixel.chatapp.interface_listeners.TriggerOnForward;
 import com.pixel.chatapp.utils.SharePhotoUtil;
 import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
@@ -32,7 +33,8 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
 
     private static TextView fromWho_TV, timeAndDate_TV, showChatTV;
     private ImageView forwardPhoto_IV, sharePhoto_TV, openOption;
-    MainActivity mainActivity = new MainActivity();
+    public static TriggerOnForward triggerOnForward;
+
     ConstraintLayout optionContainer, moreOptionContainer;
     TextView saveToGalleryTV,openInChat_TV;
 
@@ -78,7 +80,7 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
             view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(50).withEndAction(() ->
             {
                 chatModelList.add(currentModelChat);
-                mainActivity.setForwardChat();
+                triggerOnForward.openOnForwardView();
 
                 // Reset the scale
                 new Handler().postDelayed(() ->{

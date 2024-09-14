@@ -46,9 +46,11 @@ import java.util.List;
 public class WalletActivity extends AppCompatActivity implements FundTransferUserAdapter.ProceedToTransferPage {
 
     private ImageView resetPinButton, customerCareButton, arrowBack, hideAmount_IV;
-    private TextView totalAssetAmount_TV, localCurrencyAmount_TV,dollarAmount_TV, gameAmount_TV, bonusAmount_TV, merchantAmount_TV;
+    private TextView totalAssetAmount_TV, localCurrencyAmount_TV,dollarAmount_TV, gameAmount_TV, bonusAmount_TV,
+            merchantAmount_TV, lockAmount_TV;
     private CardView depositCardView,withdrawCardView, transferCardView, convertCardView, p2pCardView;
-    private CardView cardViewLocalAmount, cardViewUDSTAmount, cardViewGameAmount, cardViewBonusAmount, cardViewP2PMerchant;
+    private CardView cardViewLocalAmount, cardViewUDSTAmount, cardViewGameAmount, cardViewBonusAmount,
+            cardViewP2PMerchant, cardViewLock;
 
     private ConstraintLayout usdtPaymentOption, p2pPaymentOption, withdrawOrDepositContainer, trans_background;
     private TextView withdrawOrDeposit_TV, p2pInfo_TV, usdtInfo_TV, gameCurrency_TV;
@@ -128,6 +130,7 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         gameAmount_TV = findViewById(R.id.gameAmount_TV);
         bonusAmount_TV = findViewById(R.id.bonusAmount_TV);
         merchantAmount_TV = findViewById(R.id.merchantAmount_TV);
+        lockAmount_TV = findViewById(R.id.lockAmount_TV);
 
         // asset containers
         depositCardView = findViewById(R.id.depositCardView);
@@ -142,6 +145,8 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
         cardViewGameAmount = findViewById(R.id.cardViewGameAsset);
         cardViewBonusAmount = findViewById(R.id.cardViewBonusAsset);
         cardViewP2PMerchant = findViewById(R.id.cardViewP2PMerchantAsset);
+        cardViewLock = findViewById(R.id.cardViewLockAsset);
+
         p2pInfo_TV = findViewById(R.id.p2pInfo_TV);
         usdtInfo_TV = findViewById(R.id.usdtInfo_TV);
         gameCurrency_TV = findViewById(R.id.gameCurrency_TV);
@@ -674,6 +679,24 @@ public class WalletActivity extends AppCompatActivity implements FundTransferUse
 
             }).start();
         });
+
+        cardViewLock.setOnClickListener(v -> {
+            v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(() ->
+            {
+
+                Intent intent = new Intent(this, EachAssetActivity.class);
+                intent.putExtra("assetType", "LockAsset");
+                startActivity(intent);
+
+                new Handler().postDelayed( ()-> {
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                }, 200);
+
+            }).start();
+        });
+
+
 
         // onBackPress
         View.OnClickListener backPress = v -> {

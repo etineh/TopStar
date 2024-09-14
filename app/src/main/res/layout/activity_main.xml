@@ -26,6 +26,39 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ViewStub
+        android:id="@+id/incomingGameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_incoming_game_alert"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/addPlayerConfirmVS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_quit_or_start_game"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
+        android:id="@+id/joinGameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_join_game_decision_"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewStub
         android:id="@+id/videoOrAudioOptionLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -132,13 +165,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ViewStub
+        android:id="@+id/selectGameViewStub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_select_game"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/HomeTopConstr"
         style="@style/mainBackground"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:clickable="true"
-        android:elevation="5dp">
+        android:elevation="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/returnBackToCAll">
 
         <ImageView
             android:id="@+id/imageViewMenu"

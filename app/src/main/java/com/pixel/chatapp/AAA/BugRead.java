@@ -3,7 +3,7 @@ package com.pixel.chatapp.AAA;
 public class BugRead {
 
 
-    //    =====================================
+    //    =====================================     --- solved
 
     //  1. activity reopen/reload when I click on the notification chat, instead of it to bring the previous activity up.
     //  2. the data only print when I am on the app, it's not print when I am off the app, when I click on the chat notification. -- solved

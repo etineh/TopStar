@@ -40,9 +40,9 @@ import com.pixel.chatapp.utils.CountryNumCodeUtils;
 import com.pixel.chatapp.utils.OTPGenerator;
 import com.pixel.chatapp.utils.PhoneUtils;
 import com.pixel.chatapp.api.Dao_interface.UserDao;
-import com.pixel.chatapp.api.model.LoginDetailM;
+import com.pixel.chatapp.api.model.outgoing.LoginDetailM;
 import com.pixel.chatapp.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.api.model.UserSearchM;
+import com.pixel.chatapp.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.constants.AllConstants;
 import com.pixel.chatapp.home.MainActivity;
 
@@ -193,6 +193,7 @@ public class LinkNumberActivity extends AppCompatActivity {
         
         support_IV.setOnClickListener(v -> {
             verifyDatabaseConnection();
+            auth.signOut();
 //            Toast.makeText(this, "in progress", Toast.LENGTH_SHORT).show();
         });
 

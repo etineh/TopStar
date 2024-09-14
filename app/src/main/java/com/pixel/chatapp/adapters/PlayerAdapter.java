@@ -10,9 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.utils.TimeUtils;
 import com.pixel.chatapp.model.PlayerModel;
 
@@ -62,6 +65,8 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
         if(playerModel.getType() == player_card)
         {
+            setColours(holder);
+
             holder.playerName_TV.setText(null);
             holder.mode_TV.setText(null);
             holder.stakeAmount_TV.setText(null);
@@ -118,6 +123,30 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 //System.out.println("what is printing: " + position);
     }
 
+    private void setColours(PlayerViewHolder holder) {
+
+        if(MainActivity.nightMood) {
+            holder.playerContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.blackApp));
+            holder.playerName_TV.setTextColor(ContextCompat.getColor(context, R.color.cool_orange));
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+            holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.mode_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+            holder.playOnclick.setBackgroundResource(R.drawable.round_button_dark);
+            holder.stakeAmount_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
+
+        } else {
+            holder.playerContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            holder.playerName_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.mode_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.playOnclick.setBackgroundResource(R.drawable.round_button_orange);
+            holder.stakeAmount_TV.setTextColor(ContextCompat.getColor(context, R.color.black));
+
+        }
+
+    }
+
     //  ======  methods
 
     private void timeAndDateSent(long lastTime, PlayerViewHolder holder) {
@@ -148,7 +177,8 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
     public class PlayerViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView playerName_TV, mode_TV, stakeAmount_TV, gameType_TV, timeCreated_TV, fromWhereTV;
+        ConstraintLayout playerContainer;
+        private TextView playerName_TV, mode_TV, stakeAmount_TV, gameType_TV, timeCreated_TV, fromWhereTV, lineH, playOnclick;
         private ImageView playerPhoto_IV, dropDownIV;
 
         public PlayerViewHolder(@NonNull View itemView) {
@@ -156,13 +186,15 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
             if(status == player_card)
             {
+                playerContainer = itemView.findViewById(R.id.playerContainer);
                 playerName_TV = itemView.findViewById(R.id.playerName_TV);
                 mode_TV = itemView.findViewById(R.id.mode_TV);
                 stakeAmount_TV = itemView.findViewById(R.id.stakeAmount_TV);
                 gameType_TV = itemView.findViewById(R.id.gameType_TV);
                 timeCreated_TV = itemView.findViewById(R.id.timeCreated_TV);
                 playerPhoto_IV = itemView.findViewById(R.id.playerPhoto_IV);
-
+                lineH = itemView.findViewById(R.id.lineH);
+                playOnclick = itemView.findViewById(R.id.playOnclick);
             } else {
                 fromWhereTV = itemView.findViewById(R.id.fromWhereTV);
                 dropDownIV = itemView.findViewById(R.id.dropDownIV);

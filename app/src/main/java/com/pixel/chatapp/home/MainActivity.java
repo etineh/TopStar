@@ -1,5 +1,6 @@
 package com.pixel.chatapp.home;
 
+import static com.pixel.chatapp.utils.AnimUtils.slideOutToBottom;
 import static com.pixel.chatapp.utils.FileUtils.formatDuration;
 import static com.pixel.chatapp.utils.FileUtils.getFileName;
 import static com.pixel.chatapp.utils.FileUtils.isAudioFile;
@@ -24,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -101,14 +103,29 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.activities.CreateLeagueActivity;
 import com.pixel.chatapp.activities.CreatePinActivity;
 import com.pixel.chatapp.activities.LiveGameActivity;
+import com.pixel.chatapp.activities.RedirectHome;
+import com.pixel.chatapp.api.model.outgoing.TwoValueM;
+import com.pixel.chatapp.model.AwaitPlayerM;
+import com.pixel.chatapp.model.SignalPlayerM;
+import com.pixel.chatapp.api.Dao_interface.GameAPI;
+import com.pixel.chatapp.api.model.incoming.AssetsModel;
+import com.pixel.chatapp.api.model.incoming.ResultApiM;
+import com.pixel.chatapp.api.model.outgoing.GameSignalM;
+import com.pixel.chatapp.games.whot.AwaitPlayersActivity;
+import com.pixel.chatapp.games.whot.WhotOptionActivity;
 import com.pixel.chatapp.home.fragments.PlayersFragment;
 import com.pixel.chatapp.interface_listeners.ChatListener;
+import com.pixel.chatapp.interface_listeners.TriggerOnForward;
+import com.pixel.chatapp.interface_listeners.WalletCallBack;
 import com.pixel.chatapp.notification.NotificationHelper;
 import com.pixel.chatapp.notification.ReplyReceiver;
+import com.pixel.chatapp.photos.ViewImageActivity;
 import com.pixel.chatapp.utils.AnimUtils;
 import com.pixel.chatapp.utils.CacheUtils;
 import com.pixel.chatapp.utils.ChatUtils;
+import com.pixel.chatapp.utils.GameUtils;
 import com.pixel.chatapp.utils.IdTokenUtil;
+import com.pixel.chatapp.utils.ProfileUtils;
 import com.pixel.chatapp.utils.NumberSpacing;
 import com.pixel.chatapp.utils.OpenActivityUtil;
 import com.pixel.chatapp.utils.SharePhotoUtil;
@@ -151,13 +168,16 @@ import com.pixel.chatapp.signup_login.PhoneLoginActivity;
 import com.pixel.chatapp.signup_login.ResetAccountActivity;
 import com.pixel.chatapp.signup_login.SetUpProfileActivity;
 import com.pixel.chatapp.utils.UserChatUtils;
+import com.pixel.chatapp.utils.WalletUtils;
 import com.squareup.picasso.Picasso;
 import com.vanniktech.emoji.EmojiPopup;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -168,6 +188,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -176,7 +197,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext, ChatListener {
+public class MainActivity extends AppCompatActivity implements FragmentListener, CallListenerNext, ChatListener, TriggerOnForward {
 
     private static TabLayout tabLayoutGeneral;
     private static ViewPager2 viewPager2General;
@@ -203,8 +224,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     String imageLink;
 
     //  =============   last home button layout
-    ViewStub homeLastLayout;
     View homeLastViews;
+
+    //  =============   selectGame button layout
+    View selectGameView;
+    ImageView closePageIV, whotButton, chessButton, pokerButton, scrabbleButton, riddleButton, diceButton;
+
 
     //  ---------   sharepreference     -----------------
     public static SharedPreferences moodPreferences, myUserNamePreferences, lastPositionPreference,
@@ -261,29 +286,36 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 
     //  ---------       Forward chat declares
-    private static ViewStub forwardTopContainer;
-    private static View onForwardTopView;
-    private static ConstraintLayout forwardDownContainer;
-    private ImageView cancleForward_IV, searchUserForward_IV;
+    private View onForwardTopView;
+    private ConstraintLayout forwardDownContainer;
+    private TextView titleTV_;
     public static TextView totalUser_TV;
     public static int selectCount;
     public static CircleImageView circleForwardSend;
     private static ProgressBar progressBarForward;
     public static boolean onForward;
+    public static boolean onSelectPlayer;
+    public static boolean onSelectNewPlayer;
+
+    private View addPlayerConfirmView;
+    private TextView titleNoticeTV;
     public static boolean onUserLongPress;
     public static List <String> forwardChatUserId;
     public static List <String> selectedUserNames;
+    public static List <AwaitPlayerM> selectedPlayerMList;
+    public static List <AwaitPlayerM> newPlayerMList;
 
 
     //  ---------   Delete User from ChatList Declares
-    private ViewStub deleteUserOrClearChatContainer;
     private View deleteUserOrClearChatViews;
-    private ImageView cancelUserDelete_IV;
     private TextView deleteUserForMe_TV, deleteUserForAll_TV, otherUserName_TV;
 //    private String otherUid_Del;
     List<UserOnChatUI_Model> userModelList;
 
     //  ----------------
+
+    private View incomingGameView, joinGameViews;
+    private TextView gameBalTV, notice_TV;
 
     private static EditText editTextMessage, et_emoji;
 
@@ -312,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     private static DatabaseReference refMessages, refMsgFast, refLastDetails, refChecks,
             refEditMsg, refDeleteMsg, refPrivatePinChat, refPublicPinChat, refClearSign,
-            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls, refWallet;
+            refDeleteUser, refDeletePin, refEmojiReact, refOnReadRequest, refChatIsRead, refCalls, refGameAlert, refWallet;
 
     public static DatabaseReference refUsers;
 
@@ -332,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private String fileNamePath;
     private MediaRecorder mediaRecorder;
     private static MediaPlayer mediaPlayer;
-    private Permission permissionCheck = new Permission();
+    private final Permission permissionCheck = new Permission();
     private static RecordView recordView;
     private static RecordButton recordButton;
     private static ConstraintLayout constraintMsgBody;
@@ -467,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     public static CallsListener callsListener;
 
     private Executor executor;
-    private final Executor excutorSendDB = Executors.newSingleThreadExecutor();
+    private final Executor executorSendDB = Executors.newSingleThreadExecutor();
 
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
@@ -485,6 +517,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static int newChatNumberPosition = 0;
 
+    public static List<UserOnChatUI_Model> allUsersFromRoom;
 
     // =============    onclick
     View.OnClickListener openWallet, onEdit, onPin, onCopy, forwardChat, onDelete;
@@ -495,8 +528,29 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     ConstraintLayout userLongPressMoreSub;
     ImageView deleteUser_IV, pinUser_IV;
 
+    boolean deviceOnNightMode;
+
+
+    //  ====== onGame
+    String gameMode, stakeAmount, hostNote, totalStake, numberOfPlayers, hostUid, gameID, myGameKey = "344";
+    String newPlayerUid;
+    TextView expectedPlayerNumTV, hostByTV, gameModeTV, gameTypeTV, stakeAmountTV, rewardPoolTV, hostNoteTV;
+    ConstraintLayout minimizedContainer;
+    TextView minimizedTV;
+    boolean addNewPlayer;
+    public static boolean targetPlayer;
+    CardView signalCardView;
+    public static boolean onGameNow = false;
+    private boolean doneSelectingPlayers = false;
+    private boolean onAwaitActivity = false;
+    private boolean hostRelaunchApp = false;
+    private boolean hostReopen = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        deviceOnNightMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
 
         // Dark mood setting
         moodPreferences = this.getSharedPreferences("MOOD", Context.MODE_PRIVATE);
@@ -511,15 +565,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         super.onCreate(savedInstanceState);     //  activate view
         setContentView(R.layout.activity_main);
 
-        if(nightMood){
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        };
-
         user = FirebaseAuth.getInstance().getCurrentUser();
-
-
 
         // local variables
         ImageView sideBarMenuOpen, imageViewLogo;
@@ -604,6 +650,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         refOnReadRequest = FirebaseDatabase.getInstance().getReference("OnReadRequest");
         refChatIsRead = FirebaseDatabase.getInstance().getReference("ChatIsRead");
         refCalls = FirebaseDatabase.getInstance().getReference("Calls");
+        refGameAlert = FirebaseDatabase.getInstance().getReference("GameAlert");
+
         refWallet = FirebaseDatabase.getInstance().getReference("WalletClient");
 
         // initialise room database
@@ -631,6 +679,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         loopOnceMap = new HashMap<>();
         handlerInternet = new Handler();
         handlerTyping = new Handler();
+        allUsersFromRoom = new ArrayList<>();
 
         // pins
         pinNextPublic = 1;
@@ -641,6 +690,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         //  forward
         forwardChatUserId = new ArrayList<>();
         selectedUserNames = new ArrayList<>();
+        selectedPlayerMList = new ArrayList<>();
+        newPlayerMList = new ArrayList<>();
         selectCount = 0;
         loadMsg = true;
 
@@ -652,10 +703,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         // passing life to interface
         CallCenterActivity.callListenerNext = this;
         CallPickUpCenter.callListenerNext = this;
-        ReplyReceiver.chatListener = this;
         NotificationHelper.listener = this;
         NotificationHelper.homeContext = this;
         NotificationHelper.homeActivity = this;
+        WhotOptionActivity.TriggerInterface.triggerOnForward = this;
+        RedirectHome.triggerOnForward = this;
+        ViewImageActivity.triggerOnForward = this;
+
 
         goBackToCall = getString(R.string.returnToCall);
         mainRepository = MainRepository.getInstance();
@@ -699,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         {
             IdTokenUtil.generateToken(token -> {
                 System.out.println("what is token " + token);
-            });
+            }, this);
 
             startActivity(new Intent(MainActivity.this, LinkNumberActivity.class));
             Toast.makeText(this, getString(R.string.linkPhoneNumber), Toast.LENGTH_SHORT).show();
@@ -713,9 +767,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             deviceFirstloginRef.edit().putBoolean(AllConstants.FIRSTTIME, false).apply();
 
+            ReplyReceiver.chatListener = this;
+
             IdTokenUtil.generateToken(token -> {
                 System.out.println("what is token " + token);
-            });
+            }, this);
 
             myId = user.getUid();
 
@@ -742,6 +798,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
             });
 
+            incomingGameObserver();
 
             // store failed chat in local sharePreference
             offlineChat = this.getSharedPreferences(AllConstants.OFFLINECHAT, Context.MODE_PRIVATE);
@@ -1057,16 +1114,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             file_IV.setOnClickListener(view -> {
                 setFileOptionViews();
                 fileOptionViews.setVisibility(View.VISIBLE);
-                view.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(()->
-                {
-                    // Start the animation to make it visible
-                    animateVisibility(fileContainerAnim, null);
-
-                    new Handler().postDelayed(()-> {
-                        view.setScaleX(1f);
-                        view.setScaleY(1f);
-                    }, 300);
-                });
+                AnimUtils.slideInFromBottom(fileContainerAnim, 100);
 
             });
 
@@ -1107,8 +1155,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             sendMessageButton.setOnClickListener(sendChat);
             typeMsgContainer.setOnClickListener(sendChat);
 
-            gameMe_IV.setOnClickListener(v -> {
-                Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+            gameMe_IV.setOnClickListener(view -> {
+                view.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(()->
+                {
+                    targetUserOnGame();
+
+                    new Handler().postDelayed(()-> {
+                        view.setScaleX(1f);
+                        view.setScaleY(1f);
+                    }, 300);
+                });
             });
 
             camera_IV.setOnClickListener(view -> {
@@ -1138,9 +1194,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 
             sideBarMenuOpen.setOnClickListener(view -> {    // open the side bar menu option
-                if(sideBarView == null){
-                    activateSideBarViews(); // onMenu click
-                }
+                if(sideBarView == null) activateSideBarViews(); // onMenu click
                 AnimUtils.slideInFromRight(sideBarView, 120);
             });
 
@@ -1190,6 +1244,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             }, 5000);
 
+            if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) {
+                new Handler().postDelayed(this::activateAllViews, 30_000);
+//                System.out.println("what is done");
+            }
+
             fiveSecondsDelay(); // for network check too
             swipeReply();
             new Handler().postDelayed(()-> deleteUnusedPhotoFromSharePrefsAndAppMemory(this), 5000);
@@ -1199,6 +1258,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 setForwardChat();
                 chatModelList.addAll(photoModelList);
             }
+
+            allUsersFromRoom = UserChatUtils.getAllUsersFromRoom(this);
 
         }
 
@@ -1245,7 +1306,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 msgBackgroundActivities(otherUid);
                 callAllMethods(otherUid, this, this, true);
             }
+
+        } else {
+            assert intent != null;
+            if (intent.hasExtra("gameMode")) {
+
+                if(intent.getBooleanExtra("refreshList", false)) {
+                    gameMode = null;
+                    stakeAmount = "0";
+                    hostNote = null;
+                    totalStake = "0";
+                    numberOfPlayers = "0";
+                }
+
+                gameMode = intent.getStringExtra("gameMode");
+                stakeAmount = intent.getStringExtra("stakeAmount");
+                hostNote = intent.getStringExtra("hostNote");
+
+//                System.out.println("what is gameMode: " + intent.getStringExtra("gameMode"));
+            }
         }
+
     }
 
     private void testingApi(){
@@ -1518,6 +1599,311 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
     }
 
+    private void setAddPlayerConfirmView()
+    {
+        if(addPlayerConfirmView == null) {
+            ViewStub addPlayerConfirmVS = findViewById(R.id.addPlayerConfirmVS);
+            addPlayerConfirmView = addPlayerConfirmVS.inflate();
+
+            TextView yesTV = addPlayerConfirmView.findViewById(R.id.yesTV);
+            TextView noTV = addPlayerConfirmView.findViewById(R.id.noTV);
+            titleNoticeTV = addPlayerConfirmView.findViewById(R.id.sureNoticeTV);
+
+            noTV.setOnClickListener(v -> {
+                cancelAddNewPlayer();
+                ChatsFragment.newInstance().notifyVisibleUser();
+            });
+
+            yesTV.setOnClickListener(v -> {
+
+                addNewPlayer = true;
+                doneSelectingPlayers = true;
+
+                // add new player details to existing list
+                selectedPlayerMList.addAll(newPlayerMList);
+                numberOfPlayers = String.valueOf(forwardChatUserId.size());
+                System.out.println("what is amount: " + stakeAmount + " number: " + numberOfPlayers);
+                totalStake = String.valueOf( (Double.parseDouble(stakeAmount) * Integer.parseInt(numberOfPlayers)) ) ;
+
+                newPlayerUid = newPlayerMList.get(0).getPlayerUid();
+                sendMessage(getString(R.string.whotGame), getString(R.string.connect), 7, null, null, newPlayerUid, false); // audio or video call
+
+
+                cancelForwardSettings(this);
+
+            });
+
+        }
+    }
+
+    private void cancelAddNewPlayer(){
+        if(newPlayerMList != null && newPlayerMList.size() > 0){
+            String undoPlayerId = newPlayerMList.get(0).getPlayerUid();
+            forwardChatUserId.removeIf(name -> name.equals(undoPlayerId));
+
+            newPlayerMList.clear();
+        }
+        if(addPlayerConfirmView != null) addPlayerConfirmView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void openAddPlayerLayout(String playerName) {
+        setAddPlayerConfirmView();
+        addPlayerConfirmView.setVisibility(View.VISIBLE);
+        String addPlayerName = getString(R.string.add) + " " + playerName + " " + getString(R.string.toGame);
+        titleNoticeTV.setText(addPlayerName);
+    }
+
+    private void setIncomingGameView()
+    {
+        if(incomingGameView == null)
+        {
+            ViewStub incomingGameViewStub = findViewById(R.id.incomingGameLayout);
+            incomingGameView = incomingGameViewStub.inflate();
+
+            TextView acceptTV = incomingGameView.findViewById(R.id.acceptGameTV);
+            ImageView muteIV = incomingGameView.findViewById(R.id.muteIV);
+            TextView rejectTV = incomingGameView.findViewById(R.id.rejectGameTV);
+            ProgressBar progressBarJ = incomingGameView.findViewById(R.id.progressBarJ);
+            expectedPlayerNumTV = incomingGameView.findViewById(R.id.expectedPlayerNumTV);
+            hostByTV = incomingGameView.findViewById(R.id.hostGameTV);
+            gameModeTV = incomingGameView.findViewById(R.id.modeTV);
+            gameTypeTV = incomingGameView.findViewById(R.id.gameTypeTV);
+            stakeAmountTV = incomingGameView.findViewById(R.id.stakeAmountTV);
+            rewardPoolTV = incomingGameView.findViewById(R.id.rewardTV);
+            hostNoteTV = incomingGameView.findViewById(R.id.hostNoteTV);
+
+            ImageView minimizeIV = incomingGameView.findViewById(R.id.minimizeIV);
+            minimizedContainer = incomingGameView.findViewById(R.id.minimizedContainer);
+            signalCardView = incomingGameView.findViewById(R.id.signalCardView);
+            minimizedTV = incomingGameView.findViewById(R.id.minimizedTV);
+
+            minimizeIV.setOnClickListener(v -> {
+                AnimUtils.slideOutToBottom(signalCardView, 200);
+                minimizedTV.setText(getString(R.string.awaitingGame));
+                new Handler().postDelayed(()->{
+                    AnimUtils.slideInFromBottom(minimizedContainer, 300);
+                }, 200);
+
+            });
+
+            minimizedContainer.setOnClickListener(v -> {
+
+                if(onAwaitActivity) goToExistingAwaitPlayer();
+                else AnimUtils.slideInFromTop(signalCardView, 200);
+
+                minimizedContainer.setVisibility(View.GONE);
+            });
+
+            acceptTV.setOnClickListener(v -> {
+
+                if(gameMode.equals("stake")){
+                    AnimUtils.slideOutToBottom(incomingGameView, 200);
+                    AnimUtils.slideInFromTop(joinGameViews, 300);
+
+                } else {
+                    selectedPlayerMList.clear();
+
+                    progressBarJ.setVisibility(View.VISIBLE);
+                    acceptTV.setVisibility(View.INVISIBLE);
+
+                    if(hostUid != null) verifyBalanceAndJoin(progressBarJ, acceptTV);
+                }
+
+                stopRingTone();
+                getGameBalance(null);
+
+            });
+
+            muteIV.setOnClickListener(v -> {
+                v.animate().scaleX(1.3f).scaleY(1.3f).withEndAction(() ->
+                {
+                    stopRingTone();
+                    v.setScaleY(1.0f);
+                    v.setScaleX(1.0f);
+                });
+            });
+
+            rejectTV.setOnClickListener(v ->
+            {
+                v.animate().scaleX(1.3f).scaleY(1.3f).setDuration(100).withEndAction(() ->
+                {
+                    incomingGameView.setVisibility(View.GONE);
+                    stopRingTone();
+                    onGameNow = false;
+                    v.setScaleX(1.0f);
+                    v.setScaleY(1.0f);
+                });
+
+                GameUtils.rejectGameOrAddNewPlayer(this, hostUid, null, null, new GameUtils.RejectGameInterface() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(MainActivity.this, getString(R.string.gameRejected), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Toast.makeText(MainActivity.this, getString(R.string.errorOccur), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                progressBarJ.setVisibility(View.GONE);
+                acceptTV.setVisibility(View.VISIBLE);
+            });
+
+        }
+    }
+
+    private void goToExistingAwaitPlayer(){
+        if(hostRelaunchApp && hostReopen) {
+            Intent intent = new Intent(MainActivity.this, AwaitPlayersActivity.class);
+            intent.putExtra("mode", gameMode);
+            intent.putExtra("hostName", ProfileUtils.getMyDisplayOrUsername());
+            intent.putExtra("hostUid", hostUid);
+            startActivity(intent);
+        } else {
+            Intent mainActivityIntent = new Intent(this, AwaitPlayersActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(mainActivityIntent);
+            incomingGameView.setVisibility(View.GONE);
+        }
+        onAwaitActivity = false;
+        hostReopen = false;
+        if(selectGameView != null) selectGameView.setVisibility(View.GONE);
+    }
+
+    private void setJoinGameViews()
+    {
+        if(joinGameViews == null)
+        {
+            ViewStub joinGameViewStub = findViewById(R.id.joinGameLayout);
+            joinGameViews = joinGameViewStub.inflate();
+
+            TextView join = joinGameViews.findViewById(R.id.acceptGameTV);
+            gameBalTV = joinGameViews.findViewById(R.id.gameBalTV);
+            TextView topUpTV = joinGameViews.findViewById(R.id.topUpTV);
+            TextView cancelJoinTV = joinGameViews.findViewById(R.id.cancelJoinTV);
+            notice_TV = joinGameViews.findViewById(R.id.notice_TV);
+            ProgressBar progressBarJ = joinGameViews.findViewById(R.id.progressBarJ);
+
+            topUpTV.setOnClickListener(v -> {
+                v.animate().scaleX(1.3f).scaleY(1.3f).withEndAction(() ->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                    v.setScaleY(1.0f);
+                    v.setScaleX(1.0f);
+                });
+            });
+
+            join.setOnClickListener(v -> {
+
+                selectedPlayerMList.clear();
+
+                progressBarJ.setVisibility(View.VISIBLE);
+                join.setVisibility(View.INVISIBLE);
+                
+                if(hostUid != null) verifyBalanceAndJoin(progressBarJ, join);
+
+            });
+
+            cancelJoinTV.setOnClickListener(v -> {
+
+                AnimUtils.slideOutToBottom(joinGameViews, 200);
+                AnimUtils.slideInFromTop(incomingGameView, 400);
+                progressBarJ.setVisibility(View.GONE);
+                join.setVisibility(View.VISIBLE);
+//                v.animate().scaleX(1.3f).scaleY(1.3f).withEndAction(() ->
+//                {
+//                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+//                    v.setScaleY(1.0f);
+//                    v.setScaleX(1.0f);
+//                });
+            });
+
+
+
+        }
+
+    }
+    
+    private void verifyBalanceAndJoin(View progressBarJ, View joinTV)
+    {
+        refGameAlert.child(myId).child(hostUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    SignalPlayerM signalPlayerM = snapshot.getValue(SignalPlayerM.class);
+
+                    // Retrieve the players map
+                    DataSnapshot playersSnapshot = snapshot.child("players");
+
+                    for (DataSnapshot playerSnapshot : playersSnapshot.getChildren()) {
+                        AwaitPlayerM player = playerSnapshot.getValue(AwaitPlayerM.class);
+                        if (player != null) selectedPlayerMList.add(player);
+                    }
+
+                    GameAPI gameAPI = AllConstants.retrofit.create(GameAPI.class);
+
+                    IdTokenUtil.generateToken(token->{
+
+                        TwoValueM twoValueM = new TwoValueM(token, hostUid);
+
+                        gameAPI.join(twoValueM).enqueue(new Callback<ResultApiM>() {
+                            @Override
+                            public void onResponse(Call<ResultApiM> call, Response<ResultApiM> response) {
+
+                                if(response.isSuccessful()) {
+
+                                    if(response.body().getResult().equals("success"))
+                                    {
+                                        Intent intent = new Intent(MainActivity.this, AwaitPlayersActivity.class);
+                                        intent.putExtra("mode", signalPlayerM.getGameMode());
+                                        intent.putExtra("hostName", signalPlayerM.getSenderName());
+                                        intent.putExtra("hostUid", signalPlayerM.getFromUid());
+                                        startActivity(intent);
+
+                                        new Handler().postDelayed(()->{
+                                            progressBarJ.setVisibility(View.GONE);
+                                            joinTV.setVisibility(View.VISIBLE);
+                                            incomingGameView.setVisibility(View.GONE);
+                                            joinGameViews.setVisibility(View.GONE);
+
+                                        }, 1000);
+
+                                    } else if(response.body().getResult().equals("insufficient funds"))
+                                    {
+                                        Toast.makeText(MainActivity.this, ""+getString(R.string.insufficientBal), Toast.LENGTH_SHORT).show();
+                                        progressBarJ.setVisibility(View.GONE);
+                                        joinTV.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResultApiM> call, Throwable throwable) {
+                                progressBarJ.setVisibility(View.GONE);
+                                joinTV.setVisibility(View.VISIBLE);
+                                Toast.makeText(MainActivity.this, ""+getString(R.string.errorOccur), Toast.LENGTH_LONG).show();
+                                System.out.println("what is wallet error occur MainActivity L1700: " + throwable.getMessage());
+
+                            }
+                        });
+
+                    }, MainActivity.this);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressBarJ.setVisibility(View.GONE);
+                joinTV.setVisibility(View.VISIBLE);
+                Toast.makeText(MainActivity.this, ""+ getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
+            }
+
+        });
+        
+    }
+
     private void activateAudioOrVideoOptionView()
     {
         if(audioOrVideoView == null)
@@ -1763,12 +2149,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         //  delete user from chat list ids
         if(deleteUserOrClearChatViews == null)
         {
-            deleteUserOrClearChatContainer = findViewById(R.id.deleteUserOrClearChatContainer);
+            ViewStub deleteUserOrClearChatContainer = findViewById(R.id.deleteUserOrClearChatContainer);
             deleteUserOrClearChatViews = deleteUserOrClearChatContainer.inflate();
 
             deleteUserForMe_TV = deleteUserOrClearChatViews.findViewById(R.id.deleteForMe_TV);
             deleteUserForAll_TV = deleteUserOrClearChatViews.findViewById(R.id.deleteForEveryone_TV);
-            cancelUserDelete_IV = deleteUserOrClearChatViews.findViewById(R.id.cancelDelete_IV);
+            ImageView cancelUserDelete_IV = deleteUserOrClearChatViews.findViewById(R.id.cancelDelete_IV);
             otherUserName_TV = deleteUserOrClearChatViews.findViewById(R.id.otherUserName_TV);
 
             //  ===========  delete user from ChatList  And Clear Chat History onClicks =========
@@ -1952,7 +2338,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             scrollViewMenu = chatMenuViews.findViewById(R.id.scrollViewMenu);
             TextView viewProfileTV = chatMenuViews.findViewById(R.id.viewProfileTV);
             TextView joinTour_TV = chatMenuViews.findViewById(R.id.joinTour_TV);
-            TextView muteTV = chatMenuViews.findViewById(R.id.muteTV);
+            TextView muteTV = chatMenuViews.findViewById(R.id.muteIV);
             TextView search_TV = chatMenuViews.findViewById(R.id.search_TV);
             TextView clearPin_TV = chatMenuViews.findViewById(R.id.clearPin_TV);
             TextView clearChat_TV = chatMenuViews.findViewById(R.id.clearChat_TV);
@@ -2079,6 +2465,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             });
 
+            if(onForward) firstTopChatViews.setVisibility(View.INVISIBLE);
 
             //  ==========      set pin views
 
@@ -2370,23 +2757,21 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         if(onForwardTopView == null)
         {
-            forwardTopContainer = findViewById(R.id.forwardConstraint);
+            ViewStub forwardTopContainer = findViewById(R.id.forwardConstraint);
             onForwardTopView = forwardTopContainer.inflate();
 
             progressBarForward = onForwardTopView.findViewById(R.id.progressBarForward);
-            cancleForward_IV = onForwardTopView.findViewById(R.id.forwardCancel_IV);
-            searchUserForward_IV = onForwardTopView.findViewById(R.id.forwardSearchIV);
+            ImageView cancelForward_IV = onForwardTopView.findViewById(R.id.forwardCancel_IV);
+            ImageView searchUserForward_IV = onForwardTopView.findViewById(R.id.forwardSearchIV);
+            titleTV_ = onForwardTopView.findViewById(R.id.titleTV_);
 
             //  onClicks
 
-            cancleForward_IV.setOnClickListener(view -> {
-                cancelForwardSettings(this);
-            } );
+            cancelForward_IV.setOnClickListener(view -> cancelForwardSettings(this));
 
             searchUserForward_IV.setOnClickListener(v -> {
                 Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
             });
-
 
         }
     }
@@ -2414,7 +2799,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
                 {
                     Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
-
+//setIncomingGameView();
+//incomingGameView.setVisibility(View.VISIBLE);
                     new Handler().postDelayed(()-> {
                         v.setScaleX(1f);
                         v.setScaleY(1f);
@@ -2475,7 +2861,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         if(homeLastViews == null)
         {
-            homeLastLayout = findViewById(R.id.constraintLastLayer);
+            ViewStub homeLastLayout = findViewById(R.id.constraintLastLayer);
             homeLastViews = homeLastLayout.inflate();
             ImageView p2pHome_IV = homeLastViews.findViewById(R.id.p2pHome_IV);
             ImageView homeOpenMore = homeLastViews.findViewById(R.id.imageViewMore);
@@ -2560,28 +2946,49 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 {
                     cancelUserDeleteOption();
                 } else {
-                    v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(20).withEndAction(()->
-                    {
-                        Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
-
-                        new Handler().postDelayed(()-> {
-                            v.setScaleX(1f);
-                            v.setScaleY(1f);
-                        }, 300);
-                    });
+                    if(incomingGameView != null && incomingGameView.getVisibility() == View.VISIBLE){
+                        Toast.makeText(this, getString(R.string.finishIncomingGame), Toast.LENGTH_SHORT).show();
+                    } else {
+                        setSelectGameView();
+                        addAnimToGameButton();
+                        if(selectGameView != null) selectGameView.setVisibility(View.VISIBLE);
+                    }
                 }
             });
 
             // send forward message
-            circleForwardSend.setOnClickListener(view -> {
+            circleForwardSend.setOnClickListener(view ->
+            {
                 progressBarForward.setVisibility(View.VISIBLE);
 
-                if(MainActivity.sharingPhotoActivated) {
+                if(MainActivity.sharingPhotoActivated) // open send_image activity and prepare the photo
+                {
                     sharing = true;
-                    // open send_image activity and prepare the photo
                     startActivity(new Intent(this, SendImageOrVideoActivity.class));
-                } else {
-                    // send forward or share chat
+
+                } else if (onSelectPlayer)
+                {
+                    doneSelectingPlayers = true;
+                    if(circleForwardSend != null) circleForwardSend.setVisibility(View.INVISIBLE);
+
+                    PhoneUtils.hasInternetConnectivity(new PhoneUtils.CheckInternet() {
+                        @Override
+                        public void networkIsTrue() {
+                            cancelForwardSettings(MainActivity.this);
+                            moveToAwaitPlayers(gameMode, stakeAmount);  // multiple player
+                            if(circleForwardSend != null) circleForwardSend.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void networkIsFalse() {
+                            if(progressBarForward != null) progressBarForward.setVisibility(View.GONE);
+                            if(circleForwardSend != null) circleForwardSend.setVisibility(View.VISIBLE);
+                            Toast.makeText(MainActivity.this, getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                } else if (onForward)   // send forward or share chat
+                {
                     view.animate().scaleX(1.2f).scaleY(1.2f)
                             .setDuration(50).withEndAction(() -> {
 
@@ -2594,11 +3001,200 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             }).start();
                 }
 
+                new Handler().postDelayed(()-> progressBarForward.setVisibility(View.GONE), 5000);
+
             });
 
         }
 
         return homeLastViews;
+    }
+
+    private void moveToAwaitPlayers(String gameMode_, String stakeAmount_ ){
+        // add my details
+        String mySafeImageLink = imageLink != null ? imageLink : "null";
+        String myName = ProfileUtils.getMyDisplayOrUsername();
+        selectedPlayerMList.add(new AwaitPlayerM(mySafeImageLink, myName, myId, "hostAdmin", false));
+
+        gameID = GameUtils.gameId();
+        hostUid = myId;
+        gameMode = gameMode_;
+
+        numberOfPlayers = String.valueOf(selectedPlayerMList.size());
+        totalStake = String.valueOf( (Double.parseDouble(stakeAmount_) * Integer.parseInt(numberOfPlayers)) );
+
+        forwardChatUserId.forEach(uid-> {
+            sendMessage(getString(R.string.whotGame), getString(R.string.connect), 7, null, null, uid, false); // audio or video call
+        });
+
+        if (circleForwardSend != null) circleForwardSend.setVisibility(View.INVISIBLE);
+
+        Intent intent = new Intent(this, AwaitPlayersActivity.class);
+        intent.putExtra("mode", gameMode);
+        intent.putExtra("hostName", myName);
+        intent.putExtra("hostUid", hostUid);
+        intent.putExtra("gameID", gameID);
+        startActivity(intent);
+    }
+
+    private void setSelectGameView()
+    {
+        if(selectGameView == null)
+        {
+            ViewStub selectGameViewStub = findViewById(R.id.selectGameViewStub);
+            selectGameView = selectGameViewStub.inflate();
+
+            closePageIV = selectGameView.findViewById(R.id.closePageIV);
+            whotButton = selectGameView.findViewById(R.id.whotButton);
+            chessButton = selectGameView.findViewById(R.id.chessButton);
+            pokerButton = selectGameView.findViewById(R.id.pokerButton);
+            scrabbleButton = selectGameView.findViewById(R.id.scrabbleButton);
+            riddleButton = selectGameView.findViewById(R.id.riddleButton);
+            diceButton = selectGameView.findViewById(R.id.diceButton);
+
+
+            whotButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    Intent intent = new Intent(this, WhotOptionActivity.class);
+                    startActivity(intent);
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                    new Handler().postDelayed(()-> selectGameView.setVisibility(View.GONE), 500);
+
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+                });
+            });
+
+            chessButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+                    if(targetPlayer) {
+                        //...
+                    } else {
+
+                    }
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                });
+            });
+
+            pokerButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    if(targetPlayer) {
+                        //...
+                    } else {
+
+                    }
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                });
+            });
+
+            scrabbleButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    if(targetPlayer) {
+                        //...
+                    } else {
+
+                    }
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                });
+            });
+
+            riddleButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                });
+            });
+
+            diceButton.setOnClickListener(v -> {
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    Toast.makeText(this, "work in progress", Toast.LENGTH_SHORT).show();
+
+                    if( (!deviceOnNightMode && nightMood) || (deviceOnNightMode && !nightMood)) activateAllViews();
+
+                    v.setScaleX(1f);
+                    v.setScaleY(1f);
+                });
+            });
+
+
+            closePageIV.setOnClickListener(v -> {
+                getOnBackPressedDispatcher().onBackPressed();
+            });
+
+        }
+
+    }
+
+    private void targetUserOnGame()
+    {
+        if( !AwaitPlayersActivity.PlayersUid.playerUidList.contains(otherUserUid))
+        {
+            if(!onGameNow) {
+                selectedPlayerMList.clear();
+
+                String safeImageLink = imageUri != null ? imageUri : "null"; // Provide a default value or handle null
+                AwaitPlayerM awaitPlayerM = new AwaitPlayerM(safeImageLink, otherUserName, otherUserUid, "signal", false);
+                if( !selectedPlayerMList.contains(awaitPlayerM) ) selectedPlayerMList.add(awaitPlayerM);
+
+//                getOnBackPressedDispatcher().onBackPressed();
+                setSelectGameView();
+                addAnimToGameButton();
+                if(selectGameView != null) selectGameView.setVisibility(View.VISIBLE);
+                targetPlayer = true;
+
+                if(!forwardChatUserId.contains(otherUserUid)) forwardChatUserId.add(otherUserUid);
+                if(!selectedUserNames.contains(otherUserName)) selectedUserNames.add(otherUserName);  // Add username to the List
+
+            } else {
+                Toast.makeText(this, getString(R.string.onGoingGameAlready), Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+            Toast.makeText(this, getString(R.string.playerAlreadyInGame), Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void addAnimToGameButton()
+    {
+        whotButton.setVisibility(View.GONE);
+        chessButton.setVisibility(View.GONE);
+        pokerButton.setVisibility(View.GONE);
+        scrabbleButton.setVisibility(View.GONE);
+        riddleButton.setVisibility(View.GONE);
+        diceButton.setVisibility(View.GONE);
+
+        AnimUtils.slideInFromRight(whotButton, 400);
+        AnimUtils.slideInFromLeft(chessButton, 400);
+        AnimUtils.slideInFromRight(pokerButton, 400);
+        AnimUtils.slideInFromLeft(scrabbleButton, 400);
+        AnimUtils.slideInFromRight(riddleButton, 400);
+        AnimUtils.slideInFromLeft(diceButton, 400);
     }
 
     private void setFileOptionViews()
@@ -2687,13 +3283,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             });
 
             gameIV.setOnClickListener(v -> {
-                Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+                v.animate().scaleX(1.1f).scaleY(1.1f).withEndAction(()->
+                {
+                    targetUserOnGame();
+
+                    new Handler().postDelayed(()-> {
+                        fileOptionViews.setVisibility(View.GONE);
+                        slideOutToBottom(fileContainerAnim, 100);
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                    }, 300);
+                });
+
             });
 
             contactIV.setOnClickListener(v -> {
-                v.animate().scaleX(1.2f).scaleY(1.2f).setDuration(30).withEndAction(()->
+                v.animate().scaleX(1.2f).scaleY(1.2f).withEndAction(()->
                 {
                     Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+                    new Handler().postDelayed(()-> {
+                        v.setScaleX(1f);
+                        v.setScaleY(1f);
+                    }, 500);
                 });
             });
 
@@ -3075,6 +3686,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
     }
 
+    private void activateAllViews() {
+        activateIncomingCallView();
+        activateAudioOrVideoOptionView();
+        setCheckNetworkView();
+        setWalletVerifyViews();
+        setChatOptionView();
+        setMoreOptionViews();
+        setDeleteUserOrClearChatViews();
+        setChatMenuViews();
+//        setFirstTopChatViews();
+        setOnForwardTopView();
+        setMoreOptionHomeView();
+//        setHomeLastViews();
+//        setSelectGameView();
+        setFileOptionViews();
+        setPinForWhoViews();
+        setDeleteForWhoView();
+        setTopEmojiView();
+        setOnChatClickView();
+        setOnUserLongPressView();
+        setOnUserMoreLongPressView();
+    }
 
     //  --------------- methods && interface --------------------
 
@@ -3125,6 +3758,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         // return the contact name or displayed name of other user
         return contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
+
+    }
+
+    private String getOthername(String otherId, String otherDisplayName__, String otherUserName__)
+    {
+        // return the contact name or displayed name of other user
+        return contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
+
     }
 
     @Override
@@ -3150,6 +3791,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         // initialize voice note
         voiceNote(context, activity);
+
+        // clear all notification bar
+        new Thread(()-> NotificationHelper.clearAllMessagesAndNotifications(context));
     }
 
 
@@ -3234,7 +3878,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         }
 
         if(isPrivatePin && isPublicPin){
-            pinIcon.setImageResource(R.drawable.baseline_disabled_visible_view_24);
+            pinIcon.setImageResource(R.drawable.unpin);
             pinChatTV.setText(getString(R.string.unpin));
             pinTV.setText(getString(R.string.unpin));
 
@@ -3739,8 +4383,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //                System.out.println("what is calling");
             }
 
-            // clear all notification bar
-            NotificationHelper.clearAllMessagesAndNotifications(this);
 
         });
 
@@ -3848,17 +4490,31 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         setOnForwardTopView();
         setHomeLastViews();
 
-        pinMsgConst.setVisibility(View.GONE);
-        firstTopChatViews.setVisibility(View.INVISIBLE);
-        constraintMsgBody.setVisibility(View.INVISIBLE);
+        titleTV_.setText(R.string.forward);
+        if(onSelectPlayer && titleTV_ != null) titleTV_.setText(R.string.selectPlayer);
+        if(onSelectNewPlayer && titleTV_ != null) titleTV_.setText(R.string.addPlayer);
+
+        if(pinMsgConst != null) pinMsgConst.setVisibility(View.GONE);
+        if(firstTopChatViews != null) firstTopChatViews.setVisibility(View.INVISIBLE);
+        if(constraintMsgBody != null) constraintMsgBody.setVisibility(View.INVISIBLE);
+        topMainContainer.setVisibility(View.INVISIBLE);
 
         tabLayoutGeneral.setVisibility(View.GONE);
-        onForwardTopView.setVisibility(View.VISIBLE);
         forwardDownContainer.setVisibility(View.VISIBLE);
+        onForwardTopView.setVisibility(View.VISIBLE);
         onForwardTopView.setClickable(true);
+        if(onSelectNewPlayer){
+            circleForwardSend.setVisibility(View.INVISIBLE);
+            totalUser_TV.setText(null);
+        } else {
+            forwardChatUserId.clear();
+            selectedUserNames.clear();
+            circleForwardSend.setVisibility(View.VISIBLE);
+            totalUser_TV.setText("0 selected");
+        }
         forwardDownContainer.setClickable(true);
 
-        chatOptionView.setVisibility(View.GONE);
+        if(chatOptionView != null) chatOptionView.setVisibility(View.GONE);
         progressBarForward.setVisibility(View.GONE);
 
         if(ChatsFragment.adapter != null){
@@ -3866,14 +4522,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             ChatsFragment.newInstance().notifyVisibleUser();
         }
 
-        if(sharingPhotoActivated){
+        if(sharingPhotoActivated || onSelectPlayer){
             circleForwardSend.setImageResource(R.drawable.baseline_arrow_forward_24);
         } else {
             circleForwardSend.setImageResource(R.drawable.baseline_send_24);
         }
 
-        forwardChatUserId.clear();
-        selectedUserNames.clear();
+//        selectedPlayerMList.clear();
+
     }
 
     private void onPinData(String msgId_, String message_, Object timeStamp_)
@@ -4048,7 +4704,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             {
                 if(getLastTimeChat.get(otherId) != null){   // check if it's the first chat of the day
                     ChatUtils.notifyFirstChatOfANewDay(getLastTimeChat.get(otherId), messageModel.getTimeSent(),  // onSendChat
-                            newChatNumberKey, adapter, otherId);
+                            newChatNumberKey, adapter, otherId, this);
                 }
 
                 adapter.addMyMessageDB(messageModel);  // add new chat
@@ -4080,7 +4736,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 offlineChat.edit().putString(chatKey, otherId).apply();
             }
 
-            excutorSendDB.execute(() ->     // send only text chat to other user -- not photo nor file yet
+            executorSendDB.execute(() ->     // send only text chat to other user -- not photo nor file yet
             {
             // find position and move it to top as recent chat... also update the outside chat details
                 if(ChatsFragment.adapter != null) {
@@ -4132,6 +4788,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
+
     private void sendToDataBase(MessageModel messageModel, String text, String emojiOnly, int chatDeliveryStatus,
                                String durationOrSizeVN, String otherUid, boolean addReply, Context context)
     {
@@ -4152,6 +4809,42 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         refLastDetails.child(myId).child(otherUid).updateChildren(getOutsideChatMap);
         refLastDetails.child(otherUid).child(myId).updateChildren(getOutsideChatMap);
 
+        if(messageModel.getType() == AllConstants.type_game)
+        {
+            getOutsideChatMap.put("gameMode", gameMode);
+            getOutsideChatMap.put("stakeAmount", stakeAmount);
+            getOutsideChatMap.put("hostNote", hostNote);
+            getOutsideChatMap.put("numberOfPlayers", numberOfPlayers);
+            getOutsideChatMap.put("totalStake", totalStake);
+            getOutsideChatMap.put("gameID", gameID);
+//            System.out.println("what is gameId: " + gameID);
+            getOutsideChatMap.put("players", GameUtils.getEachPlayerMap(selectedPlayerMList));
+
+            IdTokenUtil.generateToken(token -> {
+
+                GameAPI gameAPI = AllConstants.retrofit.create(GameAPI.class);
+
+                GameSignalM signalM = new GameSignalM(token, otherUid, getOutsideChatMap);
+
+                gameAPI.signal(signalM).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if(response.isSuccessful()){
+
+                            if(addNewPlayer) alertOtherPlayerOfNewAddedPlayer();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable throwable) {
+                        Toast.makeText(MainActivity.this, getString(R.string.errorOccur), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }, context);
+
+        }
 
         //  send chatKey to other User to read  -- customise later to check user OnRead settings
         refOnReadRequest.child(otherUid).child(myId).push().setValue(messageModel.getIdKey());
@@ -4179,6 +4872,28 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //            }
 //        });
 
+    }
+
+    private void alertOtherPlayerOfNewAddedPlayer()
+    {
+        Map<String, Object> newPlayerMap = new HashMap<>();
+        newPlayerMap.put(newPlayerUid, GameUtils.newPlayerMap(newPlayerMList));
+
+        GameUtils.rejectGameOrAddNewPlayer(this, hostUid, newPlayerUid, newPlayerMap, new GameUtils.RejectGameInterface()
+        {
+            @Override
+            public void onSuccess() {
+                newPlayerMList.clear();
+                addNewPlayer = false;
+                System.out.println("successfully invite new players");
+//                                        Toast.makeText(MainActivity.this, getString(R.string.invite_friends), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure() {
+                Toast.makeText(MainActivity.this, getString(R.string.errorOccur), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     // send forward chat or new photo, video or doc files
@@ -6643,7 +7358,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
     // only alert me if I am not on another call    -- work on this later
-    public void incomingCallObserver(String otherUID){
+    private void incomingCallObserver(String otherUID){
         mainRepository.subscribeForLatestEvent(otherUID, (data)->{
             if (data.getType().equals(DataModelType.AudioCall) || data.getType().equals(DataModelType.VideoCall)
                     || data.getType().equals(DataModelType.AcceptVideo) || data.getType().equals(DataModelType.RejectVideo))
@@ -6760,6 +7475,219 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     }
 
 
+    //      ================      game methods           ========================
+    private void incomingGameObserver()     // later -- first check if there is game signal already b4 accepting new one
+    {
+        refGameAlert.child(myId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.exists()){
+
+                    snapshot.getChildren().forEach(user->{
+
+                        if(snapshot.child("gameID").exists()) {   // clear mini error if exist
+                            refGameAlert.child(myId).child("gameID").removeValue();
+
+                        } else {
+
+                            refGameAlert.child(myId).child("gameID").removeValue();
+                            SignalPlayerM signalPlayerM = user.getValue(SignalPlayerM.class);
+
+                            if(!user.getKey().equals(myId))     // I am not the host
+                            {
+                                if(!signalPlayerM.getGameID().equals("null") && !signalPlayerM.getGameID().equals("remove")
+                                        && !myGameKey.equals(signalPlayerM.getIdKey()) )
+                                {
+                                    if(!onGameNow)
+                                    {
+                                        myGameKey = signalPlayerM.getIdKey();
+                                        gameID = signalPlayerM.getGameID();
+                                        hostUid = signalPlayerM.getFromUid();
+                                        gameMode = signalPlayerM.getGameMode();
+                                        onGameNow = true;
+                                        stopRingTone();
+
+                                        setLayout();
+
+                                        String getGameMode = getString(R.string.mode_) + " " + getString(R.string.free);
+                                        if (gameMode.equals("stake")) {
+                                            getGameMode = getString(R.string.mode_) + " " + getString(R.string.stake);
+                                            stakeAmountTV.setVisibility(View.VISIBLE);
+                                            rewardPoolTV.setVisibility(View.VISIBLE);
+                                            hostNoteTV.setVisibility(View.VISIBLE);
+
+                                            // set stakeAmount
+                                            String stakeAmount = getString(R.string.entryFee) + " $" +  signalPlayerM.getStakeAmount();
+                                            stakeAmountTV.setText(stakeAmount);
+
+                                            // set reward prize for win
+                                            String reward = getString(R.string.winnerPrize) + " $" +  signalPlayerM.getTotalStake();
+                                            rewardPoolTV.setText(reward);
+
+                                            // set host note if any
+                                            String hostRemark = getString(R.string.hostRemark) + " " +  signalPlayerM.getHostNote();
+                                            hostNoteTV.setText(hostRemark);
+
+                                        }
+                                        // set game mode
+                                        gameModeTV.setText(getGameMode);
+
+                                        // set host by name
+                                        String name = getString(R.string.hostBy) + " " + contactNameShareRef.getString(hostUid, signalPlayerM.getSenderName());
+                                        hostByTV.setText(name);
+
+                                        //set game type
+                                        String gameType = getString(R.string.game_) + " " +  signalPlayerM.getMessage();
+                                        gameTypeTV.setText(gameType);
+
+                                        //set number of expected player
+                                        String numOfPlayer = getString(R.string.expectedPlayer) + " " +  signalPlayerM.getNumberOfPlayers();
+                                        expectedPlayerNumTV.setText(numOfPlayer);
+
+                                        //vibrate my tone
+                                        callUtils.startContinuousVibration();
+                                        callUtils.playRingtone();
+
+                                        getGameBalance(signalPlayerM.getStakeAmount());
+
+                                        new Handler().postDelayed(()-> signalToAwait(hostUid), 3000);
+
+                                        if(signalPlayerM.getGameID().equals("remove")) removeSignal(signalPlayerM.getFromUid());
+//                                        String gameStatus = snapshot.child(hostUid).child("players").child(myId).child("signalUpdate").getValue().toString();
+//                                    if(gameStatus.equals("reject")) onGameNow = false;
+//                                    if(gameStatus.equals("join")) onGameNow = false;
+
+                                    } else {
+                                        //  1.  signal me the host game
+                                        Toast.makeText(MainActivity.this, getString(R.string.youHaveIncomingGame) + " "
+                                                + ProfileUtils.getOtherDisplayOrUsername(signalPlayerM.getFromUid(), signalPlayerM.getSenderName()), Toast.LENGTH_LONG).show();
+                                        //  2.  Tell host, I am on a game
+                                    }
+
+                                } else if(signalPlayerM.getGameID().equals("null") || signalPlayerM.getGameID().equals("remove"))
+                                {
+                                    removeSignal(signalPlayerM.getFromUid());
+                                }
+
+                            } else // I am the host, incase I relaunch my app
+                            {
+                                if(signalPlayerM.getGameID().equals("remove")) removeSignal(signalPlayerM.getFromUid());
+                                else {
+                                    if(!onGameNow && !hostRelaunchApp){
+                                        DataSnapshot playersSnapshot = user.child("players");
+
+                                        for (DataSnapshot playerSnapshot : playersSnapshot.getChildren()) {
+                                            AwaitPlayerM player = playerSnapshot.getValue(AwaitPlayerM.class);
+                                            if (player != null) selectedPlayerMList.add(player);
+                                        }
+
+                                        myGameKey = signalPlayerM.getIdKey();
+                                        gameID = signalPlayerM.getGameID();
+                                        hostUid = signalPlayerM.getFromUid();
+                                        gameMode = signalPlayerM.getGameMode();
+                                        stakeAmount = signalPlayerM.getStakeAmount();
+                                        stopRingTone();
+
+                                        setIncomingGameView();
+                                        AnimUtils.slideInFromTop(incomingGameView, 200);
+                                        signalCardView.setVisibility(View.GONE);
+                                        minimizedContainer.setVisibility(View.VISIBLE);
+                                        new Handler().postDelayed(()-> AnimUtils.slideInFromTop(minimizedContainer, 5000), 1000);
+
+                                        onGameNow = true;
+                                        onAwaitActivity = true;
+                                        hostRelaunchApp = true;
+                                        hostReopen = true;
+                                    }
+
+                                }
+                            }
+                        }
+
+                    });
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void setLayout(){
+        setIncomingGameView();
+        AnimUtils.slideInFromTop(incomingGameView, 200);
+        AnimUtils.slideInFromTop(signalCardView, 200);
+        minimizedContainer.setVisibility(View.GONE);
+
+        setJoinGameViews();
+
+        stakeAmountTV.setVisibility(View.GONE);
+        rewardPoolTV.setVisibility(View.GONE);
+        hostNoteTV.setVisibility(View.GONE);
+    }
+
+    private void signalToAwait(String hostUid){
+
+        GameAPI gameAPI = AllConstants.retrofit.create(GameAPI.class);
+
+        IdTokenUtil.generateToken(token -> {
+            TwoValueM twoValueM = new TwoValueM(token, hostUid);
+            gameAPI.await(twoValueM).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    if(response.isSuccessful()){
+                        Toast.makeText(MainActivity.this, getString(R.string.incomingGame), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, @NonNull Throwable throwable) {
+                    Toast.makeText(MainActivity.this, getString(R.string.noInternetConnection), Toast.LENGTH_SHORT).show();
+                    System.out.println("Checking error: " + throwable.getMessage());
+                }
+            });
+        }, this);
+    }
+
+    private void removeSignal(String hostUid){
+        stopRingTone();
+
+        setIncomingGameView();
+        incomingGameView.setVisibility(View.GONE);
+
+        refGameAlert.child(myId).child(hostUid).removeValue();
+        onGameNow = false;
+    }
+
+    private void getGameBalance(String stakeAmount){
+        WalletUtils.balance(this, new WalletCallBack() {
+            @Override
+            public void onSuccess(@NonNull AssetsModel assetsModel) {
+                String getGameBal = NumberSpacing.formatNumberWithCommas(assetsModel.getGameAsset());
+                String gameBal = getString(R.string.gameBal) + " $" + getGameBal;
+                if(joinGameViews != null) gameBalTV.setText(gameBal);
+
+                if(stakeAmount != null){
+                    String getStakeAmount = NumberSpacing.formatNumberWithCommas(stakeAmount);
+                    String deductNotice =  "$" + getStakeAmount + " " + getString(R.string.gameDecision);
+                    notice_TV.setText(deductNotice);
+                }
+
+            }
+
+            @Override
+            public void onFailure() {
+                System.out.println("what is wallet error occur MainActivity L7190");
+            }
+        });
+    }
+
     // Method to hide the soft keyboard when needed
     private void hideKeyboard() {
         View currentFocusView = getCurrentFocus();
@@ -6777,17 +7705,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         totalUser_TV.setText("0 selected");
         editTextMessage.requestFocus();
 
-        if(firstTopChatViews != null) pinMsgConst.setVisibility(View.VISIBLE);
-        firstTopChatViews.setVisibility(View.VISIBLE);
-        constraintMsgBody.setVisibility(View.VISIBLE);
-//        tabLayoutGeneral.setVisibility(View.INVISIBLE);
-
-        // call forward setting method to remove the checkBox
-        onForwardTopView.setVisibility(View.GONE);
-        forwardDownContainer.setVisibility(View.INVISIBLE);
-        ChatsFragment.openContactList.setVisibility(View.VISIBLE);
-        ChatsFragment.newInstance().notifyVisibleUser();
-
         // remove the typingRunnable for checking network
         handlerTyping.removeCallbacks(runnableTyping);
 
@@ -6795,7 +7712,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         if(appActivity || otherUserUid == null || !insideChat) {
             constraintMsgBody.setVisibility(View.INVISIBLE);
-            topMainContainer.setVisibility(View.VISIBLE);
+            if(!doneSelectingPlayers) topMainContainer.setVisibility(View.VISIBLE);
 //            firstTopChatViews.setVisibility(View.INVISIBLE);
             closePinIcons();    // for sharing photo from other app
 
@@ -6808,6 +7725,13 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             appActivity = false;
         }
 
+        if(doneSelectingPlayers) {
+            new Handler().postDelayed(this::delayCloseForwardView, 3000);
+            doneSelectingPlayers = false;
+        } else {
+            delayCloseForwardView();
+        }
+
         // delete low photo from app storage if user cancel the sending
         if(sharingPhotoActivated) {
             deleteUnusedPhotoFromSharePrefsAndAppMemory(this);  // call method to delete file
@@ -6816,9 +7740,43 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         } else chatModelList.clear();
 
         viewPager2General.setUserInputEnabled(true);    // enable the swiping
-        forwardChatUserId.clear();
-        selectedUserNames.clear();
+
         sharing = false; // previous Main Activity from replace the currentActivity when user is sharing photo from other app or gallery
+
+        if (onSelectPlayer || onSelectNewPlayer) {
+
+            if(!doneSelectingPlayers) {
+                Intent mainActivityIntent = new Intent(this, WhotOptionActivity.class);
+                if(onSelectNewPlayer) mainActivityIntent = new Intent(this, AwaitPlayersActivity.class);
+                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(mainActivityIntent);
+                onSelectPlayer = false;
+                onSelectNewPlayer = false;
+            }
+
+            if(addPlayerConfirmView != null) addPlayerConfirmView.setVisibility(View.GONE);
+
+        }
+
+    }
+
+    private void delayCloseForwardView()
+    {
+        if(firstTopChatViews != null) pinMsgConst.setVisibility(View.VISIBLE);
+        firstTopChatViews.setVisibility(View.VISIBLE);
+        if(!insideChat){
+            tabLayoutGeneral.setVisibility(View.VISIBLE);
+            topMainContainer.setVisibility(View.VISIBLE);
+        } else {
+            constraintMsgBody.setVisibility(View.VISIBLE);
+        }
+        // call forward setting method to remove the checkBox
+        if(onForwardTopView != null) onForwardTopView.setVisibility(View.GONE);
+        forwardDownContainer.setVisibility(View.INVISIBLE);
+        if(ChatsFragment.adapter != null) {
+            ChatsFragment.openContactList.setVisibility(View.VISIBLE);
+            ChatsFragment.newInstance().notifyVisibleUser();
+        }
 
     }
 
@@ -7067,8 +8025,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         generateFCMToken();
     }
 
-    // generate FCM token
-    public static void generateFCMToken()
+    // generate FCM token   - for notification
+    public void generateFCMToken()
     {
         // After login is successful, retrieve the current FCM token
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task ->
@@ -7087,6 +8045,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 
     }
+
 
     private void getProfileSharePref(){
 
@@ -7359,6 +8318,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             } else if (onForward)
             {
                 cancelForwardSettings(MainActivity.this);    // onBackPress
+            } else if (selectGameView != null && selectGameView.getVisibility() == View.VISIBLE)
+            {
+                selectGameView.setVisibility(View.GONE);
+
             } else if (walletVerifyView != null && walletVerifyView.getVisibility() == View.VISIBLE)
             {
                 walletVerifyView.setVisibility(View.GONE);
@@ -7552,6 +8515,45 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         endCall();
     }
 
+    @Override
+    public void openOnForwardView() {
+        setForwardChat();
+    }
+
+    @Override
+    public void openSelectGameOption() {
+        selectGameView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void proceedToAwaitActivity(@NonNull String stakeAmount_, @NonNull String gameMode_, @NonNull String hostNote_)
+    {
+        stakeAmount = stakeAmount_;
+        hostNote = hostNote_;
+
+        moveToAwaitPlayers(gameMode_, stakeAmount_);    // one on one player
+
+    }
+
+    @Override
+    public void showMinimiseGameAlert(boolean openSignal)
+    {
+        setIncomingGameView();
+        if(openSignal){
+            AnimUtils.slideInFromTop(incomingGameView, 400);
+            signalCardView.setVisibility(View.GONE);
+            minimizedTV.setText(getString(R.string.awaitingPlayer));
+            minimizedContainer.setVisibility(View.VISIBLE);
+            onAwaitActivity = true;
+        } else {
+            incomingGameView.setVisibility(View.GONE);
+            onAwaitActivity = false;
+            Intent mainActivityIntent = new Intent(this, AwaitPlayersActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(mainActivityIntent);
+        }
+
+    }
 
     //    File appSpecificFolder = new File(getExternalFilesDir(null), "MyFolder");
 //    if (!appSpecificFolder.exists()) {

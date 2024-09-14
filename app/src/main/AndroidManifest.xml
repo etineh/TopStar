@@ -53,6 +53,20 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".games.whot.AwaitPlayersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".games.whot.WhotGameActivity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:theme="@style/FullScreenTheme" /> <!-- android:screenOrientation="landscape" -->
+        <!-- android:theme="@style/Theme.ChatApp" -->
+        <activity
+            android:name=".games.whot.WhotOptionActivity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:theme="@style/FullScreenTheme" />
+        <activity
             android:name=".activities.RedirectToHomeActivity"
             android:exported="false" />
         <activity
@@ -245,9 +259,11 @@
         </activity>
         <activity
             android:name=".photos.ViewImageActivity"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="false" />
         <activity
             android:name=".photos.SendImageOrVideoActivity"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -258,6 +274,7 @@
         <!-- /> -->
         <activity
             android:name=".photos.UploadProfileImage"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -273,9 +290,11 @@
             android:supportsPictureInPicture="true" />
         <activity
             android:name=".contacts.UsersContactActivity"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="true" />
         <activity
             android:name=".side_bar_menu.settings.SettingsActivity"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="false" />
         <activity
             android:name=".chats.MessageActivity"

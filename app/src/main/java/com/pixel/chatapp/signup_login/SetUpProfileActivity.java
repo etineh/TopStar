@@ -267,7 +267,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
                 }
             });
 
-        });
+        }, this);
 
     }
 

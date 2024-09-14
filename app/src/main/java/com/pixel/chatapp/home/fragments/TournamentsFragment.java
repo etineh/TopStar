@@ -1,5 +1,6 @@
 package com.pixel.chatapp.home.fragments;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -10,12 +11,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.TournamentAdapter;
+import com.pixel.chatapp.home.MainActivity;
 import com.pixel.chatapp.model.TournamentModel;
 
 import java.util.ArrayList;
@@ -37,9 +40,13 @@ public class TournamentsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tournaments_fragment, container, false);
 
-        recyclerViewTour = view.findViewById(R.id.recyclerViewTour);
         progressBarTour = view.findViewById(R.id.progressBarTour);
+        progressBarTour.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.orange)));
+        if(MainActivity.nightMood){
+            progressBarTour.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cool_orange)));
+        }
 
+        recyclerViewTour = view.findViewById(R.id.recyclerViewTour);
         recyclerViewTour.setLayoutManager(new LinearLayoutManager(getContext()));
 
         tourModelList = new ArrayList<>();

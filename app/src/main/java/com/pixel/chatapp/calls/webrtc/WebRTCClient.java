@@ -48,7 +48,6 @@ public class WebRTCClient {
     private MediaStream localStream;
     private MediaConstraints mediaConstraints = new MediaConstraints();
 
-    public static Listener listener;
 
     DatabaseReference refCall;
 
@@ -238,7 +237,4 @@ public class WebRTCClient {
     }
 
 
-    public interface Listener {
-        void onTransferDataToOtherPeer(CallModel model);
-    }
 }
