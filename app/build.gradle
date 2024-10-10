@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -138,4 +139,8 @@ dependencies {
 
     // Stick a view to top or bottom
     implementation 'com.github.amarjain07:StickyScrollView:1.0.3'
+
+    // for pull-down refresh
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
 }

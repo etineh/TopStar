@@ -7,7 +7,7 @@
     android:paddingStart="5dp"
     android:paddingTop="10dp"
     android:paddingEnd="5dp"
-    tools:context=".peer2peer.exchange.P2pExchangeActivity">
+    tools:context=".view_controller.peer2peer.exchange.P2pExchangeActivity">
 
     <ProgressBar
         android:id="@+id/progressBarP"

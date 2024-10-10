@@ -6,15 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.P2pExchangeM;
-import com.pixel.chatapp.peer2peer.exchange.BuyerInputAmountActivity;
-import com.pixel.chatapp.peer2peer.exchange.SellerInputAmountActivity;
+import com.pixel.chatapp.dataModel.P2pExchangeM;
+import com.pixel.chatapp.view_controller.peer2peer.exchange.BuyerInputAmountActivity;
+import com.pixel.chatapp.view_controller.peer2peer.exchange.SellerInputAmountActivity;
+import com.pixel.chatapp.utilities.OpenActivityUtil;
 
 import java.util.List;
 
@@ -90,16 +90,14 @@ public class P2pExchangeAdapter extends RecyclerView.Adapter<P2pExchangeAdapter.
 
         holder.itemView.setOnClickListener( v -> {
 
+            Intent intent;
             if(buyOrSell.equals("buy")){
-                Intent intent = new Intent(context, BuyerInputAmountActivity.class);
+                intent = new Intent(context, BuyerInputAmountActivity.class);
 
-                context.startActivity(intent);
             } else {
-                Intent intent = new Intent(context, SellerInputAmountActivity.class);
-
-                context.startActivity(intent);
-//                Toast.makeText(context, "Work in progress", Toast.LENGTH_SHORT).show();
+                intent = new Intent(context, SellerInputAmountActivity.class);
             }
+            OpenActivityUtil.openColorHighlight(v, context, intent);
 
         });
 

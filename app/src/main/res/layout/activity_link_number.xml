@@ -5,7 +5,7 @@
     style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".signup_login.LinkNumberActivity">
+    tools:context=".view_controller.signup_login.LinkNumberActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayerConstraint"
@@ -73,7 +73,7 @@
             style="@style/mainBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context=".activities.OTPActivity">
+            tools:context=".view_controller.OTPActivity">
 
             <Spinner
                 android:id="@+id/spinnerCountryCode"

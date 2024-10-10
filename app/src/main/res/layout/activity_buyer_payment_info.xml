@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".peer2peer.exchange.BuyerPaymentInfoActivity">
+    tools:context=".view_controller.peer2peer.exchange.BuyerPaymentInfoActivity">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

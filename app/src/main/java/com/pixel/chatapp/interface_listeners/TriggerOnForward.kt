@@ -6,7 +6,7 @@ interface TriggerOnForward {
 
     fun openSelectGameOption()
 
-    fun showMinimiseGameAlert(openSignal: Boolean)
+    fun showMinimiseGameAlert(openSignal: Boolean, gameHasStarted: Boolean, whichGameActivity: String = "null")
 
     fun proceedToAwaitActivity(stakeAmount: String, gameMode: String, hostNote: String)
 

@@ -15,8 +15,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.model.LeagueModel;
+import com.pixel.chatapp.view_controller.MainActivity;
+import com.pixel.chatapp.dataModel.LeagueModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -104,7 +104,7 @@ public class LeagueAdapter extends RecyclerView.Adapter<LeagueAdapter.HostViewHo
             holder.reward_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
             holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
             holder.join.setBackgroundResource(R.drawable.round_button_dark);
-            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.blackLine));
 
         } else {
             holder.cardContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.white));

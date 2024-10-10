@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="15dp"
-    tools:context=".side_bar_menu.wallet.EachAssetActivity">
+    tools:context=".view_controller.side_bar_menu.wallet.EachAssetActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

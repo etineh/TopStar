@@ -5,7 +5,7 @@
     style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".side_bar_menu.settings.StorageActivity">
+    tools:context=".view_controller.side_bar_menu.settings.StorageActivity">
 
     <include
         android:id="@+id/confirmDeleteLayout"

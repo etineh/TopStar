@@ -5,7 +5,7 @@
     style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".games.whot.AwaitPlayersActivity">
+    tools:context=".view_controller.games.AwaitPlayersActivity">
 
     <ViewStub
         android:id="@+id/startGameLayout"
@@ -95,16 +95,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/onboardingTV" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerPlayers"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
         app:layout_constraintBottom_toTopOf="@+id/startGamebutton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/numberJoined_TV"
-        tools:listitem="@layout/await_player_card" />
+        app:layout_constraintTop_toBottomOf="@+id/numberJoined_TV">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerPlayers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/await_player_card" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/recyclerPlayers"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/startGamebutton"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/numberJoined_TV"-->
+<!--        tools:listitem="@layout/await_player_card" />-->
 
     <TextView
         android:id="@+id/quitTimeCount_TV"

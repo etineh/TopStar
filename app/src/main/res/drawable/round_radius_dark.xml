@@ -10,7 +10,8 @@
     <item android:top="1dp" android:bottom="1dp" android:left="1dp" android:right="1dp">
         <shape android:shape="rectangle">
             <corners android:radius="12dp" /> <!-- Adjust the corner radius as needed -->
-            <solid android:color="#121111" /> <!-- Transparent or other background color -->
+<!--            <solid android:color="#1B1A1A" /> &lt;!&ndash; Transparent or other background color &ndash;&gt;-->
+            <solid android:color="@color/blackApp" /> <!-- Transparent or other background color -->
         </shape>
     </item>
 </layer-list>

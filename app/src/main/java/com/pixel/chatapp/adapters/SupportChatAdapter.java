@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,12 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.chats.MessageAdapter;
-import com.pixel.chatapp.model.MessageModel;
-import com.pixel.chatapp.model.SupportChatM;
+import com.pixel.chatapp.dataModel.SupportChatM;
 import com.squareup.picasso.Picasso;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -5,7 +5,7 @@
     style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".signup_login.EmailOrPhoneLoginActivity">
+    tools:context=".view_controller.signup_login.EmailOrPhoneLoginActivity">
 
     <ScrollView
         android:layout_width="match_parent"

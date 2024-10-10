@@ -230,7 +230,17 @@
     <string name="onGoingGameAlready">You have on going game already</string>
     <string name="allowOneMore">Allow minimum of two (2) joined player!</string>
     <string name="finishIncomingGame">Finish active/incoming game first</string>
-<!--    <string name="connected">Connected to game!</string>-->
+    <string name="refreshed">Refreshed!</string>
+    <string name="onGoingGame">Ongoing game >> </string>
+    <string name="hash"> *** 👁</string>
+    <string name="rewardAmount">Reward: $23 👁</string>
+    <string name="reward">Reward: </string>
+    <string name="eye"> 👁</string>
+    <string name="watchingNum">👁 25k </string>
+    <string name="quitGame"> Quit game >> </string>
+    <string name="gameId"> Game ID</string>
+    <string name="startingGame"> Starting Game…</string>
+    <string name="gameStartsNow"> Game starts now</string>
 
 
     <!--    premium bar    -->
@@ -254,7 +264,7 @@
 
     <string name="anyone">Anyone</string>
     <string name="only">Only:</string>
-    <string name="ID_verify">ID verified users</string>
+    <string name="kyc_verify">KYC verified users</string>
     <string name="premiumUser">Premium users</string>
     <string name="myCommMember">My community members</string>
     <string name="selectThanOne"> PS: You can select more than one.</string>
@@ -525,10 +535,16 @@
     <string name="notFound">file not found…</string>
     <string name="dCancel">Download cancel</string>
     <string name="userNotFound">user not found</string>
+    <string name="no_player_found">No player found. Quit and restart game</string>
+
     <string name="downloadFirst">Download first.</string>
     <string name="chatNotFound">chat not found…</string>
 
     <string name="fileNotExist">File does not exist.</string>
+    <string name="invalidPhoto">Invalid image.</string>
+    <string name="failToSaveFile">Failed to save file.</string>
+    <string name="savedToGallery">Saved to gallery!</string>
+    <string name="failToSharePhoto">Fail to share photo</string>
 
     <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>

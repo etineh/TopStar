@@ -1,7 +1,7 @@
 package com.pixel.chatapp.adapters;
 
-import static com.pixel.chatapp.home.MainActivity.nightMood;
-import static com.pixel.chatapp.side_bar_menu.settings.StorageRecyclerActivity.isOnlongPressMood;
+import static com.pixel.chatapp.view_controller.MainActivity.nightMood;
+import static com.pixel.chatapp.view_controller.side_bar_menu.settings.StorageRecyclerActivity.isOnlongPressMood;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,11 +21,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.utils.FileUtils;
-import com.pixel.chatapp.utils.OpenActivityUtil;
-import com.pixel.chatapp.photos.PlayFileActivity;
-import com.pixel.chatapp.photos.ZoomImage;
-import com.pixel.chatapp.side_bar_menu.settings.StorageRecyclerActivity;
+import com.pixel.chatapp.utilities.FileUtils;
+import com.pixel.chatapp.utilities.OpenActivityUtil;
+import com.pixel.chatapp.view_controller.photos_video.PlayFileActivity;
+import com.pixel.chatapp.view_controller.photos_video.ZoomImage;
+import com.pixel.chatapp.view_controller.side_bar_menu.settings.StorageRecyclerActivity;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -122,6 +122,7 @@ public class StorageAdapter extends RecyclerView.Adapter<StorageAdapter.ItemView
                     Intent intent = new Intent(context, ZoomImage.class);
                     intent.putExtra("otherName", "Photo");
                     intent.putExtra("imageLink", uri.toString());
+                    intent.putExtra("from", "profilePix");
                     OpenActivityUtil.openColorHighlight(v, context, intent);
 
                 } else if(extension.equals("mp4") || extension.equals("mov"))

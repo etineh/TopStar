@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 
 import androidx.recyclerview.widget.RecyclerView;
-import com.pixel.chatapp.chats.MessageAdapter;
-import com.pixel.chatapp.model.MessageModel;
-import com.pixel.chatapp.model.UserOnChatUI_Model;
 
-import java.lang.reflect.AccessibleObject;
+import com.pixel.chatapp.dataModel.MessageModel;
+import com.pixel.chatapp.dataModel.UserOnChatUI_Model;
 
 public interface FragmentListener {
 

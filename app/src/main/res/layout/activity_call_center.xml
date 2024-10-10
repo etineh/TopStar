@@ -5,7 +5,7 @@
     android:id="@+id/containerBody"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".calls.CallCenterActivity">
+    tools:context=".view_controller.calls.CallCenterActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topContainer"

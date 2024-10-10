@@ -5,7 +5,7 @@
     style="@style/mainBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".signup_login.ForgetActivity">
+    tools:context=".view_controller.signup_login.ForgetActivity">
 
     <ProgressBar
         android:id="@+id/progressBar_"

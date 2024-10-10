@@ -9,8 +9,14 @@
     <color name="whitePure">#FFFFFFFF</color>
 
     <color name="white">#FFFBEF</color>     <!-- project white colour -->
-    <color name="blackApp">#111111</color>  <!-- project black colour -->
-<!--    <color name="blackApp">#2C3039</color>  &lt;!&ndash; project black colour &ndash;&gt;-->
+<!--    <color name="blackApp_2">#1B1A1A</color>  &lt;!&ndash; project black colour &ndash;&gt;-->
+    <color name="blackApp_2">#151517</color>  <!-- project heading black colour -->
+    <color name="blackApp">#191B20</color>  <!-- project body black colour -->
+
+    <color name="transBlackApp">#191B2080</color>  <!-- 50% transparent body black colour -->
+
+    <!--    <color name="blackApp">#2C3039</color>  &lt;!&ndash; project black colour &ndash;&gt;-->
+    <color name="blackLine">#63564D</color>
     <color name="cool_orange">#E6CBB7</color>   <!-- project fade orange colour -->
     <color name="cool_black">#222020</color>
     <color name="orange">#ED7014</color>        <!-- project orange colour -->

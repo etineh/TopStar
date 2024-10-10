@@ -5,7 +5,7 @@
     style="@style/ChatBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".calls.CallPickUpCenter">
+    tools:context=".view_controller.calls.CallPickUpCenter">
 
     <ImageView
         android:id="@+id/arrowBackC"

@@ -86,7 +86,7 @@
         app:srcCompat="@drawable/baseline_play_arrow_24" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/videoSeekBarContainer"
+        android:id="@+id/headingContainer_"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"

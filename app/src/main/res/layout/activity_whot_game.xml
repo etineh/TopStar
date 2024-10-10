@@ -3,35 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/card_background_portraite"
     android:layout_height="match_parent"
-    tools:context=".games.whot.WhotGameActivity">
+    android:background="@drawable/card_background_portraite"
+    tools:context=".view_controller.games.whot.WhotGameActivity">
 
+
+    <ViewStub
+        android:id="@+id/incomingGameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_incoming_game_alert"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/gameBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="-5dp"
-        android:layout_marginTop="-5dp"
-        android:layout_marginEnd="-5dp"
-        android:layout_marginBottom="-5dp"
         android:scaleType="centerCrop"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/card_background_portraite" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/buttonContainer"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/_20dp"
         android:paddingTop="40dp"
         android:paddingEnd="@dimen/_20dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -63,48 +65,27 @@
             app:srcCompat="@drawable/baseline_more_horiz_24" />
 
         <ImageView
-            android:id="@+id/speakerIV"
+            android:id="@+id/shareGameLinkIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginTop="15dp"
             android:background="@drawable/msg_count"
             android:padding="5dp"
-            app:layout_constraintStart_toEndOf="@+id/moreIV"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_campaign_24" />
-
-        <ImageView
-            android:id="@+id/audioCall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:background="@drawable/msg_count"
-            android:padding="5dp"
-            app:layout_constraintEnd_toStartOf="@+id/videoCall"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_mic_24" />
+            app:layout_constraintStart_toStartOf="@+id/moreIV"
+            app:layout_constraintTop_toBottomOf="@+id/moreIV"
+            app:srcCompat="@drawable/baseline_share_24" />
 
         <ImageView
             android:id="@+id/chatIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:background="@drawable/msg_count"
             android:padding="5dp"
-            app:layout_constraintEnd_toStartOf="@+id/audioCall"
-            app:layout_constraintStart_toEndOf="@+id/speakerIV"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/shareGameLinkIV"
+            app:layout_constraintTop_toBottomOf="@+id/shareGameLinkIV"
             app:srcCompat="@android:drawable/sym_action_chat"
             app:tint="@color/white" />
-
-        <ImageView
-            android:id="@+id/videoCall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/msg_count"
-            android:padding="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_video_call_24" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -121,25 +102,27 @@
         android:id="@+id/opponentCardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         app:cardBackgroundColor="@color/whitePure"
         app:cardCornerRadius="@dimen/_20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonContainer">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/opponentCamera"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:scaleType="centerCrop"
             app:srcCompat="@drawable/sp_face_in_oval" />
     </androidx.cardview.widget.CardView>
 
     <ImageView
-        android:id="@+id/imageView26"
+        android:id="@+id/oppCardIV"
         android:layout_width="70dp"
         android:layout_height="101dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/opponentCardView"
         app:layout_constraintTop_toTopOf="@+id/opponentCardView"
@@ -155,11 +138,11 @@
         android:text="Rank:  Wins:"
         android:textColor="@color/whitePure"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView29"
-        app:layout_constraintEnd_toStartOf="@+id/imageView29"
+        app:layout_constraintBottom_toBottomOf="@+id/myCameraIV"
+        app:layout_constraintEnd_toStartOf="@+id/myCameraIV"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView29" />
+        app:layout_constraintTop_toTopOf="@+id/myCameraIV" />
 
     <TextView
         android:id="@+id/numberOfCardTV"
@@ -173,24 +156,17 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/opponentCardView"
-        app:layout_constraintTop_toBottomOf="@+id/imageView26" />
+        app:layout_constraintTop_toBottomOf="@+id/oppCardIV" />
 
     <ImageView
         android:id="@+id/marketCard_IV"
         android:layout_width="90dp"
         android:layout_height="111dp"
-        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
         app:layout_constraintBottom_toTopOf="@+id/recyclerView"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/line__g"
         app:layout_constraintTop_toBottomOf="@+id/opponentCardView"
         app:srcCompat="@drawable/card_market" />
-
-    <ViewStub
-        android:id="@+id/await_player_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout="@layout/vs_awaiting_player"
-        android:visibility="gone" />
 
     <ViewStub
         android:id="@+id/quit_game_layout"
@@ -207,7 +183,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="-30dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/imageView29"
+        app:layout_constraintBottom_toTopOf="@+id/myCameraIV"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -221,20 +197,93 @@
         android:id="@+id/cardPlayedIV"
         android:layout_width="80dp"
         android:layout_height="100dp"
+        android:layout_marginStart="20dp"
         app:layout_constraintBottom_toTopOf="@+id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/marketCard_IV"
+        app:layout_constraintStart_toEndOf="@+id/line__g"
         app:layout_constraintTop_toBottomOf="@+id/opponentCardView"
         app:srcCompat="@drawable/card20" />
 
-    <ImageView
-        android:id="@+id/imageView29"
-        android:layout_width="104dp"
-        android:layout_height="92dp"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/myCameraIV"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginBottom="30dp"
+        android:src="@drawable/logo"
         app:layout_constraintBottom_toBottomOf="@+id/gameBackground"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/videoCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/msg_count"
+        android:padding="7dp"
+        app:layout_constraintBottom_toBottomOf="@+id/myCameraIV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/baseline_video_call_24" />
+
+    <ImageView
+        android:id="@+id/audioCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="22dp"
+        android:background="@drawable/msg_count"
+        android:padding="7dp"
+        app:layout_constraintBottom_toBottomOf="@+id/videoCall"
+        app:layout_constraintEnd_toStartOf="@+id/videoCall"
+        app:srcCompat="@drawable/baseline_mic_24" />
+
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/msg_count"
+        android:padding="5dp"
+        android:text=">>"
+        android:textColor="@color/whitePure"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteY="492dp" />
+
+    <TextView
+        android:id="@+id/opponentTimeCountTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Ndifreke turn -60s"
+        android:textColor="@color/whitePure"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/sp_face_in_oval" />
+        app:layout_constraintTop_toBottomOf="@+id/opponentCardView" />
+
+    <TextView
+        android:id="@+id/myTimeCountTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:text="Your turn -60s"
+        android:textColor="@color/whitePure"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/line__g"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/marketCard_IV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/marketCard_IV" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,18 +15,20 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.utils.TimeUtils;
-import com.pixel.chatapp.model.PlayerModel;
+import com.pixel.chatapp.view_controller.MainActivity;
+import com.pixel.chatapp.utilities.TimeUtils;
+import com.pixel.chatapp.dataModel.PlayerModel;
+import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerViewHolder> {
 
-    private Context context;
+    private final Context context;
     private final List<PlayerModel> playerModelList;
 
     private int status;
@@ -102,7 +104,11 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
 
             timeAndDateSent(timeCreated, holder);
 
-//        holder.playerPhoto_IV.setImageResource(0);
+            if(photoLink != null && !photoLink.isEmpty() && !photoLink.equals("null")) {
+                Picasso.get().load(photoLink).into(holder.playerPhoto_IV);
+            } else {
+                holder.playerPhoto_IV.setImageResource(R.drawable.person_round);
+            }
 
 
             holder.itemView.setOnClickListener(v -> {
@@ -128,7 +134,7 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
         if(MainActivity.nightMood) {
             holder.playerContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.blackApp));
             holder.playerName_TV.setTextColor(ContextCompat.getColor(context, R.color.cool_orange));
-            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+            holder.lineH.setBackgroundColor(ContextCompat.getColor(context, R.color.blackLine));
             holder.gameType_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
             holder.mode_TV.setTextColor(ContextCompat.getColor(context, R.color.defaultWhite));
             holder.playOnclick.setBackgroundResource(R.drawable.round_button_dark);
@@ -153,7 +159,8 @@ public class PlayerAdapter extends RecyclerView.Adapter<PlayerAdapter.PlayerView
         // Convert the timestamp to the Date object
         Date d = new Date(lastTime);
         // Format the time part
-        DateFormat timeFormatter = new SimpleDateFormat("h:mm a");
+        DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
+
         String time = timeFormatter.format(d);
 
         if (TimeUtils.compareDays(lastTime) == 0) {

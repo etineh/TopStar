@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.FundTransferUser;
+import com.pixel.chatapp.dataModel.FundTransferUser;
 
 import java.util.List;
 

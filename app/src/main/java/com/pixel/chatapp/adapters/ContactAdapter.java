@@ -1,6 +1,6 @@
 package com.pixel.chatapp.adapters;
 
-import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
+import static com.pixel.chatapp.view_controller.MainActivity.myProfileShareRef;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,13 +21,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
-import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.home.fragments.ChatsFragment;
+import com.pixel.chatapp.utilities.FetchContacts;
+import com.pixel.chatapp.view_controller.LinearLayoutManagerWrapper;
+import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.model.ContactModel;
+import com.pixel.chatapp.view_controller.MainActivity;
+import com.pixel.chatapp.dataModel.ContactModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -127,8 +128,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
         // what happen when the cardView is click
         holder.itemView.setOnClickListener(view -> {
-            String myUsername = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
-            String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
+            String myUsername = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, null);
 
             view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(50)
                     .withEndAction(() -> {
@@ -236,7 +237,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
     public void synchronizeContactLists() {
         // Iterate over MainActivity.contactListFile
-        for (ContactModel contact : MainActivity.contactListFile) {
+        for (ContactModel contact : FetchContacts.contactListFile) {
             // Check if the contact exists in allContactList
             if (!allContactList.contains(contact)) {
                 // Contact exists in MainActivity.contactListFile but not in allContactList, so add it
@@ -250,7 +251,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
         // Iterate over allContactListCopy to remove contacts not present in MainActivity.contactListFile
         for (ContactModel contact : allContactListCopy) {
             // Check if the contact exists in MainActivity.contactListFile
-            if (!MainActivity.contactListFile.contains(contact)) {
+            if (!FetchContacts.contactListFile.contains(contact)) {
                 // Contact exists in allContactList but not in MainActivity.contactListFile, so remove it
                 allContactList.remove(contact);
             }

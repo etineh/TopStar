@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.pixel.chatapp.R
-import com.pixel.chatapp.model.WhotGameModel
+import com.pixel.chatapp.dataModel.WhotGameModel
 
 class WhotGameAdapter(private val itemList: MutableList<WhotGameModel>, private val context : Context)
     : RecyclerView.Adapter<WhotGameAdapter.ViewHolder>() {

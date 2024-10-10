@@ -13,8 +13,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.model.TournamentModel;
+import com.pixel.chatapp.view_controller.MainActivity;
+import com.pixel.chatapp.dataModel.TournamentModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

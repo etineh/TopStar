@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/whot_background"
-    tools:context=".games.whot.WhotOptionActivity">
+    tools:context=".view_controller.games.whot.WhotOptionActivity">
 
     <ViewStub
         android:id="@+id/gameModeLayout"

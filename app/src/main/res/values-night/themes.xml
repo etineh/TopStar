@@ -4,7 +4,8 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">#111111</item>
 <!--        change bar color here-->
-        <item name="colorPrimaryVariant">#070707</item> <!-- For the top bar color -->
+        <item name="colorPrimaryVariant">@color/blackApp_2</item> <!-- For the top bar color -->
+        <item name="android:navigationBarColor">@color/blackApp_2</item> <!-- For the home button navigator bar color -->
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -69,8 +70,8 @@
     </style>
 
     <style name="cardTopOrange">
-        <item name="android:background">#070707</item>
-<!--        <item name="android:background">#121111</item>-->
+<!--        <item name="android:background">#070707</item>-->
+        <item name="android:background">@color/blackApp_2</item>
     </style>
 
     <style name="backgroundOrangeAndCoolOrange">
@@ -78,7 +79,11 @@
     </style>
 
     <style name="backgroundOrange_Black">
-        <item name="android:background">@color/black</item>
+        <item name="android:background">@color/blackLine</item>
+    </style>
+
+    <style name="cardBackgroundOrange_Cool">
+        <item name="android:background">@color/defaultWhite</item>
     </style>
 
     <style name="cardTop2">
@@ -200,7 +205,7 @@
     </style>
 
     <style name="BackgroundW_B">
-        <item name="android:background">@color/black</item>
+        <item name="android:background">@color/blackApp_2</item>
     </style>
     <style name="BackgroundW_B2">
         <item name="android:background">@color/black</item>
@@ -220,7 +225,7 @@
     </style>
 
     <style name="recyclerBackground">
-        <item name="android:background">@color/black</item>
+        <item name="android:background">@color/blackLine</item>
     </style>
 
     <!--    radius background-->
@@ -315,7 +320,7 @@
     <style name="CustomTab" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:background">@color/black</item>
+        <item name="android:background">@color/blackApp_2</item>
         <item name="android:textSize">17sp</item>
 
         <item name="tabSelectedTextColor">@color/cool_orange</item>

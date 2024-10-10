@@ -10,11 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.pixel.chatapp.R
-import com.pixel.chatapp.model.AwaitPlayerM
-import com.pixel.chatapp.utils.GameUtils
-import com.pixel.chatapp.utils.ProfileUtils
+import com.pixel.chatapp.dataModel.AwaitPlayerM
+import com.pixel.chatapp.utilities.GameUtils
+import com.pixel.chatapp.utilities.ProfileUtils
 import com.squareup.picasso.Picasso
 
 class AwaitPlayerA (

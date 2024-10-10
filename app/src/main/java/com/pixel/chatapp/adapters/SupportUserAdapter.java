@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.SupportUserM;
-import com.pixel.chatapp.side_bar_menu.support.SupportChatActivity;
+import com.pixel.chatapp.dataModel.SupportUserM;
+import com.pixel.chatapp.view_controller.side_bar_menu.support.SupportChatActivity;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.UpcomingHostM;
+import com.pixel.chatapp.dataModel.UpcomingHostM;
 
 import java.util.List;
 

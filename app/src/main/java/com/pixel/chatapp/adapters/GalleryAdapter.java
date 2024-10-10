@@ -1,7 +1,7 @@
 package com.pixel.chatapp.adapters;
 
-import static com.pixel.chatapp.home.MainActivity.chatModelList;
-import static com.pixel.chatapp.home.MainActivity.user;
+import static com.pixel.chatapp.view_controller.MainActivity.chatModelList;
+import static com.pixel.chatapp.view_controller.MainActivity.user;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -20,9 +20,9 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.photos.CameraActivity;
-import com.pixel.chatapp.utils.FileUtils;
-import com.pixel.chatapp.model.MessageModel;
+import com.pixel.chatapp.view_controller.photos_video.CameraActivity;
+import com.pixel.chatapp.utilities.FileUtils;
+import com.pixel.chatapp.dataModel.MessageModel;
 
 import java.util.List;
 

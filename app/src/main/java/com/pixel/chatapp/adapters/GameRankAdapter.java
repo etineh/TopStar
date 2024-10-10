@@ -10,12 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.GameRankM;
-import com.pixel.chatapp.model.UpcomingHostM;
+import com.pixel.chatapp.dataModel.GameRankM;
 
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GameRankAdapter extends RecyclerView.Adapter<GameRankAdapter.RankViewHolder> {
 

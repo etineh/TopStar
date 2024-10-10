@@ -20,11 +20,11 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.photos.SendImageOrVideoActivity;
-import com.pixel.chatapp.utils.FileUtils;
-import com.pixel.chatapp.utils.AnimUtils;
+import com.pixel.chatapp.view_controller.photos_video.SendImageOrVideoActivity;
+import com.pixel.chatapp.utilities.FileUtils;
+import com.pixel.chatapp.utilities.AnimUtils;
 import com.pixel.chatapp.interface_listeners.ImageListener;
-import com.pixel.chatapp.model.MessageModel;
+import com.pixel.chatapp.dataModel.MessageModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +62,7 @@ public class ViewImageAdapter extends PagerAdapter {
         ImageView fileIcon_IV = itemView.findViewById(R.id.fileIcon_IV);
         VideoView videoView = itemView.findViewById(R.id.videoView);
         ImageView playButton_IV = itemView.findViewById(R.id.playIconView_IV);
-        ConstraintLayout videoSeekBarContainer = itemView.findViewById(R.id.videoSeekBarContainer);
+        ConstraintLayout videoSeekBarContainer = itemView.findViewById(R.id.headingContainer_);
         SeekBar seekBar = itemView.findViewById(R.id.seekBarProgress);
         TextView durationTV = itemView.findViewById(R.id.duration_TV);
         ImageView playV_IV = itemView.findViewById(R.id.playV_IV);
@@ -161,6 +161,9 @@ public class ViewImageAdapter extends PagerAdapter {
         });
 
         photoView.setOnClickListener(v -> {
+
+            imageListener.onImageClick();
+
 //            SendImageOrVideoActivity.recyclerPhoto.setVisibility(View.VISIBLE);
             AnimUtils.fadeInFastRecyclerview(SendImageOrVideoActivity.recyclerPhoto);
         });

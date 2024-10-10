@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.WalletHistory;
-import com.pixel.chatapp.side_bar_menu.wallet.TransactionReceiptActivity;
+import com.pixel.chatapp.dataModel.WalletHistory;
+import com.pixel.chatapp.view_controller.side_bar_menu.wallet.TransactionReceiptActivity;
 
 import java.util.Date;
 import java.util.List;

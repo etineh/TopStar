@@ -16,16 +16,17 @@
         android:elevation="3dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/videoSeekBarContainer">
+        app:layout_constraintTop_toBottomOf="@+id/headingContainer_">
 
 
         <TextView
             android:id="@+id/saveToGalleryTV"
+            style="@style/textColorBlack_CoolOrange"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:padding="5dp"
+            android:layout_marginTop="15dp"
+            android:padding="7dp"
             android:text="@string/saveToGallery"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -34,14 +35,15 @@
 
         <TextView
             android:id="@+id/openInChat_TV"
+            style="@style/textColorBlack_CoolOrange"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
+            android:paddingStart="7dp"
+            android:paddingTop="7dp"
             android:paddingEnd="5dp"
-            android:paddingBottom="20dp"
+            android:paddingBottom="25dp"
             android:text="@string/openInChat"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,7 +52,8 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/optionContainer"
+        android:id="@+id/transContainer"
+        style="@style/trans_background"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:elevation="2dp"
@@ -63,11 +66,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/videoSeekBarContainer"
+        android:id="@+id/headingContainer_"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/transBlack50"
         android:elevation="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -124,11 +129,11 @@
             android:layout_width="37dp"
             android:layout_height="35dp"
             android:layout_marginEnd="10dp"
-            android:tint="@color/cool_orange"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_more_vert_24" />
+            app:srcCompat="@drawable/baseline_more_vert_24"
+            app:tint="@color/whitePure" />
 
         <ImageView
             android:id="@+id/sharePhoto_IV"
@@ -158,26 +163,42 @@
 
     <TextView
         android:id="@+id/showChat_TV"
+        style="@style/TextAndBackground"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="10dp"
+        android:elevation="5dp"
+        android:gravity="center"
         android:padding="5dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="5dp"
+        android:text="Alright"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.pixel.chatapp.photos.CustomViewPager
+    <ProgressBar
+        android:id="@+id/progressBar10"
+        style="@style/progressBarColour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="5dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.pixel.chatapp.view_controller.photos_video.CustomViewPager
         android:id="@+id/viewPager_Photo"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
-    </com.pixel.chatapp.photos.CustomViewPager>
+    </com.pixel.chatapp.view_controller.photos_video.CustomViewPager>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

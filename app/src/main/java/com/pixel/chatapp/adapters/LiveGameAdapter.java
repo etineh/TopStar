@@ -4,16 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.transition.Hold;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.LiveGameM;
+import com.pixel.chatapp.dataModel.LiveGameM;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

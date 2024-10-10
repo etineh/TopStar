@@ -1,16 +1,16 @@
 package com.pixel.chatapp.adapters;
 
-import static com.pixel.chatapp.home.MainActivity.contactNameShareRef;
-import static com.pixel.chatapp.home.MainActivity.forwardChatUserId;
-import static com.pixel.chatapp.home.MainActivity.myProfileShareRef;
-import static com.pixel.chatapp.home.MainActivity.myUserName;
-import static com.pixel.chatapp.home.MainActivity.newPlayerMList;
-import static com.pixel.chatapp.home.MainActivity.onForward;
-import static com.pixel.chatapp.home.MainActivity.onUserLongPress;
-import static com.pixel.chatapp.home.MainActivity.otherUserFcmTokenRef;
-import static com.pixel.chatapp.home.MainActivity.otherUserHintRef;
-import static com.pixel.chatapp.home.MainActivity.selectedPlayerMList;
-import static com.pixel.chatapp.home.MainActivity.selectedUserNames;
+import static com.pixel.chatapp.view_controller.MainActivity.contactNameShareRef;
+import static com.pixel.chatapp.view_controller.MainActivity.forwardChatUserId;
+import static com.pixel.chatapp.view_controller.MainActivity.myProfileShareRef;
+import static com.pixel.chatapp.view_controller.MainActivity.myUserName;
+import static com.pixel.chatapp.view_controller.MainActivity.newPlayerMList;
+import static com.pixel.chatapp.view_controller.MainActivity.onForward;
+import static com.pixel.chatapp.view_controller.MainActivity.onUserLongPress;
+import static com.pixel.chatapp.view_controller.MainActivity.otherUserFcmTokenRef;
+import static com.pixel.chatapp.view_controller.MainActivity.otherUserHintRef;
+import static com.pixel.chatapp.view_controller.MainActivity.selectedPlayerMList;
+import static com.pixel.chatapp.view_controller.MainActivity.selectedUserNames;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -41,22 +41,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.pixel.chatapp.activities.LinearLayoutManagerWrapper;
-import com.pixel.chatapp.constants.AllConstants;
-import com.pixel.chatapp.home.fragments.ChatsFragment;
-import com.pixel.chatapp.home.fragments.PlayersFragment;
+import com.pixel.chatapp.view_controller.LinearLayoutManagerWrapper;
+import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
+import com.pixel.chatapp.view_controller.fragments.PlayersFragment;
 import com.pixel.chatapp.interface_listeners.ChatListener;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.model.AwaitPlayerM;
-import com.pixel.chatapp.photos.ZoomImage;
-import com.pixel.chatapp.chats.MessageAdapter;
-import com.pixel.chatapp.home.MainActivity;
-import com.pixel.chatapp.model.MessageModel;
-import com.pixel.chatapp.model.UserOnChatUI_Model;
-import com.pixel.chatapp.utils.AnimUtils;
-import com.pixel.chatapp.utils.ProfileUtils;
-import com.pixel.chatapp.utils.UserChatUtils;
+import com.pixel.chatapp.dataModel.AwaitPlayerM;
+import com.pixel.chatapp.view_controller.photos_video.ZoomImage;
+import com.pixel.chatapp.view_controller.MainActivity;
+import com.pixel.chatapp.dataModel.UserOnChatUI_Model;
+import com.pixel.chatapp.utilities.AnimUtils;
+import com.pixel.chatapp.utilities.ProfileUtils;
+import com.pixel.chatapp.utilities.UserChatUtils;
 import com.squareup.picasso.Picasso;
 
 import java.sql.Timestamp;
@@ -200,7 +198,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
             holder.textViewMsg.setText(message);
 
-            if(type == AllConstants.type_call || type ==AllConstants.type_game) // add colour if on call or game
+            if(type == K.type_call || type == K.type_game) // add colour if on call or game
             {
                 if(message.contains(mContext.getString(R.string.incomingAudioCall)) || message.contains(mContext.getString(R.string.incomingVideoCall))
                         || message.contains(mContext.getString(R.string.ongoingCall)) || message.contains(mContext.getString(R.string.ringing)) )
@@ -249,7 +247,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
             try{
-                String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+                String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
 
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
                 listener.getMessage(myUsername_, otherUid, mContext, false);
@@ -278,7 +276,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // receiving for new user the first time
         if(MainActivity.allUsersFromRoom != null && MainActivity.allUsersFromRoom.contains(userModelList.get(position_)))
         {
-            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
             listener.sendRecyclerView(holder.recyclerChat, otherUid);
             listener.getMessage(myUsername_, otherUid, mContext, true);
             System.out.println("checking loadMsg from CHLAdapter L270");
@@ -297,8 +295,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             // get the contact name or displayed name of other user
             String getUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
 
-            String myUsername_ = myProfileShareRef.getString(AllConstants.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
-            String myDisplayName = myProfileShareRef.getString(AllConstants.PROFILE_DISNAME, null);
+            String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, null);
 
             // make previous view clickable if any
 //            if(previousView != null && previousView != v) {
@@ -661,7 +659,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     // update failed status to delivery status when network is okay
     public void updateDeliveryStatus(String otherUid, String from){
-        AllConstants.executors.execute(()->
+        K.executors.execute(()->
         {
             if(userModelList != null){
                 for (int i = userModelList.size() - 1; i >= 0; i--)
@@ -674,9 +672,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         if(getUser.getMsgStatus() == 700033){
                             getUser.setMsgStatus(700024);
                             // update the UI
-                            AllConstants.handler.post(() ->{
-                                if(from.equals(AllConstants.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
-                                if(from.equals(AllConstants.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                            K.handler.post(() ->{
+                                if(from.equals(K.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                                if(from.equals(K.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
                             });
 
                             // update the firebase
@@ -703,9 +701,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        AllConstants.handler.post(() ->{
-                            if(from.equals(AllConstants.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
-                            if(from.equals(AllConstants.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                        K.handler.post(() ->{
+                            if(from.equals(K.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                            if(from.equals(K.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
                         });
 
                         // update the firebase
@@ -771,11 +769,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     userModelList.get(i).setNumberOfNewChat(0);  // reset it to 0
 
                     final int position = i;
-                    if(fromFragment.equals(AllConstants.fromChatFragment)) {
-                        AllConstants.handler.post(()-> ChatsFragment.newInstance().notifyItemChanged(position) );
+                    if(fromFragment.equals(K.fromChatFragment)) {
+                        K.handler.post(()-> ChatsFragment.newInstance().notifyItemChanged(position) );
                     }
-                    if(fromFragment.equals(AllConstants.fromPlayerFragment)) {
-                        AllConstants.handler.post(()-> PlayersFragment.newInstance().notifyItemChanged(position) );
+                    if(fromFragment.equals(K.fromPlayerFragment)) {
+                        K.handler.post(()-> PlayersFragment.newInstance().notifyItemChanged(position) );
                     }
 
                     MainActivity.chatViewModel.updateUser(userModelList.get(position));     // update room db
@@ -950,7 +948,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                AllConstants.executors.execute(()->
+                K.executors.execute(()->
                 {
                     if(position < userModelList.size())
                     {
@@ -979,7 +977,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                                 && !snapshot.child("image").getValue().toString().isEmpty()
                                 ? snapshot.child("image").getValue().toString() : null;
 
-                        AllConstants.handler.post(()->
+                        K.handler.post(()->
                         {
                             if(otherContactName != null){
                                 holder.textViewUser.setText(otherContactName);     //set users contact name

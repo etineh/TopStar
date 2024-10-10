@@ -36,7 +36,8 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:lineHeight="@dimen/_25dp" />
 
         <TextView
             android:id="@+id/noTV"
@@ -85,6 +86,17 @@
             app:layout_constraintEnd_toStartOf="@+id/yesTV"
             app:layout_constraintStart_toEndOf="@+id/noTV"
             app:layout_constraintTop_toTopOf="@+id/noTV" />
+
+        <ProgressBar
+            android:id="@+id/progressBar9"
+            style="@style/progressBarColour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/yesTV"
+            app:layout_constraintEnd_toEndOf="@+id/yesTV"
+            app:layout_constraintStart_toStartOf="@+id/yesTV"
+            app:layout_constraintTop_toTopOf="@+id/yesTV" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

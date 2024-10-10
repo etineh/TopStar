@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/card_background_landscape"
+    tools:context=".view_controller.games.whot.WhotLandscapeActivity">
+
+    <ViewStub
+        android:id="@+id/quit_game_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_quit_or_start_game"
+        android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/incomingGameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/vs_incoming_game_alert"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/trans"
+        tools:layout_editor_absoluteX="-138dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/_20dp"
+            android:paddingTop="@dimen/_10dp"
+            android:paddingEnd="@dimen/_15dp"
+            app:layout_constraintEnd_toStartOf="@+id/cardPhoto2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/rewardPoolTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/rewardAmount"
+                android:textColor="@color/green"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/cardPhoto6"
+                app:layout_constraintStart_toStartOf="@id/cardPhoto6"
+                app:layout_constraintTop_toBottomOf="@id/watchNumTV" />
+
+            <TextView
+                android:id="@+id/watchNumTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/watchingNum"
+                android:textColor="@color/whitePure"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/cardPhoto6"
+                app:layout_constraintStart_toStartOf="@id/cardPhoto6"
+                app:layout_constraintTop_toBottomOf="@+id/moreIV" />
+
+            <ImageView
+                android:id="@+id/moreIV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/msg_count"
+                android:padding="5dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_more_horiz_24" />
+
+            <ImageView
+                android:id="@+id/shareGameLinkIV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/msg_count"
+                android:padding="5dp"
+                app:layout_constraintStart_toEndOf="@+id/moreIV"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_share_24" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/msg_count"
+                android:padding="5dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_video_call_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/audioCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/msg_count"
+            android:padding="7dp"
+            app:layout_constraintEnd_toStartOf="@+id/videoCall"
+            app:layout_constraintTop_toTopOf="@+id/videoCall"
+            app:srcCompat="@drawable/baseline_mic_24" />
+
+        <ImageView
+            android:id="@+id/videoCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/msg_count"
+            android:padding="7dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_video_call_24" />
+
+        <TextView
+            android:id="@+id/playerNameTV1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="Maro King"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/myCameraIV"
+            app:layout_constraintEnd_toEndOf="@id/myCameraIV"
+            app:layout_constraintStart_toStartOf="@id/myCameraIV" />
+
+        <TextView
+            android:id="@+id/playerNameTV6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="Dominic"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/cardPhoto6"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto6"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto6" />
+
+        <TextView
+            android:id="@+id/playerNameTV5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="Rosemary"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/cardPhoto5"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto5"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto5" />
+
+        <TextView
+            android:id="@+id/playerNameTV4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="Charles Obong"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/cardPhoto4"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto4"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto4" />
+
+        <TextView
+            android:id="@+id/playerNameTV3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="\@blessingOnori"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/cardPhoto3"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto3"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto3" />
+
+        <TextView
+            android:id="@+id/playerNameTV2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-10dp"
+            android:background="@color/blackApp"
+            android:elevation="3dp"
+            android:padding="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="Maro King"
+            android:textColor="@color/cool_orange"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/cardPhoto2"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto2"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto2" />
+
+        <TextView
+            android:id="@+id/myTimeCountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your turn -60s"
+            android:textColor="@color/whitePure"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/myCardRecycler"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/cardLeftAndCountTV6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5 cards "
+            android:textColor="@color/whitePure"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/cardPhoto6"
+            app:layout_constraintStart_toStartOf="@id/cardPhoto6"
+            app:layout_constraintTop_toBottomOf="@id/cardPhoto6" />
+
+        <TextView
+            android:id="@+id/cardLeftAndCountTV5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 cards "
+            android:textColor="@color/whitePure"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/cardPhoto5"
+            app:layout_constraintStart_toStartOf="@id/cardPhoto5"
+            app:layout_constraintTop_toBottomOf="@id/cardPhoto5" />
+
+        <TextView
+            android:id="@+id/cardLeftAndCountTV3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 cards "
+            android:textColor="@color/whitePure"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/cardPhoto3"
+            app:layout_constraintStart_toStartOf="@id/cardPhoto3"
+            app:layout_constraintTop_toBottomOf="@id/cardPhoto3" />
+
+        <TextView
+            android:id="@+id/cardLeftAndCountTV4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last card"
+            android:textColor="@color/green"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto4"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto4"
+            app:layout_constraintTop_toBottomOf="@id/cardPhoto4" />
+
+        <TextView
+            android:id="@+id/cardLeftAndCountTV2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="7 cards -60s"
+            android:textColor="@color/whitePure"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/cardPhoto2"
+            app:layout_constraintStart_toStartOf="@+id/cardPhoto2"
+            app:layout_constraintTop_toBottomOf="@+id/cardPhoto2" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/myCameraIV"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginBottom="5dp"
+            android:src="@drawable/logo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/line__g"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/cardPlayedIV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cardPlayedIV" />
+
+        <ImageView
+            android:id="@+id/cardPlayedIV"
+            android:layout_width="70dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/myCardRecycler"
+            app:layout_constraintStart_toEndOf="@+id/line__g"
+            app:layout_constraintTop_toBottomOf="@+id/cardPhoto3"
+            app:srcCompat="@drawable/cross_card11" />
+
+        <ImageView
+            android:id="@+id/marketCard_IV"
+            android:layout_width="70dp"
+            android:layout_height="94dp"
+            android:layout_marginEnd="40dp"
+            app:layout_constraintBottom_toTopOf="@+id/myCardRecycler"
+            app:layout_constraintEnd_toStartOf="@+id/line__g"
+            app:layout_constraintTop_toBottomOf="@+id/cardPhoto2"
+            app:srcCompat="@drawable/card_market" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/myCardRecycler"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/whot_card_recy"
+            tools:spanCount="1">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhoto4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/whitePure"
+            app:cardCornerRadius="@dimen/_20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/opponentCamera4"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/sp_face_in_oval" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhoto3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/whitePure"
+            app:cardCornerRadius="@dimen/_20dp"
+            app:layout_constraintStart_toEndOf="@+id/cardPhoto4"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/opponentCamera3"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/sp_face_in_oval" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhoto2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="40dp"
+            app:cardBackgroundColor="@color/whitePure"
+            app:cardCornerRadius="@dimen/_20dp"
+            app:layout_constraintEnd_toStartOf="@+id/cardPhoto4"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/opponentCamera2"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/sp_face_in_oval" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhoto5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            app:cardBackgroundColor="@color/whitePure"
+            app:cardCornerRadius="@dimen/_20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/opponentCamera5"
+                android:layout_width="115dp"
+                android:layout_height="115dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/sp_face_in_oval" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhoto6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            app:cardBackgroundColor="@color/whitePure"
+            app:cardCornerRadius="@dimen/_20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/opponentCamera6"
+                android:layout_width="115dp"
+                android:layout_height="115dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/sp_face_in_oval" />
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:id="@+id/chatIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/msg_count"
+            android:padding="5dp"
+            app:layout_constraintEnd_toEndOf="@+id/videoCall"
+            app:layout_constraintStart_toStartOf="@+id/audioCall"
+            app:layout_constraintTop_toBottomOf="@+id/audioCall"
+            app:srcCompat="@android:drawable/sym_action_chat"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/newChatCountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-10dp"
+            android:background="@drawable/msg_count"
+            android:elevation="3dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:text="2"
+            android:textColor="@color/whitePure"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/chatIV"
+            app:layout_constraintTop_toTopOf="@+id/chatIV" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -39,7 +39,7 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
-        android:name=".FirebaseOffline"
+        android:name=".services.FirebaseOffline"
         android:allowBackup="true"
         android:configChanges="orientation|screenSize|uiMode"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -53,163 +53,169 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".games.whot.AwaitPlayersActivity"
+            android:name=".view_controller.games.AwaitPlayersActivity"
             android:exported="false" />
         <activity
-            android:name=".games.whot.WhotGameActivity"
+            android:name=".view_controller.games.whot.WhotLandscapeActivity"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/FullScreenTheme" />
+        <activity
+            android:name=".view_controller.games.whot.WhotGameActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:theme="@style/FullScreenTheme" /> <!-- android:screenOrientation="landscape" -->
         <!-- android:theme="@style/Theme.ChatApp" -->
         <activity
-            android:name=".games.whot.WhotOptionActivity"
+            android:name=".view_controller.games.whot.WhotOptionActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:theme="@style/FullScreenTheme" />
         <activity
-            android:name=".activities.RedirectToHomeActivity"
+            android:name=".view_controller.RedirectToHomeActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.LiveGameActivity"
+            android:name=".view_controller.LiveGameActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.PlayerFragOptionsActivity"
+            android:name=".view_controller.PlayerFragOptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.WhoCanParticipateActivity"
+            android:name=".view_controller.WhoCanParticipateActivity"
             android:exported="false"
-            android:parentActivityName=".activities.CreateLeagueActivity" />
+            android:parentActivityName=".view_controller.CreateLeagueActivity" />
         <activity
-            android:name=".activities.LMoreSettingsActivity"
+            android:name=".view_controller.LMoreSettingsActivity"
             android:exported="false"
-            android:parentActivityName=".activities.CreateLeagueActivity" />
+            android:parentActivityName=".view_controller.CreateLeagueActivity" />
         <activity
-            android:name=".activities.CreateLeagueActivity"
+            android:name=".view_controller.CreateLeagueActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.support.SupportChatActivity"
+            android:name=".view_controller.side_bar_menu.support.SupportChatActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.support.SupportUserActivity"
+            android:name=".view_controller.side_bar_menu.support.SupportUserActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.support.SupportActivity"
+            android:name=".view_controller.side_bar_menu.support.SupportActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.premium.PremiumActivity"
+            android:name=".view_controller.side_bar_menu.premium.PremiumActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.dashboard.DashboardActivity"
+            android:name=".view_controller.side_bar_menu.dashboard.DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.BankNamesActivity"
+            android:name=".view_controller.peer2peer.BankNamesActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.AddP2pAccountActivity"
+            android:name=".view_controller.peer2peer.AddP2pAccountActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.P2pSetupActivity"
+            android:name=".view_controller.peer2peer.P2pSetupActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.SecurityOptionsActivity"
+            android:name=".view_controller.side_bar_menu.settings.SecurityOptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.ResetSecurityActivity"
+            android:name=".view_controller.side_bar_menu.settings.ResetSecurityActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.SecurityActivity"
+            android:name=".view_controller.side_bar_menu.settings.SecurityActivity"
             android:exported="false" />
         <activity
-            android:name=".photos.PlayFileActivity"
+            android:name=".view_controller.photos_video.PlayFileActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.StorageRecyclerActivity"
+            android:name=".view_controller.side_bar_menu.settings.StorageRecyclerActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.StorageActivity"
+            android:name=".view_controller.side_bar_menu.settings.StorageActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.SoundOptionsActivity"
+            android:name=".view_controller.side_bar_menu.settings.SoundOptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.SoundActivity"
+            android:name=".view_controller.side_bar_menu.settings.SoundActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.PrivacyOptionsActivity"
+            android:name=".view_controller.side_bar_menu.settings.PrivacyOptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.PrivacyActivity"
+            android:name=".view_controller.side_bar_menu.settings.PrivacyActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.KycActivity"
+            android:name=".view_controller.side_bar_menu.settings.KycActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.ResetAccountActivity"
+            android:name=".view_controller.signup_login.ResetAccountActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.LinkNumberActivity"
+            android:name=".view_controller.signup_login.LinkNumberActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.NumberWithoutEmailActivity"
+            android:name=".view_controller.signup_login.NumberWithoutEmailActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.PasswordActivity"
+            android:name=".view_controller.signup_login.PasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.CreateAccountActivity"
+            android:name=".view_controller.signup_login.CreateAccountActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.PhoneLoginActivity"
+            android:name=".view_controller.signup_login.PhoneLoginActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.OTPActivity"
+            android:name=".view_controller.OTPActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.settings.ProfileActivity"
+            android:name=".view_controller.side_bar_menu.settings.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.CreatePinActivity"
+            android:name=".view_controller.CreatePinActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.exchange.BuyerInputAmountActivity"
+            android:name=".view_controller.peer2peer.exchange.BuyerInputAmountActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.exchange.BuyerPaymentInfoActivity"
+            android:name=".view_controller.peer2peer.exchange.BuyerPaymentInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.FingerprintActivity"
+            android:name=".view_controller.peer2peer.FingerprintActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.exchange.SellerPaymentInfoActivity"
+            android:name=".view_controller.peer2peer.exchange.SellerPaymentInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.exchange.SellerInputAmountActivity"
+            android:name=".view_controller.peer2peer.exchange.SellerInputAmountActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.wallet.ConvertFundActivity"
+            android:name=".view_controller.side_bar_menu.wallet.ConvertFundActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.wallet.EachAssetActivity"
+            android:name=".view_controller.side_bar_menu.wallet.EachAssetActivity"
             android:exported="false" />
         <activity
-            android:name=".peer2peer.exchange.P2pExchangeActivity"
+            android:name=".view_controller.peer2peer.exchange.P2pExchangeActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.wallet.WalletActivity"
+            android:name=".view_controller.side_bar_menu.wallet.WalletActivity"
             android:exported="false" />
         <activity
-            android:name=".side_bar_menu.wallet.TransactionReceiptActivity"
+            android:name=".view_controller.side_bar_menu.wallet.TransactionReceiptActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.CaptureAct"
+            android:name=".view_controller.CaptureAct"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme" />
         <activity
-            android:name=".calls.CallPickUpCenter"
+            android:name=".view_controller.calls.CallPickUpCenter"
             android:exported="false" />
         <activity
-            android:name=".photos.CameraActivity"
+            android:name=".view_controller.photos_video.CameraActivity"
             android:exported="false" /> <!-- this is enable file to be send from my app storage to other app or open uri on default phone viewer -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -222,7 +228,7 @@
         </provider>
 
         <activity
-            android:name=".activities.RedirectHome"
+            android:name=".view_controller.RedirectHome"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
@@ -258,11 +264,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".photos.ViewImageActivity"
+            android:name=".view_controller.photos_video.ViewImageActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false" />
         <activity
-            android:name=".photos.SendImageOrVideoActivity"
+            android:name=".view_controller.photos_video.SendImageOrVideoActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -273,43 +279,43 @@
         <!-- android:theme="@style/Base.Theme.AppCompat" -->
         <!-- /> -->
         <activity
-            android:name=".photos.UploadProfileImage"
+            android:name=".view_controller.photos_video.UploadProfileImage"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".photos.ZoomImage"
+            android:name=".view_controller.photos_video.ZoomImage"
             android:exported="false" />
         <activity
             android:name=".Menu"
             android:exported="false" />
         <activity
-            android:name=".calls.CallCenterActivity"
+            android:name=".view_controller.calls.CallCenterActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
             android:supportsPictureInPicture="true" />
         <activity
-            android:name=".contacts.UsersContactActivity"
+            android:name=".view_controller.UsersContactActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="true" />
         <activity
-            android:name=".side_bar_menu.settings.SettingsActivity"
+            android:name=".view_controller.side_bar_menu.settings.SettingsActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="false" />
         <activity
-            android:name=".chats.MessageActivity"
+            android:name=".view_controller.MessageActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.ForgetActivity"
+            android:name=".view_controller.signup_login.ForgetActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.EmailOrPhoneLoginActivity"
+            android:name=".view_controller.signup_login.EmailOrPhoneLoginActivity"
             android:exported="false" />
         <activity
-            android:name=".signup_login.SetUpProfileActivity"
+            android:name=".view_controller.signup_login.SetUpProfileActivity"
             android:exported="true" />
         <activity
-            android:name=".home.MainActivity"
+            android:name=".view_controller.MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="true"
             android:launchMode="standard">
@@ -320,7 +326,7 @@
             </intent-filter>
         </activity> <!-- Firebase Messaging Service -->
         <service
-            android:name=".notification.MyFirebaseMessagingService"
+            android:name=".services.notification.MyFirebaseMessagingService"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
@@ -344,7 +350,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".notification.ReplyReceiver"
+            android:name=".services.notification.ReplyReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.pixel.chatapp.REPLY_ACTION" />
