@@ -24,7 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.CountryNumCodeUtils;
 import com.pixel.chatapp.utilities.PhoneUtils;
 import com.pixel.chatapp.services.api.dao_interface.UserDao;
@@ -284,7 +284,7 @@ public class EmailOrPhoneLoginActivity extends AppCompatActivity {
 
     private void signInWithPhoneNumber(String number, String userPassword){
 
-        UserDao userDao = K.retrofit.create(UserDao.class);
+        UserDao userDao = Ki.retrofit.create(UserDao.class);
 
         userDao.fineUser(number).enqueue(new Callback<UserSearchM>() {
             @Override

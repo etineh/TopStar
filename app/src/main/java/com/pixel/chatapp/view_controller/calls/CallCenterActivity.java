@@ -33,7 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.repositories.CallRepository;
 import com.pixel.chatapp.utilities.AnimUtils;
 import com.pixel.chatapp.utilities.CallUtils;
@@ -405,7 +405,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
         //  end call
         endCall_IV.setOnClickListener(view -> {
             if(seconds < 1){
-                MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.end)); // update chat UI
+                MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.end)); // update chat UI
             }
             callEnd(false); // when I end the call myself
         });
@@ -414,7 +414,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
         runnableRinging = () -> {
             if (!isConnected) { // first check if it has rang
                 Toast.makeText(this, isUserAvailable, Toast.LENGTH_SHORT).show();
-                MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.noResponse)); // update chat UI
+                MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.noResponse)); // update chat UI
 
                 callEnd(false); // end if user is unavailable
             }
@@ -478,7 +478,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
 
                     if(callModel.getType().equals(DataModelType.Busy))  // when user busy my call, it change from StartCall to None
                     {
-                        MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.busy)); // update chat UI
+                        MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.busy)); // update chat UI
 
                         Toast.makeText(CallCenterActivity.this, R.string.userBusy, Toast.LENGTH_SHORT).show();
                         callEnd(false); // end when user is busy
@@ -490,7 +490,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
                         isRinging_TV.setText(connectionStatus);
                         durationTV.setText(connectionStatus);
 
-                        MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.ringing)); // update chat UI
+                        MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.ringing)); // update chat UI
 
                         // when ringing, restart the isConnected runnable to 0
                         handlerRinging.removeCallbacks(runnableRinging);
@@ -500,7 +500,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
 
                     } else if (callModel.getType().equals(DataModelType.OnAnotherCall))     // other user is on another call
                     {
-                        MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.end)); // update chat UI
+                        MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.end)); // update chat UI
 
                         Toast.makeText(CallCenterActivity.this, R.string.onAnotherCall, Toast.LENGTH_SHORT).show();
                         callEnd(true);  // end when user is on another call
@@ -564,7 +564,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
 
         if(seconds > 1){
             String timeText = convertCountToTimeFormat(seconds);
-            MainActivity.updateCallOrGameChat(K.type_call, timeText); // update chat UI
+            MainActivity.updateCallOrGameChat(Ki.type_call, timeText); // update chat UI
         }
 
         CallModel callModel = new CallModel(otherUid, otherName, user.getUid(), myUserName,
@@ -894,7 +894,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
 //            toggleVideoView(false);
             bigLocalView = true;
 
-            MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.ongoingCall));
+            MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.ongoingCall));
 
         });
     }
@@ -915,7 +915,7 @@ public class CallCenterActivity extends AppCompatActivity implements CallReposit
             bigLocalView = true;
             smallLocalView();
 
-            MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.pairing));
+            MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.pairing));
         });
     }
 

@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.interface_listeners.ChatListener;
 import com.pixel.chatapp.dataModel.MessageModel;
 import com.pixel.chatapp.dataModel.UserOnChatUI_Model;
@@ -78,8 +78,8 @@ public class ReplyReceiver extends BroadcastReceiver{
     private void sendToDatabase(Context context, String otherUid, String replyText)
     {
         SharedPreferences myProfileShareRef = context.getSharedPreferences(myId, Context.MODE_PRIVATE);
-        SharedPreferences myUserNamePreferences = context.getSharedPreferences(K.MYUSERNAME, Context.MODE_PRIVATE);
-        SharedPreferences otherUserFcmTokenRef = context.getSharedPreferences(K.FCMTOKEN, Context.MODE_PRIVATE);
+        SharedPreferences myUserNamePreferences = context.getSharedPreferences(Ki.MYUSERNAME, Context.MODE_PRIVATE);
+        SharedPreferences otherUserFcmTokenRef = context.getSharedPreferences(Ki.FCMTOKEN, Context.MODE_PRIVATE);
 
         DatabaseReference refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
         DatabaseReference refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
@@ -89,8 +89,8 @@ public class ReplyReceiver extends BroadcastReceiver{
 
         String chatKey = refMsgFast.child(myId).child(otherUid).push().getKey();  // create an id for each message
 
-        String getMyUserName = myUserNamePreferences.getString(K.USERNAME, null);
-        String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "@"+getMyUserName);
+        String getMyUserName = myUserNamePreferences.getString(Ki.USERNAME, null);
+        String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "@"+getMyUserName);
 
         // create messageModel
         MessageModel messageModel = new MessageModel(replyText, myDisplayName, myId, null,

@@ -24,7 +24,7 @@ import com.pixel.chatapp.R
 import com.pixel.chatapp.adapters.WhotGameAdapter
 import com.pixel.chatapp.services.api.dao_interface.GameAPI
 import com.pixel.chatapp.services.api.model.outgoing.ThreeValueM
-import com.pixel.chatapp.constants.K
+import com.pixel.chatapp.constants.Ki
 import com.pixel.chatapp.view_controller.MainActivity
 import com.pixel.chatapp.dataModel.AwaitPlayerM
 import com.pixel.chatapp.dataModel.SignalPlayerM
@@ -217,7 +217,7 @@ class WhotGameActivity : AppCompatActivity() {
                 progressBar?.visibility = View.VISIBLE
                 yesTV.visibility = View.INVISIBLE
 
-                val gameAPI = K.retrofit.create(GameAPI::class.java)
+                val gameAPI = Ki.retrofit.create(GameAPI::class.java)
                 IdTokenUtil.generateToken({token ->
                     val threeValueM = ThreeValueM(token, hostUid, gameId)
 

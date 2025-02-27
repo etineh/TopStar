@@ -20,7 +20,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.services.api.dao_interface.ContactApiDao;
 import com.pixel.chatapp.services.api.model.incoming.UserSearchM;
 import com.pixel.chatapp.view_controller.MainActivity;
@@ -43,7 +44,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FetchContacts {
+public class ContactUtils {
 
     public static List<ContactModel> contactList = new ArrayList<>();
 
@@ -125,7 +126,7 @@ public class FetchContacts {
 
     private static void readContactFromAPI(List<String> numberList, Context context)
     {
-        ContactApiDao contactApiDao = K.retrofit.create(ContactApiDao.class);
+        ContactApiDao contactApiDao = Ki.retrofit.create(ContactApiDao.class);
 
         contactApiDao.contacts(numberList).enqueue(new Callback<List<UserSearchM>>() {
             @Override
@@ -214,7 +215,7 @@ public class FetchContacts {
                     Collections.sort(sortedSubList, (c1, c2) -> c1.getContactName().compareToIgnoreCase(c2.getContactName()));
 
                     // Save contacts to local file
-                    K.executors.execute(()-> saveContactToLocalFile(context));
+                    Kc.executor.execute(()-> saveContactToLocalFile(context));
                     counter.set(0);
                 }
 

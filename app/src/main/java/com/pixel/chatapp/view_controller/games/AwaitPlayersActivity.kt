@@ -30,7 +30,7 @@ import com.pixel.chatapp.adapters.AwaitPlayerA
 import com.pixel.chatapp.services.api.dao_interface.GameAPI
 import com.pixel.chatapp.services.api.model.incoming.ResultApiM
 import com.pixel.chatapp.services.api.model.outgoing.TwoValueM
-import com.pixel.chatapp.constants.K
+import com.pixel.chatapp.constants.Ki
 import com.pixel.chatapp.view_controller.games.whot.WhotGameActivity
 import com.pixel.chatapp.view_controller.games.whot.WhotLandscapeActivity
 import com.pixel.chatapp.view_controller.games.whot.WhotOptionActivity
@@ -247,7 +247,7 @@ class AwaitPlayersActivity : AppCompatActivity(), AwaitPlayerA.RemovePlayerListe
     private fun affirmJoin(fromRefresh: Boolean? = false){
         IdTokenUtil.generateToken({ token: String? ->
             val twoValueM = TwoValueM(token, hostUid!!)
-            val gameAPI = K.retrofit.create(GameAPI::class.java)
+            val gameAPI = Ki.retrofit.create(GameAPI::class.java)
 
             gameAPI.join(twoValueM).enqueue(object : Callback<ResultApiM> {
                 override fun onResponse(call: Call<ResultApiM>, response: Response<ResultApiM>) {
@@ -532,7 +532,7 @@ class AwaitPlayersActivity : AppCompatActivity(), AwaitPlayerA.RemovePlayerListe
 
         IdTokenUtil.generateToken({token ->
 
-            val gameAPI = K.retrofit.create(GameAPI::class.java)
+            val gameAPI = Ki.retrofit.create(GameAPI::class.java)
 
             val twoValueM = TwoValueM(token, hostUid!!)
 

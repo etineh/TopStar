@@ -1,0 +1,1028 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TopStar</string>
+    <string name="app_name...">TopStar…</string>
+    <string name="fromApp">de, Pixel Planet</string>
+    <string name="pin">PIN</string>
+    <string name="pinChat">Fijar</string>
+    <string name="copied">Copiado</string>
+
+    <string name="playGame">Jugar</string>
+    <string name="viewProfile">Ver perfil</string>
+    <string name="viewDetails">Ver detalles ↓↓</string>
+
+    <string name="markAsRead">Marcar como leído</string>
+
+    <string name="resendFile">Reenviar archivo jefe</string>
+    <string name="askForResend">Foto no encontrada. ¡Pide al usuario que la reenvíe!</string>
+
+    <string name="deleteForOthers">Mensaje(s) eliminado(s) para</string>
+    <string name="deleteForMe">Mensaje(s) eliminado(s) solo para ti.</string>
+    <string name="deleteForEveryone">Mensaje(s) eliminado(s) para todos.</string>
+
+    <string name="unpin">Desanclar</string>
+    <string name="delete">Elim.</string>
+    <string name="forward_">Reenviar</string>
+    <string name="unpinForMe">Desanclar para mí</string>
+    <string name="unpinForEveryone">Desanclar para todos</string>
+    <string name="pinForMe">Anclar solo para mí</string>
+    <string name="pinForEveryone">Anclar para todos</string>
+    <string name="unpin_">(Des)anclar</string>
+
+    <string name="move">Mover</string>
+    <string name="mute">Silenciar</string>
+    <string name="Copy">Copiar</string>
+    <string name="blockAndReport">Bloquear y reportar</string>
+    <string name="lastSeen">En línea</string>
+    <string name="typing">Escribiendo…</string>
+    <string name="clear_chats">Borrar chats</string>
+    <string name="disappear_msg">Configurar mensaje que desaparece</string>
+    <string name="search">Buscar</string>
+    <string name="join_tour">Unirse al torneo</string>
+    <string name="forward">Reenviar a…</string>
+    <string name="selectPlayer">Seleccionar jugador(es)…</string>
+
+    <string name="file">Archivo</string>
+    <string name="hintTitle">Pista</string>
+    <string name="clearPin">Borrar Pines</string>
+    <string name="hint">Pista</string>
+    <string name="hint2">¡Hola! Avísame, juguemos juntos en el juego de transmisión en vivo.</string>
+    <string name="add_message">Agregar mensaje</string>
+    <string name="online">En línea</string>
+    <string name="more">Abrir\ngalería</string>
+    <string name="single">Individual</string>
+    <string name="multiple">Múltiple</string>
+    <string name="send">Enviar</string>
+    <string name="done">Hecho</string>
+    <string name="close">Cerrar</string>
+    <string name="more_">Más</string>
+    <string name="live">En vivo</string>
+    <string name="home">Inicio</string>
+    <string name="unavailable">No disponible</string>
+
+    <string name="confirmMsg_">¿Estás seguro de que quieres eliminar? Los elementos eliminados ya no aparecerán en tus chats.</string>
+    <string name="thumbDelMsg">¿Estás seguro de que quieres eliminar? Esto podría causar una interfaz de usuario irresponsive en los chats anteriores.</string>
+    <string name="cacheDelMsg">No te preocupes, nuestro sistema limpia automáticamente el caché cuando alcanza los 50 MB ~ 100 MB. ¿Aún deseas limpiarlo?</string>
+
+    <string name="localDatabaseMsg">Para evitar la pérdida de tus chats, datos y registros importantes, hemos deshabilitado la eliminación de la base de datos de la aplicación.
+    Puedes hacerlo manualmente desde la configuración de tu teléfono si aún insistes.</string>
+
+    <string name="clear">Limpiar</string>
+    <string name="clearCache">¿Limpiar caché?</string>
+    <string name="clearDatabase">No se puede borrar la base de datos</string>
+
+    <string name="deleteNow">¿Eliminar ahora?</string>
+    <string name="deleteAllThumbNow">¿Eliminar todas las miniaturas?</string>
+    <string name="delete_">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="deleteSuccessful">Elemento(s) eliminado(s)</string>
+    <string name="cacheClear">¡Caché limpiado!</string>
+
+    <!-- Configuración rápida -->
+    <string name="newEmail__">Nuevo correo electrónico *</string>
+    <string name="email__">Correo electrónico *</string>
+    <string name="createPassword__">Crear contraseña de inicio de sesión *</string>
+    <string name="newPassword">Nueva contraseña *</string>
+    <string name="newPin">Nuevo PIN *</string>
+    <string name="oldPin">PIN anterior *</string>
+    <string name="oldPassword">Contraseña anterior *</string>
+    <string name="displayName">Nombre de usuario</string>
+    <string name="username__">Nombre de usuario *</string>
+    <string name="setUp">Configurar</string>
+    <string name="setUpProfile">Configurar perfil</string>
+    <string name="passwordNeed">Por seguridad, esta contraseña será necesaria en tu próximo inicio de sesión.</string>
+    <string name="confirmPassword">Confirmar contraseña *</string>
+
+    <string name="imageUploadError">Error al subir la imagen</string>
+    <string name="profileSetUpSuccess">Perfil configurado con éxito</string>
+
+    <string name="resetPassword">Restablecer contraseña</string>
+    <string name="resetPasswordSent">Restablecimiento de contraseña enviado a tu correo electrónico.</string>
+
+    <string name="loginPage">Ir a la página de inicio de sesión.</string>
+
+    <string name="usernameExist">El nombre de usuario ya existe.</string>
+    <string name="usernameAvailable">El nombre de usuario está disponible.</string>
+    <string name="fieldEmpty">Correo electrónico y contraseña requeridos.</string>
+    <string name="fieldEmpty_">¡Campo vacío!</string>
+    <string name="passwordAbove5">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="passwordDontMatch">Las contraseñas no coinciden.</string>
+    <string name="newEmailRequired">No se puede usar el correo electrónico anterior. Usa uno nuevo…</string>
+
+    <string name="terms">Leer los términos completos de TopStar</string>
+    <string name="logOut">Cerrar sesión</string>
+    <string name="logIn">Iniciar sesión</string>
+    <string name="loginSuccessful">Inicio de sesión exitoso</string>
+    <string name="accountCreated">Cuenta creada con éxito.</string>
+
+    <!-- Tap layout name -->
+    <string name="alert">Alertas</string>
+    <string name="chats">Chats</string>
+    <string name="players">Jugadores</string>
+    <string name="league">Liga</string>
+    <string name="tour">Tour.</string>
+
+    <!-- Side bar -->
+    <string name="wallet">Cartera</string>
+    <string name="walletSecurity">Seguridad de la cartera</string>
+    <string name="gameSecurity">Seguridad de los juegos</string>
+    <string name="walletSub">Activo ~ Retirar ~ Transferir ~ Convertir…</string>
+    <string name="dashboard">Panel de control</string>
+    <string name="dashboardSub">Torneos ~ Rango mundial ~ Próximo juego…</string>
+    <string name="setting">Configuraciones</string>
+    <string name="settingSub">Privacidad ~ Perfil ~ P2P ~ Sonidos ~ Seguridad…</string>
+    <string name="premium">Premium</string>
+    <string name="premiumSub">Tiquete naranja ~ Anfitrión global ~ Más funciones…</string>
+    <string name="advertise">Anunciar</string>
+    <string name="advertiseSub">Publicita y llega a más personas…</string>
+    <string name="invite_friends">Invitar amigos</string>
+    <string name="invite_now">Invitar ahora</string>
+    <string name="you">Tú</string>
+
+    <string name="invite_friendSub">Refiere amigos y gana bonos…</string>
+    <string name="support">Soporte</string>
+    <string name="supportSub">Chat en vivo ~ Contactos ~ Preguntas frecuentes…</string>
+    <string name="language">Idioma +</string>
+
+    <!-- More home -->
+    <string name="hostPlayer">Anfitrionar Jugadores</string>
+    <string name="createLeague">Crear Liga</string>
+    <string name="createComm">Crear Comunidad</string>
+    <string name="buyDate">Comprar Datos</string>
+    <string name="unknown">Desconocido</string>
+
+    <string name="asideRewardFun">¡Además de la recompensa, diviértete!</string>
+    <string name="haveFun">¡Diviértete!</string>
+
+    <!-- Settings bar -->
+    <string name="profileInfo">KYC, cambiar foto, nombre de usuario, nombre de pantalla</string>
+    <string name="privacy">Privacidad</string>
+    <string name="privacyInfo">Última vista, alertas, llamadas, comunicación y bloquear usuario.</string>
+    <string name="sounds">Sonidos</string>
+    <string name="soundsInfo">Alertas, comunidad, llamadas, notificaciones P2P y juego.</string>
+    <string name="storage">Almacenamiento</string>
+    <string name="storageInfo">Medios y Archivos.</string>
+    <string name="security">Seguridad</string>
+    <string name="securityInfo">Cambiar contraseña, PIN y activar/desactivar huella dactilar.</string>
+    <string name="Games">Cuenta</string>
+    <string name="P2PInfo">Configurar cuenta de pago, registrarse como Comerciante P2P.</string>
+
+    <!-- Game strings -->
+    <string name="card">Carta(s)</string>
+    <string name="waiting">Esperando</string>
+    <string name="toJoin">unirse.</string>
+    <string name="quitGameSure">¿Salir del juego?</string>
+    <string name="quitGameForEveryone">¿Salir del juego para todos?</string>
+    <string name="yes_">Sí</string>
+    <string name="quit">Salir</string>
+    <string name="whotGame">Juego de Whot</string>
+    <string name="incoming">Entrante </string>
+    <string name="from">de </string>
+    <string name="silent">Silencio </string>
+    <string name="gameMode">Modo de juego </string>
+    <string name="amountPerPlayer">Monto por jugador (mín. 0.1) </string>
+    <string name="remarkToPlayers">Comentario (opcional) </string>
+    <string name="gameBal">Saldo del juego:  </string>
+    <string name="topUp">Recargar ></string>
+    <string name="notice">Nota: \n1. El monto apostado será deducido de tu cartera y de otros jugadores que se unieron.
+        \n2. Los fondos apostados se moverán a 'Activo Bloqueado'. Esto significa que no podrás acceder a los fondos hasta que termine el juego.
+        \n3. Los fondos totales apostados se acreditarán a la cartera del ganador inmediatamente después de que termine el juego.</string>
+    <string name="onboarding">Incorporando Jugadores </string>
+    <string name="startNow">Comenzar ahora </string>
+    <string name="mode_">Modo: </string>
+    <string name="free">Gratis </string>
+    <string name="stake">Apuesta </string>
+    <string name="gameType">Tipo de juego: </string>
+    <string name="expectedPlayer">Jugadores: </string>
+    <string name="hostRemark">Comentario del anfitrión: </string>
+    <string name="hostBy">Anfitrionado por:  </string>
+    <string name="winnerPrize">Premio del ganador: </string>
+    <string name="awaiting">Esperando… </string>
+    <string name="signalling">Señalando… </string>
+    <string name="joined">Unido</string>
+    <string name="gameDecision"> se transferirá de tu Activo del Juego a tu Activo Bloqueado,
+        donde se mantendrá hasta que el juego termine.</string>
+    <string name="yesJoin">Sí, unirse.</string>
+    <string name="noCancel">No, cancelar.</string>
+    <string name="insufficientBal">Saldo del juego insuficiente. ¡Por favor recarga!</string>
+    <string name="joinHost">Unido ~ Anfitrión</string>
+    <string name="rejected">Rechazado</string>
+    <string name="gameRejected">¡Juego rechazado!</string>
+    <string name="re_add">re-agregar:</string>
+    <string name="playerRemoved">Jugador removido.</string>
+    <string name="estWin">Est. recompensa: </string>
+    <string name="gameAsset_">Activo del juego:</string>
+    <string name="workInProgress">en progreso</string>
+    <string name="toGame">¿al juego?</string>
+    <string name="addPlayer">Agregar jugador</string>
+    <string name="cantRemovePlayer">No puedes remover al jugador aquí</string>
+    <string name="awaitingPlayer">Esperando jugador(es)</string>
+    <string name="awaitingGame">Esperando juego</string>
+    <string name="reAddNotice">Agregar jugador después del conteo de tiempo</string>
+    <string name="startGameWith">Comenzar juego con</string>
+    <string name="players_">jugadores</string>
+    <string name="remove">Remover</string>
+    <string name="hostRemovePlayer">Fuiste removido por el anfitrión</string>
+    <string name="youHaveIncomingGame">Tienes un juego entrante de :</string>
+    <string name="playerAlreadyInGame">El jugador ya está en la lista de juegos</string>
+    <string name="onGoingGameAlready">Ya tienes un juego en curso</string>
+    <string name="allowOneMore">¡Permitir un mínimo de dos (2) jugadores unidos!</string>
+    <string name="finishIncomingGame">Termina el juego activo/entrante primero</string>
+    <string name="refreshed">¡Actualizado!</string>
+    <string name="onGoingGame">Juego en curso >> </string>
+    <string name="hash"> *** 👁</string>
+    <string name="rewardAmount">Recompensa: $23 👁</string>
+    <string name="reward">Recompensa: </string>
+    <string name="watchingNum">👁 25k </string>
+    <string name="quitGame"> Salir del juego >> </string>
+    <string name="gameId"> ID del juego</string>
+    <string name="startingGame"> Iniciando juego…</string>
+    <string name="gameStartsNow"> El juego comienza ahora</string>
+
+    <!--    premium bar    -->
+    <string name="whoCalls">Permitir quién puede llamarte</string>
+    <string name="yes">Sí ✔️</string>
+    <string name="no">No</string>
+    <string name="whoHost">Permitir quién puede hospedarte</string>
+    <string name="whoChat">Permitir quién puede chatear contigo</string>
+    <string name="numberChange">Cambiar número de teléfono</string>
+    <string name="day100">100 días</string>
+    <string name="day50">50 días</string>
+    <string name="anytime">En cualquier momento</string>
+    <string name="global">Global</string>
+    <string name="hostVisibility">Visibilidad del juego anfitrión</string>
+    <string name="gameAdsControl">Control de anuncios del juego</string>
+    <string name="comm_verify">Agregar Marca Naranja a tu Comunidad</string>
+    <string name="hr24_7">24/7</string>
+
+    <string name="monthly">Mensual</string>
+    <string name="annually">Anual</string>
+
+    <string name="anyone">Cualquiera</string>
+    <string name="only">Solo:</string>
+    <string name="kyc_verify">Usuarios verificados KYC</string>
+    <string name="premiumUser">Usuarios Premium</string>
+    <string name="myCommMember">Miembros de mi comunidad</string>
+    <string name="selectThanOne"> PS: Puedes seleccionar más de uno.</string>
+    <string name="myContact"> Mis contactos</string>
+
+    <string name="strike_100"> <strike>$500</strike> </string>
+    <string name="strike_1000"> <strike>$5000</strike> </string>
+    <string name="strike_10"> <strike>$10</strike> </string>
+    <string name="strike_110"> <strike>$110</strike> </string>
+
+    <string name="subscribe_">Suscribirse</string>
+    <string name="premiumVip">Premium + VIP</string>
+    <string name="paid">Pagado</string>
+    <string name="limited">Limitado</string>
+    <string name="orangeTick">Marca Naranja Verificada</string>
+
+    <!--    pin chats    -->
+    <string name="pinBy">Anclado por: </string>
+    <string name="pinAChat">anclar un chat </string>
+    <string name="unPinAChat">desanclar un chat </string>
+    <!--    <string name="you">Tú anclas un chat en privado </string>-->
+    <!--    <string name="youUnpinPrivate">Tú desanclas un chat en privado </string>-->
+    <string name="youPinPublicly">Tú anclas un chat 🌏 </string>
+    <string name="youUnpinPublicly">Tú desanclas un chat 🌏</string>
+
+    <!--    profile side bar    -->
+    <string name="profile">Perfil</string>
+    <string name="display_name">Nombre para mostrar</string>
+    <string name="dash">---</string>
+    <string name="Username">Nombre de usuario</string>
+    <string name="email">Correo electrónico</string>
+    <string name="phoneNumber">Número de teléfono</string>
+    <string name="number">7010000000</string>
+
+    <string name="clickAgain">Haz clic nuevamente</string>
+
+    <string name="photo_">Foto</string>
+    <string name="KYC">Verificación KYC</string>
+    <string name="KYCin">Tus datos están seguros y encriptados.</string>
+    <string name="verifyNow">Verificar ahora</string>
+    <string name="verifyAccount">Verificar cuenta</string>
+    <string name="create_instant">¡Crear cuenta instantánea!</string>
+    <string name="legalName">Nombre legal</string>
+    <string name="usedForP2p">Esto se utiliza para tu comercio P2P una vez que estés verificado (KYC).</string>
+    <string name="oneMinute">(proceso de 1 minuto)</string>
+    <string name="welcomeBack">Bienvenido de nuevo</string>
+    <string name="privacyValue">¡Valoramos tu privacidad!</string>
+    <string name="app_slang">¡Chatear, jugar y ganar!</string>
+    <string name="resetLogin">Restablecer detalles de inicio de sesión</string>
+
+    <string name="numberInfo">Por privacidad, tu número se oculta automáticamente de los no contactos. Puedes optar por hacerlo público a través de la configuración después de iniciar sesión. ¡Valoramos tu privacidad 😊!</string>
+
+    <!--    sounds and notification -->
+    <string name="controlNotify">¡Controla tus notificaciones!</string>
+    <string name="phoneSetting">Configuraciones del teléfono (predeterminado)</string>
+    <string name="vibrate">Solo vibrar</string>
+    <string name="appRingtone">Tono de la aplicación</string>
+    <string name="ringtone">Tono del teléfono</string>
+    <string name="privateAlert">Alertas privadas (chats)</string>
+    <string name="privateAlert__">Alertas privadas</string>
+
+    <string name="notePrvAlert">Establece el sonido que desees cuando un usuario te alerte/chat</string>
+    <string name="noteSocieties">Establece el sonido que desees cuando llegue un mensaje de la comunidad</string>
+    <string name="noteTeam">Establece el sonido que desees cuando recibas un mensaje de tu equipo</string>
+    <string name="noteCalls__">Establece el sonido que desees al recibir una llamada de alguien</string>
+    <string name="noteTrading">Establece el sonido que desees al recibir una llamada de recordatorio de comercio P2P</string>
+    <string name="noteGame">Establece el sonido que desees al jugar</string>
+    <string name="noteMSG">Establece el sonido que desees para un nuevo mensaje general</string>
+
+    <string name="noteNewMsg">Alertas privadas</string>
+
+    <string name="newMessage">nuevo mensaje</string>
+    <string name="p2pTradeCall">Llamadas de comercio P2P</string>
+    <string name="chatEmpty">El chat está vacío… </string>
+
+    <!--    privacy -->
+    <string name="lastSeen_">Última vez visto y en línea</string>
+    <string name="everyone">Todos</string>
+    <string name="nobody">Nadie</string>
+    <string name="contactExcept">Mis contactos excepto…</string>
+    <string name="nobodyExcept">Nadie excepto…</string>
+    <string name="onlyContact">Mis contactos</string>
+    <string name="profilePhoto">Foto de perfil</string>
+    <string name="blockContact">Bloquear contacto(s)</string>
+    <string name="societies">Comunidades</string>
+    <string name="readAlert">Recibo de alertas leídas</string>
+    <string name="calls">Llamadas</string>
+    <string name="none">Ninguno</string>
+    <string name="alertChat">Alertas (chats)</string>
+    <string name="alertCalls">Alertas de llamadas</string>
+
+    <string name="unlessPremiumLastSeen">No podrás ver la última vez que otros usuarios estuvieron en línea si lo estableces en "nadie", a menos que seas un usuario Premium.</string>
+    <string name="unlessPremiumReadReceipt">No sabrás cuándo otros usuarios leyeron tu alerta (chats) si desactivas el recibo de lectura, a menos que seas un usuario Premium.</string>
+
+    <string name="goPremium">Ir Premium >></string>
+
+    <string name="noteLastSeen">Quién puede ver mi última vez visto y en línea</string>
+    <string name="noteLastPhoto">Quién puede ver mi foto de perfil</string>
+    <string name="noteHint">Quién puede ver mi pista</string>
+    <string name="noteNumber">Quién puede ver y encontrar mi número</string>
+    <string name="noteSociety">Quién puede agregarme a la comunidad</string>
+    <string name="noteAlertReceipt">Notificar a los usuarios cuando lea su alerta (chat)</string>
+    <string name="whoCanAlert">Quién puede alertarme (chatear) >> todos</string>
+    <string name="whoCanHost">Quién puede alojarme >> todos</string>
+    <string name="whoCanCall">Quién puede llamarme >> todos</string>
+    <string name="noteAlertChat">¡Hola Premium 😊! \nControla quién puede alertarte/chatear contigo</string>
+    <string name="noteGames">¡Hola Premium 😊! \nControla quién puede alojar juegos contigo</string>
+    <string name="noteCalls">¡Hola Premium 😊! \nControla quién puede llamarte</string>
+    <string name="noteDisappear_msg">Eliminar automáticamente alertas (chats) después de: </string>
+
+    <string name="walletSec">¿Cómo deseas abrir tu billetera?</string>
+    <string name="gameSec">¿Cómo deseas comenzar tu juego?</string>
+    <string name="usdtSec">¿Cómo deseas aprobar tu retiro de USDT?</string>
+    <string name="p2pSec">¿Cómo deseas aprobar tu retiro de P2P?</string>
+    <string name="fingerprint">Huella dactilar</string>
+    <string name="fingerprintDefault">Huella dactilar (predeterminado)</string>
+    <string name="pinDefault">PIN (predeterminado)</string>
+    <string name="emailOTP">OTP por correo electrónico</string>
+    <string name="fingerprint_pin">Huella dactilar y PIN</string>
+    <string name="fingerprint_email">Huella dactilar y OTP por correo electrónico</string>
+    <string name="pin_email">PIN y OTP por correo electrónico</string>
+
+    <string name="privateNumber">Privado (mis contactos)</string>
+    <string name="publicNumber">Público (todos)</string>
+
+    <string name="off">Desactivado</string>
+    <string name="on">Activado</string>
+
+    <string name="hour24">24 horas</string>
+    <string name="hour90">3 días</string>
+    <string name="hour180">7 días</string>
+
+    <!--    soporte    -->
+    <string name="liveSupport">Iniciar chat en vivo</string>
+    <string name="contact_ddress">Dirección de contacto</string>
+    <string name="addres">9 Mutungo Parish, Kampala 24624, Uganda. \nsupport@topstar.com.ng \nwww.topstar.com.ng</string>
+    <string name="q_a">Preguntas y respuestas</string>
+    <string name="previous_chats">Chats anteriores</string>
+
+    <string name="today">Hoy</string>
+    <string name="yesterday">Ayer</string>
+    <string name="day1ago">hace 1 día</string>
+    <string name="dayAgo">hace 1 día</string>
+    <string name="daysAgo">hace %d días</string>
+    <string name="weeksAgo">hace %d semanas</string>
+    <string name="monthAgo">hace un mes</string>
+    <string name="monthsAgo">hace %d meses</string>
+
+    <string name="seen_today">Visto: Hoy, %1$s.</string>
+    <string name="seen_yesterday">Visto: Ayer, %1$s.</string>
+    <string name="seen_days_ago">Visto: hace %1$d días, %2$s.</string>
+    <string name="seen_last_week">Visto: La semana pasada.</string>
+    <string name="seen_last_2_weeks">Visto: Las últimas 2 semanas.</string>
+    <string name="seen_last_3_weeks">Visto: Las últimas 3 semanas.</string>
+    <string name="seen_a_month_ago">Visto: Hace un mes.</string>
+    <string name="seen_on_date">Visto: %1$s.</string>
+
+    <string name="created">Creado: </string>
+    <string name="watch">Ver </string>
+    <string name="open">Abrir </string>
+    <string name="view">Ver </string>
+
+    <!--    almacenamiento    -->
+    <string name="total">Total >> </string>
+    <string name="localDb">Base de datos local</string>
+    <string name="cache">Caché</string>
+    <string name="others">Otros</string>
+    <string name="items">elementos</string>
+
+    <string name="photos">Fotos</string>
+    <string name="audio_">Audio</string>
+    <string name="videos">Videos</string>
+    <string name="audioCap">Audio</string>
+    <string name="voice_note">Notas de voz</string>
+    <string name="documents">Documentos</string>
+    <string name="thumbnail">Miniaturas</string>
+    <string name="photoCap">Foto</string>
+    <string name="videoCap">Video</string>
+
+    <string name="downloadFails">Error al descargar la imagen</string>
+    <string name="sharePhotoFails">Error al compartir la imagen</string>
+    <string name="preparingPhoto">Preparando foto</string>
+
+    <string name="appInvite">¡Hola! Te invito a unirte a TopStar, una aplicación donde podemos chatear, jugar varios juegos multijugador en vivo y ganar recompensas juntos.\nwww.topstar.com.ng</string>
+
+    <string name="chatClearForMe">¡Chats eliminados para mí!</string>
+    <string name="chatClearForEveryone">¡Chats eliminados para todos!</string>
+
+    <string name="p2pTrans">Transacciones P2P</string>
+    <string name="usdtTrans">Transacciones USDT</string>
+    <string name="games_">Juegos</string>
+    <string name="changePassword">Cambiar contraseña</string>
+    <string name="changePin">Cambiar PIN</string>
+
+    <string name="protect_your_account">¡Protege tu cuenta!</string>
+
+    <!--    tablero    -->
+    <string name="upcoming_match">Próximo juego unido</string>
+    <string name="myHost">Mi anfitrión / torneos</string>
+    <string name="gameRank">Rango de juego (multijugador)</string>
+    <string name="totalPlay">Jugar: </string>
+    <string name="win">Ganar: </string>
+    <string name="loss">Perder: </string>
+    <string name="worldRank">Rango mundial</string>
+    <string name="poker">Póker</string>
+    <string name="whot">Whot</string>
+    <string name="chess">Ajedrez</string>
+    <string name="scrabble">Scrabble</string>
+
+    <!--    llamadas -->
+    <string name="videoCall">Llamada de video de</string>
+    <string name="audioCall">Llamada de audio de</string>
+    <string name="video_call">Llamada de video</string>
+    <string name="audio_call">Llamada de audio</string>
+    <string name="video_callCap">Llamada de video</string>
+    <string name="audio_callCap">Llamada de audio</string>
+    <string name="accept">Aceptar</string>
+    <string name="reject">Rechazar</string>
+    <string name="initialising">inicializando</string>
+    <string name="ringing">sonando…</string>
+    <string name="busy">ocupado</string>
+    <string name="pairing">emparejando…</string>
+    <string name="notAvailable">Usuario no disponible</string>
+    <string name="onAnotherCall">Usuario en otra llamada</string>
+    <string name="callEnd">Llamada finalizada</string>
+    <string name="notPicking">Usuario no responde</string>
+    <string name="userBusy">Usuario ocupado</string>
+    <string name="returnToCall">Regresar a la llamada</string>
+    <string name="waitForUser">Esperando a que el otro usuario se una</string>
+    <string name="anotherUserIsCalling">está intentando llamarte</string>
+    <string name="requestForVideoCall">está solicitando una llamada de video</string>
+    <string name="rejectVideoCall">rechazar llamada de video</string>
+    <string name="switchToVideo">Primero cambia al modo de llamada de video</string>
+    <string name="incomingCall">Llamada entrante</string>
+    <string name="incomingGame">Juego entrante</string>
+    <string name="incomingAudioCall">Llamada de audio entrante</string>
+    <string name="incomingVideoCall">Llamada de video entrante</string>
+    <string name="ongoingCall">En curso</string>
+    <string name="noResponse">Sin respuesta</string>
+    <string name="end">Finalizar</string>
+    <string name="missed">Perdida</string>
+
+    <string name="page">páginas</string>
+    <string name="video">video</string>
+    <string name="photo">foto</string>
+    <string name="sending">Enviando…</string>
+
+    <string name="subscribe">Suscríbete a Premium para disfrutar de características avanzadas</string>
+    <string name="isNetwork">Sin conectividad de red</string>
+    <string name="errorOccur">Ocurrió un error.</string>
+    <string name="serverError">Error del servidor.</string>
+    <string name="invalidDetails">Detalles incorrectos.</string>
+    <string name="noInternetConnection">Sin conexión a Internet 😔</string>
+    <string name="scrollUpForPin">¡Desplázate hacia arriba para más chats fijados!</string>
+    <string name="checkInternet">Verifica la conexión a Internet 😔</string>
+
+    <string name="errorWithOtp">Error con el código. Vuelve a enviar.</string>
+    <string name="timeout">tiempo de espera</string>
+    <string name="timeoutResendOtp">Tiempo de espera, vuelve a enviar el código.</string>
+
+    <string name="emailExist">"El correo electrónico ya existe"</string>
+    <string name="corrupt">Archivo corrupto o mala red</string>
+    <string name="notSentYet">Archivo aún no enviado.</string>
+    <string name="resend">Eliminar y volver a enviar 🙌</string>
+    <string name="empty">No se puede enviar un archivo vacío 🙌</string>
+    <string name="notFound">archivo no encontrado…</string>
+    <string name="dCancel">Descarga cancelada</string>
+    <string name="userNotFound">usuario no encontrado</string>
+    <string name="no_player_found">No se encontró ningún jugador. Sal y reinicia el juego</string>
+
+    <string name="downloadFirst">Descargar primero.</string>
+    <string name="chatNotFound">chat no encontrado…</string>
+
+    <string name="fileNotExist">El archivo no existe.</string>
+    <string name="invalidPhoto">Imagen no válida.</string>
+    <string name="failToSaveFile">Error al guardar el archivo.</string>
+    <string name="savedToGallery">¡Guardado en la galería!</string>
+    <string name="failToSharePhoto">Error al compartir la foto</string>
+    <string name="unsupportedFile">archivo no soportado</string>
+
+    <string name="permission">Ve a configuración y concede permiso de almacenamiento/cámara</string>
+    <string name="permissionCall">Ve a configuración y concede permiso de cámara | grabación</string>
+    <string name="tooManyAttempt">Demasiados intentos. ¡Inténtalo de nuevo más tarde!</string>
+    <string name="accountDisable">El acceso a esta cuenta ha sido temporalmente deshabilitado debido a muchos intentos fallidos de contraseña. Intenta nuevamente en una hora.</string>
+
+    <string name="meet">Conocer</string>
+    <string name="gift">Regalo</string>
+    <string name="host">Anfitrión</string>
+
+    <string name="edit">Editar</string>
+    <string name="share">Compartir</string>
+    <string name="report">Reportar</string>
+    <string name="openInChat">Abrir en chat</string>
+    <string name="saveToGallery">Guardar en galería</string>
+    <string name="react">Reaccionar 😀</string>
+
+    <string name="reply">Responder</string>
+
+    <string name="gallery">Galería</string>
+    <string name="document">Documento</string>
+    <string name="audio">Audio</string>
+    <string name="contact">Contacto</string>
+    <string name="game">Juego</string>
+    <string name="games">Juegos</string>
+
+    <string name="connect">conectando…</string>
+
+    <string name="newMsg">Nuevo</string>
+
+    <!--    // eliminar historial de chat y eliminar usuario-->
+    <string name="clear_for_me">Eliminar solo para mí</string>
+    <string name="clear_for_everyone">Eliminar para todos</string>
+    <string name="delete_for_me">Eliminar solo para mí</string>
+    <string name="delete_for_everyone">Eliminar para todos</string>
+    <string name="clear_history">[Eliminar historial de chats]</string>
+
+    <!--    otros-->
+    <string name="reset">Restablecer</string>
+
+    <!--    crear nuevo pin-->
+    <string name="createPin">Crear PIN</string>
+    <string name="createIn5sec">Crear nuevo PIN en 10 segundos</string>
+    <string name="enterNewPin">Introduce un nuevo PIN de 4 dígitos</string>
+    <string name="confirmPin">Confirmar PIN</string>
+    <string name="confirmPin_">Confirmar PIN *</string>
+    <string name="createPinInfo">1. Al completar el PIN, si el dispositivo admite huellas digitales (biométrico), se habilitará automáticamente. \n2. Esto es para permitirte acceder a tu billetera rápidamente y también evitar que otras partes vean tu PIN al escribirlo.\n3. Si no necesitas la huella digital, puedes deshabilitarla a través de la configuración de la app para continuar usando solo el PIN.\n4. El equipo de TopStar nunca te pedirá tu PIN. Nunca reveles tu PIN a nadie. ¡Protege tus fondos! \n\n\n\n\n</string>
+    <string name="iUnderstand">He leído y aceptado los términos a continuación.</string>
+    <string name="fingerprintTerms">Términos sobre PIN y huella digital</string>
+    <string name="pin_usage">Este PIN se utiliza para abrir tu billetera y procesar transacciones solamente. Por lo tanto, debe ser diferente de tu contraseña de inicio de sesión.</string>
+
+    <!--    //  billetera-->
+    <string name="myAssets">Mis Activos</string>
+    <string name="create">Crear</string>
+    <string name="totalAsset">Activo Total</string>
+    <string name="totalGameAsset">Activo Total del Juego</string>
+    <string name="totalLocalAsset">Activo Local Total</string>
+    <string name="totalUSDTAsset">Activo Total en USDT</string>
+    <string name="totalBonusAsset">Activo Total de Bonos/Airdrop</string>
+    <string name="totalMerchantAsset">Activo Total de Comerciantes P2P</string>
+    <string name="totalLockAsset">Activo Total Bloqueado</string>
+
+    <string name="localAsset">Activo Local</string>
+    <string name="usdtAsset">Activo USDT</string>
+    <string name="gameAsset">Activo del Juego</string>
+    <string name="p2pMerchant">Comerciante P2P</string>
+    <string name="bonusAsset">Bonos/Airdrop</string>
+    <string name="lockAsset">Activo Bloqueado</string>
+
+    <string name="uniCountryCurrencySymbol">₦ 250,000.00</string>
+    <string name="uniCountryCurrencySymbol_">＄ 20.00</string>
+    <string name="transfer">Transferir</string>
+    <string name="deposit">Depositar</string>
+    <string name="withdraw">Retirar</string>
+    <string name="convert">Convertir</string>
+    <string name="viewAll">Ver todo</string>
+    <string name="p2p">P2P</string>
+    <string name="pinInfo">Nunca reveles tu PIN/contraseña a nadie, ni a nadie que afirme ser soporte de atención al cliente de TopStar. Nunca te pediremos los detalles de tu PIN. ¡Protege tus fondos por todos los medios!</string>
+    <string name="withdrawVia">Retirar a través de:</string>
+    <string name="depositVia">Depositar a través de:</string>
+    <string name="usdt">USDT (Red Cripto)</string>
+    <string name="peer2peer">Peer-To-Peer (P2P)</string>
+    <string name="peerTopeer">Peer-To-Peer</string>
+    <string name="becomeP2PMerchant">Conviértete en Comerciante P2P.</string>
+    <string name="addAccount">Agregar Cuenta de Pago.</string>
+    <string name="requirement">Requisitos</string>
+    <string name="number_email_ver">1. Verificación de número de teléfono y correo electrónico.</string>
+    <string name="KYCAndAddress">2. Verificación de KYC y dirección.</string>
+    <string name="minAmount">3. Mínimo de $500 (o su equivalente en tu moneda local) en tu cuenta de comercio P2P.</string>
+    <string name="add">Agregar</string>
+    <string name="paymentInfo">Agrega una cuenta bancaria a la que deseas recibir el pago. Recomendamos bancos con buena red para transacciones fluidas entre pares.</string>
+    <string name="apply">Aplicar</string>
+
+    <string name="usdtDepositInfo">Recibe fondos a través de tu dirección USDT al instante</string>
+    <string name="p2pDepositInfo">Interactúa con un usuario verificado de TopStar para financiar tu billetera a través de una transacción bancaria</string>
+    <string name="p2pWithdrawInfo">Retira directamente a tu cuenta bancaria a través de P2P</string>
+    <string name="usdtWithdrawInfo">Retira fondos directamente a cualquier dirección USDT</string>
+    <string name="searchUser">correo electrónico / número de teléfono / nombre de usuario</string>
+    <string name="transferringto">Transfiriendo a:</string>
+    <string name="enterAmount">Ingresa la cantidad</string>
+    <!--    <string name="searchAmount">Buscar cantidad</string>-->
+    <string name="enterPin">Ingresa el PIN de 4 dígitos</string>
+    <string name="enterPassword">Ingresa la contraseña de inicio de sesión</string>
+    <string name="password">Contraseña</string>
+    <string name="signup">Registrarse</string>
+    <string name="linkNumber">Vincular Número</string>
+    <string name="link">Vincular</string>
+    <string name="link_info">Vincula tu número de teléfono para disfrutar de funciones avanzadas sin problemas</string>
+    <string name="linkPhoneNumber">¡Vincula tu número de teléfono!</string>
+    <string name="account_name">Nombre de Cuenta:</string>
+
+    <string name="changeDisplayName">Cambiar Nombre de Pantalla</string>
+    <string name="changeHint">Cambiar Sugerencia</string>
+    <string name="hintInfo">Sé preciso</string>
+    <string name="changeUserName">Cambiar Nombre de Usuario</string>
+    <string name="changeEmail">Cambiar Dirección de Correo Electrónico</string>
+    <string name="changePhoneNumber">Cambiar Número de Teléfono</string>
+    <string name="change">Cambiar</string>
+
+    <string name="alreadyHaveAccount">Ya tengo una cuenta…</string>
+
+    <string name="newUsername">Nuevo nombre de usuario</string>
+    <string name="newDisplayName">Nuevo nombre de pantalla</string>
+    <string name="newEmail">Nuevo correo electrónico</string>
+    <string name="newPhoneNumber">Nuevo número de teléfono</string>
+    <string name="save">Guardar</string>
+    <string name="saved">Guardado</string>
+    <string name="photoSaved">Foto guardada</string>
+    <string name="enterOTPEmail">Ingresa el código enviado a la nueva dirección de correo electrónico</string>
+    <string name="enterOTPNumber">Ingresa el código enviado al nuevo número de teléfono</string>
+    <string name="resend_">Reenviar</string>
+    <string name="phoneNumberUpdated">Número de teléfono actualizado con éxito</string>
+    <string name="emailNumberUpdated">Dirección de correo electrónico actualizada con éxito</string>
+    <string name="verifyEmail">Verificar Dirección de Correo Electrónico</string>
+    <string name="verifyPhoneNumber">Verificar Número de Teléfono</string>
+    <string name="verify">Verificar</string>
+    <string name="loginReset">Restablecido con éxito.</string>
+
+    <string name="otpSentEmail">Código enviado al correo electrónico</string>
+    <string name="waitForTime">Espera a que transcurra el tiempo</string>
+    <string name="phoneNumberExist">No puedes usar el mismo número.</string>
+    <string name="phoneNumberExist__">El número de teléfono ya existe</string>
+
+    <string name="uploadPhoto">Subir Foto</string>
+
+    <string name="displayNameError">El nombre de pantalla debe ser mayor a cuatro (4)</string>
+    <string name="fieldInputError">El campo debe ser mayor a cuatro (4)</string>
+
+    <string name="userNameError">El nombre de usuario debe ser mayor a tres (3) caracteres</string>
+    <string name="phoneError">Número de teléfono no válido</string>
+    <string name="emailError">Correo electrónico no válido</string>
+    <string name="invalidOTP">Código de verificación no válido</string>
+    <string name="invalidPassword">Contraseña no válida</string>
+    <string name="invalidUsername">Nombre de usuario no válido</string>
+
+    <string name="smsCodeExpired">El código SMS ha expirado</string>
+    <string name="numberExist">El número de teléfono ya existe.</string>
+    <string name="userExist">El usuario ya existe. ¡Inicia sesión!</string>
+
+    <string name="anotherUserNumber">Otro usuario ya está utilizando este número.</string>
+
+    <string name="sendOTP">Enviar Código</string>
+    <string name="enterOTP">Ingresa el Código</string>
+    <string name="pressAgain">Presiona nuevamente para cerrar</string>
+    <string name="inProgress">En progreso</string>
+
+    <string name="sendingOtp">Enviando Código…</string>
+    <string name="otpSent">Código enviado con éxito</string>
+
+    <string name="entryFee">Tarifa de entrada: </string>
+    <string name="rewardPool">Fondo de recompensas: </string>
+    <string name="game_">Juego: </string>
+
+    <string name="transfer_from">Transferir desde:</string>
+    <string name="withdraw_from">Retirar desde:</string>
+    <string name="convert_from">Convertir desde:</string>
+    <string name="available_balance">Saldo disponible:</string>
+    <string name="to">A:</string>
+    <string name="to_">a</string>
+    <string name="proceed">Proceder</string>
+    <string name="convertForUser">El usuario recibirá: </string>
+    <string name="convertForAddress">La dirección recibirá: </string>
+    <string name="convertForAsset">La dirección recibirá: </string>
+    <string name="convertForLocalAsset">El activo local recibirá: </string>
+    <string name="convertForUSDTAsset">El activo USDT recibirá: </string>
+    <string name="convertForGameAsset">El activo del juego recibirá: </string>
+    <string name="convertForBonus">El activo de bonificación recibirá: </string>
+    <string name="USDT_Deposit">Depósito USDT</string>
+
+    <string name="zeroFee">¡Cero (0) comisiones! 😍</string>
+    <string name="withdrawWithCaution">Asegúrate de que todos los detalles sean correctos</string>
+    <string name="note">Nota: al transferir fondos de tu moneda local a un usuario internacional, se convertirá y se enviará como "USDT".</string>
+    <string name="incorrectPin">PIN incorrecto</string>
+    <string name="date">Fecha: </string>
+    <string name="start_date">Fecha de Inicio: </string>
+    <string name="starts">Inicia: </string>
+    <string name="time">Hora: </string>
+    <string name="fee">Comisión: </string>
+    <string name="amount">Cantidad: </string>
+    <string name="transactionSuccessful">Transacción Exitosa</string>
+    <string name="receiver">Receptor: </string>
+    <string name="sender">Remitente: </string>
+    <string name="back">Atrás </string>
+    <string name="history">Historial </string>
+    <string name="transaction_ID">ID de Transacción: </string>
+    <string name="transactionType">Tipo de Transacción: </string>
+    <string name="address">Dirección USDT</string>
+    <string name="enterUsdtAddress">Ingresa la dirección USDT correcta </string>
+    <string name="network">Red </string>
+    <string name="choseNetwork">Selecciona la red USDT </string>
+    <string name="usdtMin"> Mínimo de retiro 10 USDT </string>
+    <string name="localMin">Ingresa la cantidad </string>
+    <string name="tron">Tron (TRC20) </string>
+    <string name="bep20">Cadena Inteligente BNB (Bep20)</string>
+    <string name="minBep20"> Mínimo de depósito 5 USDT </string>
+    <string name="minTron20"> Mínimo de depósito 7 USDT </string>
+    <string name="estArrivalTron20"> Tiempo estimado de llegada: 3 minutos </string>
+    <string name="estArrivalBep20"> Tiempo estimado de llegada: 5 minutos </string>
+    <string name="networkCaution"> Por favor, elige la red correcta para la dirección proporcionada. No podemos recuperar fondos enviados a una red equivocada. </string>
+    <string name="lessAmount"> Si envías menos de la cantidad mínima, se perderán los fondos. </string>
+    <string name="usdtDeposit"> Dirección de Depósito USDT </string>
+    <string name="copyAddress"> Copiar Dirección </string>
+    <string name="networkCaution2"> Por favor, envía a la red exacta que seleccionaste. No podemos recuperar fondos enviados a una red equivocada. </string>
+    <string name="assetSwitch"> Activo cambiado </string>
+    <string name="convertSuccessfully"> Activo convertido con éxito </string>
+    <string name="received">Recibido </string>
+
+
+
+    <string name="or">O</string>
+
+    <string name="gameRewardHistory">Historial de recompensas del juego</string>
+    <string name="bonusRewardHistory">Historial de bonificaciones/airdrops</string>
+    <string name="USDTHistory">Historial de USDT</string>
+    <string name="localAssetHistory">Historial de activos locales</string>
+    <string name="merchantRewardHistory">Historial de bonificaciones/airdrops</string>
+
+    <string name="winPoker">Gané el juego de póker contra</string>
+    <string name="losePoker">Perdí el juego de póker contra</string>
+    <string name="winWhot">Gané el juego de Whot contra</string>
+    <string name="loseWhot">Perdí el juego de Whot contra</string>
+
+    <string-array name="dropdown_networks">
+        <item>Elegir red</item>
+        <item>BSc (BEP20) ~ $0.4 de tarifa</item>
+        <item>Tron (TRC20) ~ $1.4 de tarifa</item>
+    </string-array>
+
+    <string-array name="convertAssets_List">
+        <item>Activo local</item>
+        <item>Activo USDT</item>
+        <item>Recompensas del juego</item>
+        <item>Bonificación/sorteo</item>
+    </string-array>
+
+    <string name="order">orden(es)</string>
+    <string name="pay_speed">Velocidad de pago:</string>
+    <string name="buy">Comprar</string>
+    <string name="buyMood">Comprar Mood</string>
+    <string name="sellMood">Vender Mood</string>
+    <string name="sell">Vender</string>
+    <string name="p2pExc">Comercio P2P</string>
+    <string name="pendingOrder">orden pendiente</string>
+    <string name="searchAmount">Buscar cantidad</string>
+    <string name="traderFee">Tarifa del comerciante:</string>
+    <string name="feeCharge">Si el comerciante te cobra más allá de su tarifa declarada, infórmalo de inmediato.</string>
+    <string name="receive_amount">Se me acreditará:</string>
+    <string name="receive_amount_seller">Recibiré:</string>
+    <string name="chooseTraderAccount">Elegir cuenta comercial</string>
+    <string name="chooseMyAccount">Pagar a mi:</string>
+
+    <string name="acceptTerms">El incumplimiento de los términos de TopStar y la observación del comerciante a continuación puede resultar en pérdidas. Haz clic para aceptar.</string>
+    <string name="tsInfo">Términos de TopStar:</string>
+    <string name="topStarInfo">Si el pago no se realiza en la cuenta del comerciante dentro de los 20 minutos posteriores a tu proceder, la orden se cancelará automáticamente.</string>
+    <string name="topStarInfo2">1. Si no liberas los fondos después de recibir el pago del comerciante, el sistema se comunicará contigo primero. Y
+si no respondes dentro de las 6 horas posteriores a la comunicación, el sistema liberará automáticamente los fondos al comerciante. ¡Mantente activo!
+    \n2. En caso de un problema de red, asegúrate de informarlo al comerciante.
+\n3. Si el comerciante presenta un informe contra ti sobre el pago completo con evidencia, y tú afirmas no haber recibido el pago, el Soporte de TopStar verificado
+se comunicará contigo para obtener evidencia o extracto bancario, y si no respondes dentro de las 6 horas, los fondos se liberarán automáticamente.
+\n4. Si hay respuesta de tu parte dentro del marco de tiempo de 6 horas, tus fondos permanecerán intactos pero bloqueados, hasta que se lleven a cabo y resuelvan todas las verificaciones y
+pruebas de evidencia entre tú y el comerciante por parte del equipo de TopStar.\n\n</string>
+    <string name="trade_remark">Observación del comerciante:</string>
+    <string name="all">Todo</string>
+    <string name="range">Rango:</string>
+    <string name="termNotAccepted">Acepta los términos primero</string>
+    <string name="alertTrader">Alertar comerciante</string>
+    <string name="order_ID">ID de orden:</string>
+    <string name="order_time">Hora de la orden:</string>
+    <string name="name">Nombre:</string>
+    <string name="account_number">Número de cuenta:</string>
+    <string name="bank_name">Nombre del banco:</string>
+    <string name="bank_nameMore">Banco / MFB / Dinero móvil:</string>
+    <string name="selectBank">Seleccionar bancos</string>
+    <string name="selected">Seleccionado</string>
+    <string name="selectedSL"> seleccionado</string>
+    <string name="branch">Sucursal (opcional)</string>
+
+    <string name="tpInfo">El activo del comerciante para la cantidad de la orden ha sido bloqueado. ¡Puedes proceder con el pago dentro del marco de tiempo anterior!</string>
+    <string name="tpInfo2">Si el nombre real del comerciante anterior no coincide con el nombre del pago, no liberes los fondos aún hasta que te hayas comunicado
+con el Soporte de TopStar. ¡Protege tu cuenta!</string>
+
+    <string name="cancel_order">Cancelar orden</string>
+    <string name="completed">Completado</string>
+    <string name="iHavePaid">He pagado</string>
+    <string name="releaseNow">Liberar ahora</string>
+    <string name="wait">¡Espera!</string>
+    <string name="order_cancel"> Orden cancelada.</string>
+    <string name="trade_smoothly">¡Comercia sin problemas!</string>
+
+    <string name="tick_box">Marca la casilla si has confirmado el pago.</string>
+    <string name="tick_box_fingerprint">Marca la casilla si has leído y aceptado los términos.</string>
+
+    <string name="pin_4">El PIN debe ser de 4 dígitos</string>
+    <string name="pin_create">PIN creado con éxito</string>
+    <string name="pin_not_match">El PIN no coincide.</string>
+    <string name="open_walletVia">Abrir billetera a través de:</string>
+
+    <string name="hide_pin">Por favor, oculta tu PIN de todos.</string>
+
+    <string name="orderCompleted"> ¡Orden completada!</string>
+
+    <string name="giveReview">¡Dar reseña al comerciante!</string>
+    <string name="verifying">Verificando…</string>
+
+    <string name="timeWarning">Tiempo restante para tu pago:</string>
+    <string name="creditTimeLeft">Espera el pago del comerciante dentro de:</string>
+    <string name="creditInfo">Asegúrate de haber recibido los fondos en tu cuenta bancaria o billetera antes de hacer clic en "Liberar ahora".</string>
+
+    <string name="infoWarning">Si no haces clic en el botón "He pagado" antes de que se acabe el tiempo, el sistema cerrará automáticamente la orden.
+Asegúrate de completar el pago dentro del tiempo antes de hacer clic en el botón "He pagado".</string>
+
+    <string name="payCompleted">Esperando que el comerciante libere los fondos en:</string>
+    <string name="payCation">Se ha enviado una solicitud al comerciante para verificar tu pago.
+Si el comerciante no libera los fondos dentro del tiempo, notifícale. ¡Si no responde, haz un informe!</string>
+
+    <string name="payTo">Transfiere amablemente 50,000 NGN a:</string>
+    <string name="youPaidTo">Has transferido 50,000 NGN a:</string>
+    <string name="awaitingTrader">Ndifreke Sunday enviará 50,000 NGN a tu:</string>
+    <string name="invalidAmount">Cantidad inválida</string>
+
+    <string name="forgetPin">¿Olvidaste el PIN?</string>
+    <string name="forgetPassword">¿Olvidaste la contraseña?</string>
+    <string name="passwordInfo">Esto es diferente de tu PIN de transacción.</string>
+
+    <string name="play">Jugar</string>
+    <string name="filter">Filtrar</string>
+    <string name="sort">Ordenar</string>
+    <string name="amount_icon">Cantidad ↓↓</string>
+    <string name="sort_icon">Ordenar ↓↓</string>
+    <string name="filterBy">Filtrar por</string>
+    <string name="sortBy">Ordenar por</string>
+    <string name="freeMode">Modo gratuito</string>
+    <string name="stakeMode">Modo de apuesta</string>
+    <string name="orangeTickPlayer">Jugadores con tick naranja</string>
+    <string name="allPlayers">Todos los jugadores</string>
+    <string name="lowAmount">Cantidad de apuesta más baja</string>
+    <string name="highAmount">Cantidad de apuesta más alta</string>
+    <string name="mostRecent">Más reciente (hora)</string>
+    <string name="stakeAmount">Cantidad de apuesta</string>
+    <string name="mode">Modo</string>
+    <string name="watchLive">Ver juegos</string>
+    <string name="watching">viendo</string>
+    <string name="searchTitle">Buscar título de liga</string>
+    <string name="grandPrize">Gran premio:</string>
+
+    <string name="register">Registrarse</string>
+
+    <string name="confirmPayment">Por favor, confirma el pago primero.</string>
+    <string name="confirm_Withd_Trans">Por favor, asegúrate de que todos los detalles sean correctos antes de ingresar el PIN.</string>
+
+    <string name="iAcknowledge">Reconozco que he enviado la cantidad exacta al comerciante.</string>
+    <string name="iAcknowledge2">Reconozco que he revisado mi cuenta bancaria o e-wallet y confirmado que el comerciante/pagador ha realizado el pago completo a mi cuenta.</string>
+    <string name="iAcknowledge3">Reconozco que el nombre legal del comerciante/pagador que se muestra en la aplicación P2P TopStar es el mismo que el nombre del pago.</string>
+
+    <string name="confirm">Confirmar</string>
+    <string name="openWallet">Abrir billetera</string>
+
+    <string name="markOrderNotify">¡Orden marcada! \nEl comerciante/pagador afirma haber realizado el pago. Por favor, revisa tu cuenta para confirmarlo y haz clic en "Liberar ahora" si lo ves.</string>
+
+    <string name="paidAlready">1. Si ya has realizado el pago, por favor no canceles esta orden, porque no podremos recuperar los fondos.
+\n2. Si cancelas la orden dos veces en un día, el sistema te detendrá automáticamente de realizar cualquier transacción P2P durante 24 horas.</string>
+
+    <string name="issue">Relatar el problema:</string>
+    <string name="networkIssue">Hay un problema de red.</string>
+    <string name="meetRequire">No cumplí con los requisitos del comerciante.</string>
+    <string name="extraFee">El comerciante está solicitando una tarifa adicional.</string>
+    <string name="differName">El nombre de la cuenta del comerciante es diferente de su nombre legal.</string>
+    <string name="invalidAccount">La cuenta del comerciante es incorrecta/inválida.</string>
+    <string name="other">Otro</string>
+    <string name="cancelNow">Cancelar ahora</string>
+    <string name="stateReason">Indica el motivo detallado por el cual estás cancelando.</string>
+
+    <string name="stateOtherReason">Indica otro(s) motivo(s)</string>
+    <string name="moreSettings">Más configuraciones</string>
+
+    <string name="seachContact">Buscar contacto</string>
+    <string name="contactUpdated">Contactos actualizados</string>
+    <string name="contactNotFound">Contactos no encontrados</string>
+
+    <string name="joinComm">Unirse a la comunidad</string>
+    <string name="joinCommNote">¿Es obligatorio que los jugadores se unan a tu comunidad preferida primero antes de unirse a tu Liga?</string>
+    <string name="commLink">Ingresa el enlace de la comunidad</string>
+    <string name="leagueTitle">Título de la liga:</string>
+    <string name="sponsorBy">Patrocinado por:</string>
+    <string name="yourContacts">Contactar jugadores</string>
+    <string name="globalPlayer">Jugadores globales</string>
+    <string name="recentChat">Chats más recientes…</string>
+
+
+    <string name="addContact">Agregar contacto</string>
+    <string name="contactList">Contactos</string>
+
+    <string name="ongoingTour">Torneo en curso</string>
+    <string name="upcomingTour">Próximo torneo</string>
+    <string name="ongoing">Torneo en curso</string>
+    <string name="upcoming">Próximo torneo</string>
+
+    <string name="minFee">Cuota de inscripción (mín. $1 por entrada)</string>
+    <string name="winnerReward">Recompensa del ganador (opcional)</string>
+    <string name="minWinnerReward">Recompensa mínima del ganador: </string>
+
+    <string name="winnerRewardNote">En caso de una entrada con cuota, la recompensa debe ser al menos 2 veces mayor que la cuota de entrada.</string>
+    <string name="whoParticipate">¿Quién puede participar?</string>
+    <string name="entry_slot">Espacio de entrada: 10 – 100</string>
+    <string name="minimum_slot">Espacio mínimo: 10</string>
+    <string name="remark">Observación:</string>
+    <string name="remarkHint">Sé parte de este torneo</string>
+    <string name="join">Unirse</string>
+
+    <string name="more_setting">Más configuraciones (opcional)</string>
+    <string name="createLeagueRule">1. Si se involucra recompensa o cuota de entrada, los fondos se moverán a tu billetera "Activos Bloqueados". Esto significa que no podrás acceder o retirar los fondos hasta el final de la liga/torneo.
+\n2. Las recompensas se enviarán al ganador en 1 hora después del final de la liga, mientras que las cuotas de entrada se moverán de tu "Activos Bloqueados" a "Activos USDT".
+\n3. Si tienes alguna queja sobre la recompensa del ganador, por favor contacta al soporte dentro del tiempo estipulado.
+\n4. La recompensa ya enviada al ganador no se puede recuperar, especialmente si el ganador ha retirado los fondos de la plataforma.
+\n5. En caso de que canceles la liga y se involucre cuota de entrada, el sistema reembolsará automáticamente la cuota de entrada a la billetera de cada usuario.
+\n6. Si cancelas la liga más de 3 veces en 30 días, el sistema te bloqueará automáticamente de crear cualquier liga durante 40 días.
+\n7. No puedes cancelar ninguna liga en curso. Si tienes una razón de peso para cancelarla, por favor contacta al soporte para obtener asistencia.</string>
+
+<!--    <string-array name="paymentOption">-->
+<!--        <item>Elegir método de pago</item>-->
+<!--        <item>Zenith Bank</item>-->
+<!--        <item>PalmPay</item>-->
+<!--        <item>Opay</item>-->
+<!--        <item>First Bank</item>-->
+<!--        <item>MoniePoint</item>-->
+<!--    </string-array>-->
+
+    <string-array name="selectGame">
+        <item>Seleccionar juego</item>
+        <item>Whot</item>
+        <item>Póker</item>
+        <item>Ajedrez</item>
+        <item>Scrabble</item>
+        <item>Ludo</item>
+    </string-array>
+
+    <string-array name="whoParticipate">
+        <item>¿Quién puede participar?</item>
+        <item>Cualquiera</item>
+        <item>Usuario verificado con identificación</item>
+        <item>Solo mi comunidad</item>
+        <item>Mis contactos</item>
+    </string-array>
+
+    <string-array name="entryMood">
+        <item>Modo de entrada</item>
+        <item>Gratis</item>
+        <item>Pagar cuota</item>
+    </string-array>
+
+
+
+
+</resources>
+
+
+
+
+
+
+
+
+
+
+

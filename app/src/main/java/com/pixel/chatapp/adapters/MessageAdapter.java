@@ -75,7 +75,8 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.view_controller.fragments.PlayersFragment;
 import com.pixel.chatapp.utilities.ChatUtils;
@@ -126,8 +127,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public static List<Integer> chatPositionList = new ArrayList<>();
     public String uId;
     public String myUsername;
-    private Map<String, Runnable> sightedRunnableMap = new HashMap<>();
-    private Map<String, Handler> handlerNewChatNumMap = new HashMap<>();
+    private final Map<String, Runnable> sightedRunnableMap = new HashMap<>();
+    private final Map<String, Handler> handlerNewChatNumMap = new HashMap<>();
 
     Handler handlerNewChatNum = new Handler();
 
@@ -307,7 +308,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             String edit = modelList.get(finalPosition).getEdit();
 
-            if(type == K.type_pin && edit != null && edit.equals("yes"))
+            if(type == Ki.type_pin && edit != null && edit.equals("yes"))
             {
                 handler.post(()-> {
                     modelList.get(finalPosition).setNewChatNumberID(number);
@@ -326,7 +327,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         int type = modelList.get(i).getType();
         String edit = modelList.get(i).getEdit();
 
-        if(type == K.type_pin && edit != null && edit.equals("yes"))
+        if(type == Ki.type_pin && edit != null && edit.equals("yes"))
         {
             chatViewModel.deleteChat(modelList.get(i));    // delete from room
 
@@ -363,11 +364,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 String edit = modelList.get(finalPosition).getEdit();
                 MessageModel modelChats = modelList.get(finalPosition);
 
-                if (type == K.type_pin && edit != null && edit.equals("yes"))
+                if (type == Ki.type_pin && edit != null && edit.equals("yes"))
                 {
                     chatViewModel.deleteChat(modelChats); // delete from room
 
-                    K.handler.post(()->{
+                    Kc.handler.post(()->{
                         modelList.remove(finalPosition); // delete from list
                         notifyItemRemoved(finalPosition);
                         notifyItemRangeChanged(finalPosition, modelList.size(), new Object());
@@ -375,9 +376,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     });
                     // reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
                     if(ChatsFragment.adapter != null)
-                        ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromChatFragment, true);
+                        ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromChatFragment, true);
                     if(PlayersFragment.adapter != null)
-                        PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromPlayerFragment, true);
+                        PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromPlayerFragment, true);
 
                     // remove the previous runnable to prevent the onBindView calling it again
                     Runnable runnableNewChatNum = sightedRunnableMap.get(modelChats.getIdKey());
@@ -618,7 +619,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         // reset calls and games
-        if(modelChats.getType() == K.type_call || modelChats.getType() == K.type_game)
+        if(modelChats.getType() == Ki.type_call || modelChats.getType() == Ki.type_game)
         {
             holder.callOrGameHeading_TV.setText(null);
             holder.response_TV.setText(null);
@@ -629,7 +630,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         // reset pin or number of new chat
-        if(modelChats.getType() == K.type_pin) holder.pinAlertTV.setText(null);
+        if(modelChats.getType() == Ki.type_pin) holder.pinAlertTV.setText(null);
 
         // reset voice note tools player
         if(holder.seekBarProgress != null){
@@ -750,7 +751,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.response_TV.setText(modelChats.getEmojiOnly());
 
             int callIcon = R.drawable.baseline_call_24;
-            if(modelChats.getType() == K.type_game) callIcon = R.drawable.baseline_games_24;
+            if(modelChats.getType() == Ki.type_game) callIcon = R.drawable.baseline_games_24;
 
             holder.callOrGame_IV.setImageResource(callIcon);    // interchange the game icon later
         }
@@ -762,13 +763,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.linearLayoutReplyBox.setVisibility(View.VISIBLE);    // set reply container to visibility
             holder.replyChat_TV.setText(modelChats.getReplyMsg());     //   set the reply text on top msg
 
-            if(modelChats.getReplyFrom().contains(K.JOIN))   //  set the username for reply msg
+            if(modelChats.getReplyFrom().contains(Ki.JOIN))   //  set the username for reply msg
             {
                 if(modelChats.getReplyFrom().contains(myId))
                 {
                     holder.senderNameTV.setText(mContext.getString(R.string.you));
                 } else {
-                    String[] split_uid_name = modelChats.getReplyFrom().split(K.JOIN);
+                    String[] split_uid_name = modelChats.getReplyFrom().split(Ki.JOIN);
                     String otherName = contactNameShareRef.getString(split_uid_name[0], split_uid_name[1]);
                     holder.senderNameTV.setText(otherName);
                 }
@@ -833,7 +834,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     && modelChats.getPhotoUriOriginal() != null ){
                 // get the photo uid owner and the sending state
                 String photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "");
-                String[] splitX = photoCheck.split(K.JOIN);
+                String[] splitX = photoCheck.split(Ki.JOIN);
                 // check if the ref is not empty
                 if(splitX.length > 1){
                     String otherId = splitX[0];
@@ -850,7 +851,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     }
                     // it's loading now, don't repeat.
                     MainActivity.documentIdShareRef.edit()
-                            .putString(modelChats.getIdKey(), otherId + K.JOIN + "no").apply();
+                            .putString(modelChats.getIdKey(), otherId + Ki.JOIN + "no").apply();
                 }
 
             }
@@ -861,7 +862,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 displayLowImageOrDocumentThumbnail(imageUri_, holder, modelChats);
 
                 // download the low quality photo or doc thumbnail auto from firebase (if not downloaded yet)
-                K.executors.execute(() -> {
+                Kc.executor.execute(() -> {
                     downloadLowImageFrom_FB_Storage(modelChats, imageUri_);
                 });
 
@@ -1168,7 +1169,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             if(modelChats.getFromUid().equals(myId)){
                 // get the photo uid owner and the sending state
                 String photoCheck = MainActivity.voiceNoteIdShareRef.getString(modelChats.getIdKey(), "");
-                String[] splitX = photoCheck.split(K.JOIN);
+                String[] splitX = photoCheck.split(Ki.JOIN);
                 // check if the ref is not empty
                 if(splitX.length > 1) {
                     String otherId = splitX[0];
@@ -1234,7 +1235,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             } else
             {
-                if(modelChats.getType() != K.type_pin)   // don't select if it's a pin card
+                if(modelChats.getType() != Ki.type_pin)   // don't select if it's a pin card
                 {
                     // if onLongPress mood is activated, add or remove chat from list when user click a chat
                     if(modelChats.getType() != 1 && modelChats.getType() != 2 && modelChats.getType() != 5)
@@ -1257,7 +1258,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // set pin alert and onclick
         if (modelChats.getType() != empty && modelChats.getType() != 6 && modelChats.getType() != 7)
         {
-            if(modelChats.getType() == K.type_pin)   // set pin chat and scroll to chat onClick
+            if(modelChats.getType() == Ki.type_pin)   // set pin chat and scroll to chat onClick
             {
                 if( modelChats.getEdit()!= null && modelChats.getEdit().equals("yes")   //  for number of new chat
                         && modelChats.getNewChatNumberID() != null && Integer.parseInt(modelChats.getNewChatNumberID()) > 0)
@@ -1291,9 +1292,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                         // reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
                         if(ChatsFragment.adapter != null)
-                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, K.fromChatFragment, true);
+                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, Ki.fromChatFragment, true);
                         if(PlayersFragment.adapter != null)
-                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, K.fromPlayerFragment, true);
+                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUserUid, Ki.fromPlayerFragment, true);
 
                     }
 
@@ -1757,7 +1758,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private void sendMyPhotoOrDocument(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
         // get the photo uid owner and the sending state
         String[] photoCheck = MainActivity.documentIdShareRef.getString(modelChats.getIdKey(), "")
-                .split(K.JOIN);
+                .split(Ki.JOIN);
         if(photoCheck.length > 1){
             String otherId = photoCheck[0];
             String isSending = photoCheck[1];
@@ -2046,7 +2047,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         Toast.makeText(mContext, mContext.getString(R.string.corrupt), Toast.LENGTH_SHORT).show();
         loadBarVisibility(holder, modelChats);
         MainActivity.documentIdShareRef.edit()
-                .putString(modelChats.getIdKey(), otherUid + K.JOIN + "yes").apply();
+                .putString(modelChats.getIdKey(), otherUid + Ki.JOIN + "yes").apply();
         // delete the path from the app memory
         MainActivity.deleteSingleUriFromAppMemory(modelChats.getPhotoUriOriginal());
 //        System.out.println("what is error " + exception.getMessage());
@@ -2091,7 +2092,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 loadBarVisibility(holder, modelChats);
                 Toast.makeText(mContext, "Upload failed_", Toast.LENGTH_SHORT).show();
                 MainActivity.documentIdShareRef.edit()
-                        .putString(modelChats.getIdKey(), otherUid + K.JOIN + "yes").apply();
+                        .putString(modelChats.getIdKey(), otherUid + Ki.JOIN + "yes").apply();
             });
 
         }).addOnFailureListener(exception -> {
@@ -2099,7 +2100,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             loadBarVisibility(holder, modelChats);
             Toast.makeText(mContext, "Upload failed__", Toast.LENGTH_SHORT).show();
             MainActivity.documentIdShareRef.edit()
-                    .putString(modelChats.getIdKey(), otherUid + K.JOIN + "yes").apply();
+                    .putString(modelChats.getIdKey(), otherUid + Ki.JOIN + "yes").apply();
             // delete the path from the app memory
             MainActivity.deleteSingleUriFromAppMemory(modelChats.getPhotoUriOriginal());
         });
@@ -2109,8 +2110,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private void downloadPhotoOrDocSentByOtherUser(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
     {
         String pathToFirebase = modelChats.getPhotoUriOriginal();   //media/documents/AZkfy6uZunMfMUxR7HIol4rPZBq2/1708199920604winnerChatJoinPathsnull
-        if(pathToFirebase.contains(K.JOIN)){ // split in case the null was not removed
-            String splitPath[] = pathToFirebase.split(K.JOIN);
+        if(pathToFirebase.contains(Ki.JOIN)){ // split in case the null was not removed
+            String splitPath[] = pathToFirebase.split(Ki.JOIN);
             pathToFirebase = splitPath[0];
         }
         // get the path of the original image on the firebase storage
@@ -2346,7 +2347,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             {
                 try {
                     // split the original and low image uri location on firebase storage
-                    String[] splitPath = modelChats.getPhotoUriOriginal().split(K.JOIN);
+                    String[] splitPath = modelChats.getPhotoUriOriginal().split(Ki.JOIN);
                     String originalUri = splitPath[0];
                     String lowUri = splitPath[1];  //  for deleting from firebase storage
 
@@ -2632,7 +2633,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // set as "no" to disable auto loading when scrolled to position
         MainActivity.voiceNoteIdShareRef.edit().putString(modelChats.getIdKey(),
-                otherUid + K.JOIN + "no").apply();
+                otherUid + Ki.JOIN + "no").apply();
     }
 
     private void downloadOtherUserVoiceNote(MessageModel modelChats, MessageViewHolder holder, int chatPosition)
@@ -2768,7 +2769,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private void activateSendingVN(MessageModel modelChats, MessageViewHolder holder, int chatPosition){
         String photoCheck = MainActivity.voiceNoteIdShareRef.getString(modelChats.getIdKey(), "");
-        String[] splitX = photoCheck.split(K.JOIN);
+        String[] splitX = photoCheck.split(Ki.JOIN);
         // check if the ref is not empty
         if(splitX.length > 1) {
             String otherId = splitX[0];
@@ -2848,7 +2849,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         String imageSize, String imageLinkToFBStorage, String vnPathToStorage)
     {
         Map<String, Object> messageMap = new HashMap<>();
-        String myDisplayName = MainActivity.myProfileShareRef.getString(K.PROFILE_DISNAME, modelChats.getSenderName());
+        String myDisplayName = MainActivity.myProfileShareRef.getString(Ki.PROFILE_DISNAME, modelChats.getSenderName());
 
         messageMap.put("senderName", myDisplayName);
         messageMap.put("fromUid", myId);
@@ -2870,7 +2871,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(modelChats.getType() == 4 || modelChats.getType() == 1) { // it's audio | voice note
             messageMap.put("photoUriOriginal", null);
         } else {
-            messageMap.put("photoUriOriginal", originalUriPath + K.JOIN + lowImagePath);
+            messageMap.put("photoUriOriginal", originalUriPath + Ki.JOIN + lowImagePath);
         }
         messageMap.put("imageSize", imageSize);
 
@@ -2885,7 +2886,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         Map<String, Object> latestChatMap = new HashMap<>();
         // type 0 is for just text-chat, type 1 is voice_note, type 2 is photo, type 3 is document, type 4 is audio (mp3)
-        String myDisplayName = MainActivity.myProfileShareRef.getString(K.PROFILE_DISNAME, modelChats.getSenderName());
+        String myDisplayName = MainActivity.myProfileShareRef.getString(Ki.PROFILE_DISNAME, modelChats.getSenderName());
         latestChatMap.put("fromUid", myId);
         latestChatMap.put("senderName", myDisplayName);
         latestChatMap.put("emojiOnly", modelChats.getEmojiOnly());
@@ -2913,8 +2914,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         refOnReadRequest.child(otherUid).child(myId).push().setValue(modelChats.getIdKey());
 
         // update delivery status for outSide chat
-        if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUid, K.fromChatFragment);
-        if(PlayersFragment.adapter != null) PlayersFragment.adapter.updateDeliveryStatus(otherUid, K.fromPlayerFragment);
+        if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUid, Ki.fromChatFragment);
+        if(PlayersFragment.adapter != null) PlayersFragment.adapter.updateDeliveryStatus(otherUid, Ki.fromPlayerFragment);
 
         // update delivery status ROOM for outside chat
         chatViewModel.updateOutsideDelivery(otherUid, 700024);
@@ -3021,7 +3022,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             String addEmoji = modelList.get(chatPosition).getEmoji() != null ?
                     modelList.get(chatPosition).getEmoji().concat(emoji): emoji;
 
-            K.handler.post(()->{
+            Kc.handler.post(()->{
                 modelList.get(chatPosition).setEmoji(addEmoji);
                 notifyItemChanged(chatPosition, new Object());
             });
@@ -3038,7 +3039,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public void pinIconDisplay(String messageId, boolean status){
 
-        K.executors.execute(() -> {
+        Kc.executor.execute(() -> {
             if(modelList != null){
                 for (int i = modelList.size()-1; i >= 0; i--) {
                     if (modelList.get(i).getIdKey().equals(messageId)) {
@@ -3316,7 +3317,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 status = sendPhoto;
                 return sendPhoto;
 
-            } else if(chat.getType() == K.type_empty)
+            } else if(chat.getType() == Ki.type_empty)
             {
                 status = empty;
                 return empty;
@@ -3326,7 +3327,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 status = callSend;
                 return callSend;
 
-            } else if(chat.getType() == K.type_pin)
+            } else if(chat.getType() == Ki.type_pin)
             {
                 status = pinChat;
                 return pinChat;
@@ -3354,7 +3355,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 status = callReceive;
                 return callReceive;
 
-            } else if(chat.getType() == K.type_pin)
+            } else if(chat.getType() == Ki.type_pin)
             {
                 status = pinChat;
                 return pinChat;

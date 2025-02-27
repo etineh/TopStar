@@ -61,7 +61,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.permission.AppPermission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.GalleryAdapter;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.FileUtils;
 import com.pixel.chatapp.utilities.FolderUtils;
 import com.pixel.chatapp.utilities.PhoneUtils;
@@ -667,17 +667,17 @@ public class CameraActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == K.CAMERA_REQUEST_CODE && grantResults.length > 0
+        if (requestCode == Ki.CAMERA_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             setUpCameraX();
 
-        } else if (requestCode == K.STORAGE_REQUEST_CODE && grantResults.length > 0
+        } else if (requestCode == Ki.STORAGE_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             selectImageFromGallery(this, this);
 
-        } else if (requestCode == K.RECORDING_REQUEST_CODE && grantResults.length > 0
+        } else if (requestCode == Ki.RECORDING_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             captureVideo();
@@ -685,7 +685,7 @@ public class CameraActivity extends AppCompatActivity {
         }
         else {
             Toast.makeText(this, getString(R.string.permission), Toast.LENGTH_SHORT).show();
-            if(requestCode == K.CAMERA_REQUEST_CODE || requestCode == K.RECORDING_REQUEST_CODE){
+            if(requestCode == Ki.CAMERA_REQUEST_CODE || requestCode == Ki.RECORDING_REQUEST_CODE){
                 finish();
             }
         }

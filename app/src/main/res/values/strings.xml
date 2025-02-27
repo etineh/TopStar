@@ -58,6 +58,7 @@
     <string name="live">Live</string>
     <string name="home">Home</string>
     <string name="unavailable">Unavailable</string>
+    <!-- not translated yet -->
 
     <string name="confirmMsg_">Are you sure you want to delete? Item(s) deleted will no longer appear on your chats.</string>
     <string name="thumbDelMsg">Are you sure you want to delete? This might result to irresponsive user interface on previous chats</string>
@@ -235,7 +236,7 @@
     <string name="hash"> *** 👁</string>
     <string name="rewardAmount">Reward: $23 👁</string>
     <string name="reward">Reward: </string>
-    <string name="eye"> 👁</string>
+    <string name="eye" translatable="false"> 👁</string>
     <string name="watchingNum">👁 25k </string>
     <string name="quitGame"> Quit game >> </string>
     <string name="gameId"> Game ID</string>
@@ -413,15 +414,21 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="day1ago">1 day ago</string>
-    <string name="day2ago">2 days ago</string>
-    <string name="day3ago">3 days ago</string>
-    <string name="day4ago">4 days ago</string>
-    <string name="day5ago">5 days ago</string>
-    <string name="day6ago">6 days ago</string>
-    <string name="week1ago">1wk ago</string>
-    <string name="week2ago">2wk ago</string>
-    <string name="week3ago">3wk ago</string>
-    <string name="monthsAgo">month ago</string>
+    <string name="dayAgo">1 day ago</string>
+    <string name="daysAgo">%d days ago</string>
+    <string name="weeksAgo">%d weeks ago</string>
+    <string name="monthAgo">month ago</string>
+    <string name="monthsAgo">%d month ago</string>
+
+    <string name="seen_today">Seen: Today, %1$s.</string>
+    <string name="seen_yesterday">Seen: Yesterday, %1$s.</string>
+    <string name="seen_days_ago">Seen: %1$d days ago, %2$s.</string>
+    <string name="seen_last_week">Seen: Last week.</string>
+    <string name="seen_last_2_weeks">Seen: Last 2 weeks.</string>
+    <string name="seen_last_3_weeks">Seen: Last 3 weeks.</string>
+    <string name="seen_a_month_ago">Seen: A month ago.</string>
+    <string name="seen_on_date">Seen: %1$s.</string>
+
 
     <string name="created">Created: </string>
     <string name="watch">Watch </string>
@@ -520,8 +527,8 @@
     <string name="serverError">Server error.</string>
     <string name="invalidDetails">Incorrect details.</string>
     <string name="noInternetConnection">No internet connection 😔</string>
-    <string name="scrollUpForPin">Scroll up for more pin chats!</string>
     <string name="checkInternet">Check internet connection 😔</string>
+    <string name="scrollUpForPin">Scroll up for more pin chats!</string>
 
     <string name="errorWithOtp">Error with code. Resend again.</string>
     <string name="timeout">timeout</string>
@@ -545,6 +552,7 @@
     <string name="failToSaveFile">Failed to save file.</string>
     <string name="savedToGallery">Saved to gallery!</string>
     <string name="failToSharePhoto">Fail to share photo</string>
+    <string name="unsupportedFile">unsupported file</string>
 
     <!--    <string name="corrupt">File corrupt or poor network</string>-->
     <string name="permission">Go to setting and grant storage/camera permission</string>
@@ -699,15 +707,15 @@
 
     <string name="uploadPhoto">Upload Photo</string>
 
-    <string name="displayNameError">Display name must be greater than four (4)</string>
     <string name="fieldInputError">Field must be greater than four (4)</string>
 
+    <string name="displayNameError">Display name must be greater than four (4)</string>
     <string name="userNameError">Username must be greater than three (3) length</string>
+    <string name="invalidUsername">Invalid Username</string>
     <string name="phoneError">Invalid phone number</string>
     <string name="emailError">Invalid email</string>
     <string name="invalidOTP">Invalid verification code</string>
     <string name="invalidPassword">Invalid password</string>
-    <string name="invalidUsername">Invalid Username</string>
 
     <string name="smsCodeExpired">The sms code has expired</string>
     <string name="numberExist">Phone number already exist.</string>
@@ -849,6 +857,7 @@
     <string name="bank_nameMore">Bank / MFB / Mobile Money: </string>
     <string name="selectBank">Select banks </string>
     <string name="selected">Selected </string>
+    <string name="selectedSL"> selected </string>
     <string name="branch">Branch (optional) </string>
 
     <string name="tpInfo">Trader asset for the order amount has been locked. You can go ahead with payment within the above time frame! </string>

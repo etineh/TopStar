@@ -12,13 +12,12 @@ import java.util.concurrent.Executors;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public interface K {
+public interface Ki {
 
 //    FirebaseUser user = null;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-//192.168.0.171
-    // 192.168.0.2.
+
 
     Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.2:8080/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -54,31 +53,29 @@ public interface K {
     String FCMTOKEN = "FCM_TOKEN";
     String OTHERUSERHINT = "OTHER_USER_HINT";
 
+    String FIREBASE_SERVICE = "MyFirebaseMsgService";
+
     String GameIds = "GAME_IDS";
     String ongoingGameId = "ONGOING_GAME_ID";
     String gameHostUid = "GAME_HOST_ID";
-
-    Handler handler = new Handler(Looper.getMainLooper());
 
     String PICKED_IMAGE_URI_PATH = "ImageUriPath";
 
     String MIC_ICON = "\uD83C\uDFA4  ";
     String MUSIC_ICON = "\uD83C\uDFB5 ";
 
-    String DELETE_ICON = "\uD83D\uDDD1\uFE0F ";
+    String DELETE_ICON = "\uD83D\uDDD1️ ";
 //    String PHOTO_ICON = "\uD83D\uDCF7  ";
     String PHOTO_ICON = "\uD83C\uDF03 ";
     String VIDEO_ICON ="\uD83C\uDFA5 ";
     String PIN_ICON = "\uD83D\uDCCC ";
-    String EDIT_ICON = "✏\uFE0F  ";
+    String EDIT_ICON = "✏️  ";
     String CALL_ICON = "☎️ ";
     String GAME_ICON = "🎮  ";
     String DOCUMENT_ICON = "\uD83D\uDCDC ";
 
     String URI_PREF = "UriPrefs";
     String OLD_URI_LIST = "oldPhotoEditedUri";
-
-    ExecutorService executors = Executors.newSingleThreadExecutor();
 
     String fromChatFragment = "CHAT_FRAGMENT";
     String fromPlayerFragment = "PLAYER_FRAGMENT";

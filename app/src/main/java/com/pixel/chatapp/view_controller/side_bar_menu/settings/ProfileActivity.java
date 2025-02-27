@@ -56,7 +56,7 @@ import com.pixel.chatapp.services.api.model.RequestBody;
 import com.pixel.chatapp.services.api.model.incoming.ResultApiM;
 import com.pixel.chatapp.services.api.model.outgoing.TwoValueM;
 import com.pixel.chatapp.services.api.model.incoming.UserSearchM;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.dataModel.MessageModel;
@@ -526,7 +526,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
                     if (resultCode == RESULT_OK && data != null){
 
                         Intent intent = new Intent(this, UploadProfileImage.class);
-                        intent.putExtra(K.PICKED_IMAGE_URI_PATH, data.getData().toString());
+                        intent.putExtra(Ki.PICKED_IMAGE_URI_PATH, data.getData().toString());
                         startActivity(intent);
 
                     }
@@ -619,7 +619,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
 
         IdTokenUtil.generateToken(token ->
         {
-            ProfileApiDao apiDao = K.retrofit.create(ProfileApiDao.class);
+            ProfileApiDao apiDao = Ki.retrofit.create(ProfileApiDao.class);
 
             TwoValueM valueM = new TwoValueM(token, getUsername);
 
@@ -726,9 +726,9 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
     private void getProfileSharePref(){
 
         // update share_preference
-        String username = MainActivity.myProfileShareRef.getString(K.PROFILE_USERNAME, "---");
-        String displayName = MainActivity.myProfileShareRef.getString(K.PROFILE_DISNAME, "---");
-        String hint = MainActivity.myProfileShareRef.getString(K.PROFILE_HINT, getString(R.string.hint2));
+        String username = MainActivity.myProfileShareRef.getString(Ki.PROFILE_USERNAME, "---");
+        String displayName = MainActivity.myProfileShareRef.getString(Ki.PROFILE_DISNAME, "---");
+        String hint = MainActivity.myProfileShareRef.getString(Ki.PROFILE_HINT, getString(R.string.hint2));
 //        String email = MainActivity.myProfileShareRef.getString(K.PROFILE_EMAIL, "---");
 
         setDisplayName_TV.setText(displayName);
@@ -772,9 +772,9 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
                     if(imageLink != null) Picasso.get().load(imageLink).into(circleUserPhoto);
 
                     // update share_preference
-                    MainActivity.myProfileShareRef.edit().putString(K.PROFILE_USERNAME, username).apply();
-                    MainActivity.myProfileShareRef.edit().putString(K.PROFILE_DISNAME, displayName).apply();
-                    MainActivity.myProfileShareRef.edit().putString(K.PROFILE_HINT, hint).apply();
+                    MainActivity.myProfileShareRef.edit().putString(Ki.PROFILE_USERNAME, username).apply();
+                    MainActivity.myProfileShareRef.edit().putString(Ki.PROFILE_DISNAME, displayName).apply();
+                    MainActivity.myProfileShareRef.edit().putString(Ki.PROFILE_HINT, hint).apply();
 //                    MainActivity.myProfileShareRef.edit().putString(K.PROFILE_EMAIL, user.getEmail()).apply();
 
                 } else {
@@ -794,7 +794,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
     }
 
     private void checkNumberExist(String number){
-        UserDao userDao = K.retrofit.create(UserDao.class);
+        UserDao userDao = Ki.retrofit.create(UserDao.class);
 
         userDao.fineUser(number).enqueue(new Callback<UserSearchM>() {
             @Override
@@ -991,7 +991,7 @@ public class ProfileActivity extends AppCompatActivity implements OTPActivity.Up
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if(requestCode == K.STORAGE_REQUEST_CODE && grantResults.length > 0
+        if(requestCode == Ki.STORAGE_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
 
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

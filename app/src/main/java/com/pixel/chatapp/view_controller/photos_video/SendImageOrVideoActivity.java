@@ -63,7 +63,7 @@ import com.pixel.chatapp.utilities.FileUtils;
 import com.pixel.chatapp.utilities.FolderUtils;
 import com.pixel.chatapp.utilities.AnimUtils;
 import com.pixel.chatapp.utilities.PhoneUtils;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.MainActivity;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.pixel.chatapp.dataModel.MessageModel;
@@ -184,7 +184,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
         refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
 
         //  store each photo cropping or painting uri to enable delete from onCreate when app is onDestroy
-        unusedPhotoShareRef = getSharedPreferences(K.URI_PREF, Context.MODE_PRIVATE);
+        unusedPhotoShareRef = getSharedPreferences(Ki.URI_PREF, Context.MODE_PRIVATE);
 
         recyclerPhoto.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
@@ -628,7 +628,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
         // add it to sharePref too, and delete from sharePref if use perform action on the photo
         allOldUriList.add(tempCropUri.toString());
         String uriToJson = gson.toJson(allOldUriList);
-        unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, uriToJson).apply();
+        unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, uriToJson).apply();
     }
 
     @Override
@@ -645,7 +645,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
             allOldUriList.remove(tempCropUri.toString());
             // remove the uri from gson - sharePref, since user perform action on the photo
             String uriToJson = gson.toJson(allOldUriList);
-            unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, uriToJson).apply();
+            unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, uriToJson).apply();
 
         } else if (requestCode == UCrop.REQUEST_CROP && data ==null)
         {
@@ -656,7 +656,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
             allOldUriList.remove(tempCropUri.toString());
             // remove the uri from gson - sharePref, since user perform action on the photo
             String uriToJson = gson.toJson(allOldUriList);
-            unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, uriToJson).apply();
+            unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, uriToJson).apply();
 
         } else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
@@ -750,7 +750,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
         // save edited photo uri to sharePref via gson to enable app first launch onCreate to delete the photos in case photo was not deleted
         allOldUriList.addAll(photoUriToDelete);
         String json = gson.toJson(allOldUriList);
-        unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, json).apply();
+        unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, json).apply();
 
         String imageSize = FileUtils.getFileSize(newPhotoUri, this);
         // first check for bitmap image to convert, if not available, then convert the uri
@@ -934,7 +934,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == K.STORAGE_REQUEST_CODE && grantResults.length > 0
+        if (requestCode == Ki.STORAGE_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
 
             openOrLaunchGallery();
@@ -1011,7 +1011,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
                     }
                     // update the sharePrefs list
                     String convertListToJson = gson.toJson(allOldUriList);
-                    unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, convertListToJson).apply();
+                    unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, convertListToJson).apply();
                 } catch (Exception e) {}
             }
         }
@@ -1032,7 +1032,7 @@ public class SendImageOrVideoActivity extends AppCompatActivity implements Image
                     }
                     // update the sharePrefs list
                     String convertListToJson = gson.toJson(allOldUriList);
-                    unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, convertListToJson).apply();
+                    unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, convertListToJson).apply();
 
                 } catch (Exception e){}
             }

@@ -2,14 +2,14 @@ package com.pixel.chatapp.utilities;
 
 import android.content.Context;
 
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 
 import java.io.File;
 
 public class FolderUtils {
 
     public static File getPhotoFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_PHOTOS);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_PHOTOS);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -33,7 +33,7 @@ public class FolderUtils {
     }
 
     public static File getVideoFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_VIDEOs);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_VIDEOs);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -42,7 +42,7 @@ public class FolderUtils {
 
 
     public static File getThumbnailFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_THUMBNAIL);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_THUMBNAIL);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -50,7 +50,7 @@ public class FolderUtils {
     }
 
     public static File getDocumentFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_DOCUMENTS);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_DOCUMENTS);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -58,7 +58,7 @@ public class FolderUtils {
     }
 
     public static File getAudioFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_AUDIO);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_AUDIO);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -66,7 +66,7 @@ public class FolderUtils {
     }
 
     public static File getVoiceNoteFolder(Context context){
-        File appSpecificFolder = new File(context.getExternalFilesDir(null), K.ALL_VOICENOTE);
+        File appSpecificFolder = new File(context.getExternalFilesDir(null), Ki.ALL_VOICENOTE);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }

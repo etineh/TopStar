@@ -25,7 +25,7 @@ import com.pixel.chatapp.R;
 import com.pixel.chatapp.utilities.NumberSpacing;
 import com.pixel.chatapp.utilities.OTPGenerator;
 import com.pixel.chatapp.utilities.OpenActivityUtil;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.MainActivity;
 import com.pixel.chatapp.view_controller.side_bar_menu.support.SupportActivity;
 
@@ -63,7 +63,7 @@ public class NumberWithoutEmailActivity extends AppCompatActivity {
         progressBarOTP = findViewById(R.id.progressBarOTP);
         verifyAccount = findViewById(R.id.verifyAccount);
 
-        resetLoginSharePref = this.getSharedPreferences(K.RESET_LOGIN, Context.MODE_PRIVATE);
+        resetLoginSharePref = this.getSharedPreferences(Ki.RESET_LOGIN, Context.MODE_PRIVATE);
 
 
         new Handler().postDelayed(()-> editTextCode.requestFocus(), 1000);

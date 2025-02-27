@@ -19,7 +19,7 @@ import com.pixel.chatapp.view_controller.OTPActivity;
 import com.pixel.chatapp.services.api.dao_interface.OtpApiDao;
 import com.pixel.chatapp.services.api.model.outgoing.TwoValueM;
 import com.pixel.chatapp.services.api.model.incoming.ResultApiM;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +32,7 @@ public class OTPGenerator {
     //  ======= Email address =========
 
     public static void generateOtpEmail(String token, String email, Context context, TextView resend, TextView otpStatus_TV){
-        OtpApiDao otpApiDao = K.retrofit.create(OtpApiDao.class);
+        OtpApiDao otpApiDao = Ki.retrofit.create(OtpApiDao.class);
 
         TwoValueM OTPModel = new TwoValueM(token, email);
 
@@ -69,7 +69,7 @@ public class OTPGenerator {
     public static void verifyEmailOtp(String token, String otpValue, Context context, TextView otpStatus_TV,
                                       ProgressBar progressBarOTP, CallFinishMethod finishMethod)
     {
-        OtpApiDao otpApiDao = K.retrofit.create(OtpApiDao.class);
+        OtpApiDao otpApiDao = Ki.retrofit.create(OtpApiDao.class);
 
         TwoValueM OTPModel = new TwoValueM(token, otpValue);
 

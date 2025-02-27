@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.pixel.chatapp.permission.AppPermission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.interface_listeners.ImageListener;
 import com.yalantis.ucrop.UCrop;
 
@@ -51,7 +51,7 @@ public class UploadProfileImage extends AppCompatActivity {
         registerActivityForSelectImage();
 
         Intent intent = getIntent();
-        imageUriPath = Uri.parse(intent.getStringExtra(K.PICKED_IMAGE_URI_PATH));
+        imageUriPath = Uri.parse(intent.getStringExtra(Ki.PICKED_IMAGE_URI_PATH));
 
         activateCrop();
 
@@ -151,6 +151,7 @@ public class UploadProfileImage extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         activityResultLauncherForSelectImage.launch(intent);
     }

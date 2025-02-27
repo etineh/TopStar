@@ -1,6 +1,6 @@
 package com.pixel.chatapp.view_controller;
 
-import static com.pixel.chatapp.constants.K.gameHostUid;
+import static com.pixel.chatapp.constants.Ki.gameHostUid;
 import static com.pixel.chatapp.utilities.AnimUtils.slideOutToBottom;
 import static com.pixel.chatapp.utilities.FileUtils.formatDuration;
 import static com.pixel.chatapp.utilities.FileUtils.getFileName;
@@ -14,7 +14,7 @@ import static com.pixel.chatapp.utilities.FileUtils.isVideoFile;
 import static com.pixel.chatapp.utilities.FolderUtils.getVoiceNoteFolder;
 import static com.pixel.chatapp.utilities.AnimUtils.animateVisibility;
 import static com.pixel.chatapp.view_controller.calls.CallCenterActivity.handlerVibrate;
-import static com.pixel.chatapp.constants.K.ACCEPTED_MIME_TYPES;
+import static com.pixel.chatapp.constants.Ki.ACCEPTED_MIME_TYPES;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -98,12 +98,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.gson.Gson;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.interface_listeners.SuccessAndFailureListener;
 import com.pixel.chatapp.services.NetworkChangeReceiver;
 import com.pixel.chatapp.permission.AppPermission;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ViewPagerMainAdapter;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.services.api.model.outgoing.TwoValueM;
+import com.pixel.chatapp.utilities.TimeUtils;
 import com.pixel.chatapp.view_controller.calls.CallCenterActivity;
 import com.pixel.chatapp.view_controller.calls.CallPickUpCenter;
 import com.pixel.chatapp.view_controller.games.whot.WhotGameActivity;
@@ -133,7 +136,7 @@ import com.pixel.chatapp.utilities.NumberSpacing;
 import com.pixel.chatapp.utilities.OpenActivityUtil;
 import com.pixel.chatapp.utilities.Photo_Video_Utils;
 import com.pixel.chatapp.services.api.dao_interface.WalletListener;
-import com.pixel.chatapp.utilities.FetchContacts;
+import com.pixel.chatapp.utilities.ContactUtils;
 import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.CallListenerNext;
 import com.pixel.chatapp.interface_listeners.CallsListener;
@@ -248,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     View firstTopChatViews;
     private static ConstraintLayout mainViewConstraint, topMainContainer;
     private ImageView editOrReplyIV;
-    public static TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible, bioHint_TV;
+    public TextView textViewOtherUser, textViewLastSeen, textViewMsgTyping, textViewReplyOrEdit, nameReply, replyVisible, bioHint_TV;
     private View deleteForWhoView;
     private TextView deleteChatForOnlyOther_TV;
 
@@ -256,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private View chatMenuViews;
     ScrollView scrollViewMenu;
 
-    private static ImageView emoji_IV, file_IV, camera_IV, gameMe_IV;
+    private ImageView emoji_IV, file_IV, camera_IV, gameMe_IV;
 
     View topEmojiView, onChatClickView;
     ImageView pinIcon, editOrShareIcon;
@@ -276,10 +279,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private final String PRIVATE = "private";
     private final String PUBLIC = "public";
     private Object timeStamp;
-    private ImageView arrowUp, arrowDown;
-    private static ImageView cancelPinOption;
-    private static TextView totalPinPrivate_TV, pinCount_TV, pinMsg_TV, totalPinPublic_TV, newPinIndicator_TV;
-    public static TextView pinMineTV, pinEveryoneTV, pinByTV;
+    private ImageView arrowUp;
+    private TextView totalPinPrivate_TV, pinCount_TV, pinMsg_TV, totalPinPublic_TV, newPinIndicator_TV;
+    public TextView pinMineTV, pinEveryoneTV, pinByTV;
 
 
     //  ---------       Forward chat declares
@@ -317,10 +319,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private static EditText editTextMessage, et_emoji;
 
     private static CircleImageView sendMessageButton;
-    private static CardView cardViewMsg, cardViewReplyOrEdit;
+    private static CardView cardViewReplyOrEdit;
+    @SuppressLint("StaticFieldLeak")
     public static ImageView scrollPositionIV, sendIndicator;
+    @SuppressLint("StaticFieldLeak")
     public static TextView scrollCountTV, receiveIndicator;
-    private static ProgressBar progressBarLoadChats;
+    private ProgressBar progressBarLoadChats;
 
     //  -------------   network settings    -----------
     public static ViewStub constrNetConnect;
@@ -724,11 +728,11 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
         callUtils = new CallUtils(this);
 
-        resetLoginSharePref = this.getSharedPreferences(K.RESET_LOGIN, Context.MODE_PRIVATE);
+        resetLoginSharePref = this.getSharedPreferences(Ki.RESET_LOGIN, Context.MODE_PRIVATE);
         boolean isResetMood = user != null && resetLoginSharePref.getBoolean(user.getUid(), false);
 
-        deviceFirstLoginRef = this.getSharedPreferences(K.DEVICEFIRSTLOGIN, Context.MODE_PRIVATE);
-        boolean isFirstTimeLogin = deviceFirstLoginRef.getBoolean(K.FIRSTTIME, true);
+        deviceFirstLoginRef = this.getSharedPreferences(Ki.DEVICEFIRSTLOGIN, Context.MODE_PRIVATE);
+        boolean isFirstTimeLogin = deviceFirstLoginRef.getBoolean(Ki.FIRSTTIME, true);
 
         if(user == null){
 
@@ -764,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             finish();
         } else{
 
-            deviceFirstLoginRef.edit().putBoolean(K.FIRSTTIME, false).apply();
+            deviceFirstLoginRef.edit().putBoolean(Ki.FIRSTTIME, false).apply();
 
             ReplyReceiver.chatListener = this;
 
@@ -774,12 +778,12 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             myId = user.getUid();
 
-            lastPositionPreference = this.getSharedPreferences(K.SCROLLPOSITION, Context.MODE_PRIVATE);
-            gameSharePref = getSharedPreferences(K.GameIds, Context.MODE_PRIVATE);
+            lastPositionPreference = this.getSharedPreferences(Ki.SCROLLPOSITION, Context.MODE_PRIVATE);
+            gameSharePref = getSharedPreferences(Ki.GameIds, Context.MODE_PRIVATE);
 
             // store new username if another new user login
-            myUserNamePreferences = this.getSharedPreferences(K.MYUSERNAME, Context.MODE_PRIVATE);
-            getMyUserName = myUserNamePreferences.getString(K.USERNAME, null);
+            myUserNamePreferences = this.getSharedPreferences(Ki.MYUSERNAME, Context.MODE_PRIVATE);
+            getMyUserName = myUserNamePreferences.getString(Ki.USERNAME, null);
             refUsers.child(myId).child("general").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -787,7 +791,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     String fetchUserName = snapshot.child("userName").getValue().toString();
 
                     if(getMyUserName == null || (getMyUserName != null && !fetchUserName.equals(getMyUserName)) ){
-                        myUserNamePreferences.edit().putString(K.USERNAME, fetchUserName).apply();
+                        myUserNamePreferences.edit().putString(Ki.USERNAME, fetchUserName).apply();
                     }
 
                 }
@@ -801,16 +805,16 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             incomingGameObserver();
 
             // store failed chat in local sharePreference
-            offlineChat = this.getSharedPreferences(K.OFFLINECHAT, Context.MODE_PRIVATE);
+            offlineChat = this.getSharedPreferences(Ki.OFFLINECHAT, Context.MODE_PRIVATE);
             // store each photo with their user uid
-            documentIdShareRef = getSharedPreferences(K.PHOTO_OTHERUID, Context.MODE_PRIVATE);
-            voiceNoteIdShareRef = getSharedPreferences(K.VOICENOTE_UID, Context.MODE_PRIVATE);
+            documentIdShareRef = getSharedPreferences(Ki.PHOTO_OTHERUID, Context.MODE_PRIVATE);
+            voiceNoteIdShareRef = getSharedPreferences(Ki.VOICENOTE_UID, Context.MODE_PRIVATE);
             if(user != null) myProfileShareRef = getSharedPreferences(user.getUid(), Context.MODE_PRIVATE);
 
             // for other user details
-            contactNameShareRef = getSharedPreferences(K.CONTACTNAME, Context.MODE_PRIVATE);
-            otherUserFcmTokenRef = getSharedPreferences(K.FCMTOKEN, Context.MODE_PRIVATE);
-            otherUserHintRef = getSharedPreferences(K.OTHERUSERHINT, Context.MODE_PRIVATE);
+            contactNameShareRef = getSharedPreferences(Ki.CONTACTNAME, Context.MODE_PRIVATE);
+            otherUserFcmTokenRef = getSharedPreferences(Ki.FCMTOKEN, Context.MODE_PRIVATE);
+            otherUserHintRef = getSharedPreferences(Ki.OTHERUSERHINT, Context.MODE_PRIVATE);
 
             // Register the NetworkChangeReceiver to receive network connectivity changes
             new Handler().postDelayed(()-> {
@@ -1089,7 +1093,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             recyclerMap.get(otherUserUid).scrollToPosition(goToNum + 2);
                         } else {
                             //scroll to last position
-                            recyclerMap.get(otherUserUid).scrollToPosition(adapterMap.get(otherUserUid).getItemCount() - 1);
+                            Objects.requireNonNull(recyclerMap.get(otherUserUid)).scrollToPosition(adapterMap.get(otherUserUid).getItemCount() - 1);
                         }
 
                         adapterMap.get(otherUserUid).highlightItem(goToNum); // notify Colour
@@ -1229,7 +1233,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             devicePermission(); // fetch contactList and request for all permission
 
 //            new Thread(this::readContactFromFile).start();
-            FetchContacts.contactListFile = FetchContacts.readContactFromFile(this);
+            ContactUtils.contactListFile = ContactUtils.readContactFromFile(this);
 
             new Handler().postDelayed(()->
             {
@@ -1333,7 +1337,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     private void testingApi(){
 
-        WalletListener walletListener = K.retrofit.create(WalletListener.class);
+        WalletListener walletListener = Ki.retrofit.create(WalletListener.class);
 
         walletListener.test().enqueue(new Callback<Long>() {
             @Override
@@ -1784,7 +1788,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 goToWhotGameIntent = new Intent(this, WhotGameActivity.class);
             }
 
-            String gameId = gameSharePref.getString(K.ongoingGameId, null);
+            String gameId = gameSharePref.getString(Ki.ongoingGameId, null);
             String hostId = gameSharePref.getString(gameHostUid, null);
             // Put the list as a Parcelable extra
             goToWhotGameIntent.putParcelableArrayListExtra("playerDetailList", new ArrayList<>(playersInGameList));
@@ -1876,7 +1880,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         if (player != null) selectedPlayerMList.add(player);
                     }
 
-                    GameAPI gameAPI = K.retrofit.create(GameAPI.class);
+                    GameAPI gameAPI = Ki.retrofit.create(GameAPI.class);
 
                     IdTokenUtil.generateToken(token->{
 
@@ -1897,7 +1901,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                         intent.putExtra("gameID", signalPlayerM.getGameID());
                                         startActivity(intent);
 
-                                        gameSharePref.edit().putString(K.ongoingGameId, signalPlayerM.getGameID()).apply();
+                                        gameSharePref.edit().putString(Ki.ongoingGameId, signalPlayerM.getGameID()).apply();
                                         gameSharePref.edit().putString(gameHostUid, signalPlayerM.getFromUid()).apply();
 
                                         new Handler().postDelayed(()->{
@@ -2156,6 +2160,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             TextView editTV = moreOptionViews.findViewById(R.id.editChatTV);
             saveToGalleryTV = moreOptionViews.findViewById(R.id.saveToGalleryTV);
             reportTV = moreOptionViews.findViewById(R.id.report_TV);
+            ProgressBar progressBar = moreOptionViews.findViewById(R.id.progressBar11);
 
             //  ====    onClicks
 
@@ -2165,13 +2170,31 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             pinTV.setOnClickListener(onPin);
 
             // save photo or file to gallery
-            saveToGalleryTV.setOnClickListener(view -> {
-                Toast.makeText(this, "Work in progress", Toast.LENGTH_SHORT).show();
+            saveToGalleryTV.setOnClickListener(view ->
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                String getUriString = chatModelList.get(0).getPhotoUriOriginal();
+                Photo_Video_Utils.saveMediaToGallery(this, getUriString, new SuccessAndFailureListener()
+                {
+                    @Override
+                    public void onSuccess(String success) {
+                        progressBar.setVisibility(View.GONE);
+                        getOnBackPressedDispatcher().onBackPressed();
+                        Toast.makeText(MainActivity.this, success, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             });
 
             // save photo or file to gallery
             reportTV.setOnClickListener(view -> {
-                Toast.makeText(this, "Report chat in progress", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.inProgress), Toast.LENGTH_SHORT).show();
             });
 
             // hide the more option container
@@ -2224,14 +2247,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                         }  else      // clear only chat from outside
                         {
-                            refLastDetails.child(myId).child(otherUid_Del).child("message").setValue(K.DELETE_ICON +" ...");
+                            refLastDetails.child(myId).child(otherUid_Del).child("message").setValue(Ki.DELETE_ICON +" ...");
 
                             MessageAdapter adapter = adapterMap.get(otherUid_Del);
                             assert adapter != null;
 
                             // delete last chat from ROOM - outside UI
                             MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
-                            chatViewModel.editOutsideChat(otherUid_Del, K.DELETE_ICON + "  ...",
+                            chatViewModel.editOutsideChat(otherUid_Del, Ki.DELETE_ICON + "  ...",
                                     null, model.getIdKey());
 
                             // update outside user UI chatList model
@@ -2250,12 +2273,14 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         chatViewModel.deleteChatByUserId(otherUid_Del, myId);
                         // delete from adapter chat list
                         try{
-                            if(adapterMap.get(otherUid_Del) != null) adapterMap.get(otherUid_Del).clearChats();
+                            if(adapterMap.get(otherUid_Del) != null)
+                                Objects.requireNonNull(adapterMap.get(otherUid_Del)).clearChats();
                         } catch (Exception e){
                             System.out.println("what is error Main L2195: " + e.getMessage());
                         }
 
-                        if(photoAndVideoMap.get(otherUid_Del) != null) photoAndVideoMap.get(otherUid_Del).clear();
+                        if(photoAndVideoMap.get(otherUid_Del) != null)
+                            Objects.requireNonNull(photoAndVideoMap.get(otherUid_Del)).clear();
 
                         if(i == userModelList.size()-1){
                             if(clearOnlyChatHistory) {
@@ -2303,15 +2328,15 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         } else      // clear only chat from outside
                         {
                             refLastDetails.child(myId).child(otherUid_Del)
-                                    .child("message").setValue(K.DELETE_ICON + " ...");
+                                    .child("message").setValue(Ki.DELETE_ICON + " ...");
                             refLastDetails.child(otherUid_Del).child(myId)
-                                    .child("message").setValue( K.DELETE_ICON + " ...");
+                                    .child("message").setValue( Ki.DELETE_ICON + " ...");
 
                             // delete last chat from ROOM - outside UI
                             MessageAdapter adapter = adapterMap.get(otherUid_Del);
                             assert adapter != null;
                             MessageModel model = adapter.getModelList().get(adapter.getModelList().size()-1);   // get the last msg on the chat list
-                            chatViewModel.editOutsideChat(otherUid_Del, K.DELETE_ICON + "  ...",
+                            chatViewModel.editOutsideChat(otherUid_Del, Ki.DELETE_ICON + "  ...",
                                     null, model.getIdKey());
 
                             // update outside user UI chatList model
@@ -2517,7 +2542,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             totalPinPrivate_TV = firstTopChatViews.findViewById(R.id.totalPinMsgPrivate_TV);
             totalPinPublic_TV = firstTopChatViews.findViewById(R.id.totalPinMsgPublic_TV);
             pinMsg_TV = firstTopChatViews.findViewById(R.id.pinMsg_TV);
-            arrowDown = firstTopChatViews.findViewById(R.id.downArrow_IV);
+            ImageView arrowDown = firstTopChatViews.findViewById(R.id.downArrow_IV);
             arrowUp = firstTopChatViews.findViewById(R.id.upArrow_IV);
             pinLockPrivate_IV = firstTopChatViews.findViewById(R.id.private_IV);
             pinLockPublic_IV = firstTopChatViews.findViewById(R.id.public_IV);
@@ -3075,7 +3100,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         intent.putExtra("gameID", gameID);
         startActivity(intent);
 
-        gameSharePref.edit().putString(K.ongoingGameId, gameID).apply();
+        gameSharePref.edit().putString(Ki.ongoingGameId, gameID).apply();
         gameSharePref.edit().putString(gameHostUid, hostUid).apply();
 
     }
@@ -3361,7 +3386,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             pinForWhoViews = pinOptionBox.inflate();
             pinMineTV = pinForWhoViews.findViewById(R.id.textViewPinMine);
             pinEveryoneTV = pinForWhoViews.findViewById(R.id.textViewPinEveryone);
-            cancelPinOption = pinForWhoViews.findViewById(R.id.imageViewCancelPin);
+            ImageView cancelPinOption = pinForWhoViews.findViewById(R.id.imageViewCancelPin);
 
             //  ========== pin message for only me -- private
             pinMineTV.setOnClickListener(view -> {
@@ -3422,7 +3447,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                     UserChatUtils.findUserAndDeleteChat(PlayersFragment.adapter, otherUserUid, chatModel.getIdKey());
 
                     // delete the ROOM outside UI
-                    chatViewModel.editOutsideChat( otherUserUid, K.DELETE_ICON + " ...",
+                    chatViewModel.editOutsideChat( otherUserUid, Ki.DELETE_ICON + " ...",
                             null, chatModel.getIdKey());
 
                     // delete inside chat from ROOM
@@ -3492,7 +3517,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                     try{
                         // delete chat from ROOM - outside UI
-                        chatViewModel.editOutsideChat(otherUserUid, K.DELETE_ICON + "  ...",
+                        chatViewModel.editOutsideChat(otherUserUid, Ki.DELETE_ICON + "  ...",
                                 null, chatModel.getIdKey());
 
                         // update outside user UI chatList model
@@ -3628,7 +3653,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         // add emoji to local list and ROOM
                         String chat = messageAdapter.addEmojiReact(text, getChatID, otherUserUid);  // add emoji to inside chat
 
-                        String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "@"+myUserName);
+                        String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "@"+myUserName);
                         if(myDisplayName.length() > 15) myDisplayName = myDisplayName.substring(0, 14);
 
                         // send a signal to add emoji for other user also
@@ -3803,13 +3828,6 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     }
 
-    private String getOthername(String otherId, String otherDisplayName__, String otherUserName__)
-    {
-        // return the contact name or displayed name of other user
-        return contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
-
-    }
-
     @Override
     public void callAllMethods(String otherUid, Context context, Activity activity, boolean onNotification)
     {
@@ -3933,8 +3951,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 pinChatTV.setText(getString(R.string.unpin_));
                 pinTV.setText(getString(R.string.unpin_));
 
-                MainActivity.pinMineTV.setText(getString(R.string.unpinForMe));
-                MainActivity.pinEveryoneTV.setText(getString(R.string.pinForEveryone));
+                pinMineTV.setText(getString(R.string.unpinForMe));
+                pinEveryoneTV.setText(getString(R.string.pinForEveryone));
 
             } else if (isPublicPin)
             {
@@ -3949,8 +3967,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 pinChatTV.setText(getString(R.string.pinChat));
                 pinTV.setText(getString(R.string.pinChat));
 
-                MainActivity.pinMineTV.setText(getString(R.string.pinForMe));
-                MainActivity.pinEveryoneTV.setText(getString(R.string.pinForEveryone));
+                pinMineTV.setText(getString(R.string.pinForMe));
+                pinEveryoneTV.setText(getString(R.string.pinForEveryone));
             }
             pinIcon.setImageResource(R.drawable.baseline_push_pin_24);
         }
@@ -4237,127 +4255,27 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         lastSeenValueListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long lastSeenTimestamp = -1;
 
-                try{
-                    long onlineValue = snapshot.child("presence").exists() ?
-                            (long) snapshot.child("presence").getValue() : -1;
-                    if(onlineValue != -1)
-                    {
-                        if (onlineValue == 1)
-                        {
-                            String online = getString(R.string.online);
-                            textViewLastSeen.setText(online);
-                        } else {
-                            //  Sat Jun 17 23:07:21 GMT+01:00 2023          //  1687042708508
-                            // current date and time
-                            Timestamp stamp = new Timestamp(System.currentTimeMillis());
-                            Date date = new Date(stamp.getTime());
-                            String dateString = String.valueOf(date);
-
-                            // last user date and time
-                            Date d = new Date(onlineValue);
-                            DateFormat formatter = new SimpleDateFormat("h:mm a");
-                            String time = formatter.format(d);
-                            String previousDateString = String.valueOf(d);
-
-                            dateMonth = new HashMap<>();     // months
-                            dateMonth.put("Jan", 1);
-                            dateMonth.put("Feb", 2);
-                            dateMonth.put("Mar", 3);
-                            dateMonth.put("Apr", 4);
-                            dateMonth.put("May", 5);
-                            dateMonth.put("Jun", 6);
-                            dateMonth.put("Jul", 7);
-                            dateMonth.put("Aug", 8);
-                            dateMonth.put("Sep", 9);
-                            dateMonth.put("Oct", 10);
-                            dateMonth.put("Nov", 11);
-                            dateMonth.put("Dec", 12);
-
-                            dateNum = new HashMap<>();      // days
-                            dateNum.put("Mon", 1);
-                            dateNum.put("Tue", 2);
-                            dateNum.put("Wed", 3);
-                            dateNum.put("Thu", 4);
-                            dateNum.put("Fri", 5);
-                            dateNum.put("Sat", 6);
-                            dateNum.put("Sun", 7);
-
-                            String lastYear = previousDateString.substring(30, 34);  // last year
-
-                            int curMonth = dateMonth.get(dateString.substring(4,7));    // Months
-                            int lastMonth = dateMonth.get(previousDateString.substring(4,7));
-
-                            int curDay = dateNum.get(dateString.substring(0,3));    // Mon - Sun
-                            int lastDay = dateNum.get(previousDateString.substring(0,3));
-
-                            String lastDayString = previousDateString.substring(0,3);   // get the day
-
-                            int dateCur = Integer.parseInt(dateString.substring(8, 10));    // day 1 - 30
-                            int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
-
-                            if (curMonth - lastMonth == 0)
-                            {
-                                if (dateCur - dateLast < 7)
-                                {
-                                    if(curDay - lastDay == 0)
-                                    {
-                                        textViewLastSeen.setText("Seen: Today, " + time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 1) {
-                                        textViewLastSeen.setText("Seen: Yesterday, "+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 2) {
-                                        textViewLastSeen.setText("Seen: 2days ago, "+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 3) {
-                                        textViewLastSeen.setText("Seen: 3days ago, "+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 4) {
-                                        textViewLastSeen.setText("Seen: 4days ago, "+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 5) {
-                                        textViewLastSeen.setText("Seen: 5days ago, "+time.toLowerCase()+".");
-                                    } else if (curDay - lastDay == 6) {
-                                        textViewLastSeen.setText("Seen: 6days ago, "+time.toLowerCase()+".");
-                                    }
-                                } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14) {
-                                    textViewLastSeen.setText("Seen: Last week "+lastDayString+".");
-                                } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21) {
-                                    textViewLastSeen.setText("Seen: Last 2 weeks "+lastDayString+".");
-                                } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27) {
-                                    textViewLastSeen.setText("Seen: Last 3 weeks "+lastDayString+".");
-                                } else {
-                                    textViewLastSeen.setText("Seen: a month ago");
-                                }
-                            } else if(curMonth - lastMonth == 1){
-                                textViewLastSeen.setText("Seen: one month ago.");
-                            } else if(curMonth - lastMonth == 2){
-                                textViewLastSeen.setText("Seen: two months ago.");
-                            }else if(curMonth - lastMonth == 3){
-                                textViewLastSeen.setText("Seen: three months ago.");
-                            }else if(curMonth - lastMonth == 4){
-                                textViewLastSeen.setText("Seen: Four months ago.");
-                            }else if(curMonth - lastMonth == 5){
-                                textViewLastSeen.setText("Seen: Five months ago.");
-                            } else {
-                                textViewLastSeen.setText("Seen: "+dateLast +"/"+ lastMonth+"/"+ lastYear);
-                            }
-
-                        }
-
-                    } else{
-                        textViewLastSeen.setText(context.getString(R.string.unavailable));
-                    }
-                } catch (Exception e){
-                    String appName = context.getString(R.string.app_name);
-                    textViewLastSeen.setText(appName);
+                if (snapshot.child("presence").exists()){
+                    Object getTimeStamp = snapshot.child("presence").getValue();
+                    if(getTimeStamp != null) lastSeenTimestamp = (long) getTimeStamp;
                 }
+
+                String lastSeenMessage = TimeUtils.getUserLastSeenOnChat(lastSeenTimestamp, context);
+                textViewLastSeen.setText(lastSeenMessage);
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                // Handle database error if needed
             }
         };
 
         refUsers.child(otherUid).child("general").addValueEventListener(lastSeenValueListener);
     }
+
 
     // This method will be called by NetworkChangeReceiver whenever network status changes   // reload message loadStatus
     @Override
@@ -4393,7 +4311,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     @Override
     public void msgBackgroundActivities(String otherUid) {
 
-        K.executors.execute(() ->
+        Kc.executor.execute(() ->
         {
             newChatNumberPosition = -1;
             // set my status to be true in case I receive msg, it will be tick as seen
@@ -4497,7 +4415,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         if(editOrReply.equals("reply")){
 
             replyText = chat;
-            replyFrom = messageModel.getFromUid() + K.JOIN + messageModel.getSenderName();
+            replyFrom = messageModel.getFromUid() + Ki.JOIN + messageModel.getSenderName();
             String from = getOtherUserName(null, messageModel);
             nameReply.setText(from);
 
@@ -4583,7 +4501,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         msgId = msgId_;
         message = message_;
         timeStamp = timeStamp_;
-        pinByWho = myProfileShareRef.getString(K.PROFILE_DISNAME, myUserName);
+        pinByWho = myProfileShareRef.getString(Ki.PROFILE_DISNAME, myUserName);
         // show pin option
         setPinForWhoViews();
         pinForWhoViews.setVisibility(View.VISIBLE);
@@ -4675,7 +4593,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private Map<String, Object> forwardChatsMap(MessageModel chatModel)
     {
         Map<String, Object> forwardMessageMap = new HashMap<>();
-        String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, myUserName);
+        String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, myUserName);
 
         forwardMessageMap.put("senderName", myDisplayName);
         forwardMessageMap.put("fromUid", myId);
@@ -4713,7 +4631,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         } else {
 
             String newChatNumberKey = refMsgFast.child(myId).child(otherId).push().getKey();  // create an id for each message
-            String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "@"+getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "@"+getMyUserName);
 
             String chatKey = refMsgFast.child(myId).child(otherId).push().getKey();  // create an id for each message
 
@@ -4728,7 +4646,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // save otherId to a photo key or VN key, so it doesn't send to another user
             int delivery = chatDeliveryStatus;
             if(isSendingVoiceNote) {
-                voiceNoteIdShareRef.edit().putString(chatKey, otherId + K.JOIN + "yes").apply();
+                voiceNoteIdShareRef.edit().putString(chatKey, otherId + Ki.JOIN + "yes").apply();
                 delivery = 700033;
             }
 
@@ -4806,9 +4724,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
                 final String emoji = emoji_1;
 
-                if(messageModel.getType() == K.type_pin)     // @maro pin a chat
+                if(messageModel.getType() == Ki.type_pin)     // @maro pin a chat
                 {
-                    String displayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "@"+myUserName);
+                    String displayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "@"+myUserName);
                     String pinNoty = emojiOnly.equals(getString(R.string.pin)) ? getString(R.string.pinAChat) : getString(R.string.unPinAChat);
                     text_1 = displayName + " " + pinNoty;
                     messageModel.setReplyID(msgId);
@@ -4851,7 +4769,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         refLastDetails.child(myId).child(otherUid).updateChildren(getOutsideChatMap);
         refLastDetails.child(otherUid).child(myId).updateChildren(getOutsideChatMap);
 
-        if(messageModel.getType() == K.type_game)
+        if(messageModel.getType() == Ki.type_game)
         {
             getOutsideChatMap.put("gameMode", gameMode);
             getOutsideChatMap.put("stakeAmount", stakeAmount);
@@ -4863,7 +4781,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
             IdTokenUtil.generateToken(token -> {
 
-                GameAPI gameAPI = K.retrofit.create(GameAPI.class);
+                GameAPI gameAPI = Ki.retrofit.create(GameAPI.class);
 
                 GameSignalM signalM = new GameSignalM(token, otherUid, getOutsideChatMap);
 
@@ -4987,7 +4905,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 if(forwardPhotoPath != null || forwardType == 3)
                 {
                     // save otherId to a photo key, so it doesn't send to another user
-                    documentIdShareRef.edit().putString(chatId, otherUid + K.JOIN + "yes").apply();
+                    documentIdShareRef.edit().putString(chatId, otherUid + Ki.JOIN + "yes").apply();
                     delivery = 700033;
                     if(imageSize_ == null){
                         Uri uriOnPhone = photoOriginal.startsWith("/storage/") ? Uri.fromFile(new File(photoOriginal))
@@ -4998,10 +4916,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 } else if (forwardType == 4 || forwardType == 1)
                 {
                     delivery = 700033;  // so as to enable sending
-                    voiceNoteIdShareRef.edit().putString(chatId, otherUid + K.JOIN + "yes").apply();
+                    voiceNoteIdShareRef.edit().putString(chatId, otherUid + Ki.JOIN + "yes").apply();
                 }
 
-                String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, myUserName);
+                String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, myUserName);
 
                 // save to local list for fast update
                 MessageModel messageModel = new MessageModel(forwardChat, myDisplayName, myId, replyFrom_,
@@ -5140,7 +5058,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 otherId, idKey, text, emojiOnly);
 
         // update the ROOM outside UI
-        chatViewModel.editOutsideChat(otherId, K.EDIT_ICON + text,
+        chatViewModel.editOutsideChat(otherId, Ki.EDIT_ICON + text,
                 emojiOnly, idKey);
 
         // remove the typingRunnable for checking network
@@ -5355,7 +5273,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
 //        getLastScrollPosition(otherUID);    // retrieve the last previous scroll position
 
-        K.executors.execute(() -> {
+        Kc.executor.execute(() -> {
 
             if(chatViewModel != null){
                 // fetch chats from ROOM
@@ -5537,7 +5455,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
             {
-                K.executors.execute(() ->
+                Kc.executor.execute(() ->
                 {
                     int itemCount = (int) snapshot.getChildrenCount();
                     int processedItems = 0;
@@ -5721,7 +5639,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
                                         // delete the ROOM outside UI
                                         chatViewModel.editOutsideChat(otherUid,
-                                                K.DELETE_ICON + " ...",
+                                                Ki.DELETE_ICON + " ...",
                                                 null, outSideChatID);
 
                                         // update user chatList model
@@ -5759,7 +5677,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                K.executors.execute(() -> {
+                Kc.executor.execute(() -> {
                     if (snapshot.getValue() != null && snapshot.getValue().toString().equals("clear")) {
                         if (adapterMap.get(otherUid) != null) {
                             // clear local list -- adapter
@@ -5772,9 +5690,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         chatViewModel.deleteChatByUserId(otherUid, myId);
 
                         if(ChatsFragment.adapter != null)   // reset num of new chat to 0
-                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, K.fromChatFragment, false);
+                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, Ki.fromChatFragment, false);
                         if(PlayersFragment.adapter != null)
-                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, K.fromPlayerFragment, false);
+                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherUid, Ki.fromPlayerFragment, false);
 
                     }
                 });
@@ -5793,7 +5711,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                K.executors.execute(()-> {
+                Kc.executor.execute(()-> {
                     if(snapshot.getValue() != null && snapshot.getValue().toString().equals("clear"))
                     {
                         if(adapterMap.get(otherUid) != null )
@@ -5891,7 +5809,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                K.executors.execute(() ->
+                Kc.executor.execute(() ->
                 {
                     for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         if(snapshot1.exists()){
@@ -5923,7 +5841,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
             {
-                K.executors.execute(() ->
+                Kc.executor.execute(() ->
                 {
                     int totalItem = (int) snapshot.getChildrenCount();
                     int processedItems = 0;
@@ -5951,10 +5869,10 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                                         runOnUiThread(()-> adapter.notifyItemChanged(chatPosition, new Object()));
 
                                         // update delivery status for outSide chat
-                                        PlayersFragment.adapter.updateDeliveryToRead(otherId, K.fromPlayerFragment);
+                                        PlayersFragment.adapter.updateDeliveryToRead(otherId, Ki.fromPlayerFragment);
 
                                         if(ChatsFragment.adapter != null)
-                                            ChatsFragment.adapter.updateDeliveryToRead(otherId, K.fromChatFragment);
+                                            ChatsFragment.adapter.updateDeliveryToRead(otherId, Ki.fromChatFragment);
 
                                         // update ROOM for inside chat
                                         chatViewModel.updateDeliveryStatus(otherId, getChatId, 700016);
@@ -6020,7 +5938,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                         // add emoji to local list and ROOM
                         String chat = messageAdapter.addEmojiReact(getEmoji, chatID, otherUserUid);
 
-                        String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "@"+myUserName);
+                        String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "@"+myUserName);
                         if(myDisplayName.length() > 15) myDisplayName = myDisplayName.substring(0, 14);
 
                         // send a signal to add emoji for other user also
@@ -6076,7 +5994,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
             {
-                K.executors.execute(() ->
+                Kc.executor.execute(() ->
                 {
                     int itemCount = (int) snapshot.getChildrenCount();
                     int processedItems = 0;
@@ -6244,7 +6162,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                K.executors.execute(()->
+                Kc.executor.execute(()->
                 {
                     for (DataSnapshot snapshotPin : snapshot.getChildren()) {
                         // check if pin message still exists
@@ -6470,7 +6388,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             Toast.makeText(this, "Chat unpin!", Toast.LENGTH_SHORT).show();
 
             // send to database
-            sendMessage(getString(R.string.youUnpinPublicly), getString(R.string.unpin), K.type_pin,    // unpin publicly
+            sendMessage(getString(R.string.youUnpinPublicly), getString(R.string.unpin), Ki.type_pin,    // unpin publicly
                     null, null, otherUserUid, false);
 
         } else {
@@ -6507,7 +6425,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             Toast.makeText(this, "Chat pin!", Toast.LENGTH_SHORT).show();
 
             // send to database
-            sendMessage(getString(R.string.youPinPublicly), getString(R.string.pin), K.type_pin,    // pin publicly
+            sendMessage(getString(R.string.youPinPublicly), getString(R.string.pin), Ki.type_pin,    // pin publicly
                     null, null, otherUserUid, false );
         }
 
@@ -7049,8 +6967,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                             adapter.notifyItemChanged(chatPosition, new Object());
 
                             // update delivery status for outSide chat
-                            PlayersFragment.adapter.updateDeliveryStatus(otherUID_, K.fromPlayerFragment);
-                            if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUID_, K.fromChatFragment);
+                            PlayersFragment.adapter.updateDeliveryStatus(otherUID_, Ki.fromPlayerFragment);
+                            if(ChatsFragment.adapter != null) ChatsFragment.adapter.updateDeliveryStatus(otherUID_, Ki.fromChatFragment);
 
                             // update ROOM for inside chat
                             chatViewModel.updateDeliveryStatus(otherUID_, chatKey, 700024);
@@ -7489,7 +7407,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 });
 
                 if(missCallModel != null && missCallModel.getFromUid().equals(data.getSenderUid())){
-                    missCallOrGameMethod(K.type_call, getString(R.string.missed), data.getSenderUid()); // update chat UI
+                    missCallOrGameMethod(Ki.type_call, getString(R.string.missed), data.getSenderUid()); // update chat UI
                 }
 
                 // to enable viewCallerActivity to end or finish when other user end call
@@ -7530,7 +7448,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         runnableOnAnotherCall = () -> activeOnCall = 0;
         handlerOnAnotherCall.postDelayed(runnableOnAnotherCall, 33_000);
 
-        missCallOrGameMethod(K.type_call, getString(R.string.incomingCall), callData.getSenderUid());
+        missCallOrGameMethod(Ki.type_call, getString(R.string.incomingCall), callData.getSenderUid());
         // make activeCall return back to 0 after 5min if I didn't pick
 //        runnableOnAnotherCall2 = () -> activeOnCall = 0;
 //        handlerOnAnotherCall2.postDelayed(runnableOnAnotherCall2, 300_000);
@@ -7540,8 +7458,8 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     //      ================      game methods           ========================
     private void checkIfGameHasStarted() {
 
-        String gameId = gameSharePref.getString(K.ongoingGameId, null);
-        String hostUid_ = gameSharePref.getString(K.gameHostUid, null);
+        String gameId = gameSharePref.getString(Ki.ongoingGameId, null);
+        String hostUid_ = gameSharePref.getString(Ki.gameHostUid, null);
         if (gameId != null && hostUid_ != null) {
             refGameStarts.child(gameId).child(hostUid_).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -7747,7 +7665,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     private void signalToAwait(String hostUid){
 
-        GameAPI gameAPI = K.retrofit.create(GameAPI.class);
+        GameAPI gameAPI = Ki.retrofit.create(GameAPI.class);
 
         IdTokenUtil.generateToken(token -> {
             TwoValueM twoValueM = new TwoValueM(token, hostUid);
@@ -8044,17 +7962,17 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 
     public static void deleteUnusedPhotoFromSharePrefsAndAppMemory(Context context){
         //  store each photo cropping or painting uri to enable delete from onCreate when app is onDestroy
-        unusedPhotoShareRef = context.getSharedPreferences(K.URI_PREF, Context.MODE_PRIVATE);
+        unusedPhotoShareRef = context.getSharedPreferences(Ki.URI_PREF, Context.MODE_PRIVATE);
 
         // delete the uri photo from app memory
-        String json = unusedPhotoShareRef.getString(K.OLD_URI_LIST, null);
+        String json = unusedPhotoShareRef.getString(Ki.OLD_URI_LIST, null);
         if(json != null){
             Gson gson = new Gson();
             List<String> uriList = gson.fromJson(json, List.class);
 
             boolean isDoneDeleting = uriList != null && deleteOldUriFromAppMemory(uriList, context);
             if(isDoneDeleting){
-                unusedPhotoShareRef.edit().remove(K.OLD_URI_LIST).apply();
+                unusedPhotoShareRef.edit().remove(Ki.OLD_URI_LIST).apply();
             }
         }
     }
@@ -8126,9 +8044,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
                 }
 
                 // update share_preference
-                myProfileShareRef.edit().putString(K.PROFILE_USERNAME, userName).apply();
-                myProfileShareRef.edit().putString(K.PROFILE_DISNAME, displayName).apply();
-                myProfileShareRef.edit().putString(K.PROFILE_HINT, hint).apply();
+                myProfileShareRef.edit().putString(Ki.PROFILE_USERNAME, userName).apply();
+                myProfileShareRef.edit().putString(Ki.PROFILE_DISNAME, displayName).apply();
+                myProfileShareRef.edit().putString(Ki.PROFILE_HINT, hint).apply();
             }
 
             @Override
@@ -8165,9 +8083,9 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     private void getProfileSharePref(){
 
         // update share_preference
-        String username = myProfileShareRef.getString(K.PROFILE_USERNAME, "---");
-        String displayName = myProfileShareRef.getString(K.PROFILE_DISNAME, "---");
-        String hint = myProfileShareRef.getString(K.PROFILE_HINT, getString(R.string.hint2));
+        String username = myProfileShareRef.getString(Ki.PROFILE_USERNAME, "---");
+        String displayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, "---");
+        String hint = myProfileShareRef.getString(Ki.PROFILE_HINT, getString(R.string.hint2));
 //        String email = myProfileShareRef.getString(K.PROFILE_EMAIL, "---");
 
         textViewDisplayName.setText(displayName);
@@ -8191,7 +8109,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
         {
             appPermissionCheck.requestStorage(this);
         } else {
-            new Thread(() -> FetchContacts.readContacts(this)).start();   // permission
+            new Thread(() -> ContactUtils.readContacts(this)).start();   // permission
         }
 
         if(!appPermissionCheck.isNotificationOk(this))
@@ -8230,7 +8148,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             // turn off my online and set my last seen date/time
 //            refUsers.child(myId).child("general").child("presence").setValue(ServerValue.TIMESTAMP);
 
-            K.executors.execute(()->{
+            Kc.executor.execute(()->{
 
                 if(constraintMsgBody.getVisibility() == View.VISIBLE){
                     try{
@@ -8397,7 +8315,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //                        ChatListAdapter.previousView = null;    // return it back to null
 //                    }
 
-                    K.executors.execute(() -> {
+                    Kc.executor.execute(() -> {
 
                         if (otherUserUid != null) {
                             Map<String, Object> mapUpdate = new HashMap<>();
@@ -8487,7 +8405,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if(requestCode == K.RECORDING_REQUEST_CODE && grantResults.length > 0
+        if(requestCode == Ki.RECORDING_REQUEST_CODE && grantResults.length > 0
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED){
 //            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //            activityResultLauncherForSelectImage.launch(intent);
@@ -8516,7 +8434,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
 //                &&  grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //            Toast.makeText(this, "write is granted", Toast.LENGTH_SHORT).show();
 
-        }else if(requestCode == K.CALL_CAMERA_REQUEST_CODE && grantResults.length > 0
+        }else if(requestCode == Ki.CALL_CAMERA_REQUEST_CODE && grantResults.length > 0
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             if(appPermissionCheck.isRecordingOk(this)){
@@ -8532,26 +8450,26 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
             }
 
         }
-        else if(requestCode == K.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
+        else if(requestCode == Ki.CALL_RECORDING_REQUEST_CODE && grantResults.length > 0
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             answerCall();
         }
-        else if(requestCode == K.CONTACTS_REQUEST_CODE && grantResults.length > 0
+        else if(requestCode == Ki.CONTACTS_REQUEST_CODE && grantResults.length > 0
                 &&  grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
-            new Thread(() -> FetchContacts.readContacts(this)).start();   // onRequestPermission
+            new Thread(() -> ContactUtils.readContacts(this)).start();   // onRequestPermission
         }
-        else if (requestCode == K.BIOMETRIC_REQUEST_CODE && grantResults.length > 0
+        else if (requestCode == Ki.BIOMETRIC_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
             // Permission granted
             Toast.makeText(this, "I have verify!", Toast.LENGTH_SHORT).show();
             showFingerPrint();
         } else {
-            if(requestCode == K.RECORDING_REQUEST_CODE){
+            if(requestCode == Ki.RECORDING_REQUEST_CODE){
                 Toast.makeText(mainActivityContext, "Go to phone app settings and permit Microphone", Toast.LENGTH_SHORT).show();
-            } else if(requestCode == K.CALL_CAMERA_REQUEST_CODE || requestCode == K.CALL_RECORDING_REQUEST_CODE){
+            } else if(requestCode == Ki.CALL_CAMERA_REQUEST_CODE || requestCode == Ki.CALL_RECORDING_REQUEST_CODE){
                 rejectCall();
                 Toast.makeText(mainActivityContext, getString(R.string.permissionCall), Toast.LENGTH_SHORT).show();
             }
@@ -8619,7 +8537,7 @@ public class MainActivity extends AppCompatActivity implements FragmentListener,
     @Override
     public void busyCall() {
 
-        MainActivity.updateCallOrGameChat(K.type_call, getString(R.string.busy)); // update chat UI
+        MainActivity.updateCallOrGameChat(Ki.type_call, getString(R.string.busy)); // update chat UI
 
         CallModel data = new CallModel(myId, myUserName, otherUserUid, otherUserName, null, DataModelType.Busy, false);
         refCalls.child(myId).child(currentUserUidOnCall).setValue(gson.toJson(data));

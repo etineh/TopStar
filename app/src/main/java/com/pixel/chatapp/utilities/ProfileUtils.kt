@@ -1,6 +1,6 @@
 package com.pixel.chatapp.utilities
 
-import com.pixel.chatapp.constants.K
+import com.pixel.chatapp.constants.Ki
 import com.pixel.chatapp.view_controller.MainActivity
 
 class ProfileUtils {
@@ -10,7 +10,7 @@ class ProfileUtils {
         fun getMyDisplayOrUsername(): String? {
 
             return MainActivity.myProfileShareRef.getString(
-                K.PROFILE_DISNAME,
+                Ki.PROFILE_DISNAME,
                 "@" + MainActivity.getMyUserName
             )
         }

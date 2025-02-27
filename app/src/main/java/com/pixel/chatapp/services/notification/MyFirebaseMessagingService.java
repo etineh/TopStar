@@ -2,21 +2,11 @@ package com.pixel.chatapp.services.notification;
 
 import static com.pixel.chatapp.view_controller.MainActivity.adapterMap;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Application;
-//import android.app.RemoteInput;
 import androidx.annotation.NonNull;
 
-import android.app.Person;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,41 +16,29 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.pixel.chatapp.constants.K;
-import com.pixel.chatapp.dataModel.ContactModel;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.dataModel.MessageModel;
 import com.pixel.chatapp.dataModel.UserOnChatUI_Model;
 import com.pixel.chatapp.services.roomDatabase.repositories.UserChatRepository;
 import com.pixel.chatapp.utilities.ChatUtils;
 
-import android.util.Log;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = "MyFirebaseMsgService";
-    public static List<UserOnChatUI_Model> mUsersID = new ArrayList<>();
+//    private static final String TAG = Ki.FIREBASE_SERVICE;
     private static final String myId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     private static final DatabaseReference refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
     private static final DatabaseReference refLastDetails = FirebaseDatabase.getInstance().getReference("UsersList");
 //    private final static DatabaseReference refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        SharedPreferences contactNameShareRef = getSharedPreferences(K.CONTACTNAME, Context.MODE_PRIVATE);
+        SharedPreferences contactNameShareRef = getSharedPreferences(Ki.CONTACTNAME, Context.MODE_PRIVATE);
 
         Map<String, String> data = remoteMessage.getData();
 
@@ -80,7 +58,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // If there's new message from otherUser, add here to adapter UI
             if(messageModel.getFromUid() != null)
             {
-                K.executors.execute(()->
+                Kc.executor.execute(()->
                 {
                     if(adapterMap != null && adapterMap.get(otherUid) != null){
                         if(messageModel.getIdKey() != null) {
@@ -121,11 +99,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             if(currentNewChatNumber > 1) // add increment to previous new chat number -- inside chat
             {
-                MessageModel modelChat = userRepository.findNewChatNumber(otherUid, myId, K.type_pin, "yes");
+                MessageModel modelChat = userRepository.findNewChatNumber(otherUid, myId, Ki.type_pin, "yes");
                 if(modelChat != null)
                 {
                     // update chat count
-                    modelChat.setNewChatNumberID(currentNewChatNumber+"");
+                    modelChat.setNewChatNumberID(String.valueOf(currentNewChatNumber));
                     userRepository.updateChats(modelChat);
 
                 } else {
@@ -135,8 +113,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } else // it is the first new chat // generate new id and add count
             {
                 MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
-                        System.currentTimeMillis(), messageModel.getNewChatNumberID(), "yes", currentNewChatNumber+"",
-                        null, 0, K.type_pin, null, null, false, false,
+                        System.currentTimeMillis(), messageModel.getNewChatNumberID(), "yes", String.valueOf(currentNewChatNumber),
+                        null, 0, Ki.type_pin, null, null, false, false,
                         null, null, null, null, null, null);
 
                 newNewCountModel.setMyUid(myId);
@@ -151,8 +129,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //System.out.println("what is number: " + currentNewChatNumber);
             refLastDetails.child(myId).child(otherUid).child("numberOfNewChat").setValue(currentNewChatNumber).addOnCompleteListener(task ->
             {
-                if(task.isSuccessful()) System.out.println("it is success: " + task.getResult()+"");
-                else System.out.println("it is failed: " + task.getException().getMessage());
+                if(task.isSuccessful()) System.out.println("it is success: " + task.getResult());
+                else System.out.println("it is failed: " + Objects.requireNonNull(task.getException()).getMessage());
             });
 
         } else  // first time user - add to database
@@ -163,11 +141,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 public void onDataChange(@NonNull DataSnapshot snapshot)
                 {
                     UserOnChatUI_Model userModel = snapshot.getValue(UserOnChatUI_Model.class);
-                    userModel.setOtherUid(otherUid);
-                    userModel.setMyUid(myId);
-                    userModel.setNumberOfNewChat(1);
 
-                    userRepository.insertUser(userModel);
+                    if (userModel != null) {
+                        userModel.setOtherUid(otherUid);
+                        userModel.setMyUid(myId);
+                        userModel.setNumberOfNewChat(1);
+
+                        userRepository.insertUser(userModel);
+                    }
                 }
 
                 @Override
@@ -193,7 +174,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private MessageModel messageModelMethod(Map<String, String> data)
     {
         String idKey = data.get("idKey");
-        String myUid = data.get("myUid");
+//        String myUid = data.get("myUid");
         String fromUid = data.get("fromUid");
         String message = data.get("message");
         String emojiOnly = data.get("emojiOnly");
@@ -203,14 +184,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String replyMsg = data.get("replyMsg");
         long timeSent = Long.parseLong(Objects.requireNonNull(data.get("timeSent")));
         String newChatNumberID = data.get("newChatNumberID");
-        int msgStatus = Integer.parseInt(data.get("msgStatus"));
-        int type = Integer.parseInt(data.get("type"));
+        int msgStatus = Integer.parseInt(Objects.requireNonNull(data.get("msgStatus")));
+        int type = Integer.parseInt(Objects.requireNonNull(data.get("type")));
         String imageSize = data.get("imageSize");
         String replyID = data.get("replyID");
         boolean chatIsPin = Boolean.parseBoolean(data.get("chatIsPin"));
         boolean chatIsForward = Boolean.parseBoolean(data.get("chatIsForward"));
         String emoji = data.get("emoji");
-        String otherUid = data.get("otherUid");
+//        String otherUid = data.get("otherUid");
         String voiceNote = data.get("voiceNote");
         String vnDuration = data.get("vnDuration");
         String photoUriPath = data.get("photoUriPath");
@@ -224,76 +205,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     }
 
-    @SuppressLint("RestrictedApi")
-    private void updateNotification(int notificationId, Context context, String userId, String replyText, String from)
-    {
-        List<NotificationCompat.MessagingStyle.Message> messages = NotificationHelper.userMessages.get(userId);
-        if (messages != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                messages.add(new NotificationCompat.MessagingStyle.Message(replyText, System.currentTimeMillis(), androidx.core.app.Person.fromAndroidPerson(new Person.Builder().setName("You").build())));
-            }
-        }
-
-        // Update the notification with the reply
-        NotificationCompat.Builder notificationBuilder = NotificationHelper.getNotificationBuilder();
-        if (notificationBuilder != null) {
-            NotificationCompat.MessagingStyle messagingStyle = NotificationHelper.getStyle();
-            if (messagingStyle != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    messagingStyle.addMessage(replyText, System.currentTimeMillis(), androidx.core.app.Person.fromAndroidPerson(new Person.Builder().setName(from).build()));
-                }
-                notificationBuilder.setStyle(messagingStyle);
-            }
-
-            // Ensure the notification remains visible
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            notificationManager.notify(notificationId, notificationBuilder.build());
-        }
-    }
 
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d(TAG, "Refreshed token: " + token);
-//        MainActivity.generateFCMToken();
-//        refUsers.child(myId).child("general").child("fcmToken").setValue(token);
-
-    }
-
-    public static void readContactFromFile(Context context)
-    {
-        FileInputStream fis = null;
-        try {
-            fis = context.openFileInput("contacts.json");
-            InputStreamReader inputStreamReader = new InputStreamReader(fis);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            String json = stringBuilder.toString();
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<ContactModel>>(){}.getType();
-
-            mUsersID = gson.fromJson(json, listType);
-            System.out.println("what is user total list: " + mUsersID.size());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
     }
 
 }

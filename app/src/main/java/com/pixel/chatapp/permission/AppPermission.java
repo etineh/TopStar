@@ -9,7 +9,7 @@ import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 
 public class AppPermission {
 
@@ -30,7 +30,7 @@ public class AppPermission {
         } else {    // for below SDK 33 or below android version 13
             permission = Manifest.permission.READ_EXTERNAL_STORAGE;
         }
-        ActivityCompat.requestPermissions(activity, new String[]{permission, Manifest.permission.WRITE_EXTERNAL_STORAGE}, K.STORAGE_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{permission, Manifest.permission.WRITE_EXTERNAL_STORAGE}, Ki.STORAGE_REQUEST_CODE);
     }
 
     public boolean isContactOk(Context context) {
@@ -38,7 +38,7 @@ public class AppPermission {
     }
 
     public void requestContact(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, K.CONTACTS_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, Ki.CONTACTS_REQUEST_CODE);
     }
 
     public boolean isRecordingOk(Context context) {
@@ -46,7 +46,7 @@ public class AppPermission {
     }
 
     public void requestRecording(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, K.RECORDING_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, Ki.RECORDING_REQUEST_CODE);
     }
 
     public boolean isCameraOk(Context context) {
@@ -54,15 +54,15 @@ public class AppPermission {
     }
 
     public void requestCamera(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, K.CAMERA_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Ki.CAMERA_REQUEST_CODE);
     }
 
     public void requestCameraForCall(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, K.CALL_CAMERA_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Ki.CALL_CAMERA_REQUEST_CODE);
     }
 
     public void requestRecordingForCall(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, K.CALL_RECORDING_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, Ki.CALL_RECORDING_REQUEST_CODE);
     }
 
     public boolean isBiometricOk(Context context) {
@@ -70,7 +70,7 @@ public class AppPermission {
     }
 
     public void requestBiometric(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.USE_BIOMETRIC}, K.BIOMETRIC_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.USE_BIOMETRIC}, Ki.BIOMETRIC_REQUEST_CODE);
     }
 
     public boolean isNotificationOk(Context context) {
@@ -78,7 +78,7 @@ public class AppPermission {
     }
 
     public void requestNotification(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.POST_NOTIFICATIONS}, K.NOTIFICATION_REQUEST_CODE);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.POST_NOTIFICATIONS}, Ki.NOTIFICATION_REQUEST_CODE);
     }
 
 }

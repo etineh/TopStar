@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.IdTokenUtil;
 import com.pixel.chatapp.utilities.OTPGenerator;
 import com.pixel.chatapp.utilities.PhoneUtils;
@@ -249,7 +249,7 @@ public class OTPActivity extends AppCompatActivity{
 
         IdTokenUtil.generateToken(token->{
 
-            ProfileApiDao profileApiDao = K.retrofit.create(ProfileApiDao.class);
+            ProfileApiDao profileApiDao = Ki.retrofit.create(ProfileApiDao.class);
             ThreeValueM valueM = new ThreeValueM(token, previousData, newData);
 
             profileApiDao.number(valueM).enqueue(new Callback<ResultApiM>() {
@@ -334,7 +334,7 @@ public class OTPActivity extends AppCompatActivity{
     }
     
     public void updateEmail(){
-        ProfileApiDao profileApiDao = K.retrofit.create(ProfileApiDao.class);
+        ProfileApiDao profileApiDao = Ki.retrofit.create(ProfileApiDao.class);
 
         ThreeValueM valueM = new ThreeValueM(token, newData, pass);
 

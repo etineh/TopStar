@@ -26,6 +26,7 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.pixel.chatapp.R;
+import com.pixel.chatapp.constants.Kc;
 import com.pixel.chatapp.interface_listeners.SuccessAndFailureListener;
 import com.pixel.chatapp.dataModel.MessageModel;
 
@@ -34,20 +35,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Photo_Video_Utils {
 
-    private static final ExecutorService executor = Executors.newCachedThreadPool();
-
     public static void downloadImageFromInternetAndShare(Context context, String imageUrl, String shareTitle) {
 
-        executor.execute(() -> {
+        Kc.executor.execute(() -> {
             try {
                 FutureTarget<Bitmap> futureTarget = Glide.with(context)
                         .asBitmap()
@@ -151,58 +146,34 @@ public class Photo_Video_Utils {
 
     }
 
-    public static Uri uniqueUriForSharingPhotoOrDoc(MessageModel model, Context context){
+    public static Uri uniqueUriForSharingPhotoOrDoc(MessageModel model, Context context)
+    {
         // send app logo in case any error getting the photo uri path
-        Uri photoUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.drawable.logo);
+        Uri contentUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.drawable.logo);
 
         if(model.getPhotoUriOriginal() != null){
-            if(model.getPhotoUriOriginal().startsWith("file:/")) {
-                try {
-                    File file = new File(new URI( model.getPhotoUriOriginal() ));
-                    photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
 
-            } else if(model.getPhotoUriOriginal().startsWith("/storage")) {
-                File file = new File( model.getPhotoUriOriginal() );
-                photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
+            contentUri = FileUtils.convertFileOrStorageUriToContentUri(context, model.getPhotoUriOriginal());
 
-            }else if (model.getPhotoUriOriginal().startsWith("content:/"))
-            {
-                photoUri = Uri.parse(model.getPhotoUriOriginal());
-            }
         } else if (model.getVoiceNote() != null) {
-            if(model.getVoiceNote().startsWith("file:/")) {
-                try {
-                    File file = new File(new URI( model.getVoiceNote() ));
-                    photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
 
-            }
-            else if(model.getVoiceNote().startsWith("/storage")) {
-                File file = new File( model.getVoiceNote() );
-                photoUri = FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
-            }else if (model.getVoiceNote().startsWith("content:/")) {
-                photoUri = Uri.parse(model.getVoiceNote());
-            }
+            contentUri = FileUtils.convertFileOrStorageUriToContentUri(context, model.getVoiceNote());
 
         }
-        return photoUri;
+
+        return contentUri;
 
         //  content://media/external/images/media/1000143399  -- from device
         //  file:///storage/emulated/0/Android/data/com.pixel.chatapp/files/Media/Photos/WinnerChat_1707594880207.jpg -- from app storage
     }
 
 
-    public static void saveMediaToGallery(Context context, String photoUriString, SuccessAndFailureListener successAndFailureListener)
+    public static void saveMediaToGallery(Context context, String mediaUriString, SuccessAndFailureListener sfListener)
     {
-        Uri mediaUri = Uri.parse(photoUriString);  // Convert the string to a Uri
+        Uri mediaUri = FileUtils.convertFileOrStorageUriToContentUri(context, mediaUriString);
 
         if (mediaUri == null) {
-            successAndFailureListener.onFailure(context.getString(R.string.notFound));
+            sfListener.onFailure(context.getString(R.string.notFound));
             return;
         }
 
@@ -215,17 +186,7 @@ public class Photo_Video_Utils {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             // Save the bitmap to the gallery
-                            saveImageBitmapToGallery(context, resource, new SuccessAndFailureListener() {
-                                @Override
-                                public void onSuccess() {
-                                    successAndFailureListener.onSuccess();
-                                }
-
-                                @Override
-                                public void onFailure(String error) {
-                                    successAndFailureListener.onFailure(error);
-                                }
-                            });
+                            Kc.executor.execute(() -> savePhotoToGallery(context, resource, sfListener));
                         }
 
                         @Override
@@ -235,36 +196,25 @@ public class Photo_Video_Utils {
 
                         @Override
                         public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            successAndFailureListener.onFailure("glide error");
+                            sfListener.onFailure("glide error");
                         }
                     });
 
         } else if (FileUtils.isVideoFile(mediaUri, context))    // Handle video saving
         {
             //  content://media/external/video/media/1000040476
-            saveVideoToGallery(context, mediaUri, new SuccessAndFailureListener(){
-
-                @Override
-                public void onSuccess() {
-                    successAndFailureListener.onSuccess();
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    successAndFailureListener.onFailure(error);
-                }
-            });
+            Kc.executor.execute(() -> saveVideoToGallery(context, mediaUri, sfListener) );
 
         } else {
-            successAndFailureListener.onFailure("unsupported file");
+            sfListener.onFailure(context.getString(R.string.unsupportedFile));
         }
 
     }
 
-    private static void saveImageBitmapToGallery(Context context, Bitmap bitmap, SuccessAndFailureListener successAndFailureListener)
+    private static void savePhotoToGallery(Context context, Bitmap bitmap, SuccessAndFailureListener successAndFailureListener)
     {
         if (bitmap == null) {
-            successAndFailureListener.onFailure(context.getString(R.string.notFound));
+            Kc.handler.post(()-> successAndFailureListener.onFailure(context.getString(R.string.notFound)));
             return;
         }
 
@@ -282,7 +232,7 @@ public class Photo_Video_Utils {
             Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
             try {
                 if (imageUri == null) {
-                    successAndFailureListener.onFailure(context.getString(R.string.notFound));
+                    Kc.handler.post(()-> successAndFailureListener.onFailure(context.getString(R.string.notFound)));
                     return;
                 }
                 fos = resolver.openOutputStream(imageUri);
@@ -290,10 +240,10 @@ public class Photo_Video_Utils {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 fos.close();
 
-                successAndFailureListener.onSuccess();
+                Kc.handler.post(()-> successAndFailureListener.onSuccess(context.getString(R.string.savedToGallery)) );
 
             } catch (IOException e) {
-                successAndFailureListener.onFailure(e.getMessage());
+                Kc.handler.post(()-> successAndFailureListener.onFailure(e.getLocalizedMessage()));
                 e.printStackTrace();
             }
 
@@ -307,10 +257,13 @@ public class Photo_Video_Utils {
                 fos.close();
 
                 MediaScannerConnection.scanFile( context, new String[]{imageFile.getAbsolutePath()},
-                        null, (path, uri) -> successAndFailureListener.onSuccess() );
+                        null, (path, uri) ->
+                                Kc.handler.post(()-> successAndFailureListener.onSuccess(context.getString(R.string.savedToGallery)
+                        ))
+                );
 
             } catch (IOException e) {
-                successAndFailureListener.onFailure(e.getLocalizedMessage());
+                Kc.handler.post(()-> successAndFailureListener.onFailure(e.getLocalizedMessage()));
                 e.printStackTrace();
             }
         }
@@ -327,7 +280,7 @@ public class Photo_Video_Utils {
         try {
             inputStream = resolver.openInputStream(videoUri);
             if (inputStream == null) {
-                successAndFailureListener.onFailure(context.getString(R.string.errorOccur));
+                Kc.handler.post(()-> successAndFailureListener.onFailure(context.getString(R.string.errorOccur)));
                 return;
             }
 
@@ -340,13 +293,13 @@ public class Photo_Video_Utils {
 
                 Uri videoContentUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
                 if (videoContentUri == null) {
-                    successAndFailureListener.onFailure(context.getString(R.string.errorOccur));
+                    Kc.handler.post(()-> successAndFailureListener.onFailure(context.getString(R.string.errorOccur)));
                     return;
                 }
 
                 outputStream = resolver.openOutputStream(videoContentUri);
                 if (outputStream == null) {
-                    successAndFailureListener.onFailure(context.getString(R.string.errorOccur));
+                    Kc.handler.post(()-> successAndFailureListener.onFailure(context.getString(R.string.errorOccur)));
                     return;
                 }
 
@@ -356,7 +309,7 @@ public class Photo_Video_Utils {
                     outputStream.write(buffer, 0, length);
                 }
 
-                successAndFailureListener.onSuccess();
+                Kc.handler.post(()-> successAndFailureListener.onSuccess(context.getString(R.string.savedToGallery)) );
 
             } else  // For Android versions below 10
             {
@@ -371,11 +324,12 @@ public class Photo_Video_Utils {
                 }
 
                 MediaScannerConnection.scanFile( context, new String[]{videoFile.getAbsolutePath()},
-                        null, (path, uri) -> successAndFailureListener.onSuccess() );
+                        null, (path, uri) -> Kc.handler.post(()-> successAndFailureListener
+                                .onSuccess(context.getString(R.string.savedToGallery)) ));
             }
 
         } catch (IOException e) {
-            successAndFailureListener.onFailure(e.getLocalizedMessage());
+            Kc.handler.post(()-> successAndFailureListener.onFailure(e.getLocalizedMessage()));
             e.printStackTrace();
         } finally {
             try {

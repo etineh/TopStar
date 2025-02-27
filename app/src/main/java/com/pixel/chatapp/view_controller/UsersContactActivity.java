@@ -25,7 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ContactAdapter;
-import com.pixel.chatapp.utilities.FetchContacts;
+import com.pixel.chatapp.utilities.ContactUtils;
 import com.pixel.chatapp.utilities.PhoneUtils;
 import com.pixel.chatapp.utilities.SearchUtils;
 import com.pixel.chatapp.utilities.Photo_Video_Utils;
@@ -35,7 +35,7 @@ import com.pixel.chatapp.dataModel.ContactModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersContactActivity extends AppCompatActivity implements ContactAdapter.BackButtonClickListener, FetchContacts.RefreshContactListener {
+public class UsersContactActivity extends AppCompatActivity implements ContactAdapter.BackButtonClickListener, ContactUtils.RefreshContactListener {
 
     RecyclerView recyclerView;
     FirebaseAuth auth;
@@ -91,20 +91,20 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
         // A field to store the listener reference
         FragmentListener fragmentListener = mainActivity.getMainActivityContext();
 
-        if(FetchContacts.contactListFile.size() == 0){  // when local file contact is empty - no contact save yet
-            adapter = new ContactAdapter(FetchContacts.contactList, UsersContactActivity.this);
-            searchUtils = new SearchUtils(FetchContacts.contactList);
+        if(ContactUtils.contactListFile.size() == 0){  // when local file contact is empty - no contact save yet
+            adapter = new ContactAdapter(ContactUtils.contactList, UsersContactActivity.this);
+            searchUtils = new SearchUtils(ContactUtils.contactList);
             System.out.println("what is contactList");
         } else {
-            adapter = new ContactAdapter(FetchContacts.contactListFile, UsersContactActivity.this);
-            searchUtils = new SearchUtils(FetchContacts.contactListFile);
-            System.out.println("what is contactFile " + FetchContacts.contactListFile.size());
+            adapter = new ContactAdapter(ContactUtils.contactListFile, UsersContactActivity.this);
+            searchUtils = new SearchUtils(ContactUtils.contactListFile);
+            System.out.println("what is contactFile " + ContactUtils.contactListFile.size());
         }
 
         //  initialise interface
         adapter.setListener(fragmentListener);
         adapter.setBackButtonClickListener(UsersContactActivity.this); // "this" refers to the UserContactActivity
-        FetchContacts.refreshContactListener = this;
+        ContactUtils.refreshContactListener = this;
 
         new Handler().postDelayed(()-> {
             recyclerView.setAdapter(adapter);
@@ -156,7 +156,7 @@ public class UsersContactActivity extends AppCompatActivity implements ContactAd
     private void refreshContact(){
         progressBarRefresh.setVisibility(View.VISIBLE);
         refresh_IV.setVisibility(View.INVISIBLE);
-        new Handler().postDelayed(()-> new Thread(()-> FetchContacts.readContacts(this) ).start(), 20);
+        new Handler().postDelayed(()-> new Thread(()-> ContactUtils.readContacts(this) ).start(), 20);
     }
 
     private void searchContactListener()

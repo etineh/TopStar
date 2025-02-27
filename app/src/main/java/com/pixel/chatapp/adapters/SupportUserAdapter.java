@@ -13,11 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.dataModel.SupportUserM;
+import com.pixel.chatapp.utilities.TimeUtils;
 import com.pixel.chatapp.view_controller.side_bar_menu.support.SupportChatActivity;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -47,21 +45,21 @@ public class SupportUserAdapter extends RecyclerView.Adapter<SupportUserAdapter.
     {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.support_card, parent, false);
 
-        return new SupportUserAdapter.SupportViewHolder(view);
+        return new SupportViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SupportUserAdapter.SupportViewHolder holder, int position) {
 
 //        holder.supportPhoto_IV.setImageResource(0);
-//        holder.deliveryStatus_IV.setImageResource(0);
         holder.supportName_TV.setText(null);
+//        holder.deliveryStatus_IV.setImageResource(0);
         holder.deliveryTime_TV.setText(null);
         holder.lastChat_TV.setText(null);
-        holder.newChatCount_TV.setText(null);
 //        holder.lastChat_TV.setText(null);
+        holder.newChatCount_TV.setText(null);
 
-        String supportUid = userMList.get(position).getSupportUid();
+//        String supportUid = userMList.get(position).getSupportUid();
         String supportName = userMList.get(position).getSupportName();
         String deliveryStatus = userMList.get(position).getDeliveryStatus();
         long time = userMList.get(position).getTime();
@@ -73,16 +71,14 @@ public class SupportUserAdapter extends RecyclerView.Adapter<SupportUserAdapter.
         timeAndDateSent(time, holder);
 
         // set msgStatus if last chat was from own user
-        int deliveryIcon = R.drawable.message_load;
-        if(deliveryStatus.equals("700024"))
-        {   // delivery
-            deliveryIcon = R.drawable.message_tick_one;
-        } else if (deliveryStatus.equals("700016"))
-        {  // read
-            deliveryIcon = R.drawable.baseline_grade_24;
-        } else if(deliveryStatus.equals("0")) {
-            deliveryIcon = 0;
-        }
+        int deliveryIcon = switch (deliveryStatus) {
+            case "700024" ->    // delivery
+                    R.drawable.message_tick_one;
+            case "700016" ->   // read
+                    R.drawable.baseline_grade_24;
+            case "0" -> 0;
+            default -> R.drawable.message_load;
+        };
 
         holder.deliveryStatus_IV.setImageResource(deliveryIcon);
 
@@ -101,123 +97,42 @@ public class SupportUserAdapter extends RecyclerView.Adapter<SupportUserAdapter.
 
     // method
 
-    private void timeAndDateSent(long lastTime, SupportViewHolder holder)
-    {
+    private void timeAndDateSent(long lastTime, SupportViewHolder holder) {
+        // Get current time and last message time as Date objects
+        Date currentDate = new Date();
+        Date lastMessageDate = new Date(lastTime);  // Convert lastTime (timestamp) to Date
 
-        // current date and time
-        Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        Date date = new Date(stamp.getTime());
-        String currentDateString = String.valueOf(date);
+        // Calculate time difference in days
+        int dayDifference = TimeUtils.calculateDayDifference(currentDate, lastMessageDate);
+        String time = TimeUtils.getFormattedTime(lastTime);
 
-        // last user date and time
-        Date d = new Date(lastTime);    // convert the timestamp to current time
-        DateFormat formatter = new SimpleDateFormat("h:mm a");
-        String time = formatter.format(d);
-        String previousDateString = String.valueOf(d);
-
-        dateMonth = new HashMap<>();     // months
-        dateMonth.put("Jan", 1);
-        dateMonth.put("Feb", 2);
-        dateMonth.put("Mar", 3);
-        dateMonth.put("Apr", 4);
-        dateMonth.put("May", 5);
-        dateMonth.put("Jun", 6);
-        dateMonth.put("Jul", 7);
-        dateMonth.put("Aug", 8);
-        dateMonth.put("Sep", 9);
-        dateMonth.put("Oct", 10);
-        dateMonth.put("Nov", 11);
-        dateMonth.put("Dec", 12);
-
-        dateNum = new HashMap<>();      // days
-        dateNum.put("Mon", 1);
-        dateNum.put("Tue", 2);
-        dateNum.put("Wed", 3);
-        dateNum.put("Thu", 4);
-        dateNum.put("Fri", 5);
-        dateNum.put("Sat", 6);
-        dateNum.put("Sun", 7);
-
-        String lastYear = previousDateString.substring(30, 34);  // last year
-
-        int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
-        int lastMonth = dateMonth.get(previousDateString.substring(4,7));
-
-        int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
-        int lastDay = dateNum.get(previousDateString.substring(0,3));
-
-
-        int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
-        int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
-
-        if (curMonth - lastMonth == 0)
+        if (TimeUtils.isSameYear(currentDate, lastMessageDate))
         {
-            if (dateCur - dateLast < 7)
+            int monthDifference = TimeUtils.calculateMonthDifference(currentDate, lastMessageDate); // Add this
+            if (TimeUtils.isSameMonth(currentDate, lastMessageDate))
             {
-                if(curDay - lastDay == 0)
-                {
-                    String newTime = context.getString(R.string.today) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 1)
-                {
-                    String newTime = context.getString(R.string.yesterday) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 2)
-                {
-                    String newTime = context.getString(R.string.day2ago) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 3)
-                {
-                    String newTime = context.getString(R.string.day3ago) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 4)
-                {
-                    String newTime = context.getString(R.string.day4ago) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 5)
-                {
-                    String newTime = context.getString(R.string.day5ago) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
-
-                } else if (curDay - lastDay == 6)
-                {
-                    String newTime = context.getString(R.string.day6ago) + " " + time.toLowerCase();
-                    holder.deliveryTime_TV.setText(newTime);
+                if (dayDifference == 0) {
+                    holder.deliveryTime_TV.setText(String.format("%s %s", context.getString(R.string.today), time.toLowerCase()));
+                } else if (dayDifference == 1) {
+                    holder.deliveryTime_TV.setText(String.format("%s %s", context.getString(R.string.yesterday), time.toLowerCase()));
+                } else if (dayDifference < 7) {
+                    holder.deliveryTime_TV.setText(String.format("%s %s", context.getString(R.string.daysAgo, dayDifference), time.toLowerCase()));
+                } else {
+                    holder.deliveryTime_TV.setText(context.getString(R.string.weeksAgo, dayDifference / 7));
                 }
-
-            } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14)
-            {
-                String newTime = context.getString(R.string.week1ago);
-                holder.deliveryTime_TV.setText(newTime);
-
-            } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21)
-            {
-                String newTime = context.getString(R.string.week2ago);
-                holder.deliveryTime_TV.setText(newTime);
-
-            } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27)
-            {
-                String newTime = context.getString(R.string.week3ago);
-                holder.deliveryTime_TV.setText(newTime);
-            } else
-            {
-                String newTime = context.getString(R.string.monthsAgo);
-                holder.deliveryTime_TV.setText(newTime);
+            } else { // Return "X months ago" if it's more than one month ago
+                if (monthDifference == 1) {
+                    holder.deliveryTime_TV.setText(context.getString(R.string.monthAgo)); // If it’s exactly 1 month ago
+                } else {
+                    holder.deliveryTime_TV.setText(context.getString(R.string.monthsAgo, monthDifference));
+                }
             }
 
-        } else
-        {
-            String lastD = dateLast +"/"+ lastMonth+"/"+ lastYear;
-            holder.deliveryTime_TV.setText(lastD);
+        } else {    // If it's from a previous year
+            String lastDateString = TimeUtils.getShortFormattedDate(lastMessageDate);
+            holder.deliveryTime_TV.setText(lastDateString);
         }
-
     }
-
 
 
     @Override
@@ -225,7 +140,7 @@ public class SupportUserAdapter extends RecyclerView.Adapter<SupportUserAdapter.
         return userMList.size();
     }
 
-    public class SupportViewHolder extends RecyclerView.ViewHolder {
+    public static class SupportViewHolder extends RecyclerView.ViewHolder {
 
         ImageView supportPhoto_IV, deliveryStatus_IV;
         TextView supportName_TV, deliveryTime_TV, lastChat_TV,  newChatCount_TV;

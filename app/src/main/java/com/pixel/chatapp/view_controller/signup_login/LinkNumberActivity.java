@@ -36,7 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.CountryNumCodeUtils;
 import com.pixel.chatapp.utilities.OTPGenerator;
 import com.pixel.chatapp.utilities.PhoneUtils;
@@ -362,7 +362,7 @@ public class LinkNumberActivity extends AppCompatActivity {
                 {
                     String myUsername = snapshot.child("userName").getValue().toString();
 
-                    UserDao userDao = K.retrofit.create(UserDao.class);
+                    UserDao userDao = Ki.retrofit.create(UserDao.class);
 
                     LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), finalCodeNumber, user.getEmail(), myUsername);
 
@@ -417,7 +417,7 @@ public class LinkNumberActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(LinkNumberActivity.this, getString(R.string.userNotFound), Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LinkNumberActivity.this, PhoneLoginActivity.class));
-                    deviceFirstLoginRef.edit().putBoolean(K.FIRSTTIME, true).apply();
+                    deviceFirstLoginRef.edit().putBoolean(Ki.FIRSTTIME, true).apply();
                     finish();
                 }
             }
@@ -456,7 +456,7 @@ public class LinkNumberActivity extends AppCompatActivity {
 
             finalCodeNumber = countryCodeNumber;
 
-            UserDao userDao = K.retrofit.create(UserDao.class);
+            UserDao userDao = Ki.retrofit.create(UserDao.class);
 
             userDao.fineUser(finalCodeNumber).enqueue(new Callback<UserSearchM>() {
                 @Override

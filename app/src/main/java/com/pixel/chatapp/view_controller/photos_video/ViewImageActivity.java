@@ -120,11 +120,11 @@ public class ViewImageActivity extends AppCompatActivity implements ImageListene
 
             Photo_Video_Utils.saveMediaToGallery(this, currentModelChat.getPhotoUriOriginal(), new SuccessAndFailureListener() {
                 @Override
-                public void onSuccess() {
+                public void onSuccess(String success) {
                     transContainer.setVisibility(View.GONE);
                     moreOptionContainer.setVisibility(View.GONE);
                     progressBar10.setVisibility(View.GONE);
-                    Toast.makeText(ViewImageActivity.this, getString(R.string.savedToGallery), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ViewImageActivity.this, success, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override

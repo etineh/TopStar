@@ -16,7 +16,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pixel.chatapp.R;
 import com.pixel.chatapp.adapters.ChatListAdapter;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.MainActivity;
 import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.view_controller.fragments.PlayersFragment;
@@ -74,7 +75,7 @@ public class UserChatUtils {
 
                     if(ChatsFragment.adapter != null)
                     {
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             ChatsFragment.newInstance().notifyItemChanged(position);     // notify the adapter of the item changes
                             ChatsFragment.newInstance().notifyUserMoved(position);   // Notify the adapter that the user has moved.
                         });
@@ -82,7 +83,7 @@ public class UserChatUtils {
                         updateUserChatOnPlayerFragment(otherId, getUser);
 
                     } else {
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             PlayersFragment.newInstance().notifyItemChanged(position);
                             PlayersFragment.newInstance().notifyUserMoved(position);
                         });
@@ -94,9 +95,9 @@ public class UserChatUtils {
                         refUsersLast.child(myId).child(otherId).child("numberOfNewChat").setValue(numberOfNewChat);
                     } else {
                         // reset new chat count number -- inside and outside
-                        K.handler.post(()-> new Handler().postDelayed(()-> new Thread(()-> {
+                        Kc.handler.post(()-> new Handler().postDelayed(()-> new Thread(()-> {
                             try{
-                                adapterMap.get(otherId).getChatByPinTypeAndDeleteViaRecycler(recyclerMap.get(otherId), otherId);   // UserChatUtil
+                                Objects.requireNonNull(adapterMap.get(otherId)).getChatByPinTypeAndDeleteViaRecycler(Objects.requireNonNull(recyclerMap.get(otherId)), otherId);   // UserChatUtil
                             } catch (Exception e) {
                                 System.out.println("what is error UserChatUtil L80: " + e.getMessage());
                             }
@@ -126,7 +127,7 @@ public class UserChatUtils {
                         userOnPlayerList.remove(position__);     // Remove the user from the list.
                         userOnPlayerList.add(0, getUser);   // Insert the latest user at the first position
 
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             PlayersFragment.newInstance().notifyItemChanged(position__);
                             PlayersFragment.newInstance().notifyUserMoved(position__);
                         });
@@ -137,7 +138,7 @@ public class UserChatUtils {
                         userOnPlayerList.remove(2);     // user not found, remove the last user from the list and add the new one.
                         userOnPlayerList.add(0, getUser);   // Insert the latest user at the first position
 
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             PlayersFragment.newInstance().notifyItemChanged(position__);
                             PlayersFragment.newInstance().notifyUserMoved(position__);
                         });
@@ -151,7 +152,7 @@ public class UserChatUtils {
                         userOnPlayerList.remove(position__);     // Remove the user from the list.
                         userOnPlayerList.add(0, getUser);   // Insert the latest user at the first position
 
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             PlayersFragment.newInstance().notifyItemChanged(position__);
                             PlayersFragment.newInstance().notifyUserMoved(position__);
                         });
@@ -159,7 +160,7 @@ public class UserChatUtils {
 
                     } else if(position__ == userOnPlayerList.size()-1)  {   // user not found
                         userOnPlayerList.add(0, getUser);   // Insert the item at the first position
-                        K.handler.post(()-> PlayersFragment.newInstance().notifyItemInserted(0));
+                        Kc.handler.post(()-> PlayersFragment.newInstance().notifyItemInserted(0));
                         break;
                     }
                 }
@@ -168,7 +169,7 @@ public class UserChatUtils {
 
         } else {
             userOnPlayerList.add(0, getUser);   // Insert the item at the first position
-            K.handler.post(()-> PlayersFragment.newInstance().notifyItemInserted(0));
+            Kc.handler.post(()-> PlayersFragment.newInstance().notifyItemInserted(0));
         }
 
     }
@@ -203,32 +204,32 @@ public class UserChatUtils {
 
     public static String setChatText(int type, String chat, String emojiOnly, String vnDuration, Context mContext){
 
-        if (type == K.type_text){
+        if (type == Ki.type_text){
             if(chat == null || chat.isEmpty()) chat = emojiOnly;
 
-        } else if (type == K.type_voice_note){
-            chat = K.MIC_ICON + vnDuration;
+        } else if (type == Ki.type_voice_note){
+            chat = Ki.MIC_ICON + vnDuration;
 
-        }  if (type == K.type_audio)
+        }  if (type == Ki.type_audio)
         {
-            chat = K.MUSIC_ICON + vnDuration;
+            chat = Ki.MUSIC_ICON + vnDuration;
 
-        } else if (type == K.type_photo)
+        } else if (type == Ki.type_photo)
         {
-            if(chat == null || chat.isEmpty()) chat = K.PHOTO_ICON + mContext.getString(R.string.photoCap);
-            else chat = K.PHOTO_ICON + chat;
+            if(chat == null || chat.isEmpty()) chat = Ki.PHOTO_ICON + mContext.getString(R.string.photoCap);
+            else chat = Ki.PHOTO_ICON + chat;
         }
-        else if (type == K.type_video)
+        else if (type == Ki.type_video)
         {
-            if(chat == null || chat.isEmpty()) chat = K.VIDEO_ICON + mContext.getString(R.string.videoCap);
-            else chat = K.VIDEO_ICON + chat;
+            if(chat == null || chat.isEmpty()) chat = Ki.VIDEO_ICON + mContext.getString(R.string.videoCap);
+            else chat = Ki.VIDEO_ICON + chat;
 
-        } else if (type == K.type_document)
+        } else if (type == Ki.type_document)
         {
-            if(chat == null || chat.isEmpty()) chat = K.DOCUMENT_ICON + emojiOnly;
-            else chat = K.DOCUMENT_ICON + chat;
+            if(chat == null || chat.isEmpty()) chat = Ki.DOCUMENT_ICON + emojiOnly;
+            else chat = Ki.DOCUMENT_ICON + chat;
 
-        }else if (type == K.type_call)
+        }else if (type == Ki.type_call)
         {
             if(emojiOnly.equals(mContext.getString(R.string.ongoingCall))){
 
@@ -237,17 +238,17 @@ public class UserChatUtils {
                 chat = mContext.getString(R.string.ongoingCall) + " " + chat;
 
             } else if (emojiOnly.equals(mContext.getString(R.string.incomingCall))) {
-                if(chat.contains("Audio")) chat = K.CALL_ICON +  mContext.getString(R.string.incomingAudioCall);
-                if(chat.contains("Video")) chat = K.CALL_ICON + mContext.getString(R.string.incomingVideoCall);
+                if(chat.contains("Audio")) chat = Ki.CALL_ICON +  mContext.getString(R.string.incomingAudioCall);
+                if(chat.contains("Video")) chat = Ki.CALL_ICON + mContext.getString(R.string.incomingVideoCall);
 
             } else{
-                if(chat.contains("Audio")) chat = K.CALL_ICON + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
-                if(chat.contains("Video")) chat = K.CALL_ICON + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
+                if(chat.contains("Audio")) chat = Ki.CALL_ICON + mContext.getString(R.string.audio_call) + " ••• " + emojiOnly;
+                if(chat.contains("Video")) chat = Ki.CALL_ICON + mContext.getString(R.string.video_call) + " ••• " + emojiOnly;
             }
 
-        } else if (type == K.type_pin)
+        } else if (type == Ki.type_pin)
         {
-            chat = K.PIN_ICON + chat;
+            chat = Ki.PIN_ICON + chat;
         }
 
         return chat;
@@ -266,7 +267,7 @@ public class UserChatUtils {
                     // check if it's same message ID
                     if(userModel.get(i).getIdKey().equals(chatId)){
                         // Remove the chat from its old position.
-                        userModel.get(i).setMessage(K.DELETE_ICON +"  ...");
+                        userModel.get(i).setMessage(Ki.DELETE_ICON +"  ...");
 //                        mUsersID.get(i).setEmojiOnly("...");
                         adapter.notifyItemChanged(i, new Object());
                     }
@@ -286,7 +287,7 @@ public class UserChatUtils {
                     int userPosition = i;
                     if (userModel.get(userPosition).getOtherUid().equals(userUid)) {
 
-                        K.handler.post(()->{
+                        Kc.handler.post(()->{
                             userModel.remove(userPosition);
                             adapter.notifyItemRemoved(userPosition);
                             adapter.notifyItemRangeChanged(userPosition, userModel.size());
@@ -311,9 +312,9 @@ public class UserChatUtils {
                     // check if it's same message ID
                     if(userModel.get(i).getIdKey().equals(chatId)){
                         if(chat != null){
-                            userModel.get(i).setMessage(K.EDIT_ICON + chat);
+                            userModel.get(i).setMessage(Ki.EDIT_ICON + chat);
                         } else {
-                            userModel.get(i).setMessage(K.EDIT_ICON + emoji);
+                            userModel.get(i).setMessage(Ki.EDIT_ICON + emoji);
                         }
 
                         adapter.notifyItemChanged(i, new Object());
@@ -333,8 +334,7 @@ public class UserChatUtils {
 
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
-        if (layoutManager instanceof LinearLayoutManager) {
-            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+        if (layoutManager instanceof LinearLayoutManager linearLayoutManager) {
 
             int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
             int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
@@ -350,14 +350,14 @@ public class UserChatUtils {
                     int type = modelList.get(i).getType();
                     String edit = modelList.get(i).getEdit();
 
-                    if (type == K.type_pin && edit != null && edit.equals("yes"))
+                    if (type == Ki.type_pin && edit != null && edit.equals("yes"))
                     {
                         // Reset new chat count -- outside outside >> in case I am inside the chat when user send new chat
                         if (ChatsFragment.adapter != null) {
-                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromChatFragment, true);
+                            ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromChatFragment, true);
                         }
                         if (PlayersFragment.adapter != null) {
-                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromPlayerFragment, true);
+                            PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromPlayerFragment, true);
                         }
                         return i;
                     }
@@ -385,7 +385,7 @@ public class UserChatUtils {
                 int type = modelList.get(i).getType();
                 String edit = modelList.get(i).getEdit();
 
-                if (type == K.type_pin && edit != null && edit.equals("yes"))
+                if (type == Ki.type_pin && edit != null && edit.equals("yes"))
                 {
 //                    System.out.println("what is calling2222: " + i);
 
@@ -399,10 +399,10 @@ public class UserChatUtils {
                 } else if(i == startCount && !fromNotification){
                     // Reset new chat count if at the startCount boundary and it hasn't been reset yet
                     if (ChatsFragment.adapter != null) {
-                        ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromChatFragment, true);
+                        ChatsFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromChatFragment, true);
                     }
                     if (PlayersFragment.adapter != null) {
-                        PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, K.fromPlayerFragment, true);
+                        PlayersFragment.adapter.findUserModelByUidAndResetNewChatNum(otherId, Ki.fromPlayerFragment, true);
                     }
                     loopOnceMap.put(otherId, true);
                 }

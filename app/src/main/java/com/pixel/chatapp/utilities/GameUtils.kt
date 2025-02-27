@@ -4,7 +4,7 @@ import android.content.Context
 import com.pixel.chatapp.services.api.dao_interface.GameAPI
 import com.pixel.chatapp.services.api.model.outgoing.AddNewPlayerM
 import com.pixel.chatapp.services.api.model.outgoing.ThreeValueM
-import com.pixel.chatapp.constants.K
+import com.pixel.chatapp.constants.Ki
 import com.pixel.chatapp.dataModel.AwaitPlayerM
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,7 +20,7 @@ class GameUtils {
             newPlayerDetailsMap: MutableMap<String, Any>?,
             rejectGameInterface: RejectGameInterface
         ) {
-            val gameAPI = K.retrofit.create(GameAPI::class.java)
+            val gameAPI = Ki.retrofit.create(GameAPI::class.java)
 
             IdTokenUtil.generateToken ({ token: String? ->
 
@@ -44,7 +44,7 @@ class GameUtils {
         @JvmStatic
         fun removePlayer(context: Context?, hostUid: String, rejectPlayerUid: String, rejectGameInterface: RejectGameInterface)
         {
-            val gameAPI = K.retrofit.create(GameAPI::class.java)
+            val gameAPI = Ki.retrofit.create(GameAPI::class.java)
 
             IdTokenUtil.generateToken ({token->
                 val threeValueM = ThreeValueM(token, hostUid, rejectPlayerUid)

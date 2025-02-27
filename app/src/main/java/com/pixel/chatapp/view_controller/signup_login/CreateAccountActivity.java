@@ -22,7 +22,7 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.NumberSpacing;
 import com.pixel.chatapp.utilities.OTPGenerator;
 import com.pixel.chatapp.utilities.PhoneUtils;
@@ -205,7 +205,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     private void loginApi() {
 
-        UserDao userDao = K.retrofit.create(UserDao.class);
+        UserDao userDao = Ki.retrofit.create(UserDao.class);
 
         LoginDetailM loginDetailM = new LoginDetailM(auth.getUid(), getNumber, null, null);
 

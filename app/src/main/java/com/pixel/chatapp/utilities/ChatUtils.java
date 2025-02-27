@@ -15,6 +15,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,7 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.services.api.dao_interface.NotificationDao;
 import com.pixel.chatapp.services.api.model.outgoing.ChatNotificationM;
 import com.pixel.chatapp.adapters.MessageAdapter;
@@ -58,7 +60,7 @@ public class ChatUtils {
             if( !adapter.messageIdSet.contains(messageModel.getIdKey()) )
             {
                 System.out.println("what is from: " + from + " context: " + context + " key: " + messageModel.getIdKey());
-                if(messageModel.getType() == K.type_call) MainActivity.missCallModel = messageModel;
+                if(messageModel.getType() == Ki.type_call) MainActivity.missCallModel = messageModel;
 
                 if(adapter.getItemCount() == 0) addEmptyChatCard(otherId, adapter);   // other user sending me chat the first time
 
@@ -69,8 +71,11 @@ public class ChatUtils {
                 String newChatDateKey = refMsgFast.child(myId).push().getKey();  // create an id for each message
 
                 // check recycler position before scrolling // or receiving number of new chat alert
-                int scrollNumCheck = scrollNumMap.get(otherId) == null ? adapter.getItemCount() - 1
-                        : (int) scrollNumMap.get(otherId) ;
+                int scrollNumCheck = adapter.getItemCount() - 1;
+                if (scrollNumMap.get(otherId) != null) {
+                    scrollNumCheck = Integer.parseInt((String) Objects.requireNonNull(scrollNumMap.get(otherId)));
+                }
+
                 int scrollCheck = adapter.getItemCount() - scrollNumCheck;
 
                 int currentNewChatNumber = 0;
@@ -82,21 +87,21 @@ public class ChatUtils {
                             newChatDateKey, adapter, otherId, context);
 
                     // add the new chat alert   ================= 5 new chats
-                    if( (insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck > 5)   // I am inside the chat
-                            || ( insideChatMap.get(otherId) != null && !insideChatMap.get(otherId) )    // I am not inside the chat
+                    if( (insideChatMap.get(otherId) != null && Boolean.TRUE.equals(insideChatMap.get(otherId)) && scrollCheck > 5)   // I am inside the chat
+                            || ( insideChatMap.get(otherId) != null && Boolean.FALSE.equals(insideChatMap.get(otherId)))    // I am not inside the chat
                             || (insideChatMap.get(otherId) == null) )  // a total new user
                     {
                         currentNewChatNumber = outsideUserModel.getNumberOfNewChat() + 1;
 
                         if(currentNewChatNumber > 1) // add increment to previous new chat number -- inside chat
                         {
-                            adapter.getChatAndIncrementNewChatNumber(currentNewChatNumber+"");
+                            adapter.getChatAndIncrementNewChatNumber(String.valueOf(currentNewChatNumber));
 
                         } else // it is the first new chat // generate new id and add count
                         {
                             MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
-                                    System.currentTimeMillis(), messageModel.getNewChatNumberID(), "yes", currentNewChatNumber+"",
-                                    null, 0, K.type_pin, null, null, false, false,
+                                    System.currentTimeMillis(), messageModel.getNewChatNumberID(), "yes", String.valueOf(currentNewChatNumber),
+                                    null, 0, Ki.type_pin, null, null, false, false,
                                     null, null, null, null, null, null);
 
                             newNewCountModel.setMyUid(myId);
@@ -132,9 +137,9 @@ public class ChatUtils {
                 // update last msg for outside chat display chat, since it will show msg new count
                 refLastDetails.child(myId).child(otherId).child("msgStatus").setValue(0);
 
-                K.handler.post(()->{
+                Kc.handler.post(()->{
                     // scroll to last position I am inside chat
-                    if(insideChatMap.get(otherId) != null && insideChatMap.get(otherId) && scrollCheck < 10)
+                    if(insideChatMap.get(otherId) != null && Boolean.TRUE.equals(insideChatMap.get(otherId)) && scrollCheck < 10)
                     {
                         scrollToPreviousPosition(otherId, (adapter.getItemCount() - 1));     // new message
                     }
@@ -164,7 +169,7 @@ public class ChatUtils {
                 RecyclerView recyclerView = (RecyclerView) child;
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                layoutManager.scrollToPosition(position);
+                if (layoutManager != null) layoutManager.scrollToPosition(position);
 
             }
         }
@@ -197,7 +202,7 @@ public class ChatUtils {
         {
             MessageModel newDateChatModel = new MessageModel(null, null, myId, null,
                     timeStamp, chatID, "newDate", null,
-                    null, 0, K.type_pin, null, null, false, false,
+                    null, 0, Ki.type_pin, null, null, false, false,
                     null, null, null, null, null, null);
 
             newDateChatModel.setMyUid(myId);
@@ -229,7 +234,7 @@ public class ChatUtils {
     {
         MessageModel newDateChatModel = new MessageModel(null, null, myId, null,
                 timeStamp, chatID, "newDate", null,
-                null, 0, K.type_pin, null, null, false, false,
+                null, 0, Ki.type_pin, null, null, false, false,
                 null, null, null, null, null, null);
 
         newDateChatModel.setMyUid(myId);
@@ -248,7 +253,7 @@ public class ChatUtils {
 
         MessageModel newNewCountModel = new MessageModel(null, null, myId, null,
                 System.currentTimeMillis(), newChatDateKey, "yes", "1",
-                null, 0, K.type_pin, null, null, false, false,
+                null, 0, Ki.type_pin, null, null, false, false,
                 null, null, null, null, null, null);
 
         newNewCountModel.setMyUid(myId);
@@ -259,19 +264,17 @@ public class ChatUtils {
         // save to local ROOM database
         chatViewModel.insertChat(otherId, newNewCountModel);
 
-        K.handler.post(()-> {
-            new Handler().postDelayed(()->  // delay 1sec to give time to userModelList to add the new user
-            {
-                if(ChatsFragment.adapter != null) {     // update to 1 new count
-                    UserChatUtils.findUserPositionByUID(ChatsFragment.adapter.userModelList,
-                            otherId, messageModel, 1, context);
-                } else {
-                    UserChatUtils.findUserPositionByUID(PlayersFragment.adapter.userModelList,
-                            otherId, messageModel, 1, context);
-                }
+        Kc.handler.post(()-> new Handler().postDelayed(()->  // delay 1sec to give time to userModelList to add the new user
+        {
+            if(ChatsFragment.adapter != null) {     // update to 1 new count
+                UserChatUtils.findUserPositionByUID(ChatsFragment.adapter.userModelList,
+                        otherId, messageModel, 1, context);
+            } else {
+                UserChatUtils.findUserPositionByUID(PlayersFragment.adapter.userModelList,
+                        otherId, messageModel, 1, context);
+            }
 
-            }, 1000);
-        });
+        }, 1000));
 
         refLastDetails.child(myId).child(otherId).child("numberOfNewChat").setValue(1);
 
@@ -323,18 +326,18 @@ public class ChatUtils {
 
     public static void sentChatNotification(String otherUid, Map<String, Object> getInsideChatMap, String fcmToken)
     {
-        NotificationDao notificationDao = K.retrofit.create(NotificationDao.class);
+        NotificationDao notificationDao = Ki.retrofit.create(NotificationDao.class);
 
         ChatNotificationM notificationM = new ChatNotificationM(fcmToken, otherUid, getInsideChatMap);
 
         notificationDao.chatNotify(notificationM).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
 
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable throwable) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable throwable) {
                 System.out.println("what is notify fail:: " + throwable.getMessage());
 
             }

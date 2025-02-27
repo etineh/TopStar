@@ -32,7 +32,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pixel.chatapp.permission.AppPermission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
+import com.pixel.chatapp.utilities.EmailValidator;
 import com.pixel.chatapp.utilities.IdTokenUtil;
 import com.pixel.chatapp.utilities.UsernameTextListener;
 import com.pixel.chatapp.services.api.dao_interface.ProfileApiDao;
@@ -91,7 +92,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
         checkUsername_TV = findViewById(R.id.checkUsername_TV);
         displayNames_ET = findViewById(R.id.displayNames_ET);
 
-        resetLoginSharePref = this.getSharedPreferences(K.RESET_LOGIN, Context.MODE_PRIVATE);
+        resetLoginSharePref = this.getSharedPreferences(Ki.RESET_LOGIN, Context.MODE_PRIVATE);
         
 
         // --------------------- activating Firebase and database
@@ -121,43 +122,47 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
             String username = editTextUsername.getText().toString();
             String displayName = displayNames_ET.getText().toString();
 
-            if (!email.isEmpty() && !password.isEmpty() && !username.isEmpty())
+            if (email.isEmpty() && password.isEmpty() && username.isEmpty()) {
+                Toast.makeText(SetUpProfileActivity.this, getString(R.string.fieldEmpty), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!EmailValidator.isEmailValidUtil(email, this)) return;
+
+            if(password.length() < 6) {
+                Toast.makeText(SetUpProfileActivity.this, getString(R.string.passwordAbove5), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(editTextUsername.length() <= 3) {
+                Toast.makeText(SetUpProfileActivity.this, getString(R.string.userNameError), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            setUpButton.setVisibility(View.INVISIBLE);
+            progressBarSetUp.setVisibility(View.VISIBLE);
+            usernameRef.child(username.toLowerCase()).addListenerForSingleValueEvent(new ValueEventListener()
             {
-                if(password.length() >= 6)
-                {
-                    if(editTextUsername.length() > 3)
-                    {
-                        setUpButton.setVisibility(View.INVISIBLE);
-                        progressBarSetUp.setVisibility(View.VISIBLE);
-                        usernameRef.child(username.toLowerCase()).addListenerForSingleValueEvent(new ValueEventListener()
-                        {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if(snapshot.exists()){
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
 
-                                    Toast.makeText(SetUpProfileActivity.this, getString(R.string.usernameExist), Toast.LENGTH_SHORT).show();
-                                    setUpButton.setVisibility(View.VISIBLE);
-                                    progressBarSetUp.setVisibility(View.GONE);
+                        Toast.makeText(SetUpProfileActivity.this, getString(R.string.usernameExist), Toast.LENGTH_SHORT).show();
+                        setUpButton.setVisibility(View.VISIBLE);
+                        progressBarSetUp.setVisibility(View.GONE);
 
-                                } else {    // set up user account
+                    } else {    // set up user account
 
-                                    setUpAccount(email, password, username, displayName);
-                                }
-                            }
+                        setUpAccount(email, password, username, displayName);
+                    }
+                }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                setUpButton.setVisibility(View.VISIBLE);
-                                progressBarSetUp.setVisibility(View.GONE);
-                                Toast.makeText(SetUpProfileActivity.this, getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                    } else Toast.makeText(SetUpProfileActivity.this, getString(R.string.userNameError), Toast.LENGTH_SHORT).show();
-
-                } else Toast.makeText(SetUpProfileActivity.this, getString(R.string.passwordAbove5), Toast.LENGTH_SHORT).show();
-
-            } else Toast.makeText(SetUpProfileActivity.this, getString(R.string.fieldEmpty), Toast.LENGTH_SHORT).show();
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    setUpButton.setVisibility(View.VISIBLE);
+                    progressBarSetUp.setVisibility(View.GONE);
+                    Toast.makeText(SetUpProfileActivity.this, getString(R.string.isNetwork), Toast.LENGTH_SHORT).show();
+                }
+            });
 
         });
 
@@ -189,7 +194,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
                     if (resultCode == RESULT_OK && data != null){
 
                         Intent intent = new Intent(this, UploadProfileImage.class);
-                        intent.putExtra(K.PICKED_IMAGE_URI_PATH, data.getData().toString());
+                        intent.putExtra(Ki.PICKED_IMAGE_URI_PATH, data.getData().toString());
                         startActivity(intent);
                     }
                 }
@@ -200,7 +205,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if(requestCode == K.STORAGE_REQUEST_CODE && grantResults.length > 0
+        if(requestCode == Ki.STORAGE_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
 
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -227,7 +232,7 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
 
     public void setUpAccount(String email, String password, String userName, String displayName)
     {
-        ProfileApiDao profileApiDao = K.retrofit.create(ProfileApiDao.class);
+        ProfileApiDao profileApiDao = Ki.retrofit.create(ProfileApiDao.class);
 
         IdTokenUtil.generateToken(token -> {
 
@@ -242,8 +247,8 @@ public class SetUpProfileActivity extends AppCompatActivity implements ImageList
                         signInNewEmail(email, password);
 
                         SharedPreferences myProfileShareRef = getSharedPreferences(auth.getUid(), Context.MODE_PRIVATE);
-                        myProfileShareRef.edit().putString(K.PROFILE_USERNAME, userName).apply();
-                        myProfileShareRef.edit().putString(K.PROFILE_DISNAME, displayName).apply();
+                        myProfileShareRef.edit().putString(Ki.PROFILE_USERNAME, userName).apply();
+                        myProfileShareRef.edit().putString(Ki.PROFILE_DISNAME, displayName).apply();
 
                     } else{
                         Toast.makeText(SetUpProfileActivity.this, getString(R.string.errorOccur), Toast.LENGTH_SHORT).show();

@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class ImagePainter {
 
                 // save edited photo uri to sharePref via gson to enable app first launch onCreate to delete the photos in case photo was not deleted
                 String json = gson.toJson(SendImageOrVideoActivity.allOldUriList);
-                unusedPhotoShareRef.edit().putString(K.OLD_URI_LIST, json).apply();
+                unusedPhotoShareRef.edit().putString(Ki.OLD_URI_LIST, json).apply();
 
             } catch (IOException e) {
                 throw new RuntimeException(e);

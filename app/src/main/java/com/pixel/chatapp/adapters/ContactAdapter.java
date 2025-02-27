@@ -21,9 +21,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pixel.chatapp.utilities.FetchContacts;
+import com.pixel.chatapp.utilities.ContactUtils;
 import com.pixel.chatapp.view_controller.LinearLayoutManagerWrapper;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.interface_listeners.FragmentListener;
 import com.pixel.chatapp.R;
@@ -128,8 +128,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
         // what happen when the cardView is click
         holder.itemView.setOnClickListener(view -> {
-            String myUsername = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
-            String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, null);
+            String myUsername = myProfileShareRef.getString(Ki.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, null);
 
             view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(50)
                     .withEndAction(() -> {
@@ -237,7 +237,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
 
     public void synchronizeContactLists() {
         // Iterate over MainActivity.contactListFile
-        for (ContactModel contact : FetchContacts.contactListFile) {
+        for (ContactModel contact : ContactUtils.contactListFile) {
             // Check if the contact exists in allContactList
             if (!allContactList.contains(contact)) {
                 // Contact exists in MainActivity.contactListFile but not in allContactList, so add it
@@ -251,7 +251,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.UserView
         // Iterate over allContactListCopy to remove contacts not present in MainActivity.contactListFile
         for (ContactModel contact : allContactListCopy) {
             // Check if the contact exists in MainActivity.contactListFile
-            if (!FetchContacts.contactListFile.contains(contact)) {
+            if (!ContactUtils.contactListFile.contains(contact)) {
                 // Contact exists in allContactList but not in MainActivity.contactListFile, so remove it
                 allContactList.remove(contact);
             }

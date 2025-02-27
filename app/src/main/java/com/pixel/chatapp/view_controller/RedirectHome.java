@@ -26,7 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.interface_listeners.TriggerOnForward;
 import com.pixel.chatapp.utilities.FileUtils;
 import com.pixel.chatapp.dataModel.MessageModel;
@@ -58,7 +58,7 @@ public class RedirectHome extends AppCompatActivity {
         setContentView(R.layout.redirect_home);
 
         refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
-        photoShareRef = getSharedPreferences(K.URI_PREF, Context.MODE_PRIVATE);
+        photoShareRef = getSharedPreferences(Ki.URI_PREF, Context.MODE_PRIVATE);
         gson = new Gson();
         photoUri = new ArrayList<>();  // save the uri to SharePref to enable delete in case user didn't send the image
 
@@ -300,7 +300,7 @@ public class RedirectHome extends AppCompatActivity {
         if(lowerUri != null)photoUri.add(lowerUri);
         if(highUri != null) photoUri.add(highUri);
         String uriToJson = gson.toJson(photoUri);
-        photoShareRef.edit().putString(K.OLD_URI_LIST, uriToJson).apply();
+        photoShareRef.edit().putString(Ki.OLD_URI_LIST, uriToJson).apply();
     }
 
     private void finishSingleFile(List<MessageModel> getUriList){
@@ -487,7 +487,7 @@ public class RedirectHome extends AppCompatActivity {
     }
 
     private File getPhotoFolder(){
-        File appSpecificFolder = new File(getExternalFilesDir(null), K.ALL_PHOTOS);
+        File appSpecificFolder = new File(getExternalFilesDir(null), Ki.ALL_PHOTOS);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -495,7 +495,7 @@ public class RedirectHome extends AppCompatActivity {
     }
 
     private File getThumbnailFolder(){
-        File appSpecificFolder = new File(getExternalFilesDir(null), K.ALL_THUMBNAIL);
+        File appSpecificFolder = new File(getExternalFilesDir(null), Ki.ALL_THUMBNAIL);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -503,7 +503,7 @@ public class RedirectHome extends AppCompatActivity {
     }
 
     private File getDocumentFolder(){
-        File appSpecificFolder = new File(getExternalFilesDir(null), K.ALL_DOCUMENTS);
+        File appSpecificFolder = new File(getExternalFilesDir(null), Ki.ALL_DOCUMENTS);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }
@@ -511,7 +511,7 @@ public class RedirectHome extends AppCompatActivity {
     }
 
     private File getAudioFolder(){
-        File appSpecificFolder = new File(getExternalFilesDir(null), K.ALL_AUDIO);
+        File appSpecificFolder = new File(getExternalFilesDir(null), Ki.ALL_AUDIO);
         if (!appSpecificFolder.exists()) {
             appSpecificFolder.mkdirs();
         }

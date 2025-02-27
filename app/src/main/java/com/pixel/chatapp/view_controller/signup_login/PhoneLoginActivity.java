@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.utilities.CountryNumCodeUtils;
 import com.pixel.chatapp.utilities.OpenActivityUtil;
 import com.pixel.chatapp.utilities.PhoneUtils;
@@ -157,7 +157,7 @@ public class PhoneLoginActivity extends AppCompatActivity {
 
             String finalCodeNumber = countryCodeNumber;
 
-            UserDao userDao = K.retrofit.create(UserDao.class);
+            UserDao userDao = Ki.retrofit.create(UserDao.class);
 
             userDao.fineUser(finalCodeNumber).enqueue(new Callback<UserSearchM>() {
                 @Override

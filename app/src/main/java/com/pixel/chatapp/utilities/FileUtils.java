@@ -7,7 +7,6 @@ import static com.pixel.chatapp.utilities.FolderUtils.getVideoFolder;
 
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -42,21 +41,25 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FileUtils {
 
-    public static String getFileSize(Uri imageUri, Context context){
+    public static String getFileSize(Uri imageUri, Context context) {
 
-        try {   // get the total image length
+        try {
+            // Get the total image length
             InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
             if (inputStream != null) {
                 int fileSizeBytes = inputStream.available();
-                int fileSizeKB = fileSizeBytes / 1024; // Size in kilobytes
-                int fileSizeMB = fileSizeKB / 1024; // Size in megabytes
+                double fileSizeKB = (double) fileSizeBytes / 1024; // Size in kilobytes
+                double fileSizeMB = fileSizeKB / 1024; // Size in megabytes
 
-                String sizeString = fileSizeKB < 1000.0 ? Math.round(fileSizeKB) + " kB" : Math.round(fileSizeMB) + " MB";
+                // If file size is less than 1000KB, show in KB, otherwise in MB
+                String sizeString = fileSizeKB < 1000 ? String.format(Locale.US, "%.2f kB", fileSizeKB)
+                        : String.format(Locale.US, "%.2f MB", fileSizeMB);
 
                 inputStream.close();
 
@@ -65,14 +68,15 @@ public class FileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur FileUtil 62: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            System.out.println("Error Occur FileUtil 62: " + imageUri + " show error: " + e.getMessage());
+            Toast.makeText(context, "Error Occur FileUtil 70: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            System.out.println("Error Occur FileUtil 70: " + imageUri + " show error: " + e.getMessage());
         }
-        return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
 
+        return context.getString(R.string.app_name); // Return a default value in case of an error
     }
 
-//    e.g from 200kb to 200_000
+
+    //    e.g from 200kb to 200_000
     public static int convertFileSizeToInt(String photoSize){
         String[] parts = photoSize.split(" ");
         int sizeValue = Integer.parseInt(parts[0]); // Extract the numeric part of the string
@@ -90,6 +94,8 @@ public class FileUtils {
 
         return  fileSizeBytes;
     }
+
+
     public static String getEstimateVideoSize(Uri imageUri, Context context){
 
         try {   // get the total image length
@@ -132,7 +138,7 @@ public class FileUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error Occur FileUtil 129: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.errorOccur), Toast.LENGTH_SHORT).show();
             System.out.println("Error Occur FileUtil 129: " + imageUri + " show error: " + e.getMessage());
         }
         return context.getString(R.string.app_name); // Return an empty string or another appropriate default value in case of an error
@@ -178,7 +184,7 @@ public class FileUtils {
         try {
             InputStream inputStream = context.getContentResolver().openInputStream(uri);
             originalBitmap = BitmapFactory.decodeStream(inputStream);
-            inputStream.close();
+            if (inputStream != null) inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             // Handle the error, e.g., log it or show a message to the user
@@ -241,7 +247,7 @@ public class FileUtils {
             OutputStream outputStream = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
             int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
+            while ((bytesRead = Objects.requireNonNull(inputStream).read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
 
@@ -344,7 +350,7 @@ public class FileUtils {
 
     public static String getFileName(Uri uri, Context context) {
         String displayName = context.getString(R.string.app_name);
-        if (uri.getScheme().equals("content")) {
+        if (Objects.equals(uri.getScheme(), "content")) {
             try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
@@ -353,7 +359,7 @@ public class FileUtils {
                     }
                 }
             }
-        } else if (uri.getScheme().equals("file")) {
+        } else if (Objects.equals(uri.getScheme(), "file")) {
             displayName = uri.getLastPathSegment();
         }
         return displayName;
@@ -507,15 +513,16 @@ public class FileUtils {
 
     }
 
-    public static Bitmap createVideoThumbnail(Context context, Uri videoUri) {
+    public static Bitmap createVideoThumbnail(Context context, Uri videoUri)
+    {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             // Set data source to the video URI
             retriever.setDataSource(context, videoUri);
 
             // Retrieve the thumbnail at the first frame
-            Bitmap thumbnail = retriever.getFrameAtTime(0);
-            return thumbnail;
+            return retriever.getFrameAtTime(0);
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -524,9 +531,10 @@ public class FileUtils {
             try {
                 retriever.release();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
+
     }
 
     public static String downloadThumbnailFile(String fileUrl, Context context) throws IOException {
@@ -539,14 +547,15 @@ public class FileUtils {
                 // Save the response body (file) to the specified path
                 File createThumbnailPath = new File(getThumbnailFolder(context),
                         context.getString(R.string.app_name) + "_" + System.currentTimeMillis() + ".jpg");
+
                  try (OutputStream outputStream = new FileOutputStream(createThumbnailPath)) {
-                     outputStream.write(response.body().bytes());
+
+                     if (response.body() != null) outputStream.write(response.body().bytes());
 
                      return Uri.fromFile( createThumbnailPath ).toString();
                  }
 
             } else {
-                // Handle unsuccessful response
                 return null;
             }
         }
@@ -555,7 +564,7 @@ public class FileUtils {
     // file:// to /storage
     public String getFilePathFromUri(Context context, Uri fileUri) {
         String filePath = null;
-        if (fileUri.getScheme().equals("content")) {
+        if (Objects.equals(fileUri.getScheme(), "content")) {
             ContentResolver contentResolver = context.getContentResolver();
             Cursor cursor = contentResolver.query(fileUri, null, null, null, null);
             if (cursor != null) {
@@ -565,32 +574,34 @@ public class FileUtils {
                 }
                 cursor.close();
             }
-        } else if (fileUri.getScheme().equals("file")) {
+        } else if (Objects.equals(fileUri.getScheme(), "file")) {
             filePath = fileUri.getPath();
         }
         return filePath;
     }
 
+    public static Uri convertFileOrStorageUriToContentUri (Context context, String uriString)
+    {
+        if(uriString == null) return null;
 
-    public static Uri convertFileUriToContentUri(Context context, Uri fileUri) {
-        String filePath = fileUri.getPath();
-        Uri contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = { MediaStore.Images.Media._ID };
-        String selection = MediaStore.Images.Media.DATA + "=?";
-        String[] selectionArgs = { filePath };
-        String sortOrder = null;
-
-        Cursor cursor = context.getContentResolver().query(contentUri, projection, selection, selectionArgs, sortOrder);
-        if (cursor != null && cursor.moveToFirst()) {
-            int columnIndex = cursor.getColumnIndex(projection[0]);
-            long imageId = cursor.getLong(columnIndex);
-            cursor.close();
-            return ContentUris.withAppendedId(contentUri, imageId);
+        if(uriString.startsWith("file:/")) {
+            try {
+                File file = new File(new URI( uriString ));
+                return FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        // If cursor is null or no matching records found, return null
-        return null;
+        if(uriString.startsWith("/storage")) {
+            File file = new File( uriString );
+            return FileProvider.getUriForFile(context, "com.pixel.chatapp.fileprovider", file);
+        }
+
+        return Uri.parse(uriString);
+
     }
+
 
     // Function to format duration in milliseconds to "mm:ss" format
     public static String formatDuration(int durationInMillis) {
@@ -598,7 +609,7 @@ public class FileUtils {
         int minutes = seconds / 60;
         seconds = seconds % 60;
 
-        return String.format("%02d:%02d", minutes, seconds);
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds);
     }
 
     // Function to format duration to "mm:ss" to milliseconds format
@@ -634,26 +645,6 @@ public class FileUtils {
 
     }
 
-    public static String getMediaDuration(File file) {
-        String mediaDuration = "0";
-
-        try {
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(file.getAbsolutePath());
-            String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            if (durationStr != null) {
-                int duration = Integer.parseInt(durationStr);
-                mediaDuration = FileUtils.formatDuration(duration);
-
-                return mediaDuration;
-            }
-            retriever.release();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return mediaDuration;
-    }
 
     public static void openDocumentFromUrl(Context mContext, String documentUri) throws URISyntaxException {
         System.out.println("what is doc ur " + documentUri);

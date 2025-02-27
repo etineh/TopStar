@@ -3,7 +3,7 @@ package com.pixel.chatapp.utilities
 import android.content.Context
 import com.pixel.chatapp.services.api.dao_interface.WalletListener
 import com.pixel.chatapp.services.api.model.incoming.AssetsModel
-import com.pixel.chatapp.constants.K
+import com.pixel.chatapp.constants.Ki
 import com.pixel.chatapp.interface_listeners.WalletCallBack
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,7 +14,7 @@ class WalletUtils {
     companion object {
         @JvmStatic
         fun balance(context: Context, walletCallBack: WalletCallBack) {
-            val walletListener = K.retrofit.create(WalletListener::class.java)
+            val walletListener = Ki.retrofit.create(WalletListener::class.java)
 
             IdTokenUtil.generateToken( { token: String? ->
                 walletListener.assets(token).enqueue(object : Callback<AssetsModel?> {

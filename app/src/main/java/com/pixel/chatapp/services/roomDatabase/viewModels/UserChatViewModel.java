@@ -5,7 +5,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Kc;
 import com.pixel.chatapp.dataModel.MessageModel;
 import com.pixel.chatapp.dataModel.UserOnChatUI_Model;
 import com.pixel.chatapp.services.roomDatabase.repositories.UserChatRepository;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UserChatViewModel extends AndroidViewModel {
 
-    private UserChatRepository repository;
+    private final UserChatRepository repository;
 
     public UserChatViewModel(@NonNull Application application) {
         super(application);
@@ -66,9 +66,7 @@ public class UserChatViewModel extends AndroidViewModel {
     //   =======   chats
 
     public void insertChat(String otherId, MessageModel chatModel){
-        K.executors.execute(() -> {
-            repository.insertChats(otherId, chatModel);
-        });
+        Kc.executor.execute(() -> repository.insertChats(otherId, chatModel));
     }
 
     public void updatePhotoUriPath(String idKey, String otherId, String photoLowPath,

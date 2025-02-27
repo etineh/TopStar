@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.pixel.chatapp.permission.AppPermission;
 import com.pixel.chatapp.R;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 
 import java.util.concurrent.Executor;
 
@@ -81,7 +81,7 @@ public class FingerprintActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == K.BIOMETRIC_REQUEST_CODE) {
+        if (requestCode == Ki.BIOMETRIC_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
                 Toast.makeText(this, "I have verify!", Toast.LENGTH_SHORT).show();

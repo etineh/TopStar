@@ -16,8 +16,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,8 +38,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pixel.chatapp.constants.Kc;
+import com.pixel.chatapp.utilities.TimeUtils;
 import com.pixel.chatapp.view_controller.LinearLayoutManagerWrapper;
-import com.pixel.chatapp.constants.K;
+import com.pixel.chatapp.constants.Ki;
 import com.pixel.chatapp.view_controller.fragments.ChatsFragment;
 import com.pixel.chatapp.view_controller.fragments.PlayersFragment;
 import com.pixel.chatapp.interface_listeners.ChatListener;
@@ -57,14 +56,14 @@ import com.pixel.chatapp.utilities.ProfileUtils;
 import com.pixel.chatapp.utilities.UserChatUtils;
 import com.squareup.picasso.Picasso;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -78,21 +77,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     private final DatabaseReference referenceUsers;
     private final DatabaseReference refUsersLast;
     private final DatabaseReference referenceCheck;
-    private final DatabaseReference refChatList;
-    private final DatabaseReference refChat;
-    private final DatabaseReference refMsgFast;
-    private final DatabaseReference refPinPublic;
-    private final DatabaseReference refPinPrivate;
     FirebaseUser user;
     Map<String, Object> offlinePresenceAndStatus;
     Map<String, Integer> dateMonth, dateNum;
-//    Map<String, ValueEventListener> typeValueListenerMap;
-    private boolean typeListenerActivated;
     public List<String> otherUidLongPressList = new ArrayList<>();
-
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private List<View> viewClickList = new ArrayList<>();
-    public View previousView;
 
     private FragmentListener listener;
     private ChatListener chatListener;
@@ -111,7 +99,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         this.userModelList = userModelList;
         this.mContext = mContext;
         this.activity = activity;
-//        MainActivity.myHolder_ = new ArrayList<>();
 
         ContactAdapter.setmContext(mContext);
 
@@ -119,11 +106,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         referenceCheck = FirebaseDatabase.getInstance().getReference("Checks");
         referenceUsers = FirebaseDatabase.getInstance().getReference("Users");
         refUsersLast = FirebaseDatabase.getInstance().getReference("UsersList");
-        refChatList = FirebaseDatabase.getInstance().getReference("ChatList");
-        refChat = FirebaseDatabase.getInstance().getReference("Messages");
-        refPinPrivate = FirebaseDatabase.getInstance().getReference("PinChatPrivate");
-        refPinPublic = FirebaseDatabase.getInstance().getReference("PinChatPublic");
-        refMsgFast = FirebaseDatabase.getInstance().getReference("MsgFast");
 
         offlinePresenceAndStatus = new HashMap<>();
         dateMonth = new HashMap<>();
@@ -167,7 +149,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         String message = userModelList.get(position_).getMessage();
         String otherUserName = userModelList.get(position_).getOtherUserName();
         String otherDisplayName = userModelList.get(position_).getOtherDisplayName();
-        String otherContactName = userModelList.get(position_).getOtherContactName();
+//        String otherContactName = userModelList.get(position_).getOtherContactName();
         String imageLink = userModelList.get(position_).getImageUrl();
         int type = userModelList.get(position_).getType();
         int newChatNumbers = userModelList.get(position_).getNumberOfNewChat();
@@ -198,7 +180,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
             holder.textViewMsg.setText(message);
 
-            if(type == K.type_call || type == K.type_game) // add colour if on call or game
+            if(type == Ki.type_call || type == Ki.type_game) // add colour if on call or game
             {
                 if(message.contains(mContext.getString(R.string.incomingAudioCall)) || message.contains(mContext.getString(R.string.incomingVideoCall))
                         || message.contains(mContext.getString(R.string.ongoingCall)) || message.contains(mContext.getString(R.string.ringing)) )
@@ -247,7 +229,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // send all recyclerView to mainActivity just once and call the getMessage to load message to it
         if(MainActivity.loadMsg){
             try{
-                String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+                String myUsername_ = myProfileShareRef.getString(Ki.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
 
                 listener.sendRecyclerView(holder.recyclerChat, otherUid);
                 listener.getMessage(myUsername_, otherUid, mContext, false);
@@ -260,7 +242,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 //                new Handler().postDelayed(()-> {
                     for (Map.Entry<String, MessageAdapter> entry : MainActivity.adapterMap.entrySet()) {
                         String firstKey = entry.getKey();
-                        MainActivity.adapterMap.get(firstKey).addLayoutViewInBackground();
+                        Objects.requireNonNull(MainActivity.adapterMap.get(firstKey)).addLayoutViewInBackground();
                     }
 //                }, 2000);
             }
@@ -276,7 +258,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         // receiving for new user the first time
         if(MainActivity.allUsersFromRoom != null && MainActivity.allUsersFromRoom.contains(userModelList.get(position_)))
         {
-            String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+            String myUsername_ = myProfileShareRef.getString(Ki.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
             listener.sendRecyclerView(holder.recyclerChat, otherUid);
             listener.getMessage(myUsername_, otherUid, mContext, true);
             System.out.println("checking loadMsg from CHLAdapter L270");
@@ -292,29 +274,19 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             String imageLink__ = userModelList.get(position_).getImageUrl();
             String otherId = userModelList.get(position_).getOtherUid();
 
-            // get the contact name or displayed name of other user
-            String getUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
+            String getOtherUserName = contactNameShareRef.getString(otherId, otherDisplayName__ != null ? otherDisplayName__ : "@"+otherUserName__);
 
-            String myUsername_ = myProfileShareRef.getString(K.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
-            String myDisplayName = myProfileShareRef.getString(K.PROFILE_DISNAME, null);
+            String myUsername_ = myProfileShareRef.getString(Ki.PROFILE_USERNAME, "@" + MainActivity.getMyUserName);
+//            String myDisplayName = myProfileShareRef.getString(Ki.PROFILE_DISNAME, null);
 
-            // make previous view clickable if any
-//            if(previousView != null && previousView != v) {
-//                previousView.setClickable(true);
-//                previousView.setBackgroundColor(((ColorDrawable) v.getBackground()).getColor());
-//            }
-
-//            MyFirebaseMessagingService firebaseMessagingService = new MyFirebaseMessagingService();
-//            firebaseMessagingService.showNotification(mContext, "New chat", "How are you", null);
-
-            if (MainActivity.getLastTimeChat != null)
-                MainActivity.getLastTimeChat.put(otherId, userModelList.get(position_).getTimeSent());    // enable add up new time card
+            if (MainActivity.getLastTimeChat != null) // enable add up new time card
+                MainActivity.getLastTimeChat.put(otherId, userModelList.get(position_).getTimeSent());
 
             if(!MainActivity.onForward && !MainActivity.onUserLongPress && !MainActivity.onSelectNewPlayer)
             {
                 // open the user chats
                 try {
-                    listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+                    listener.chatBodyVisibility(getOtherUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                     listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -328,7 +300,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     listener.sendRecyclerView(holder.recyclerChat, otherUid);
                     listener.getMessage(myUserName, otherUid, mContext, false);
 
-                    listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
+                    listener.chatBodyVisibility(getOtherUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
 
                     listener.getLastSeenAndOnline(otherUid, mContext);
 
@@ -344,108 +316,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
                 holder.checkBoxContainer.setVisibility(View.GONE);  // close forward chat checkbox if visible by bug
 
-                // don't show anim if it contain
-//                if(viewClickList.contains(v)){
-//                    // open the user chats
-//                    try {
-//                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-//
-//                        listener.getLastSeenAndOnline(otherUid, mContext);
-//
-//                        listener.msgBackgroundActivities(otherUid);
-//
-//                        listener.callAllMethods(otherUid, mContext, activity);
-//
-//                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-//
-//                    } catch (Exception e){
-//
-//                        MainActivity.readDatabase = 0;
-//                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
-//                        listener.getMessage(myUserName, otherUid, mContext, false);
-//
-//                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-//
-//                        listener.getLastSeenAndOnline(otherUid, mContext);
-//
-//                        listener.msgBackgroundActivities(otherUid);
-//
-//                        listener.callAllMethods(otherUid, mContext, activity);
-//
-//                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-//
-//                        MainActivity.offMainDatabase();
-//                        Toast.makeText(mContext, mContext.getString(R.string.app_name), Toast.LENGTH_SHORT).show();
-//                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
-//                    }
-//
-//                } else
-//                {
-//                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
-//
-//                    int originalColor;  // Default color
-//                    if (v.getBackground() instanceof ColorDrawable) {
-//                        originalColor = ((ColorDrawable) v.getBackground()).getColor();
-//                    } else {
-//                        originalColor = 0;
-//                    }
-//                    v.setBackgroundColor(mContext.getResources().getColor(R.color.transparent_orangeLow));
-//                    // set it false so it doesn't click and change colour
-//                    v.setClickable(false);
-//                    // Apply custom animation (e.g., scale)
-//                    v.animate().scaleX(1.1f).scaleY(1.1f)
-////                    .setDuration(50)
-//                            .withEndAction(() -> {
-//
-//                                if(!MainActivity.onForward){
-//
-//                                    try {
-//
-//                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-//
-//                                        listener.getLastSeenAndOnline(otherUid, mContext);
-//
-//                                        listener.msgBackgroundActivities(otherUid);
-//
-//                                        listener.callAllMethods(otherUid, mContext, activity);
-//
-//                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-//
-//                                    } catch (Exception e){
-//
-//                                        MainActivity.readDatabase = 0;
-//                                        listener.sendRecyclerView(holder.recyclerChat, otherUid);
-//                                        listener.getMessage(myUsername_, otherUid, mContext, false);
-//
-//                                        listener.chatBodyVisibility(getUserName, imageLink__, myUsername_, otherUid, mContext, holder.recyclerChat);
-//
-//                                        listener.getLastSeenAndOnline(otherUid, mContext);
-//
-//                                        listener.msgBackgroundActivities(otherUid);
-//
-//                                        listener.callAllMethods(otherUid, mContext, activity);
-//
-//                                        holder.textViewMsgCount.setVisibility(View.INVISIBLE);
-//
-//                                        MainActivity.offMainDatabase();
-//                                        Toast.makeText(mContext, "WinnerChats...", Toast.LENGTH_SHORT).show();
-//                                        System.out.println("Error occur - WinnerChat Toast (ChatListAdapter L222)" + e.getMessage());
-//                                    }
-//
-//                                }
-//
-//                                v.setBackgroundColor(originalColor);
-//
-//                                // Reset the scale
-//
-//                                v.setScaleX(1.0f);
-//                                v.setScaleY(1.0f);
-//
-//                            }).start();
-//
-//                    viewClickList.add(v);
-//                    previousView = v;   // to enable the view clickable via MainActivity @onBackPress
-//                }
 
             } else // check if user is forwarding chat or onUserLongPress
             {
@@ -649,7 +519,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
         if(forwardChatUserId.size() > 0 && !MainActivity.onSelectNewPlayer) {           //  make send button invisible
-            MainActivity.totalUser_TV.setText("" + MainActivity.selectCount + " selected");
+            String totalSelected = MainActivity.selectCount + " " + mContext.getString(R.string.selectedSL);
+            MainActivity.totalUser_TV.setText(totalSelected);
             MainActivity.circleForwardSend.setVisibility(View.VISIBLE);
         } else {
             MainActivity.totalUser_TV.setText(null);
@@ -659,7 +530,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
     // update failed status to delivery status when network is okay
     public void updateDeliveryStatus(String otherUid, String from){
-        K.executors.execute(()->
+        Kc.executor.execute(()->
         {
             if(userModelList != null){
                 for (int i = userModelList.size() - 1; i >= 0; i--)
@@ -672,9 +543,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         if(getUser.getMsgStatus() == 700033){
                             getUser.setMsgStatus(700024);
                             // update the UI
-                            K.handler.post(() ->{
-                                if(from.equals(K.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
-                                if(from.equals(K.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                            Kc.handler.post(() ->{
+                                if(from.equals(Ki.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                                if(from.equals(Ki.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
                             });
 
                             // update the firebase
@@ -701,9 +572,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         // update the list
                         getUser.setMsgStatus(700016);
                         // update the UI
-                        K.handler.post(() ->{
-                            if(from.equals(K.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
-                            if(from.equals(K.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
+                        Kc.handler.post(() ->{
+                            if(from.equals(Ki.fromChatFragment)) ChatsFragment.newInstance().notifyItemChanged(position);
+                            if(from.equals(Ki.fromPlayerFragment)) PlayersFragment.newInstance().notifyItemChanged(position);
                         });
 
                         // update the firebase
@@ -769,11 +640,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                     userModelList.get(i).setNumberOfNewChat(0);  // reset it to 0
 
                     final int position = i;
-                    if(fromFragment.equals(K.fromChatFragment)) {
-                        K.handler.post(()-> ChatsFragment.newInstance().notifyItemChanged(position) );
+                    if(fromFragment.equals(Ki.fromChatFragment)) {
+                        Kc.handler.post(()-> ChatsFragment.newInstance().notifyItemChanged(position) );
                     }
-                    if(fromFragment.equals(K.fromPlayerFragment)) {
-                        K.handler.post(()-> PlayersFragment.newInstance().notifyItemChanged(position) );
+                    if(fromFragment.equals(Ki.fromPlayerFragment)) {
+                        Kc.handler.post(()-> PlayersFragment.newInstance().notifyItemChanged(position) );
                     }
 
                     MainActivity.chatViewModel.updateUser(userModelList.get(position));     // update room db
@@ -788,115 +659,26 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
 
-    private void timeAndDateSent(long lastTime, ChatViewHolder holder){
+    private void timeAndDateSent(long lastTime, ChatViewHolder holder) {
+        Date currentDate = new Date(System.currentTimeMillis());
+        Date lastDate = new Date(lastTime);
 
-        // current date and time
-        Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        Date date = new Date(stamp.getTime());
-        String currentDateString = String.valueOf(date);
+        int dayDifference = TimeUtils.calculateDayDifference(currentDate, lastDate);
+        String formattedTime = TimeUtils.getFormattedTime(lastTime);
 
-        // last user date and time
-        Date d = new Date(lastTime);    // convert the timestamp to current time
-        DateFormat formatter = new SimpleDateFormat("h:mm a");
-        String time = formatter.format(d);
-        String previousDateString = String.valueOf(d);
-
-        dateMonth = new HashMap<>();     // months
-        dateMonth.put("Jan", 1);
-        dateMonth.put("Feb", 2);
-        dateMonth.put("Mar", 3);
-        dateMonth.put("Apr", 4);
-        dateMonth.put("May", 5);
-        dateMonth.put("Jun", 6);
-        dateMonth.put("Jul", 7);
-        dateMonth.put("Aug", 8);
-        dateMonth.put("Sep", 9);
-        dateMonth.put("Oct", 10);
-        dateMonth.put("Nov", 11);
-        dateMonth.put("Dec", 12);
-
-        dateNum = new HashMap<>();      // days
-        dateNum.put("Mon", 1);
-        dateNum.put("Tue", 2);
-        dateNum.put("Wed", 3);
-        dateNum.put("Thu", 4);
-        dateNum.put("Fri", 5);
-        dateNum.put("Sat", 6);
-        dateNum.put("Sun", 7);
-
-        String lastYear = previousDateString.substring(30, 34);  // last year
-
-        int curMonth = dateMonth.get(currentDateString.substring(4,7));    // Months
-        int lastMonth = dateMonth.get(previousDateString.substring(4,7));
-
-        int curDay = dateNum.get(currentDateString.substring(0,3));         // Mon - Sun
-        int lastDay = dateNum.get(previousDateString.substring(0,3));
-
-        String lastDayString = previousDateString.substring(0,3);   // get the day string
-
-        int dateCur = Integer.parseInt(currentDateString.substring(8, 10));    // day 1 - 30
-        int dateLast = Integer.parseInt(previousDateString.substring(8, 10));
-
-        if (curMonth - lastMonth == 0)
-        {
-            if (dateCur - dateLast < 7)
-            {
-                if(curDay - lastDay == 0)
-                {
-                    holder.dateTime_TV.setText(time.toLowerCase());
-
-                } else if (curDay - lastDay == 1)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.yesterday));
-
-                } else if (curDay - lastDay == 2)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.day2ago));
-//                    holder.dateTime_TV.setText(time.toLowerCase());
-
-                } else if (curDay - lastDay == 3)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.day3ago));
-//                    holder.dateTime_TV.setText(time.toLowerCase());
-
-                } else if (curDay - lastDay == 4)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.day4ago));
-//                    holder.dateTime_TV.setText(time.toLowerCase());
-
-                } else if (curDay - lastDay == 5)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.day5ago));
-//                    holder.dateTime_TV.setText(time.toLowerCase());
-
-                } else if (curDay - lastDay == 6)
-                {
-                    holder.dateTime_TV.setText(mContext.getString(R.string.day6ago));
-//                    holder.dateTime_TV.setText(time.toLowerCase());
-                }
-
-            } else if (dateCur - dateLast >= 7 && dateCur - dateLast < 14)
-            {
-                holder.dateTime_TV.setText(mContext.getString(R.string.week1ago));
-
-            } else if (dateCur - dateLast >= 14 && dateCur - dateLast < 21)
-            {
-                holder.dateTime_TV.setText(mContext.getString(R.string.week2ago));
-
-            } else if (dateCur - dateLast >= 21 && dateCur - dateLast < 27)
-            {
-                holder.dateTime_TV.setText(mContext.getString(R.string.week3ago));
-
-            } else {
-                holder.dateTime_TV.setText(mContext.getString(R.string.monthsAgo));
-            }
-
-        } else
-        {
-            String lastD = dateLast +"/"+ lastMonth+"/"+ lastYear;
-            holder.dateTime_TV.setText(lastD);
+        if (dayDifference == 0) {
+            holder.dateTime_TV.setText(formattedTime);
+        } else if (dayDifference == 1) {
+            holder.dateTime_TV.setText(mContext.getString(R.string.yesterday));
+        } else if (dayDifference <= 6) {
+            holder.dateTime_TV.setText(mContext.getString(R.string.daysAgo, dayDifference));
+        } else if (dayDifference <= 30) {
+            holder.dateTime_TV.setText(mContext.getString(R.string.weeksAgo, dayDifference / 7));
+        } else {
+            String lastYear = new SimpleDateFormat("yyyy", Locale.getDefault()).format(lastDate);
+            String formattedDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(lastDate);
+            holder.dateTime_TV.setText(formattedDate.equals(lastYear) ? formattedTime : formattedDate);
         }
-
     }
 
 
@@ -907,26 +689,25 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                try {
-                    long typing = snapshot.child(otherUid).child("typing").exists() ?
-                            (long) snapshot.child(otherUid).child("typing").getValue() : -1;
+                long typing = -1;
 
-                    if(typing == 0)
-                    {
-//                            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
-                        holder.textViewTyping.setVisibility(View.GONE);
-                        holder.textViewMsg.setVisibility(View.VISIBLE);
-
-                    } else if(typing == 1){
-                        AnimUtils.fadeInVisible(holder.textViewTyping, 300);
-                        holder.textViewMsg.setVisibility(View.INVISIBLE);
-                        holder.textViewTyping.setText(mContext.getString(R.string.typing));
-                    }
-
-                } catch (Exception e){
-                    System.out.println("what is error ChatListAdap L880 " + e.getMessage());
+                if (snapshot.child(otherUid).child("typing").exists()) {
+                    Object typingValue = snapshot.child(otherUid).child("typing").getValue();
+                    if (typingValue != null) typing = (long) typingValue;
                 }
-//
+
+                if(typing == 0)
+                {
+//                            AnimUtils.fadeInVisible(holder.textViewMsg, 300);
+                    holder.textViewTyping.setVisibility(View.GONE);
+                    holder.textViewMsg.setVisibility(View.VISIBLE);
+
+                } else if(typing == 1){
+                    AnimUtils.fadeInVisible(holder.textViewTyping, 300);
+                    holder.textViewMsg.setVisibility(View.INVISIBLE);
+                    holder.textViewTyping.setText(mContext.getString(R.string.typing));
+                }
+
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -948,41 +729,42 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                K.executors.execute(()->
+                Kc.executor.execute(()->
                 {
                     if(position < userModelList.size())
                     {
                         // Will later change it to Display Names
-                        String otherUsername = snapshot.child("userName").getValue().toString();
+                        String otherUsername = snapshot.child("userName").getValue(String.class);
 
                         String otherDisplayName = snapshot.child("displayName").exists()
-                                && !snapshot.child("displayName").getValue().toString().isEmpty()
-                                ? snapshot.child("displayName").getValue().toString() : null;
+                                && !Objects.requireNonNull(snapshot.child("displayName").getValue(String.class)).isEmpty()
+                                ? snapshot.child("displayName").getValue(String.class) : null;
 
                         String otherContactName = contactNameShareRef.getString(otherUid, otherDisplayName);
 
                         String otherFcmToken = !snapshot.child("fcmToken").exists() ? null :
-                                snapshot.child("fcmToken").getValue().toString();
+                                snapshot.child("fcmToken").getValue(String.class);
 
                         otherUserFcmTokenRef.edit().putString(otherUid, otherFcmToken).apply();
 
                         String hint = !snapshot.child("hint").exists() ? mContext.getString(R.string.hint2) :
-                                snapshot.child("hint").getValue().toString();
+                                snapshot.child("hint").getValue(String.class);
 
                         otherUserHintRef.edit().putString(otherUid, hint).apply();
 
                         // set users image
                         String imageUrl = snapshot.child("image").exists()
-                                && !snapshot.child("image").getValue().toString().equals("null")
-                                && !snapshot.child("image").getValue().toString().isEmpty()
-                                ? snapshot.child("image").getValue().toString() : null;
+                                && !Objects.equals(snapshot.child("image").getValue(String.class), "null")
+                                && !Objects.requireNonNull(snapshot.child("image").getValue(String.class)).isEmpty()
+                                ? snapshot.child("image").getValue(String.class) : null;
 
-                        K.handler.post(()->
+                        Kc.handler.post(()->
                         {
                             if(otherContactName != null){
                                 holder.textViewUser.setText(otherContactName);     //set users contact name
                             } else {
-                                holder.textViewUser.setText("@"+otherUsername);     //set users username name
+                                String name = "@"+otherUsername;
+                                holder.textViewUser.setText(name);     //set users username name
                             }
 
                             if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -1001,10 +783,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
                         MainActivity.chatViewModel.updateOtherNameAndPhoto(otherUid, otherUsername, otherDisplayName, otherContactName, imageUrl);
 
                     }
-
-//                    // save the contact name to my database
-//                    referenceCheck.child(user.getUid()).child(otherUid).child("contactName")
-//                            .setValue(otherContactName != null ? otherContactName : otherUsername);
 
                 });
 
@@ -1048,16 +826,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
     }
 
 
-    public class ChatViewHolder extends RecyclerView.ViewHolder{
+    public static class ChatViewHolder extends RecyclerView.ViewHolder{
 
         private final ConstraintLayout userBackground;
         private final CircleImageView imageView;
         private final ImageView imageViewDeliver;
-        //        private final ImageView imageViewPin, imageViewPin2, imageViewMute, imageViewUnmute, imageViewMove, imageViewDel, imageViewCancel;
-        private final ImageView pinIcon_IV, muteIcon_IV;
-        //        private final ConstraintLayout constraintTop, constraintLast;
         private final TextView textViewUser, textViewMsg, textViewMsgCount, dateTime_TV, textViewTyping;
-        private final CardView cardView;
         RecyclerView recyclerChat;
 
         // forward declares
@@ -1074,24 +848,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             textViewMsgCount = itemView.findViewById(R.id.textViewMsgCount);
             imageViewDeliver = itemView.findViewById(R.id.imageViewDelivery);
             dateTime_TV = itemView.findViewById(R.id.dateTime_TV);
-//            textViewDay = itemView.findViewById(R.id.textViewDay);
             textViewTyping = itemView.findViewById(R.id.textViewTyping);
-            cardView = itemView.findViewById(R.id.cardView);
-            pinIcon_IV = itemView.findViewById(R.id.pinIcon_IV);
-            muteIcon_IV = itemView.findViewById(R.id.muteIcon_IV);
-//            imageViewPin2 = itemView.findViewById(R.id.imageViewPin);
-//            imageViewDel = itemView.findViewById(R.id.imageViewDel);
-//            imageViewMute = itemView.findViewById(R.id.imageViewMute);
-//            imageViewMove = itemView.findViewById(R.id.imageViewMove);
-//            imageViewCancel = itemView.findViewById(R.id.imageViewCancel2);
-//            imageViewMenu = itemView.findViewById(R.id.imageViewUserMenu);
-//            constraintTop = itemView.findViewById(R.id.constraintTop);
-//            constraintLast = itemView.findViewById(R.id.constrainLast);
             checkBoxToWho = itemView.findViewById(R.id.checkBoxForward);
             checkBoxContainer = itemView.findViewById(R.id.checkBoxContainer);
 
-//
-//            recyclerChat.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             recyclerChat = itemView.findViewById(R.id.recyclerChat);
 
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManagerWrapper(itemView.getContext(), LinearLayoutManager.VERTICAL, false);
@@ -1099,9 +859,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
             recyclerChat.setLayoutManager(mLayoutManager);
 
         }
-//        public void setRecyclerView(RecyclerView recyclerView) {
-//            this.recyclerChat = recyclerView;
-//        }
+
     }
 
 }
