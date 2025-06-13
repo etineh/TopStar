@@ -1,5 +1,5 @@
 
-# GetMeh (Renamed to TopStar) 
+# TopStar
 
 An Android shopping app built in Java using Firebase for authentication and Sprint boot for backend. Users can sign up, log in, chat live, connect with a player and interact with a simple user-friendly interface.
 
@@ -50,10 +50,12 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
 This project was a major milestone during my learning journey. I gained practical experience in:
 
-* Connecting Android apps to Spring boot backend.
-* Managing user sessions and data.
-* Building user interfaces and handling app navigation.
-* Handling images and network-based data.
+* Integrating Android apps with a Spring Boot backend.
+* Implementing live chat and video call features for real-time user interaction.
+* Managing user sessions and handling authentication securely.
+* Designing user-friendly interfaces and navigating between screens effectively.
+* Loading and displaying images efficiently, and handling network-based data.
+* and lot more!
 
 ---
 
