@@ -12,10 +12,10 @@ An Android shopping app built in Java using Firebase for authentication and Spri
   * Sign up and log in using Firebase Authentication.
   * Stores user data securely in Firebase Realtime Database.
 
-* **Product Listing**
+* **Video and audio call**
 
-  * Browse a list of items retrieved dynamically.
-  * Images loaded efficiently with Picasso.
+  * Chat and video call users/players.
+  * Images loaded efficiently with Picasso on live chat.
 
 * **User Navigation**
 
@@ -35,6 +35,7 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 * Picasso (Image Loading)
 * Android SDK
 * Gradle
+* RestFul API
 
 ---
 
@@ -42,7 +43,7 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
 This project was a major milestone during my learning journey. I gained practical experience in:
 
-* Connecting Android apps to Firebase backend.
+* Connecting Android apps to Spring boot backend.
 * Managing user sessions and data.
 * Building user interfaces and handling app navigation.
 * Handling images and network-based data.
@@ -58,12 +59,19 @@ If I were to rebuild this project today:
 * I’d implement the **Repository pattern** to decouple data sources.
 * I’d introduce **Dependency Injection** using Hilt for cleaner and testable code.
 * I’d write **unit tests** and **UI tests** to ensure better reliability and scalability.
-
+* I’d complete the **multiplayer game part** to enhance app fun.
 ---
 
-## 📸 Screenshots (Optional)
+## 📸 Few Screenshots 
 
-> *(Add a few screenshots of your app here to make the README visually appealing. If needed, I can help you create a quick layout.)*
+> * ![2025-04-10 16 00 24](https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c)
+ *
+ ![2025-06-13 11 06 38](https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18)
+
+![2025-06-13 11 06 48](https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068)
+
+![2025-06-13 11 06 52](https://github.com/user-attachments/assets/75cf7889-d17d-43c8-b820-34662acc43c6)
+
 
 ---
 
