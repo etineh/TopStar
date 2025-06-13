@@ -25,6 +25,12 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
   * Centralized backend for managing user and product data in real time.
 
+
+* **🌓 Light & Dark Mode Support**
+
+  * Seamless switching between light and dark themes based on system settings
+  * Enhances user comfort and aligns with modern Android design standards
+    
 ---
 
 ## 🛠️ Technologies Used
@@ -35,7 +41,8 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 * Picasso (Image Loading)
 * Android SDK
 * Gradle
-* RestFul API
+* RESTful API
+* Spring Boot
 
 ---
 
