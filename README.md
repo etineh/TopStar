@@ -5,7 +5,7 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
 ---
 
-![2025-06-13 11 06 52](https://github.com/user-attachments/assets/75cf7889-d17d-43c8-b820-34662acc43c6)
+<img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="[https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c](https://github.com/user-attachments/assets/75cf7889-d17d-43c8-b820-34662acc43c6)" /> 
 
 ---
 
@@ -79,7 +79,7 @@ If I were to rebuild this project today:
 
 | Home Screen | League | Chats | Wallet
 |------------|-----------|--------------|--------------|
-| <img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="367" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | ![telegram-cloud-photo-size-4-5940737844467320985-y](https://github.com/user-attachments/assets/18013350-9d5d-4736-9c26-f3b695374e16) |
+| <img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="367" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="[https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068](https://github.com/user-attachments/assets/18013350-9d5d-4736-9c26-f3b695374e16)" /> |
 
 
 ---
