@@ -79,8 +79,7 @@ If I were to rebuild this project today:
 
 | Home Screen | League | Chats | Wallet
 |------------|-----------|--------------|--------------|
-| <img width="380" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="380" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="380" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | <img width="380" alt="Screenshot 2025-06-14 at 19 18 06" src="[https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068](https://github-production-user-asset-6210df.s3.amazonaws.com/22806602/455200148-06b78433-2df5-4110-ad0e-91628651a79c.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250614%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250614T182649Z&X-Amz-Expires=300&X-Amz-Signature=f4b383aa21e77d9b13a9213066310994db1b06aa3635fa13a096e47d3d0684f9&X-Amz-SignedHeaders=host)" /> |
-
+| <img width="380" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="380" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="380" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | <img width="380" alt="Screenshot 2025-06-14 19 18 10" src="https://github.com/user-attachments/assets/2c356c6b-9cb4-4902-8e3d-305fc90ab47b" /> |
 
 ---
 
