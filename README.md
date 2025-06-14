@@ -73,14 +73,9 @@ If I were to rebuild this project today:
 
 ## 📸 Few Screenshots 
 
-> * ![2025-04-10 16 00 24](https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c)
- *
- ![2025-06-13 11 06 38](https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18)
-
-![2025-06-13 11 06 48](https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068)
-
-![2025-06-13 11 06 52](https://github.com/user-attachments/assets/75cf7889-d17d-43c8-b820-34662acc43c6)
-
+| Home Screen | League | Chats |
+|------------|-----------|--------------|
+| <img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="367" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> |
 
 ---
 
