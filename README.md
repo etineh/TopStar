@@ -5,7 +5,7 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
 ---
 
-<img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="[https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c](https://github.com/user-attachments/assets/75cf7889-d17d-43c8-b820-34662acc43c6)" /> 
+![2025-06-14 19 18 04](https://github.com/user-attachments/assets/d965fe72-d833-4715-8762-3b69d0044d40)
 
 ---
 
@@ -79,7 +79,7 @@ If I were to rebuild this project today:
 
 | Home Screen | League | Chats | Wallet
 |------------|-----------|--------------|--------------|
-| <img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="367" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="[https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068](https://github.com/user-attachments/assets/18013350-9d5d-4736-9c26-f3b695374e16)" /> |
+| <img width="389" alt="Screenshot 2025-06-14 at 18 17 25" src="https://github.com/user-attachments/assets/9a6298a2-3d97-4bf1-ab2f-b8385924649c" /> | <img width="367" alt="Screenshot 2025-06-14 at 18 15 45" src="https://github.com/user-attachments/assets/2a05f367-4a0b-4c64-abd3-d7478cbfbf18" /> | <img width="360" alt="Screenshot 2025-06-14 at 18 18 06" src="https://github.com/user-attachments/assets/02ac674a-37b2-4df2-9de3-b0f6f3b15068" /> | ![2025-06-14 19 18 10](https://github.com/user-attachments/assets/06b78433-2df5-4110-ad0e-91628651a79c)|
 
 
 ---
