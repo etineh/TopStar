@@ -5,7 +5,9 @@ An Android shopping app built in Java using Firebase for authentication and Spri
 
 ---
 
-<img width="200" alt="Screenshot 2025-06-14 19 18 04" src="https://github.com/user-attachments/assets/d965fe72-d833-4715-8762-3b69d0044d40" />
+<p align="center">
+  <img width="200" alt="Alarm screenshot" src="https://github.com/user-attachments/assets/d965fe72-d833-4715-8762-3b69d0044d40" />
+</p>
 
 ---
 
